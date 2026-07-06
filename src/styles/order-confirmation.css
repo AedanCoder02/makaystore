@@ -1,0 +1,173 @@
+.order-confirmation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px);
+  padding: 2rem;
+  background: #f9f7f4;
+}
+
+.confirmation-card {
+  background: white;
+  border: 1px solid #e5d9d0;
+  border-radius: 8px;
+  padding: 3rem 2rem;
+  max-width: 500px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.confirmation-icon {
+  font-size: 3rem;
+  color: #f59e0b;
+  margin-bottom: 1rem;
+  line-height: 1;
+}
+
+.order-confirmation-container h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.confirmation-number {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-bottom: 1rem;
+}
+
+.confirmation-message {
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.order-summary-section,
+.shipping-section {
+  text-align: left;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid #e5d9d0;
+}
+
+.order-summary-section h2,
+.shipping-section h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  text-align: left;
+}
+
+.items-list {
+  margin-bottom: 1rem;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #4b5563;
+  border-bottom: 1px solid #f3f0ed;
+}
+
+.summary-item span:first-child {
+  flex: 1;
+}
+
+.summary-totals {
+  margin-top: 1rem;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.total-row.total {
+  font-weight: 700;
+  border-top: 1px solid #e5d9d0;
+  padding-top: 0.75rem;
+  margin-top: 0.75rem;
+  color: #1f2937;
+}
+
+.shipping-section p {
+  font-size: 0.9rem;
+  color: #4b5563;
+  margin: 0.5rem 0;
+  line-height: 1.4;
+}
+
+.shipping-section strong {
+  color: #1f2937;
+}
+
+.status-section {
+  margin-bottom: 2rem;
+}
+
+.status-badge {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.confirmation-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.btn-primary {
+  background: #f59e0b;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: #d97706;
+}
+
+.secondary-link {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.secondary-link a {
+  color: #f59e0b;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.secondary-link a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .confirmation-card {
+    padding: 2rem 1.5rem;
+  }
+
+  .order-confirmation-container h1 {
+    font-size: 1.5rem;
+  }
+}

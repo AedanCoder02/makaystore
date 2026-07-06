@@ -6,6 +6,7 @@ import NavBar from "@/components/NavBar";
 import StripeProvider from "@/components/StripeProvider";
 import "./globals.css";
 import "@/styles/cart.css";
+import "@/styles/order-confirmation.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
