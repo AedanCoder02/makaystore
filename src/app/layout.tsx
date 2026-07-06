@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import LenisProvider from "@/components/providers/LenisProvider";
 import NavBar from "@/components/NavBar";
+import StripeProvider from "@/components/StripeProvider";
 import "./globals.css";
 import "@/styles/cart.css";
 
@@ -33,8 +34,10 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col">
-          <NavBar />
-          <LenisProvider>{children}</LenisProvider>
+          <StripeProvider>
+            <NavBar />
+            <LenisProvider>{children}</LenisProvider>
+          </StripeProvider>
         </body>
       </html>
     </ClerkProvider>

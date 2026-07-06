@@ -1,58 +1,64 @@
+import { CartItem } from '@/stores/cartStore';
+
 export interface Order {
   id: string;
   customerId: string;
-  products: Array<{
-    productId: string;
-    quantity: number;
-    price: number;
-  }>;
+  items: CartItem[];
   total: number;
+  shippingAddress: {
+    name: string;
+    email: string;
+    address: string;
+    city: string;
+    zip: string;
+    country: string;
+  };
+  shippingMethod: 'standard' | 'express' | 'overnight';
+  shippingCost: number;
   status: 'pending' | 'processing' | 'shipped' | 'delivered';
+  paymentId: string;
   createdAt: Date;
 }
 
-export const mockOrders: Order[] = [
-  {
-    id: 'order-001',
-    customerId: 'cust-001',
-    products: [
-      { productId: '1', quantity: 2, price: 79.99 },
-      { productId: '3', quantity: 1, price: 49.99 },
-    ],
-    total: 209.97,
-    status: 'delivered',
-    createdAt: new Date(Date.now() - 7 * 24 * 60 * 60000),
-  },
-  {
-    id: 'order-002',
-    customerId: 'cust-002',
-    products: [
-      { productId: '4', quantity: 1, price: 129.99 },
-    ],
-    total: 129.99,
-    status: 'shipped',
-    createdAt: new Date(Date.now() - 3 * 24 * 60 * 60000),
-  },
-  {
-    id: 'order-003',
-    customerId: 'cust-003',
-    products: [
-      { productId: '7', quantity: 1, price: 99.99 },
-      { productId: '14', quantity: 1, price: 54.99 },
-    ],
-    total: 154.98,
-    status: 'processing',
-    createdAt: new Date(Date.now() - 1 * 24 * 60 * 60000),
-  },
-  {
-    id: 'order-004',
-    customerId: 'cust-004',
-    products: [
-      { productId: '5', quantity: 1, price: 89.99 },
-      { productId: '6', quantity: 2, price: 74.99 },
-    ],
-    total: 239.97,
+export interface OrderPayload {
+  items: CartItem[];
+  total: number;
+  shippingAddress: {
+    name: string;
+    email: string;
+    address: string;
+    city: string;
+    zip: string;
+    country: string;
+  };
+  shippingMethod: 'standard' | 'express' | 'overnight';
+  shippingCost: number;
+  paymentId: string;
+}
+
+// Mock orders array — persists in module scope for this session
+export const mockOrders: Order[] = [];
+
+// Create order and add to mock array
+export function createOrder(payload: OrderPayload): Order {
+  const order: Order = {
+    id: `ORD-${Date.now()}`,
+    customerId: 'CUSTOMER_001', // Stub until Task 11+
+    items: payload.items,
+    total: payload.total,
+    shippingAddress: payload.shippingAddress,
+    shippingMethod: payload.shippingMethod,
+    shippingCost: payload.shippingCost,
     status: 'pending',
+    paymentId: payload.paymentId,
     createdAt: new Date(),
-  },
-];
+  };
+
+  mockOrders.push(order);
+  return order;
+}
+
+// Get order by ID
+export function getOrderById(id: string): Order | undefined {
+  return mockOrders.find((order) => order.id === id);
+}
