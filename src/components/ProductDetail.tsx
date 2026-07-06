@@ -7,6 +7,7 @@ import VariantSelector from '@/components/VariantSelector';
 import QuantitySelector from '@/components/QuantitySelector';
 import RelatedProducts from '@/components/RelatedProducts';
 import ProductReviewsSection from '@/components/ProductReviewsSection';
+import { useCart } from '@/hooks/useCart';
 import '@/styles/product-detail.css';
 
 // Emoji map matching ProductCard
@@ -31,18 +32,20 @@ export default function ProductDetail({ product }: Props) {
   const stock = product.stock;
   const emoji = CATEGORY_EMOJI[product.category] ?? '🛍️';
 
-  const handleAddToCart = () => {
-    // Task 8 will wire this to Zustand cart state
-    setAddedToCart(true);
-    setTimeout(() => setAddedToCart(false), 2000);
+  const { addToCart } = useCart();
 
-    console.log('[Cart placeholder]', {
+  const handleAddToCart = () => {
+    addToCart({
       productId: product.id,
-      variantId: currentVariant?.id,
+      variantId: currentVariant?.id ?? product.id,
       quantity: selectedQuantity,
       price: displayPrice,
       title: product.title,
+      category: product.category,
     });
+
+    setAddedToCart(true);
+    setTimeout(() => setAddedToCart(false), 2000);
   };
 
   return (
