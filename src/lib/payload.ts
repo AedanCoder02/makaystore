@@ -1,5 +1,8 @@
 import { getPayload, type Payload } from 'payload';
 import config from '../../payload.config';
+import { mockProducts } from './mockData';
+import { mockWorkers } from './mockWorkers';
+import { mockOrders } from './mockOrders';
 
 let cachedPayload: Payload | null = null;
 
@@ -58,3 +61,7 @@ export async function fetchDesignSystem(): Promise<any> {
   });
   return designSystem;
 }
+
+// Mock data exports — used by all API routes until post-approval
+// Swap: import from './mockData' → real Payload queries (zero other code changes needed)
+export { mockProducts, mockWorkers, mockOrders };
