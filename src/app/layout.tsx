@@ -10,6 +10,7 @@ import "@/styles/order-confirmation.css";
 import "@/styles/tutorial.css";
 import "@/styles/worker-activity.css";
 import "@/styles/supervisor-dashboard.css";
+import "@/styles/product-generation.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
