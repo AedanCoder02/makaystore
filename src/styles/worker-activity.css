@@ -1,0 +1,272 @@
+.worker-activity-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+  background: #f9f7f4;
+  min-height: 100vh;
+}
+
+.activity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.activity-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.help-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #f59e0b;
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  flex-shrink: 0;
+}
+
+.help-button:hover {
+  background: #d97706;
+}
+
+.help-button:active {
+  transform: scale(0.95);
+}
+
+.activity-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Status Card */
+.status-card {
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+  border: 2px solid;
+}
+
+.status-card.clocked-in {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
+
+.status-card.clocked-out {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.status-text {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+}
+
+.elapsed-time {
+  font-size: 1rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+/* Clock In/Out Button */
+.clock-in-button {
+  width: 100%;
+  height: 56px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.clock-in-button:not(.clocked-in) {
+  background: #f59e0b;
+  color: white;
+}
+
+.clock-in-button:not(.clocked-in):hover {
+  background: #d97706;
+}
+
+.clock-in-button:not(.clocked-in):active {
+  transform: scale(0.98);
+}
+
+.clock-in-button.clocked-in {
+  background: #ef4444;
+  color: white;
+}
+
+.clock-in-button.clocked-in:hover {
+  background: #dc2626;
+}
+
+.clock-in-button.clocked-in:active {
+  transform: scale(0.98);
+}
+
+.clock-in-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Task List */
+.task-list {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e5d9d0;
+}
+
+.task-list-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+}
+
+.task-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.task-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #f9f7f4;
+  border-radius: 6px;
+  border-left: 4px solid #f59e0b;
+}
+
+.task-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.task-priority {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.task-priority.high {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.task-priority.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.task-priority.low {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.no-tasks {
+  color: #6b7280;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+  margin: 0;
+}
+
+/* Activity Log */
+.activity-log {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #e5d9d0;
+}
+
+.activity-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+}
+
+.activity-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.activity-item {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem;
+  background: #f9f7f4;
+  border-radius: 6px;
+}
+
+.activity-time {
+  font-weight: 700;
+  color: #f59e0b;
+  min-width: 80px;
+  font-size: 0.95rem;
+}
+
+.activity-action {
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.no-activity {
+  color: #6b7280;
+  font-style: italic;
+  text-align: center;
+  padding: 1rem;
+  margin: 0;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .worker-activity-container {
+    padding: 1rem;
+  }
+
+  .activity-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .status-card {
+    padding: 1.5rem;
+  }
+
+  .clock-in-button {
+    height: 48px;
+    font-size: 1.1rem;
+  }
+
+  .task-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .task-priority {
+    align-self: flex-start;
+  }
+}
