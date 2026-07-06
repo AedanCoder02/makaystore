@@ -2,10 +2,14 @@
   "name": "makaystore",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "payload": "payload",
+    "payload:generate": "payload generate:types",
+    "payload:migrate": "payload migrate"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.13",
