@@ -7,6 +7,7 @@ import StripeProvider from "@/components/StripeProvider";
 import "./globals.css";
 import "@/styles/cart.css";
 import "@/styles/order-confirmation.css";
+import "@/styles/tutorial.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
