@@ -229,3 +229,7 @@ export const mockProducts: Product[] = [
     ],
   },
 ];
+
+export function getProductById(id: string): Product | undefined {
+  return mockProducts.find((p) => p.id === id);
+}
