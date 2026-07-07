@@ -1,0 +1,367 @@
+/* ============================================================
+   Admin Reports Dashboard — Makay Store
+   Design: amber #f59e0b, 48-56px tabs, high contrast
+   Responsive: 768px breakpoint
+   ============================================================ */
+
+/* ---- Tabs ---- */
+.reports-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e5d9d0;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.reports-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  color: #6b7280;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+  min-height: 56px;
+}
+
+.tab-button:hover {
+  color: #1f2937;
+}
+
+.tab-button.active {
+  color: #f59e0b;
+  border-bottom-color: #f59e0b;
+}
+
+.tab-icon {
+  font-size: 1.1rem;
+}
+
+.tab-label {
+  font-size: 0.9rem;
+}
+
+/* ---- Report content area ---- */
+.report-content {
+  padding-top: 0.5rem;
+}
+
+.report-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+/* ---- Metric cards ---- */
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.metric-card {
+  background: #ffffff;
+  border: 1px solid #e5d9d0;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.metric-card:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+}
+
+.metric-card.color-green {
+  border-left: 4px solid #10b981;
+}
+
+.metric-card.color-amber {
+  border-left: 4px solid #f59e0b;
+}
+
+.metric-card.color-red {
+  border-left: 4px solid #ef4444;
+}
+
+.metric-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.5rem;
+}
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1f2937;
+  line-height: 1.1;
+}
+
+.metric-unit {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 0.35rem;
+}
+
+.metric-trend {
+  font-size: 0.85rem;
+  color: #10b981;
+  font-weight: 700;
+  margin-top: 0.35rem;
+}
+
+.alert-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  background: #ef4444;
+  color: #ffffff;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-left: 0.5rem;
+  vertical-align: middle;
+}
+
+/* ---- Charts ---- */
+.chart-container {
+  background: #ffffff;
+  border: 1px solid #e5d9d0;
+  border-radius: 10px;
+  padding: 1.5rem 1.75rem;
+  min-height: 380px;
+}
+
+.chart-container h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 1.25rem 0;
+}
+
+/* ---- Progress bar ---- */
+.progress-bar-container {
+  background: #ffffff;
+  border: 1px solid #e5d9d0;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+}
+
+.progress-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background: #f3f4f6;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.6rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  border-radius: 10px;
+  transition: width 0.4s ease;
+}
+
+.progress-percent {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #f59e0b;
+}
+
+/* ---- Tables ---- */
+.table-container {
+  background: #ffffff;
+  border: 1px solid #e5d9d0;
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  overflow-x: auto;
+}
+
+.table-container h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 1rem 0;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table thead {
+  border-bottom: 2px solid #e5d9d0;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 0.625rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.data-table td {
+  padding: 0.625rem 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  font-size: 0.875rem;
+  color: #1f2937;
+}
+
+.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tbody tr:hover td {
+  background: #fef9ee;
+}
+
+/* ---- Status labels ---- */
+.status-active {
+  color: #10b981;
+  font-weight: 700;
+}
+
+.status-paused {
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+.status-archived {
+  color: #9ca3af;
+  font-weight: 700;
+}
+
+/* ---- Milestone list ---- */
+.milestone-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+}
+
+.milestone-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: #6b7280;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.milestone-item.done {
+  color: #1f2937;
+}
+
+.milestone-item:last-child {
+  border-bottom: none;
+}
+
+.milestone-icon {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.milestone-item.done .milestone-icon {
+  background: #d1fae5;
+  color: #10b981;
+}
+
+/* ---- Export button ---- */
+.btn.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.875rem 1.75rem;
+  background: #f59e0b;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  border-radius: 8px;
+  min-height: 48px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  align-self: flex-start;
+}
+
+.btn.btn-primary:hover {
+  background: #d97706;
+}
+
+/* ---- Mobile (<=768px) ---- */
+@media (max-width: 768px) {
+  .reports-tabs {
+    gap: 0;
+  }
+
+  .tab-button {
+    padding: 0.625rem 0.875rem;
+    min-height: 48px;
+    font-size: 0.8rem;
+  }
+
+  .metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-card {
+    min-height: 100px;
+  }
+
+  .metric-value {
+    font-size: 1.5rem;
+  }
+
+  .chart-container {
+    min-height: 300px;
+    padding: 1rem;
+  }
+
+  .table-container {
+    padding: 1rem;
+  }
+}

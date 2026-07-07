@@ -107,6 +107,55 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
     ],
   },
 
+  'reports-tour': {
+    id: 'reports-tour',
+    name: 'Navigate Reports',
+    role: 'admin',
+    steps: [
+      {
+        id: 'step-1',
+        target: '.dashboard-header h1',
+        title: 'Reports & Analytics',
+        description: 'View sales, costs, goals, inventory, and rotation metrics here.',
+        placement: 'bottom',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-2',
+        target: '.tab-button:first-child',
+        title: 'Sales Report',
+        description: 'Track revenue, orders, and top-performing products.',
+        placement: 'bottom',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-3',
+        target: '.metric-card',
+        title: 'Key Metrics',
+        description: 'Each card shows a critical metric with trend information.',
+        placement: 'right',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-4',
+        target: '.chart-container',
+        title: 'Visual Analytics',
+        description: 'Charts help you see trends at a glance.',
+        placement: 'top',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-5',
+        target: '.tab-button:last-child',
+        title: 'Manage Rotation',
+        description: 'Switch to Rotation tab to schedule product rotations.',
+        placement: 'bottom',
+        actionText: 'Done',
+        skipAllowed: true,
+      },
+    ],
+  },
+
   'admin-tour': {
     id: 'admin-tour',
     name: 'Tour del Panel Admin',
