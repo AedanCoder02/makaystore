@@ -15,6 +15,7 @@ const SIDEBAR_ITEMS: SidebarItem[] = [
   { label: 'Pedidos', href: '/admin/orders', icon: '🛒' },
   { label: 'Trabajadores', href: '/admin/workers', icon: '👥' },
   { label: 'Reportes', href: '/admin/reports', icon: '📈' },
+  { label: 'Marketing', href: '/admin/editor', icon: '✏️' },
   { label: 'Configuración', href: '/admin/settings', icon: '⚙️' },
 ];
 
