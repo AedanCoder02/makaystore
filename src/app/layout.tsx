@@ -48,10 +48,8 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <StripeProvider>
-            <NavBar />
-            <LenisProvider>{children}</LenisProvider>
-          </StripeProvider>
+          <NavBar />
+          <LenisProvider>{children}</LenisProvider>
         </NextIntlClientProvider>
       </body>
     </html>
