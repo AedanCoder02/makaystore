@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Product } from '@/lib/mockData';
 import ProductModel3D from '@/components/ProductModel3D';
 import VariantSelector from '@/components/VariantSelector';
@@ -26,6 +27,7 @@ export default function ProductDetail({ product }: Props) {
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const t = useTranslations('storefront');
 
   const currentVariant = product.variants[selectedVariant];
   const displayPrice = currentVariant?.price ?? product.price;
@@ -64,7 +66,7 @@ export default function ProductDetail({ product }: Props) {
         <div className="product-detail-right">
           <div className="product-header">
             <h1>{product.title}</h1>
-            <p className="product-sku">SKU: {product.sku}</p>
+            <p className="product-sku">{t('sku')}: {product.sku}</p>
           </div>
 
           <div className="product-description">
@@ -72,7 +74,7 @@ export default function ProductDetail({ product }: Props) {
           </div>
 
           <div className="product-price">
-            <span className="price-label">Price</span>
+            <span className="price-label">{t('price')}</span>
             <span className="price-value">${displayPrice.toFixed(2)}</span>
           </div>
 
@@ -94,12 +96,12 @@ export default function ProductDetail({ product }: Props) {
             onClick={handleAddToCart}
             disabled={stock === 0}
           >
-            {stock === 0 ? 'Out of Stock' : 'Agregar al Carrito'}
+            {stock === 0 ? t('outOfStock') : t('addToCart')}
           </button>
 
           {addedToCart && (
             <div className="toast-success" role="status" aria-live="polite">
-              ✓ Añadido al carrito
+              ✓ {t('addedToCart')}
             </div>
           )}
         </div>

@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import {
   BarChart,
   Bar,
@@ -27,6 +28,7 @@ const milestones = [
 ];
 
 export default function GoalsReport() {
+  const t = useTranslations('reports');
   const progress = 121.8;
   const fillWidth = Math.min(progress, 100);
 
@@ -34,28 +36,28 @@ export default function GoalsReport() {
     <div className="report-container">
       <div className="metrics-grid">
         <div className="metric-card">
-          <div className="metric-label">Monthly Goal</div>
+          <div className="metric-label">{t('monthlyGoal')}</div>
           <div className="metric-value">$400,000</div>
         </div>
         <div className="metric-card color-green">
-          <div className="metric-label">Current Progress</div>
+          <div className="metric-label">{t('currentProgress')}</div>
           <div className="metric-value">{progress.toFixed(1)}%</div>
-          <div className="metric-trend">On track</div>
+          <div className="metric-trend">{t('onTrack')}</div>
         </div>
         <div className="metric-card">
-          <div className="metric-label">Days Left</div>
+          <div className="metric-label">{t('daysLeft')}</div>
           <div className="metric-value">5</div>
-          <div className="metric-unit">in June</div>
+          <div className="metric-unit">{t('inJune')}</div>
         </div>
         <div className="metric-card">
-          <div className="metric-label">Projected Finish</div>
+          <div className="metric-label">{t('projectedFinish')}</div>
           <div className="metric-value">$487,200</div>
           <div className="metric-trend">+$87,200</div>
         </div>
       </div>
 
       <div className="progress-bar-container">
-        <div className="progress-label">Monthly Target Progress</div>
+        <div className="progress-label">{t('monthlyTargetProgress')}</div>
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${fillWidth}%` }} />
         </div>
@@ -63,7 +65,7 @@ export default function GoalsReport() {
       </div>
 
       <div className="chart-container">
-        <h3>Target vs Actual by Week</h3>
+        <h3>{t('targetVsActual')}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={goalsData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -78,7 +80,7 @@ export default function GoalsReport() {
       </div>
 
       <div className="table-container">
-        <h3>Milestones</h3>
+        <h3>{t('milestones')}</h3>
         <ul className="milestone-list">
           {milestones.map((m) => (
             <li key={m.label} className={`milestone-item ${m.done ? 'done' : ''}`}>

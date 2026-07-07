@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useCart } from '@/hooks/useCart';
 import CartItem from '@/components/CartItem';
 import CartSummary from '@/components/CartSummary';
@@ -8,16 +9,17 @@ import '@/styles/cart.css';
 
 export default function CartPage() {
   const { items, totalPrice, removeFromCart, updateQuantity } = useCart();
+  const t = useTranslations('cart');
 
   if (items.length === 0) {
     return (
       <div className="cart-empty">
         <div className="cart-empty-content">
           <span className="empty-icon">🛒</span>
-          <h1>Your cart is empty</h1>
-          <p>Add some products and come back here.</p>
+          <h1>{t('empty')}</h1>
+          <p>{t('emptyDesc')}</p>
           <Link href="/products" className="btn-primary">
-            Browse Products
+            {t('browseProducts')}
           </Link>
         </div>
       </div>
@@ -26,7 +28,7 @@ export default function CartPage() {
 
   return (
     <div className="cart-page">
-      <h1>Shopping Cart</h1>
+      <h1>{t('title')}</h1>
 
       <div className="cart-container">
         <div className="cart-items">

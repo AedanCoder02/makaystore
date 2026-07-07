@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import {
   LineChart,
   Line,
@@ -21,32 +22,34 @@ const salesData = [
 ];
 
 export default function SalesReport() {
+  const t = useTranslations('reports');
+
   return (
     <div className="report-container">
       <div className="metrics-grid">
         <div className="metric-card">
-          <div className="metric-label">Total Revenue</div>
+          <div className="metric-label">{t('totalRevenue')}</div>
           <div className="metric-value">$487,300</div>
           <div className="metric-unit">June 2026</div>
         </div>
         <div className="metric-card">
-          <div className="metric-label">Orders This Month</div>
+          <div className="metric-label">{t('ordersThisMonth')}</div>
           <div className="metric-value">342</div>
           <div className="metric-trend">+12%</div>
         </div>
         <div className="metric-card">
-          <div className="metric-label">Avg Order Value</div>
+          <div className="metric-label">{t('avgOrderValueShort')}</div>
           <div className="metric-value">$1,424</div>
         </div>
         <div className="metric-card">
-          <div className="metric-label">Top Product</div>
+          <div className="metric-label">{t('topProduct')}</div>
           <div className="metric-value">Linen Shirt</div>
-          <div className="metric-unit">124 sold</div>
+          <div className="metric-unit">124 {t('sold')}</div>
         </div>
       </div>
 
       <div className="chart-container">
-        <h3>Revenue Trend (Last 30 Days)</h3>
+        <h3>{t('revenueTrend')}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={salesData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -58,7 +61,7 @@ export default function SalesReport() {
         </ResponsiveContainer>
       </div>
 
-      <button className="btn btn-primary">Export Report</button>
+      <button className="btn btn-primary">{t('exportReport')}</button>
     </div>
   );
 }

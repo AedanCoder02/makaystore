@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import {
   AreaChart,
   Area,
@@ -27,6 +28,7 @@ function getMarginColor(margin: number): 'green' | 'amber' | 'red' {
 }
 
 export default function CostMarginReport() {
+  const t = useTranslations('reports');
   const marginPercent = 46;
   const marginColor = getMarginColor(marginPercent);
 
@@ -34,26 +36,26 @@ export default function CostMarginReport() {
     <div className="report-container">
       <div className="metrics-grid">
         <div className={`metric-card color-${marginColor}`}>
-          <div className="metric-label">Total Cost</div>
+          <div className="metric-label">{t('totalCost')}</div>
           <div className="metric-value">$234,500</div>
         </div>
         <div className={`metric-card color-${marginColor}`}>
-          <div className="metric-label">Gross Margin</div>
+          <div className="metric-label">{t('grossMargin')}</div>
           <div className="metric-value">{marginPercent}%</div>
         </div>
         <div className="metric-card">
-          <div className="metric-label">Profit This Month</div>
+          <div className="metric-label">{t('profitThisMonth')}</div>
           <div className="metric-value">$252,800</div>
         </div>
         <div className="metric-card">
-          <div className="metric-label">Margin Trend</div>
+          <div className="metric-label">{t('marginTrend')}</div>
           <div className="metric-value">+3.2%</div>
-          <div className="metric-trend">Good</div>
+          <div className="metric-trend">{t('marginTrendGood')}</div>
         </div>
       </div>
 
       <div className="chart-container">
-        <h3>Margin % Trend</h3>
+        <h3>{t('marginTrendChart')}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={marginData}>
             <CartesianGrid strokeDasharray="3 3" />

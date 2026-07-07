@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 import ProductFilters, { Filters } from '@/components/ProductFilters';
 import ProductSort, { SortOption } from '@/components/ProductSort';
 import ProductGrid from '@/components/ProductGrid';
@@ -8,6 +9,7 @@ import { mockProducts } from '@/lib/mockData';
 import '@/styles/products.css';
 
 export default function ProductsPage() {
+  const t = useTranslations('storefront');
   const [filters, setFilters] = useState<Filters>({
     search: '',
     category: [],
@@ -46,9 +48,9 @@ export default function ProductsPage() {
   return (
     <main className="products-page">
       <div className="products-header">
-        <h1 className="products-title">Nuestra Colección</h1>
+        <h1 className="products-title">{t('collection')}</h1>
         <p className="products-subtitle">
-          {mockProducts.length} piezas cuidadosamente seleccionadas para ti
+          {mockProducts.length} {t('collectionSubtitle').replace('{count}', String(mockProducts.length))}
         </p>
       </div>
 
@@ -60,7 +62,7 @@ export default function ProductsPage() {
         <div className="products-main">
           <div className="products-toolbar">
             <span className="products-count">
-              Mostrando <strong>{sorted.length}</strong> de {mockProducts.length} productos
+              {t('showing')} <strong>{sorted.length}</strong> {t('of')} {mockProducts.length} {t('productsCount')}
             </span>
             <ProductSort sort={sort} onChange={setSort} />
           </div>

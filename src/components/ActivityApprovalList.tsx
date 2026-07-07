@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Approval } from '@/stores/supervisorStore';
 
 interface ActivityApprovalListProps {
@@ -13,11 +14,13 @@ export default function ActivityApprovalList({
   onApprove,
   onReject,
 }: ActivityApprovalListProps) {
+  const t = useTranslations('supervisor');
+
   return (
     <div className="pending-approvals">
-      <h2>Pending Approvals</h2>
+      <h2>{t('pendingApprovals')}</h2>
       {pendingApprovals.length === 0 ? (
-        <p className="no-pending">All activities approved.</p>
+        <p className="no-pending">{t('allApproved')}</p>
       ) : (
         <div className="approval-items">
           {pendingApprovals.map((approval) => (
@@ -25,7 +28,7 @@ export default function ActivityApprovalList({
               <div className="approval-info">
                 <h4>{approval.workerName}</h4>
                 <p className="action">
-                  {approval.action === 'clock-in' ? '→ Clock In' : '← Clock Out'}
+                  {approval.action === 'clock-in' ? t('clockInAction') : t('clockOutAction')}
                 </p>
                 <p className="timestamp">
                   {new Date(approval.timestamp).toLocaleTimeString()}
@@ -35,14 +38,14 @@ export default function ActivityApprovalList({
                 <button
                   className="btn btn-approve approve-button"
                   onClick={() => onApprove(approval.id)}
-                  aria-label="Approve"
+                  aria-label={t('approve')}
                 >
                   ✓
                 </button>
                 <button
                   className="btn btn-reject"
                   onClick={() => onReject(approval.id)}
-                  aria-label="Reject"
+                  aria-label={t('reject')}
                 >
                   ✗
                 </button>

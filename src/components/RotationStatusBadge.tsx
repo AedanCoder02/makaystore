@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import type { RotationStatus } from '@/stores/rotationStore';
 
 type BadgeStatus = RotationStatus | 'pending';
@@ -16,12 +17,21 @@ const STATUS_COLORS: Record<BadgeStatus, string> = {
 };
 
 export default function RotationStatusBadge({ status }: RotationStatusBadgeProps) {
+  const t = useTranslations('rotation');
+
+  const statusLabels: Record<BadgeStatus, string> = {
+    active: t('statusActive'),
+    paused: t('statusPaused'),
+    archived: t('statusArchived'),
+    pending: t('statusPending'),
+  };
+
   return (
     <span
       className="status-badge"
       style={{ backgroundColor: STATUS_COLORS[status] }}
     >
-      {status.charAt(0).toUpperCase() + status.slice(1)}
+      {statusLabels[status]}
     </span>
   );
 }

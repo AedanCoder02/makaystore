@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRotationStore } from '@/stores/rotationStore';
 import type { RotationStatus } from '@/stores/rotationStore';
 import type { ProductRow } from './RotationTable';
@@ -19,6 +20,7 @@ export default function RotationScheduleForm({ product, onClose }: RotationSched
   const [notes, setNotes] = useState('');
   const [error, setError] = useState('');
   const { addRotation } = useRotationStore();
+  const t = useTranslations('rotation');
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -27,17 +29,17 @@ export default function RotationScheduleForm({ product, onClose }: RotationSched
     setError('');
 
     if (!scheduledDate) {
-      setError('Please select a scheduled date.');
+      setError(t('errorDateRequired'));
       return;
     }
 
     if (scheduledDate < today) {
-      setError('Scheduled date cannot be in the past.');
+      setError(t('errorPastDate'));
       return;
     }
 
     if (newStatus === product.status) {
-      setError('New status must differ from the current status.');
+      setError(t('errorSameStatus'));
       return;
     }
 
@@ -45,20 +47,26 @@ export default function RotationScheduleForm({ product, onClose }: RotationSched
     onClose();
   };
 
+  const statusLabels: Record<RotationStatus, string> = {
+    active: t('statusActive'),
+    paused: t('statusPaused'),
+    archived: t('statusArchived'),
+  };
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={(e) => e.stopPropagation()}>
-        <h2>Schedule Rotation</h2>
+        <h2>{t('scheduleRotation')}</h2>
         <p className="modal-subtitle">
-          <strong>{product.name}</strong> — currently{' '}
+          <strong>{product.name}</strong> — {t('currently')}{' '}
           <span style={{ color: product.status === 'active' ? '#10b981' : product.status === 'paused' ? '#f59e0b' : '#6b7280' }}>
-            {product.status}
+            {statusLabels[product.status]}
           </span>
         </p>
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="rotation-status">New Status</label>
+            <label htmlFor="rotation-status">{t('newStatus')}</label>
             <select
               id="rotation-status"
               value={newStatus}
@@ -66,14 +74,14 @@ export default function RotationScheduleForm({ product, onClose }: RotationSched
             >
               {availableStatuses.map((status) => (
                 <option key={status} value={status}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
+                  {statusLabels[status]}
                 </option>
               ))}
             </select>
           </div>
 
           <div className="form-group">
-            <label htmlFor="rotation-date">Scheduled Date</label>
+            <label htmlFor="rotation-date">{t('scheduledDate')}</label>
             <input
               id="rotation-date"
               type="date"
@@ -84,12 +92,12 @@ export default function RotationScheduleForm({ product, onClose }: RotationSched
           </div>
 
           <div className="form-group">
-            <label htmlFor="rotation-notes">Notes (Optional)</label>
+            <label htmlFor="rotation-notes">{t('notes')}</label>
             <textarea
               id="rotation-notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Add notes about this rotation..."
+              placeholder={t('notesPlaceholder')}
               rows={3}
             />
           </div>
@@ -98,10 +106,10 @@ export default function RotationScheduleForm({ product, onClose }: RotationSched
 
           <div className="form-actions">
             <button type="submit" className="btn btn-primary">
-              Schedule
+              {t('schedule')}
             </button>
             <button type="button" className="btn btn-secondary" onClick={onClose}>
-              Cancel
+              {t('cancel')}
             </button>
           </div>
         </form>

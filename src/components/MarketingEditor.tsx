@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useEditorStore, ComponentType } from '@/stores/editorStore';
+import { useTranslations } from 'next-intl';
+import { useEditorStore } from '@/stores/editorStore';
+
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import { ComponentLibrary } from './ComponentLibrary';
@@ -14,6 +16,8 @@ export default function MarketingEditor() {
   const [newPageModalOpen, setNewPageModalOpen] = useState(false);
   const [newPageData, setNewPageData] = useState({ slug: '', title: '' });
   const [previewMode, setPreviewMode] = useState(false);
+  const t = useTranslations('marketing');
+  const tCommon = useTranslations('common');
 
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('editor-tour');
@@ -50,7 +54,7 @@ export default function MarketingEditor() {
 
   const handleCreatePage = () => {
     if (!newPageData.slug.trim() || !newPageData.title.trim()) {
-      alert('Por favor completa todos los campos');
+      alert(t('allFieldsRequired'));
       return;
     }
 
@@ -63,13 +67,13 @@ export default function MarketingEditor() {
     if (!currentPageId) return;
 
     if (currentPage?.components.length === 0) {
-      alert('La página debe tener al menos un componente');
+      alert(t('atLeastOneComponent'));
       return;
     }
 
     saveVersion(currentPageId);
     publishPage(currentPageId);
-    alert('¡Página publicada exitosamente!');
+    alert(t('pagePublished'));
   };
 
   return (
@@ -79,34 +83,34 @@ export default function MarketingEditor() {
       <main className="admin-main">
         <div className="editor-header">
           <div className="editor-title-section">
-            <h1>Editor de Marketing</h1>
-            <p className="editor-subtitle">Crea páginas promocionales sin código</p>
+            <h1>{t('editor')}</h1>
+            <p className="editor-subtitle">{t('editorSubtitle')}</p>
           </div>
           <div className="editor-actions">
             <button
               className="btn btn-primary"
               onClick={() => setPreviewMode(!previewMode)}
-              aria-label={previewMode ? 'Ver editor' : 'Ver vista previa'}
+              aria-label={previewMode ? t('editorBtn') : t('previewBtn')}
             >
-              {previewMode ? '📐 Editor' : '👁️ Previsualizar'}
+              {previewMode ? `📐 ${t('editorBtn')}` : `👁️ ${t('previewBtn')}`}
             </button>
             {currentPage && (
               <button
                 className="btn btn-success"
                 onClick={handlePublish}
                 disabled={currentPage.status === 'published'}
-                aria-label="Publicar página"
+                aria-label={t('publishPage')}
               >
                 {currentPage.status === 'published'
-                  ? '✓ Publicada'
-                  : '🚀 Publicar'}
+                  ? t('publishedCheck')
+                  : `🚀 ${t('publishBtn')}`}
               </button>
             )}
             <button
               className="help-button"
               onClick={() => tutorialStore.showTutorial('editor-tour')}
-              aria-label="Mostrar tutorial"
-              title="Ayuda"
+              aria-label={t('saveVersion')}
+              title={t('settings')}
             >
               ?
             </button>
@@ -116,13 +120,13 @@ export default function MarketingEditor() {
         {!currentPage ? (
           <div className="editor-empty">
             <div className="empty-state">
-              <h2>No hay página seleccionada</h2>
-              <p>Crea una nueva página o selecciona una existente</p>
+              <h2>{t('noPageSelected')}</h2>
+              <p>{t('noPageSelectedDesc')}</p>
 
               <div className="pages-list">
-                <h3>Páginas Existentes</h3>
+                <h3>{t('existingPages')}</h3>
                 {pages.length === 0 ? (
-                  <p className="no-pages">No hay páginas aún</p>
+                  <p className="no-pages">{t('noPagesYet')}</p>
                 ) : (
                   <div className="pages-grid">
                     {pages.map((page) => (
@@ -144,7 +148,7 @@ export default function MarketingEditor() {
                         </div>
                         <p className="page-slug">/{page.slug}</p>
                         <div className="page-card-footer">
-                          <span>{page.components.length} componentes</span>
+                          <span>{page.components.length} {t('components')}</span>
                         </div>
                       </div>
                     ))}
@@ -155,9 +159,9 @@ export default function MarketingEditor() {
               <button
                 className="btn btn-primary"
                 onClick={() => setNewPageModalOpen(true)}
-                aria-label="Crear nueva página"
+                aria-label={t('createPage')}
               >
-                + Nueva Página
+                {t('newPage')}
               </button>
             </div>
           </div>
@@ -175,19 +179,19 @@ export default function MarketingEditor() {
                 <div className="editor-sidebar">
                   <div className="editor-page-info">
                     <div className="page-info-group">
-                      <label>Nombre de la Página</label>
+                      <label>{t('pageName')}</label>
                       <input
                         type="text"
                         value={currentPage.title}
                         onChange={(e) =>
                           currentPageId && updatePageTitle(currentPageId, e.target.value)
                         }
-                        placeholder="Nombre de la página"
+                        placeholder={t('pageTitlePlaceholder')}
                         className="page-title-input"
                       />
                     </div>
                     <div className="page-info-group">
-                      <label>URL Slug</label>
+                      <label>{t('slugLabel')}</label>
                       <input
                         type="text"
                         value={currentPage.slug}
@@ -196,11 +200,11 @@ export default function MarketingEditor() {
                       />
                     </div>
                     <div className="page-info-group">
-                      <label>Estado</label>
+                      <label>{t('status')}</label>
                       <span className="page-status-badge">
                         {currentPage.status === 'published'
-                          ? '🟢 Publicada'
-                          : '🟡 Borrador'}
+                          ? `🟢 ${t('statusPublished')}`
+                          : `🟡 ${t('statusDraft')}`}
                       </span>
                     </div>
                   </div>
@@ -225,25 +229,25 @@ export default function MarketingEditor() {
 
             <div className="editor-footer">
               <span className="editor-status">
-                {currentPage.components.length} componentes
+                {currentPage.components.length} {t('components')}
               </span>
               <button
                 className="btn btn-secondary"
                 onClick={() => loadPage('')}
-                aria-label="Volver a la lista de páginas"
+                aria-label={t('backToList')}
               >
-                ← Volver
+                ← {t('backToList')}
               </button>
               <button
                 className="btn btn-danger"
                 onClick={() => {
-                  if (currentPageId && confirm('¿Eliminar esta página?')) {
+                  if (currentPageId && confirm(t('deletePageConfirm'))) {
                     deletePage(currentPageId);
                   }
                 }}
-                aria-label="Eliminar página"
+                aria-label={t('deletePage')}
               >
-                Eliminar Página
+                {t('deletePage')}
               </button>
             </div>
           </div>
@@ -258,14 +262,14 @@ export default function MarketingEditor() {
               role="dialog"
               aria-labelledby="modal-title"
             >
-              <h2 id="modal-title">Crear Nueva Página</h2>
+              <h2 id="modal-title">{t('createNewPage')}</h2>
               <div className="modal-form">
                 <div className="form-group">
-                  <label htmlFor="page-slug">Slug (URL)</label>
+                  <label htmlFor="page-slug">{t('slugLabel')}</label>
                   <input
                     id="page-slug"
                     type="text"
-                    placeholder="ej: promocion-verano"
+                    placeholder={t('slugPlaceholder')}
                     value={newPageData.slug}
                     onChange={(e) =>
                       setNewPageData({ ...newPageData, slug: e.target.value })
@@ -273,11 +277,11 @@ export default function MarketingEditor() {
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="page-title">Título de la Página</label>
+                  <label htmlFor="page-title">{t('pageTitle')}</label>
                   <input
                     id="page-title"
                     type="text"
-                    placeholder="ej: Promoción de Verano"
+                    placeholder={t('titlePlaceholder')}
                     value={newPageData.title}
                     onChange={(e) =>
                       setNewPageData({ ...newPageData, title: e.target.value })
@@ -289,16 +293,16 @@ export default function MarketingEditor() {
                 <button
                   className="btn btn-secondary"
                   onClick={() => setNewPageModalOpen(false)}
-                  aria-label="Cancelar"
+                  aria-label={tCommon('cancel')}
                 >
-                  Cancelar
+                  {tCommon('cancel')}
                 </button>
                 <button
                   className="btn btn-primary"
                   onClick={handleCreatePage}
-                  aria-label="Crear página"
+                  aria-label={t('createPage')}
                 >
-                  Crear Página
+                  {t('createPage')}
                 </button>
               </div>
             </div>

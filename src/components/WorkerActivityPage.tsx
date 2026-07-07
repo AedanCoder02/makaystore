@@ -1,5 +1,7 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useWorkerActivity } from '@/hooks/useWorkerActivity';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
@@ -7,13 +9,14 @@ import StatusCard from './StatusCard';
 import ClockInOutButton from './ClockInOutButton';
 import TaskListWorker from './TaskListWorker';
 import ActivityLogWorker from './ActivityLogWorker';
-import { useEffect } from 'react';
 
 export default function WorkerActivityPage() {
   const activity = useWorkerActivity();
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('worker-clock-in');
   const completed = tutorialStore.completed;
+  const t = useTranslations('worker');
+  const tAdmin = useTranslations('admin');
 
   // Show tutorial on first visit
   useEffect(() => {
@@ -25,11 +28,11 @@ export default function WorkerActivityPage() {
   return (
     <div className="worker-activity-container">
       <div className="activity-header">
-        <h1>My Activity</h1>
+        <h1>{t('myActivity')}</h1>
         <button
           className="help-button"
           onClick={() => tutorialStore.showTutorial('worker-clock-in')}
-          aria-label="Show tutorial"
+          aria-label={tAdmin('showTutorial')}
         >
           ?
         </button>

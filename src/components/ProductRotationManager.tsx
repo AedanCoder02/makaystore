@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import { useRotationStore } from '@/stores/rotationStore';
@@ -14,6 +15,8 @@ export default function ProductRotationManager() {
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('rotation-tour');
   const { rotateNow, bulkRotate, selectedProducts, clearSelection } = useRotationStore();
+  const t = useTranslations('rotation');
+  const tAdmin = useTranslations('admin');
 
   useEffect(() => {
     if (!tutorialStore.completed.has('rotation-tour')) {
@@ -23,7 +26,7 @@ export default function ProductRotationManager() {
   }, []);
 
   const handleRotateNow = (product: ProductRow) => {
-    if (window.confirm(`Rotate "${product.name}" from ${product.status} to paused now?`)) {
+    if (window.confirm(t('rotateNowConfirm').replace('{name}', product.name).replace('{from}', product.status))) {
       rotateNow(product.id, product.status, 'paused');
     }
   };
@@ -43,24 +46,23 @@ export default function ProductRotationManager() {
   };
 
   const handleScheduleAll = () => {
-    // Bulk schedule opens modal on first selected product as entry point
-    window.alert('Select "Schedule" on individual products to set specific dates per product.');
+    window.alert(t('scheduleAllHint'));
   };
 
   return (
     <div className="admin-rotation-layout">
       <div className="rotation-header dashboard-header">
         <div>
-          <h1>Product Rotation</h1>
+          <h1>{t('title')}</h1>
           <p className="rotation-subtitle">
-            Schedule and manage when products cycle between Active, Paused, and Archived states.
+            {t('subtitle')}
           </p>
         </div>
         <button
           className="help-button"
           onClick={() => tutorialStore.showTutorial('rotation-tour')}
-          aria-label="Show tutorial"
-          title="Show tutorial"
+          aria-label={tAdmin('showTutorial')}
+          title={tAdmin('showTutorial')}
         >
           ?
         </button>

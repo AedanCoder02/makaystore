@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Product } from '@/lib/mockData';
 import '@/styles/variant-selector.css';
 
@@ -16,9 +17,11 @@ export default function VariantSelector({
   onChange,
   stock,
 }: Props) {
+  const t = useTranslations('storefront');
+
   return (
     <div className="variant-selector">
-      <h3>Choose Size</h3>
+      <h3>{t('chooseSize')}</h3>
       <div className="variant-buttons">
         {variants.map((variant, index) => (
           <button
@@ -33,7 +36,7 @@ export default function VariantSelector({
         ))}
       </div>
       <p className="variant-stock">
-        {stock > 0 ? `Stock: ${stock}` : 'Out of Stock'}
+        {stock > 0 ? `${t('stock')}: ${stock}` : t('outOfStock')}
       </p>
     </div>
   );

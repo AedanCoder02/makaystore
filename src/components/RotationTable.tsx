@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import RotationStatusBadge from './RotationStatusBadge';
 import { useRotationStore } from '@/stores/rotationStore';
 import type { RotationStatus } from '@/stores/rotationStore';
@@ -39,6 +40,7 @@ interface RotationTableProps {
 
 export default function RotationTable({ onRotateNow, onSchedule }: RotationTableProps) {
   const { selectProduct, deselectProduct, selectedProducts } = useRotationStore();
+  const t = useTranslations('rotation');
 
   const allSelected = PRODUCTS_MOCK.every((p) => selectedProducts.includes(p.id));
 
@@ -66,16 +68,16 @@ export default function RotationTable({ onRotateNow, onSchedule }: RotationTable
             <th>
               <input
                 type="checkbox"
-                aria-label="Select all products"
+                aria-label={t('selectAll')}
                 checked={allSelected}
                 onChange={(e) => handleSelectAll(e.target.checked)}
               />
             </th>
-            <th>Product Name</th>
-            <th>SKU</th>
-            <th>Current Status</th>
-            <th>Last Rotated</th>
-            <th>Actions</th>
+            <th>{t('productName')}</th>
+            <th>{t('sku')}</th>
+            <th>{t('currentStatus')}</th>
+            <th>{t('lastRotated')}</th>
+            <th>{t('actions')}</th>
           </tr>
         </thead>
         <tbody>
@@ -88,28 +90,28 @@ export default function RotationTable({ onRotateNow, onSchedule }: RotationTable
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => handleRowToggle(product.id)}
-                    aria-label={`Select ${product.name}`}
+                    aria-label={t('selectProduct').replace('{name}', product.name)}
                   />
                 </td>
-                <td data-label="Product">{product.name}</td>
-                <td data-label="SKU">{product.sku}</td>
-                <td data-label="Status">
+                <td data-label={t('productName')}>{product.name}</td>
+                <td data-label={t('sku')}>{product.sku}</td>
+                <td data-label={t('currentStatus')}>
                   <RotationStatusBadge status={product.status} />
                 </td>
-                <td data-label="Last Rotated">{product.lastRotated}</td>
-                <td data-label="Actions" className="action-buttons">
+                <td data-label={t('lastRotated')}>{product.lastRotated}</td>
+                <td data-label={t('actions')} className="action-buttons">
                   <button
                     className="btn btn-small"
                     onClick={() => onRotateNow(product)}
                     disabled={product.status === 'archived'}
                   >
-                    Rotate Now
+                    {t('rotateNow')}
                   </button>
                   <button
                     className="btn btn-small btn-secondary"
                     onClick={() => onSchedule(product)}
                   >
-                    Schedule
+                    {t('schedule')}
                   </button>
                 </td>
               </tr>

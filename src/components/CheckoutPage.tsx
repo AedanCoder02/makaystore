@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useCart } from '@/hooks/useCart';
 import ShippingForm from '@/components/ShippingForm';
 import ShippingMethodSelector, {
@@ -24,6 +25,7 @@ interface FormData {
 export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
+  const t = useTranslations('checkout');
 
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -45,10 +47,10 @@ export default function CheckoutPage() {
   if (items.length === 0) {
     return (
       <div className="checkout-empty">
-        <h1>Your cart is empty</h1>
-        <p>Add items before checkout.</p>
+        <h1>{t('emptyCart')}</h1>
+        <p>{t('emptyCartDesc')}</p>
         <button onClick={() => router.push('/cart')} className="btn-primary">
-          Back to Cart
+          {t('backToCart')}
         </button>
       </div>
     );
@@ -108,7 +110,7 @@ export default function CheckoutPage() {
                 className="btn-back"
                 onClick={() => setStep('shipping')}
               >
-                &larr; Back to Shipping
+                &larr; {t('backToShipping')}
               </button>
               <StripePaymentForm
                 amount={finalTotal}

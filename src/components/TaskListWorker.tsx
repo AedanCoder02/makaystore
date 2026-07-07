@@ -1,13 +1,16 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Task } from '@/hooks/useWorkerActivity';
 
 export default function TaskListWorker({ tasks }: { tasks: Task[] }) {
+  const t = useTranslations('worker');
+
   return (
     <div className="task-list">
-      <h3 className="task-list-title">Your Tasks Today</h3>
+      <h3 className="task-list-title">{t('tasksToday')}</h3>
       {tasks.length === 0 ? (
-        <p className="no-tasks">No tasks assigned.</p>
+        <p className="no-tasks">{t('noTasks')}</p>
       ) : (
         <div className="task-items">
           {tasks.map((task) => (

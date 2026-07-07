@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface DailySummaryCardProps {
   totalWorkers: number;
   workersClockIn: number;
@@ -11,18 +13,20 @@ export default function DailySummaryCard({
   workersClockIn,
   totalHours,
 }: DailySummaryCardProps) {
+  const t = useTranslations('supervisor');
+
   return (
     <div className="daily-summary">
-      <h2>Today's Summary</h2>
+      <h2>{t('todaySummary')}</h2>
       <div className="summary-stats">
         <div className="stat">
-          <span className="label">Workers Clocked In:</span>
+          <span className="label">{t('workersClockIn')}:</span>
           <span className="value">
             {workersClockIn}/{totalWorkers}
           </span>
         </div>
         <div className="stat">
-          <span className="label">Total Hours:</span>
+          <span className="label">{t('totalHours')}:</span>
           <span className="value">{totalHours}h</span>
         </div>
       </div>

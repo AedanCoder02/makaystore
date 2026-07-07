@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface Props {
   maxQuantity: number;
   selectedQuantity: number;
@@ -11,6 +13,8 @@ export default function QuantitySelector({
   selectedQuantity,
   onChange,
 }: Props) {
+  const t = useTranslations('storefront');
+
   const handleDecrement = () => {
     if (selectedQuantity > 1) onChange(selectedQuantity - 1);
   };
@@ -29,7 +33,7 @@ export default function QuantitySelector({
 
   return (
     <div className="quantity-selector">
-      <label>Quantity</label>
+      <label>{t('quantity')}</label>
       <div className="quantity-controls">
         <button
           onClick={handleDecrement}
@@ -57,7 +61,7 @@ export default function QuantitySelector({
         </button>
       </div>
       <p className="qty-available">
-        {maxQuantity > 0 ? `${maxQuantity} available` : 'Out of stock'}
+        {maxQuantity > 0 ? `${maxQuantity} ${t('stock')}` : t('outOfStockShort')}
       </p>
     </div>
   );

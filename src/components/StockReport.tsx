@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import {
   PieChart,
   Pie,
@@ -8,12 +9,6 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-
-const stockData = [
-  { name: 'In Stock', value: 487 },
-  { name: 'Low Stock', value: 23 },
-  { name: 'Out of Stock', value: 8 },
-];
 
 const COLORS = ['#10b981', '#f59e0b', '#ef4444'];
 
@@ -28,25 +23,33 @@ const topSKUs = [
 const OUT_OF_STOCK_COUNT = 8;
 
 export default function StockReport() {
+  const t = useTranslations('reports');
+
+  const stockData = [
+    { name: t('inStock'), value: 487 },
+    { name: t('lowStock'), value: 23 },
+    { name: t('outOfStock'), value: 8 },
+  ];
+
   return (
     <div className="report-container">
       <div className="metrics-grid">
         <div className="metric-card">
-          <div className="metric-label">Total SKUs</div>
+          <div className="metric-label">{t('totalSKUs')}</div>
           <div className="metric-value">518</div>
         </div>
         <div className="metric-card color-green">
-          <div className="metric-label">In Stock</div>
+          <div className="metric-label">{t('inStock')}</div>
           <div className="metric-value">487</div>
           <div className="metric-unit">94%</div>
         </div>
         <div className="metric-card color-amber">
-          <div className="metric-label">Low Stock</div>
+          <div className="metric-label">{t('lowStock')}</div>
           <div className="metric-value">23</div>
           <div className="metric-unit">4%</div>
         </div>
         <div className={`metric-card ${OUT_OF_STOCK_COUNT > 10 ? 'color-red' : ''}`}>
-          <div className="metric-label">Out of Stock</div>
+          <div className="metric-label">{t('outOfStock')}</div>
           <div className="metric-value">
             {OUT_OF_STOCK_COUNT}
             {OUT_OF_STOCK_COUNT > 10 && (
@@ -58,7 +61,7 @@ export default function StockReport() {
       </div>
 
       <div className="chart-container">
-        <h3>Inventory Status Breakdown</h3>
+        <h3>{t('inventoryBreakdown')}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <PieChart>
             <Pie
@@ -80,13 +83,13 @@ export default function StockReport() {
       </div>
 
       <div className="table-container">
-        <h3>Top 5 SKUs by Quantity</h3>
+        <h3>{t('topSKUs')}</h3>
         <table className="data-table">
           <thead>
             <tr>
-              <th>SKU</th>
-              <th>Product</th>
-              <th>Quantity</th>
+              <th>{t('sku')}</th>
+              <th>{t('product')}</th>
+              <th>{t('quantity')}</th>
             </tr>
           </thead>
           <tbody>

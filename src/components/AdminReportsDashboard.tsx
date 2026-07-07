@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import { useReportsStore, type ReportTab } from '@/stores/reportsStore';
@@ -9,14 +10,6 @@ import CostMarginReport from './CostMarginReport';
 import GoalsReport from './GoalsReport';
 import StockReport from './StockReport';
 import RotationReport from './RotationReport';
-
-const REPORT_TABS: { id: ReportTab; label: string; icon: string }[] = [
-  { id: 'sales', label: 'Sales', icon: '📊' },
-  { id: 'cost', label: 'Cost/Margin', icon: '💰' },
-  { id: 'goals', label: 'Goals', icon: '🎯' },
-  { id: 'stock', label: 'Stock', icon: '📦' },
-  { id: 'rotation', label: 'Rotation', icon: '🔄' },
-];
 
 function renderReport(activeTab: ReportTab) {
   switch (activeTab) {
@@ -32,6 +25,16 @@ export default function AdminReportsDashboard() {
   const { activeTab, setActiveTab } = useReportsStore();
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('reports-tour');
+  const t = useTranslations('reports');
+  const tAdmin = useTranslations('admin');
+
+  const REPORT_TABS: { id: ReportTab; label: string; icon: string }[] = [
+    { id: 'sales', label: t('sales'), icon: '📊' },
+    { id: 'cost', label: t('costMargin'), icon: '💰' },
+    { id: 'goals', label: t('goals'), icon: '🎯' },
+    { id: 'stock', label: t('stock'), icon: '📦' },
+    { id: 'rotation', label: t('rotation'), icon: '🔄' },
+  ];
 
   useEffect(() => {
     if (!tutorialStore.completed.has('reports-tour')) {
@@ -44,11 +47,11 @@ export default function AdminReportsDashboard() {
     <div className="admin-layout">
       <main className="admin-main">
         <div className="dashboard-header">
-          <h1>Reports &amp; Analytics</h1>
+          <h1>{t('analytics')}</h1>
           <button
             className="help-button"
             onClick={() => tutorialStore.showTutorial('reports-tour')}
-            aria-label="Show tutorial"
+            aria-label={tAdmin('showTutorial')}
           >
             ?
           </button>

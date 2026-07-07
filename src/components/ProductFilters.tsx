@@ -1,6 +1,8 @@
 'use client';
 
 import { ChangeEvent } from 'react';
+import { useTranslations } from 'next-intl';
+
 
 export interface Filters {
   search: string;
@@ -18,6 +20,9 @@ const CATEGORIES = ['Shirts', 'Shorts', 'Dresses', 'Accessories'];
 const PRICE_MAX = 160;
 
 export default function ProductFilters({ filters, onChange }: Props) {
+  const t = useTranslations('storefront');
+  const tCommon = useTranslations('common');
+
   const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
     onChange({ ...filters, search: e.target.value });
   };
@@ -46,19 +51,19 @@ export default function ProductFilters({ filters, onChange }: Props) {
   return (
     <div className="product-filters">
       <div className="filters-header">
-        <h3>Filtros</h3>
+        <h3>{t('filters')}</h3>
         <button onClick={resetFilters} className="filters-reset">
-          Limpiar
+          {t('filtersClear')}
         </button>
       </div>
 
       {/* Search */}
       <div className="filter-section">
-        <label htmlFor="search" className="filter-label">Buscar</label>
+        <label htmlFor="search" className="filter-label">{tCommon('search')}</label>
         <input
           id="search"
           type="text"
-          placeholder="Buscar por nombre..."
+          placeholder={t('searchByName')}
           value={filters.search}
           onChange={handleSearchChange}
           className="filter-input"
@@ -67,7 +72,7 @@ export default function ProductFilters({ filters, onChange }: Props) {
 
       {/* Price Range */}
       <div className="filter-section">
-        <label className="filter-label">Rango de Precio</label>
+        <label className="filter-label">{t('priceRange')}</label>
         <div className="price-range">
           <input
             type="range"
@@ -77,7 +82,7 @@ export default function ProductFilters({ filters, onChange }: Props) {
             value={filters.priceMin}
             onChange={handlePriceMinChange}
             className="price-slider"
-            aria-label="Precio mínimo"
+            aria-label={t('minPrice')}
           />
           <input
             type="range"
@@ -87,7 +92,7 @@ export default function ProductFilters({ filters, onChange }: Props) {
             value={filters.priceMax}
             onChange={handlePriceMaxChange}
             className="price-slider"
-            aria-label="Precio máximo"
+            aria-label={t('maxPrice')}
           />
         </div>
         <div className="price-display">
@@ -97,7 +102,7 @@ export default function ProductFilters({ filters, onChange }: Props) {
 
       {/* Categories */}
       <div className="filter-section">
-        <label className="filter-label">Categoría</label>
+        <label className="filter-label">{t('category')}</label>
         <div className="filter-checkboxes">
           {CATEGORIES.map((category) => (
             <label key={category} className="filter-checkbox">

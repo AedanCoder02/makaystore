@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { useRotationStore } from '@/stores/rotationStore';
 
 interface BulkRotationActionsProps {
@@ -16,6 +17,7 @@ export default function BulkRotationActions({
 }: BulkRotationActionsProps) {
   const { selectedProducts, clearSelection } = useRotationStore();
   const [confirmAction, setConfirmAction] = useState<'rotate' | 'archive' | null>(null);
+  const t = useTranslations('rotation');
 
   const count = selectedProducts.length;
   if (count === 0) return null;
@@ -34,21 +36,21 @@ export default function BulkRotationActions({
       {confirmAction && (
         <div className="modal-overlay" onClick={() => setConfirmAction(null)}>
           <div className="modal modal-confirm" onClick={(e) => e.stopPropagation()}>
-            <h2>Confirm Bulk Action</h2>
+            <h2>{t('confirmBulkAction')}</h2>
             <p>
               {confirmAction === 'rotate'
-                ? `Rotate ${count} product${count > 1 ? 's' : ''} to Paused now?`
-                : `Archive ${count} product${count > 1 ? 's' : ''}? This cannot be undone.`}
+                ? t('rotateBulkConfirm').replace('{count}', String(count))
+                : t('archiveBulkConfirm').replace('{count}', String(count))}
             </p>
             <div className="form-actions">
               <button
                 className={`btn ${confirmAction === 'archive' ? 'btn-danger' : 'btn-primary'}`}
                 onClick={handleConfirm}
               >
-                Confirm
+                {t('confirm')}
               </button>
               <button className="btn btn-secondary" onClick={() => setConfirmAction(null)}>
-                Cancel
+                {t('cancel')}
               </button>
             </div>
           </div>
@@ -57,20 +59,20 @@ export default function BulkRotationActions({
 
       <div className="bulk-actions-bar">
         <span className="selection-count">
-          {count} product{count > 1 ? 's' : ''} selected
+          {count} {t('selected').replace('{count}', '')}
         </span>
         <div className="action-buttons">
           <button className="btn btn-small btn-white" onClick={handleRotateAll}>
-            Rotate All Now
+            {t('rotateAllNow')}
           </button>
           <button className="btn btn-small btn-white-outline" onClick={onScheduleAll}>
-            Schedule Rotation
+            {t('scheduleRotationAll')}
           </button>
           <button className="btn btn-small btn-danger" onClick={handleArchiveAll}>
-            Archive All
+            {t('archiveAll')}
           </button>
           <button className="btn btn-small btn-gray" onClick={clearSelection}>
-            Clear Selection
+            {t('clearSelection')}
           </button>
         </div>
       </div>

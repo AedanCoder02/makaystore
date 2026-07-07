@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   ComposedChart,
   Bar,
@@ -32,29 +33,31 @@ const upcomingRotations = [
 ];
 
 export default function RotationReport() {
+  const t = useTranslations('reports');
+
   return (
     <div className="report-container">
       <div className="metrics-grid">
         <div className="metric-card">
-          <div className="metric-label">Active Products</div>
+          <div className="metric-label">{t('activeProducts')}</div>
           <div className="metric-value">198</div>
         </div>
         <div className="metric-card color-amber">
-          <div className="metric-label">Paused Products</div>
+          <div className="metric-label">{t('pausedProducts')}</div>
           <div className="metric-value">14</div>
         </div>
         <div className="metric-card">
-          <div className="metric-label">Rotated This Month</div>
+          <div className="metric-label">{t('rotatedThisMonth')}</div>
           <div className="metric-value">32</div>
         </div>
         <div className="metric-card">
-          <div className="metric-label">Upcoming Changes</div>
+          <div className="metric-label">{t('upcomingChanges')}</div>
           <div className="metric-value">7</div>
         </div>
       </div>
 
       <div className="chart-container">
-        <h3>Rotation Activity (Last 30 Days)</h3>
+        <h3>{t('rotationActivity')}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <ComposedChart data={rotationData}>
             <CartesianGrid strokeDasharray="3 3" />
@@ -70,14 +73,14 @@ export default function RotationReport() {
       </div>
 
       <div className="table-container">
-        <h3>Next 5 Products to Rotate</h3>
+        <h3>{t('nextToRotate')}</h3>
         <table className="data-table">
           <thead>
             <tr>
-              <th>Product</th>
-              <th>Current</th>
-              <th>Next</th>
-              <th>Date</th>
+              <th>{t('product')}</th>
+              <th>{t('current')}</th>
+              <th>{t('next')}</th>
+              <th>{t('date')}</th>
             </tr>
           </thead>
           <tbody>
@@ -95,7 +98,7 @@ export default function RotationReport() {
 
       <div style={{ marginTop: '1.5rem' }}>
         <Link href="/admin/rotation" className="btn-primary-link">
-          Manage Rotation
+          {t('manageRotation')}
         </Link>
       </div>
     </div>

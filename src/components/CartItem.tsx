@@ -1,5 +1,6 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { CartItem as CartItemType } from '@/stores/cartStore';
 
 interface Props {
@@ -10,6 +11,7 @@ interface Props {
 
 export default function CartItem({ item, onRemove, onQuantityChange }: Props) {
   const subtotal = item.price * item.quantity;
+  const t = useTranslations('cart');
 
   return (
     <div className="cart-item">
@@ -20,7 +22,7 @@ export default function CartItem({ item, onRemove, onQuantityChange }: Props) {
       <div className="cart-item-info">
         <h3>{item.title}</h3>
         <p className="category-badge">{item.category}</p>
-        <p className="price-per-unit">${item.price.toFixed(2)} each</p>
+        <p className="price-per-unit">${item.price.toFixed(2)} {t('each')}</p>
       </div>
 
       <div className="cart-item-controls">
@@ -36,7 +38,7 @@ export default function CartItem({ item, onRemove, onQuantityChange }: Props) {
         <p className="subtotal">${subtotal.toFixed(2)}</p>
       </div>
 
-      <button className="remove-btn" onClick={onRemove} aria-label="Remove item">
+      <button className="remove-btn" onClick={onRemove} aria-label={t('remove')}>
         ✕
       </button>
     </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { CartItem } from '@/stores/cartStore';
 
 interface Props {
@@ -13,36 +14,37 @@ export default function CartSummary({ items, totalPrice }: Props) {
   const discount = 0;
   const total = totalPrice - discount;
   const isEmpty = items.length === 0;
+  const t = useTranslations('cart');
 
   return (
     <div className="cart-summary">
-      <h2>Order Summary</h2>
+      <h2>{t('orderSummary')}</h2>
 
       <div className="summary-row">
-        <span>Items</span>
+        <span>{t('items')}</span>
         <span>{itemCount}</span>
       </div>
 
       <div className="summary-row">
-        <span>Subtotal</span>
+        <span>{t('subtotal')}</span>
         <span>${totalPrice.toFixed(2)}</span>
       </div>
 
       {discount > 0 && (
         <div className="summary-row discount">
-          <span>Discount</span>
+          <span>{t('discount')}</span>
           <span>-${discount.toFixed(2)}</span>
         </div>
       )}
 
       <div className="summary-row total">
-        <span>Total</span>
+        <span>{t('total')}</span>
         <span>${total.toFixed(2)}</span>
       </div>
 
       <div className="summary-actions">
         <Link href="/products" className="btn-secondary">
-          Continue Shopping
+          {t('continueShopping')}
         </Link>
         <Link
           href="/checkout"
@@ -52,7 +54,7 @@ export default function CartSummary({ items, totalPrice }: Props) {
           }}
           aria-disabled={isEmpty}
         >
-          Proceed to Checkout
+          {t('proceedToCheckout')}
         </Link>
       </div>
     </div>

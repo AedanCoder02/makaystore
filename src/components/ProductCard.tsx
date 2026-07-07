@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Product } from '@/lib/mockData';
 
 // Emoji map for placeholder visuals
@@ -18,6 +19,7 @@ interface Props {
 
 export default function ProductCard({ product }: Props) {
   const [selectedVariant, setSelectedVariant] = useState(0);
+  const t = useTranslations('storefront');
 
   const variant = product.variants[selectedVariant];
   const price = variant?.price ?? product.price;
@@ -60,9 +62,9 @@ export default function ProductCard({ product }: Props) {
           <div className="product-price">${price.toFixed(2)}</div>
           <button
             className="product-add-btn"
-            aria-label={`Agregar ${product.title} al carrito`}
+            aria-label={`${t('add')} ${product.title}`}
           >
-            Agregar
+            {t('add')}
           </button>
         </div>
       </div>

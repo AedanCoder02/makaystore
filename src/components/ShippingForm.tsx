@@ -1,5 +1,7 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
+
 interface FormData {
   name: string;
   email: string;
@@ -22,16 +24,19 @@ export default function ShippingForm({
   onSubmit,
   loading = false,
 }: Props) {
+  const t = useTranslations('checkout');
+  const tCommon = useTranslations('common');
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.email || !formData.address || !formData.city || !formData.zip || !formData.country) {
-      alert('Please fill in all required fields');
+      alert(t('requiredFields'));
       return;
     }
 
     if (!formData.email.includes('@')) {
-      alert('Please enter a valid email');
+      alert(t('invalidEmail'));
       return;
     }
 
@@ -40,10 +45,10 @@ export default function ShippingForm({
 
   return (
     <form onSubmit={handleSubmit} className="shipping-form">
-      <h2>Shipping Information</h2>
+      <h2>{t('shippingInfo')}</h2>
 
       <div className="form-group">
-        <label htmlFor="name">Full Name *</label>
+        <label htmlFor="name">{t('fullName')} *</label>
         <input
           id="name"
           type="text"
@@ -55,7 +60,7 @@ export default function ShippingForm({
       </div>
 
       <div className="form-group">
-        <label htmlFor="email">Email *</label>
+        <label htmlFor="email">{t('email')} *</label>
         <input
           id="email"
           type="email"
@@ -67,7 +72,7 @@ export default function ShippingForm({
       </div>
 
       <div className="form-group">
-        <label htmlFor="address">Street Address *</label>
+        <label htmlFor="address">{t('address')} *</label>
         <input
           id="address"
           type="text"
@@ -80,7 +85,7 @@ export default function ShippingForm({
 
       <div className="form-row">
         <div className="form-group">
-          <label htmlFor="city">City *</label>
+          <label htmlFor="city">{t('city')} *</label>
           <input
             id="city"
             type="text"
@@ -92,7 +97,7 @@ export default function ShippingForm({
         </div>
 
         <div className="form-group">
-          <label htmlFor="zip">ZIP Code *</label>
+          <label htmlFor="zip">{t('zipCode')} *</label>
           <input
             id="zip"
             type="text"
@@ -105,14 +110,14 @@ export default function ShippingForm({
       </div>
 
       <div className="form-group">
-        <label htmlFor="country">Country *</label>
+        <label htmlFor="country">{t('country')} *</label>
         <select
           id="country"
           value={formData.country}
           onChange={(e) => onChange('country', e.target.value)}
           required
         >
-          <option value="">Select a country</option>
+          <option value="">{t('selectCountry')}</option>
           <option value="US">United States</option>
           <option value="CA">Canada</option>
           <option value="MX">Mexico</option>
@@ -122,7 +127,7 @@ export default function ShippingForm({
       </div>
 
       <button type="submit" className="btn-primary" disabled={loading}>
-        {loading ? 'Processing...' : 'Continue to Payment'}
+        {loading ? tCommon('processing') : t('continueToPayment')}
       </button>
     </form>
   );

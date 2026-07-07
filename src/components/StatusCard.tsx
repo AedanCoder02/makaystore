@@ -1,6 +1,7 @@
 'use client';
 
-import { useMemo, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function StatusCard({
   clockedIn,
@@ -10,6 +11,7 @@ export default function StatusCard({
   startTime?: string;
 }) {
   const [elapsedTime, setElapsedTime] = useState('');
+  const t = useTranslations('worker');
 
   useEffect(() => {
     if (!clockedIn || !startTime) {
@@ -27,7 +29,7 @@ export default function StatusCard({
     };
 
     updateElapsedTime();
-    const interval = setInterval(updateElapsedTime, 60000); // Update every minute
+    const interval = setInterval(updateElapsedTime, 60000);
 
     return () => clearInterval(interval);
   }, [clockedIn, startTime]);
@@ -35,10 +37,10 @@ export default function StatusCard({
   return (
     <div className={`status-card ${clockedIn ? 'clocked-in' : 'clocked-out'}`}>
       <h2 className="status-text">
-        {clockedIn ? 'You are clocked IN' : 'You are clocked OUT'}
+        {clockedIn ? t('clockedInStatus') : t('clockedOutStatus')}
       </h2>
       {clockedIn && elapsedTime && (
-        <p className="elapsed-time">You've been working for {elapsedTime}</p>
+        <p className="elapsed-time">{t('workingFor').replace('{time}', elapsedTime)}</p>
       )}
     </div>
   );
