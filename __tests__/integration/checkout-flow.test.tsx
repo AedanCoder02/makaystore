@@ -127,16 +127,16 @@ describe('Checkout Flow Integration', () => {
     expect(screen.getByText('Your cart is empty')).toBeInTheDocument();
   });
 
-  it.skip('proceeds from shipping step to payment step on valid form submission', () => {
+  it('proceeds from shipping step to payment step on valid form submission', () => {
     render(<CheckoutPage />);
 
-    // Fill in all required shipping fields
-    fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'John Doe' } });
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'john@example.com' } });
-    fireEvent.change(screen.getByLabelText(/address/i), { target: { value: '123 Main St' } });
-    fireEvent.change(screen.getByLabelText(/city/i), { target: { value: 'New York' } });
-    fireEvent.change(screen.getByLabelText(/zip code/i), { target: { value: '10001' } });
-    fireEvent.change(screen.getByLabelText(/country/i), { target: { value: 'US' } });
+    // Fill in all required shipping fields using element IDs (ShippingForm uses htmlFor="name" etc.)
+    fireEvent.change(document.getElementById('name')!, { target: { value: 'John Doe' } });
+    fireEvent.change(document.getElementById('email')!, { target: { value: 'john@example.com' } });
+    fireEvent.change(document.getElementById('address')!, { target: { value: '123 Main St' } });
+    fireEvent.change(document.getElementById('city')!, { target: { value: 'New York' } });
+    fireEvent.change(document.getElementById('zip')!, { target: { value: '10001' } });
+    fireEvent.change(document.getElementById('country')!, { target: { value: 'US' } });
 
     // Submit shipping form
     const form = screen.getByRole('button', { name: /continue to payment/i }).closest('form')!;
@@ -151,16 +151,16 @@ describe('Checkout Flow Integration', () => {
     expect(screen.getByTestId('order-summary')).toBeInTheDocument();
   });
 
-  it.skip('completes checkout: payment success → clear cart → redirect to order confirmation', () => {
+  it('completes checkout: payment success → clear cart → redirect to order confirmation', () => {
     render(<CheckoutPage />);
 
     // Navigate to payment step
-    fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'John Doe' } });
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'john@example.com' } });
-    fireEvent.change(screen.getByLabelText(/address/i), { target: { value: '123 Main St' } });
-    fireEvent.change(screen.getByLabelText(/city/i), { target: { value: 'New York' } });
-    fireEvent.change(screen.getByLabelText(/zip code/i), { target: { value: '10001' } });
-    fireEvent.change(screen.getByLabelText(/country/i), { target: { value: 'US' } });
+    fireEvent.change(document.getElementById('name')!, { target: { value: 'John Doe' } });
+    fireEvent.change(document.getElementById('email')!, { target: { value: 'john@example.com' } });
+    fireEvent.change(document.getElementById('address')!, { target: { value: '123 Main St' } });
+    fireEvent.change(document.getElementById('city')!, { target: { value: 'New York' } });
+    fireEvent.change(document.getElementById('zip')!, { target: { value: '10001' } });
+    fireEvent.change(document.getElementById('country')!, { target: { value: 'US' } });
     fireEvent.submit(screen.getByRole('button', { name: /continue to payment/i }).closest('form')!);
 
     // Trigger payment success
@@ -170,20 +170,20 @@ describe('Checkout Flow Integration', () => {
     expect(mockPush).toHaveBeenCalledWith('/order-confirmation/order-test-001');
   });
 
-  it.skip('can go back to shipping step from payment step', () => {
+  it('can go back to shipping step from payment step', () => {
     render(<CheckoutPage />);
 
     // Go to payment step
-    fireEvent.change(screen.getByLabelText(/full name/i), { target: { value: 'John Doe' } });
-    fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'john@example.com' } });
-    fireEvent.change(screen.getByLabelText(/address/i), { target: { value: '123 Main St' } });
-    fireEvent.change(screen.getByLabelText(/city/i), { target: { value: 'New York' } });
-    fireEvent.change(screen.getByLabelText(/zip code/i), { target: { value: '10001' } });
-    fireEvent.change(screen.getByLabelText(/country/i), { target: { value: 'US' } });
+    fireEvent.change(document.getElementById('name')!, { target: { value: 'John Doe' } });
+    fireEvent.change(document.getElementById('email')!, { target: { value: 'john@example.com' } });
+    fireEvent.change(document.getElementById('address')!, { target: { value: '123 Main St' } });
+    fireEvent.change(document.getElementById('city')!, { target: { value: 'New York' } });
+    fireEvent.change(document.getElementById('zip')!, { target: { value: '10001' } });
+    fireEvent.change(document.getElementById('country')!, { target: { value: 'US' } });
     fireEvent.submit(screen.getByRole('button', { name: /continue to payment/i }).closest('form')!);
 
-    // Go back
-    fireEvent.click(screen.getByText(/back to shipping/i));
+    // Go back (button text is t('backToShipping') which falls through to key 'backToShipping')
+    fireEvent.click(screen.getByText(/backToShipping|back to shipping/i));
 
     expect(screen.getByText('Shipping Information')).toBeInTheDocument();
   });

@@ -53,7 +53,7 @@ const config = {
   ],
   coverageThreshold: {
     global: {
-      lines: 15, // Realistic threshold given test scope (stores, hooks, components)
+      lines: 60,
     },
   },
   coverageReporters: ['text', 'lcov', 'html'],
