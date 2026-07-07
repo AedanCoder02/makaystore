@@ -1,0 +1,300 @@
+/* ============================================================
+   Admin Dashboard — Makay Store
+   Design: high contrast, amber #f59e0b, large targets (48-56px)
+   Responsive: 768px breakpoint (sidebar hidden on mobile)
+   ============================================================ */
+
+/* Layout */
+.admin-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: 100vh;
+  background: #f9f7f4;
+}
+
+/* ---- Sidebar ---- */
+.admin-sidebar {
+  background: #ffffff;
+  border-right: 2px solid #e5d9d0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid #e5d9d0;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1f2937;
+}
+
+.sidebar-brand-icon {
+  font-size: 1.5rem;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 0.5rem;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: #374151;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background 0.2s ease, color 0.2s ease;
+  font-weight: 500;
+  font-size: 1rem;
+  min-height: 48px;
+}
+
+.sidebar-item:hover {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.sidebar-item.active {
+  background: #f59e0b;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.sidebar-icon {
+  font-size: 1.25rem;
+  min-width: 24px;
+  text-align: center;
+}
+
+.sidebar-label {
+  font-size: 0.95rem;
+}
+
+/* ---- Main content ---- */
+.admin-main {
+  grid-column: 2;
+  padding: 2rem 2.5rem;
+  max-width: 1100px;
+}
+
+/* ---- Header ---- */
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.dashboard-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-welcome {
+  font-size: 1.05rem;
+  color: #6b7280;
+  margin: 0 0 2rem 0;
+}
+
+.help-button {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #f59e0b;
+  color: #ffffff;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.help-button:hover {
+  background: #d97706;
+  transform: scale(1.05);
+}
+
+.help-button:active {
+  transform: scale(0.97);
+}
+
+/* ---- Navigation card grid ---- */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.admin-nav-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.5rem;
+  background: #ffffff;
+  border: 2px solid #e5d9d0;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+  cursor: pointer;
+  min-height: 110px;
+}
+
+.admin-nav-card:hover {
+  border-color: #f59e0b;
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.18);
+  transform: translateY(-2px);
+}
+
+.admin-nav-card:active {
+  transform: translateY(0);
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  min-width: 56px;
+  text-align: center;
+  line-height: 1;
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-content h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.3rem 0;
+}
+
+.card-content p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.card-badge {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  margin-top: 0.5rem;
+}
+
+.card-arrow {
+  font-size: 1.5rem;
+  color: #f59e0b;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+/* ---- Access states ---- */
+.access-denied {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 2rem;
+  gap: 1rem;
+}
+
+.access-denied h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #dc2626;
+  margin: 0;
+}
+
+.access-denied p {
+  font-size: 1rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+.btn-primary-link {
+  display: inline-block;
+  padding: 0.875rem 1.75rem;
+  background: #f59e0b;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1rem;
+  text-decoration: none;
+  border-radius: 8px;
+  min-height: 48px;
+  line-height: 1;
+  transition: background 0.2s ease;
+}
+
+.btn-primary-link:hover {
+  background: #d97706;
+}
+
+.access-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  font-size: 1.15rem;
+  color: #6b7280;
+}
+
+/* ---- Mobile (≤768px) ---- */
+@media (max-width: 768px) {
+  .admin-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-sidebar {
+    display: none;
+  }
+
+  .admin-main {
+    grid-column: 1;
+    padding: 1.25rem 1rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-nav-card {
+    min-height: 80px;
+    padding: 1.25rem;
+  }
+
+  .card-icon {
+    font-size: 2rem;
+    min-width: 44px;
+  }
+}

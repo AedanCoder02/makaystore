@@ -11,6 +11,7 @@ import "@/styles/tutorial.css";
 import "@/styles/worker-activity.css";
 import "@/styles/supervisor-dashboard.css";
 import "@/styles/product-generation.css";
+import "@/styles/admin-dashboard.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

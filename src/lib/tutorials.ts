@@ -106,4 +106,53 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
       },
     ],
   },
+
+  'admin-tour': {
+    id: 'admin-tour',
+    name: 'Tour del Panel Admin',
+    role: 'admin',
+    steps: [
+      {
+        id: 'step-1',
+        target: '.dashboard-header h1',
+        title: 'Bienvenido al Panel',
+        description: 'Este es su panel para gestionar Makay Store. Seleccione cualquier sección para comenzar.',
+        placement: 'bottom',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-2',
+        target: '.admin-nav-card:first-child',
+        title: 'Gestión de Productos',
+        description: 'Suba productos, genere modelos 3D y gestione el inventario.',
+        placement: 'right',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-3',
+        target: '.admin-nav-card:nth-child(2)',
+        title: 'Ver Pedidos',
+        description: 'Vea todos los pedidos de clientes y sus detalles.',
+        placement: 'right',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-4',
+        target: '.admin-nav-card:nth-child(3)',
+        title: 'Gestión de Trabajadores',
+        description: 'Monitoree a los miembros del equipo y su actividad.',
+        placement: 'right',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-5',
+        target: '.help-button',
+        title: 'Botón de Ayuda',
+        description: 'Pulse aquí en cualquier momento para volver a ver este tutorial.',
+        placement: 'bottom',
+        actionText: 'Finalizar',
+        skipAllowed: true,
+      },
+    ],
+  },
 };
