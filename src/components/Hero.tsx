@@ -2,11 +2,13 @@
 
 import { useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { animate, stagger, createTimeline } from 'animejs';
 import ShaderGradientCanvasWrapper from './ShaderGradientCanvas';
 import '../styles/hero.css';
 
 export default function Hero() {
+  const t = useTranslations('hero');
   const heroRef = useRef<HTMLElement>(null);
   const headlineRef = useRef<HTMLHeadingElement>(null);
   const subRef = useRef<HTMLParagraphElement>(null);
@@ -123,16 +125,16 @@ export default function Hero() {
 
       <div className="hero-content">
         <h1 ref={headlineRef} className="hero-headline">
-          Tu Refugio de Conexion
+          {t('headline')}
         </h1>
 
         <p ref={subRef} className="hero-subheadline">
-          Descubre ropa que cuenta historias. Disenada para ti, inspirada en la playa.
+          {t('subheadline')}
         </p>
 
         <Link ref={ctaRef} href="/products" className="hero-cta">
           <span className="hero-cta-inner">
-            Explorar Coleccion
+            {t('cta')}
             <svg
               width="18"
               height="18"

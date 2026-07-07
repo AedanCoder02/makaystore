@@ -1,14 +1,17 @@
 'use client';
 
+import { useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { useSupervisorDashboard } from '@/hooks/useSupervisorDashboard';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import WorkerStatusOverview from './WorkerStatusOverview';
 import ActivityApprovalList from './ActivityApprovalList';
 import DailySummaryCard from './DailySummaryCard';
-import { useEffect } from 'react';
 
 export default function SupervisorDashboardPage() {
+  const t = useTranslations('supervisor');
+  const tTutorial = useTranslations('tutorial');
   const dashboard = useSupervisorDashboard();
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('supervisor-approve');
@@ -18,16 +21,17 @@ export default function SupervisorDashboardPage() {
     if (!completed.has('supervisor-approve')) {
       tutorialStore.showTutorial('supervisor-approve');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="supervisor-dashboard-container">
       <div className="dashboard-header">
-        <h1>Supervisor Dashboard</h1>
+        <h1>{t('dashboard')}</h1>
         <button
           className="help-button"
           onClick={() => tutorialStore.showTutorial('supervisor-approve')}
-          aria-label="Show tutorial"
+          aria-label={tTutorial('next')}
         >
           ?
         </button>

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useAdminAuth } from '@/hooks/useAdminAuth';
 
 interface RoleBasedGuardProps {
@@ -10,18 +11,19 @@ interface RoleBasedGuardProps {
 
 export default function RoleBasedGuard({ children, requiredRole }: RoleBasedGuardProps) {
   const { isLoading, hasAccess } = useAdminAuth(requiredRole);
+  const t = useTranslations('access');
 
   if (isLoading) {
-    return <div className="access-loading">Cargando...</div>;
+    return <div className="access-loading">{t('loading')}</div>;
   }
 
   if (!hasAccess) {
     return (
       <div className="access-denied">
-        <h2>Acceso Denegado</h2>
-        <p>No tiene permiso para ver esta página.</p>
+        <h2>{t('denied')}</h2>
+        <p>{t('noPermission')}</p>
         <Link href="/admin/dashboard" className="btn-primary-link">
-          Volver al Panel
+          {t('backToDashboard')}
         </Link>
       </div>
     );

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 import LenisProvider from "@/components/providers/LenisProvider";
 import NavBar from "@/components/NavBar";
 import StripeProvider from "@/components/StripeProvider";
@@ -31,22 +33,27 @@ export const metadata: Metadata = {
   description: "Makay - Tu refugio de conexión",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
     <ClerkProvider>
       <html
-        lang="es"
+        lang={locale}
         className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       >
         <body className="min-h-full flex flex-col">
-          <StripeProvider>
-            <NavBar />
-            <LenisProvider>{children}</LenisProvider>
-          </StripeProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <StripeProvider>
+              <NavBar />
+              <LenisProvider>{children}</LenisProvider>
+            </StripeProvider>
+          </NextIntlClientProvider>
         </body>
       </html>
     </ClerkProvider>

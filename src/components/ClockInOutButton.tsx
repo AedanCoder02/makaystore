@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 export default function ClockInOutButton({
   clockedIn,
@@ -12,6 +13,8 @@ export default function ClockInOutButton({
   onClockOut: () => void;
 }) {
   const [loading, setLoading] = useState(false);
+  const t = useTranslations('worker');
+  const tCommon = useTranslations('common');
 
   const handleClick = async () => {
     setLoading(true);
@@ -31,9 +34,9 @@ export default function ClockInOutButton({
       className={`clock-in-button ${clockedIn ? 'clocked-in' : ''}`}
       onClick={handleClick}
       disabled={loading}
-      aria-label={clockedIn ? 'Clock Out' : 'Clock In'}
+      aria-label={clockedIn ? t('clockOut') : t('clockIn')}
     >
-      {loading ? 'Processing...' : clockedIn ? 'Clock Out' : 'Clock In'}
+      {loading ? tCommon('processing') : clockedIn ? t('clockOut') : t('clockIn')}
     </button>
   );
 }
