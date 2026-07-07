@@ -178,8 +178,15 @@
 
 .btn-small {
   padding: 0.4rem 0.875rem;
-  min-height: 36px;
+  min-height: 48px;
   font-size: 0.75rem;
+}
+
+/* Desktop: bump to 56px */
+@media (min-width: 768px) {
+  .btn-small {
+    min-height: 56px;
+  }
 }
 
 .action-buttons {
