@@ -13,6 +13,7 @@ import "@/styles/supervisor-dashboard.css";
 import "@/styles/product-generation.css";
 import "@/styles/admin-dashboard.css";
 import "@/styles/admin-reports.css";
+import "@/styles/admin-rotation.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

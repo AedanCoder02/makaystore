@@ -204,4 +204,53 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
       },
     ],
   },
+
+  'rotation-tour': {
+    id: 'rotation-tour',
+    name: 'Manage Product Rotation',
+    role: 'supervisor',
+    steps: [
+      {
+        id: 'step-1',
+        target: '.rotation-header h1',
+        title: 'Product Rotation',
+        description: 'Schedule when products rotate between Active, Paused, and Archived states.',
+        placement: 'bottom',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-2',
+        target: '.rotation-table',
+        title: 'Current Products',
+        description: 'View all 17 products and their current status here. Click column headers to sort.',
+        placement: 'top',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-3',
+        target: '.action-buttons',
+        title: 'Rotate Individual Products',
+        description: 'Use "Rotate Now" for an immediate status change, or "Schedule" to pick a future date.',
+        placement: 'left',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-4',
+        target: '.rotation-table input[type="checkbox"]',
+        title: 'Bulk Selection',
+        description: 'Check multiple products to perform the same action on all of them at once.',
+        placement: 'right',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-5',
+        target: '.bulk-actions-bar',
+        title: 'Bulk Actions',
+        description: 'When products are selected, this bar appears. Rotate, schedule, or archive them all in one click.',
+        placement: 'top',
+        actionText: 'Done',
+        skipAllowed: true,
+      },
+    ],
+  },
 };
