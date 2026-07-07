@@ -42,20 +42,18 @@ export default async function RootLayout({
   const messages = await getMessages();
 
   return (
-    <ClerkProvider>
-      <html
-        lang={locale}
-        className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-      >
-        <body className="min-h-full flex flex-col">
-          <NextIntlClientProvider locale={locale} messages={messages}>
-            <StripeProvider>
-              <NavBar />
-              <LenisProvider>{children}</LenisProvider>
-            </StripeProvider>
-          </NextIntlClientProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html
+      lang={locale}
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col">
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <StripeProvider>
+            <NavBar />
+            <LenisProvider>{children}</LenisProvider>
+          </StripeProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
   );
 }
