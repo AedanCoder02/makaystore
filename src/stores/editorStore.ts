@@ -53,8 +53,11 @@ interface EditorState {
   restoreVersion: (pageId: string, versionId: string) => void;
 }
 
+let componentCounter = 0;
+let pageCounter = 0;
+
 const createDefaultPage = (slug: string, title: string): MarketingPage => ({
-  id: `page-${Date.now()}`,
+  id: `page-${Date.now()}-${++pageCounter}`,
   slug,
   title,
   status: 'draft',
@@ -117,7 +120,7 @@ export const useEditorStore = create<EditorState>()(
           if (!currentPage) return state;
 
           const newComponent: ComponentData = {
-            id: `comp-${Date.now()}`,
+            id: `comp-${Date.now()}-${++componentCounter}`,
             type,
             order: currentPage.components.length,
             content,

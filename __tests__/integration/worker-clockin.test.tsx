@@ -15,7 +15,7 @@ jest.mock('next-intl', () => ({
   useLocale: () => 'en',
 }));
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import ClockInOutButton from '@/components/ClockInOutButton';
 
 describe('Worker Clock In/Out Integration', () => {
@@ -57,16 +57,19 @@ describe('Worker Clock In/Out Integration', () => {
 });
 
 // Store interaction tests - separate from component tests
+import { useWorkerStore } from '@/stores/workerStore';
+
 describe('Worker Store Direct Interaction', () => {
   beforeEach(() => {
-    jest.resetModules();
+    // Reset store state
+    useWorkerStore.setState({
+      clockedIn: false,
+      currentShift: null,
+      activityLog: [],
+    });
   });
 
   it('clock in/out store workflow: clock in then clock out', () => {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { useWorkerStore } = require('@/stores/workerStore');
-    const { act } = require('@testing-library/react');
-
     // Clock in
     act(() => { useWorkerStore.getState().clockIn('worker-test-001'); });
     expect(useWorkerStore.getState().clockedIn).toBe(true);

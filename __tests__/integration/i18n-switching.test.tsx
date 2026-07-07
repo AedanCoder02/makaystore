@@ -5,18 +5,18 @@
 import React from 'react';
 
 // Setup all mocks BEFORE any component imports
-jest.mock('next-intl', () => {
-  let currentLocale = 'en';
-  const translations = {
-    language: 'Language',
-  };
-  return {
-    useTranslations: () => (key: string) => translations[key] || key,
-    useLocale: () => currentLocale,
-  };
-});
+const mockTranslations = {
+  language: 'Language',
+};
 
 const mockPush = jest.fn();
+let mockCurrentLocale = 'en';
+
+jest.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => mockTranslations[key] || key,
+  useLocale: () => mockCurrentLocale,
+}));
+
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: mockPush }),
   usePathname: () => '/products',
@@ -28,12 +28,13 @@ jest.mock('@/i18n/config', () => ({
   routing: {},
 }));
 
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
+import { useReportsStore } from '@/stores/reportsStore';
 
 describe('i18n Switching Integration', () => {
   beforeEach(() => {
-    currentLocale = 'en';
+    mockCurrentLocale = 'en';
     mockPush.mockClear();
     localStorage.clear();
   });
@@ -53,7 +54,7 @@ describe('i18n Switching Integration', () => {
   });
 
   it('switching to EN from ES removes locale prefix', () => {
-    currentLocale = 'es';
+    mockCurrentLocale = 'es';
     render(<LanguageSwitcher />);
     fireEvent.click(screen.getByRole('button', { name: 'EN' }));
 
@@ -79,12 +80,12 @@ describe('i18n Switching Integration', () => {
 
 // ─── Additional i18n store tests using the reports store locale simulation ───
 describe('i18n with reports tab state', () => {
-  it('reports store tab survives locale switch (state is independent)', () => {
-    jest.resetModules();
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { useReportsStore } = require('@/stores/reportsStore');
-    const { act } = require('@testing-library/react');
+  beforeEach(() => {
+    // Reset store state
+    useReportsStore.setState({ activeTab: 'sales' });
+  });
 
+  it('reports store tab survives locale switch (state is independent)', () => {
     act(() => { useReportsStore.getState().setActiveTab('cost'); });
     expect(useReportsStore.getState().activeTab).toBe('cost');
 
