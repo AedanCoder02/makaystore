@@ -3,7 +3,10 @@
 import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { animate } from 'animejs';
+import { Waves, Leaf, Users } from 'lucide-react';
 import '../styles/why-makay.css';
+
+const FEATURE_ICONS = [Waves, Leaf, Users];
 
 export default function WhyMakay() {
   const t = useTranslations('whyMakay');
@@ -50,17 +53,17 @@ export default function WhyMakay() {
 
   const features = [
     {
-      icon: '🌊',
+      Icon: FEATURE_ICONS[0],
       title: t('feature1.title'),
       description: t('feature1.description'),
     },
     {
-      icon: '♻️',
+      Icon: FEATURE_ICONS[1],
       title: t('feature2.title'),
       description: t('feature2.description'),
     },
     {
-      icon: '🤝',
+      Icon: FEATURE_ICONS[2],
       title: t('feature3.title'),
       description: t('feature3.description'),
     },
@@ -74,11 +77,13 @@ export default function WhyMakay() {
         </h2>
 
         <div className="why-grid">
-          {features.map((feature, idx) => (
+          {features.map(({ Icon, title, description }, idx) => (
             <div key={idx} className="why-card">
-              <div className="why-icon">{feature.icon}</div>
-              <h3 className="why-title">{feature.title}</h3>
-              <p className="why-description">{feature.description}</p>
+              <div className="why-icon">
+                <Icon size={48} color="var(--makay-peachy-rose)" strokeWidth={1.5} />
+              </div>
+              <h3 className="why-title">{title}</h3>
+              <p className="why-description">{description}</p>
             </div>
           ))}
         </div>
