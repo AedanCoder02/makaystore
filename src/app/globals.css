@@ -2,14 +2,14 @@
 
 :root {
   /* Makay Brand Colors - Sunset/Sand Aesthetic */
-  --color-peachy-rose: #D4A574;
-  --color-soft-coral: #E8B4A6;
-  --color-sand-cream: #F5EFE5;
-  --color-premium-cream: #FFF8F0;
-  --color-ocean-teal: #4A9FB5;
-  --color-warm-gold: #D4AF37;
-  --color-dark-navy: #2C2C2C;
-  --color-mauve-rose: #A89080;
+  --makay-peachy-rose: #D4A574;
+  --makay-soft-coral: #E8B4A6;
+  --makay-sand-cream: #F5EFE5;
+  --makay-premium-cream: #FFF8F0;
+  --makay-ocean-teal: #4A9FB5;
+  --makay-warm-gold: #D4AF37;
+  --makay-dark-navy: #2C2C2C;
+  --makay-mauve: #A89080;
 
   /* Legacy/Fallback Colors */
   --background: #FFF8F0;
