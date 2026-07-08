@@ -1,0 +1,165 @@
+.how-it-works {
+  width: 100%;
+  padding: 4rem 1.5rem;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+}
+
+.how-it-works-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.how-heading {
+  font-size: clamp(1.875rem, 5vw, 2.5rem);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #1f2937;
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.how-steps-wrapper {
+  overflow-x: auto;
+  padding: 1rem 0;
+}
+
+.how-steps {
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  min-width: min-content;
+  padding: 0.5rem;
+}
+
+.how-step {
+  flex: 1;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem 1.5rem;
+  background: white;
+  border-radius: 1rem;
+  border: 1px solid #e5e7eb;
+  position: relative;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.4s ease;
+}
+
+.how-step:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+  border-color: #f59e0b;
+}
+
+.how-step-number {
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+}
+
+.how-step-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.how-step-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 0.75rem;
+}
+
+.how-step-description {
+  font-size: 0.9rem;
+  color: #6b7280;
+  line-height: 1.6;
+}
+
+.how-step-arrow {
+  position: absolute;
+  right: -1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  color: #f59e0b;
+  font-weight: 300;
+  display: none;
+}
+
+/* Show arrows on desktop */
+@media (min-width: 1024px) {
+  .how-step:not(:last-child) .how-step-arrow {
+    display: block;
+  }
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .how-steps {
+    gap: 1.5rem;
+  }
+
+  .how-step {
+    min-width: 180px;
+    padding: 1.5rem 1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .how-it-works {
+    padding: 3rem 1rem;
+  }
+
+  .how-steps {
+    gap: 1rem;
+    justify-content: center;
+  }
+
+  .how-step {
+    min-width: 160px;
+    padding: 1.5rem 1rem;
+  }
+
+  .how-step-number {
+    font-size: 2rem;
+  }
+
+  .how-step-icon {
+    font-size: 2.5rem;
+  }
+
+  .how-heading {
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .how-step {
+    min-width: 140px;
+    padding: 1.25rem 0.75rem;
+  }
+
+  .how-step-title {
+    font-size: 1rem;
+  }
+
+  .how-step-description {
+    font-size: 0.8rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .how-heading,
+  .how-step {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

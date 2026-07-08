@@ -386,5 +386,78 @@
     "denied": "Access Denied",
     "noPermission": "You don't have permission to view this page.",
     "backToDashboard": "Back to Dashboard"
+  },
+  "featured": {
+    "heading": "Handpicked Collection",
+    "product1": {
+      "name": "Ocean Breeze Tee",
+      "description": "Lightweight cotton shirt perfect for beach days"
+    },
+    "product2": {
+      "name": "Coastal Dress",
+      "description": "Elegant linen dress inspired by tropical vibes"
+    },
+    "product3": {
+      "name": "Wave Shorts",
+      "description": "Comfortable shorts with modern coastal design"
+    },
+    "product4": {
+      "name": "Sunset Hoodie",
+      "description": "Cozy sweatshirt for cool evenings by the shore"
+    },
+    "viewProduct": "View Product",
+    "viewAll": "View All Collection →"
+  },
+  "whyMakay": {
+    "heading": "Why Choose Makay",
+    "feature1": {
+      "title": "Beach-Inspired Design",
+      "description": "Every piece captures the essence of ocean life and coastal living"
+    },
+    "feature2": {
+      "title": "Sustainable Materials",
+      "description": "Eco-conscious production using organic and recycled fabrics"
+    },
+    "feature3": {
+      "title": "Community-Focused",
+      "description": "Built for connection - wear, share, and celebrate with our community"
+    }
+  },
+  "testimonials": {
+    "heading": "What Our Community Says",
+    "testimonial1": {
+      "name": "Sarah Johnson",
+      "role": "Beach Lover, California",
+      "text": "Makay pieces are perfect for my lifestyle. The quality and design are unmatched!"
+    },
+    "testimonial2": {
+      "name": "Marcus Chen",
+      "role": "Sustainability Advocate",
+      "text": "Finally, fashion that aligns with my values. I love wearing clothes that make a difference."
+    },
+    "testimonial3": {
+      "name": "Elena Rodriguez",
+      "role": "Fashion Enthusiast, Miami",
+      "text": "The community here is incredible. I've met amazing people through Makay."
+    }
+  },
+  "howItWorks": {
+    "heading": "From Ocean to Closet",
+    "step1": {
+      "title": "Inspire",
+      "description": "Browse our curated collection of coastal-inspired pieces"
+    },
+    "step2": {
+      "title": "Select",
+      "description": "Choose your favorite styles that match your personality"
+    },
+    "step3": {
+      "title": "Connect",
+      "description": "Join our community and meet fellow beach lifestyle enthusiasts"
+    },
+    "step4": {
+      "title": "Celebrate",
+      "description": "Wear and share your Makay moments with the world"
+    }
   }
 }

@@ -386,5 +386,78 @@
     "denied": "Acceso Denegado",
     "noPermission": "No tiene permiso para ver esta página.",
     "backToDashboard": "Volver al Panel"
+  },
+  "featured": {
+    "heading": "Colección Seleccionada",
+    "product1": {
+      "name": "Camiseta Ocean Breeze",
+      "description": "Camiseta de algodón ligero perfecta para días de playa"
+    },
+    "product2": {
+      "name": "Vestido Costero",
+      "description": "Elegante vestido de lino inspirado en vibraciones tropicales"
+    },
+    "product3": {
+      "name": "Shorts Wave",
+      "description": "Cómodos pantalones cortos con diseño costero moderno"
+    },
+    "product4": {
+      "name": "Sudadera Sunset",
+      "description": "Sudadera acogedora para noches frescas a orillas del mar"
+    },
+    "viewProduct": "Ver Producto",
+    "viewAll": "Ver Toda la Colección →"
+  },
+  "whyMakay": {
+    "heading": "Por Qué Elegir Makay",
+    "feature1": {
+      "title": "Diseño Inspirado en la Playa",
+      "description": "Cada pieza captura la esencia de la vida marina y la vida costera"
+    },
+    "feature2": {
+      "title": "Materiales Sostenibles",
+      "description": "Producción responsable utilizando telas orgánicas y recicladas"
+    },
+    "feature3": {
+      "title": "Enfoque Comunitario",
+      "description": "Hecho para la conexión - usa, comparte y celebra con nuestra comunidad"
+    }
+  },
+  "testimonials": {
+    "heading": "Lo Que Dice Nuestra Comunidad",
+    "testimonial1": {
+      "name": "Sarah Johnson",
+      "role": "Amante de la Playa, California",
+      "text": "Las piezas de Makay son perfectas para mi estilo de vida. ¡La calidad y el diseño son incomparables!"
+    },
+    "testimonial2": {
+      "name": "Marcus Chen",
+      "role": "Defensor de la Sostenibilidad",
+      "text": "Finalmente, moda que se alinea con mis valores. Me encanta usar ropa que hace la diferencia."
+    },
+    "testimonial3": {
+      "name": "Elena Rodriguez",
+      "role": "Entusiasta de la Moda, Miami",
+      "text": "La comunidad aquí es increíble. He conocido gente asombrosa a través de Makay."
+    }
+  },
+  "howItWorks": {
+    "heading": "Del Océano al Guardarropa",
+    "step1": {
+      "title": "Inspira",
+      "description": "Explora nuestra colección seleccionada de piezas inspiradas en la costa"
+    },
+    "step2": {
+      "title": "Selecciona",
+      "description": "Elige tus estilos favoritos que coincidan con tu personalidad"
+    },
+    "step3": {
+      "title": "Conecta",
+      "description": "Únete a nuestra comunidad y conoce a otros entusiastas del estilo de vida playero"
+    },
+    "step4": {
+      "title": "Celebra",
+      "description": "Usa y comparte tus momentos de Makay con el mundo"
+    }
   }
 }
