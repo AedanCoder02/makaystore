@@ -388,25 +388,42 @@
     "backToDashboard": "Back to Dashboard"
   },
   "featured": {
-    "heading": "Handpicked Collection",
-    "product1": {
-      "name": "Ocean Breeze Tee",
-      "description": "Lightweight cotton shirt perfect for beach days"
-    },
-    "product2": {
-      "name": "Coastal Dress",
-      "description": "Elegant linen dress inspired by tropical vibes"
-    },
-    "product3": {
-      "name": "Wave Shorts",
-      "description": "Comfortable shorts with modern coastal design"
-    },
-    "product4": {
-      "name": "Sunset Hoodie",
-      "description": "Cozy sweatshirt for cool evenings by the shore"
-    },
-    "viewProduct": "View Product",
-    "viewAll": "View All Collection →"
+    "title": "Discover Makay Collection",
+    "description": "Experience the essence of community and belonging",
+    "items": [
+      {
+        "id": 1,
+        "name": "Signature T-Shirt",
+        "description": "Crafted for the community. Worn at gatherings under golden skies.",
+        "image": "https://images.unsplash.com/photo-1523228114739-fbf0aa74c24d?w=600&h=750&fit=crop",
+        "price": "$65",
+        "category": "Apparel"
+      },
+      {
+        "id": 2,
+        "name": "Linen Cover-Up",
+        "description": "Light, breathable elegance for beach club moments.",
+        "image": "https://images.unsplash.com/photo-1515180707541-76139ca888b9?w=600&h=750&fit=crop",
+        "price": "$85",
+        "category": "Apparel"
+      },
+      {
+        "id": 3,
+        "name": "Canvas Beach Tote",
+        "description": "Carry your essentials with artisanal craftsmanship.",
+        "image": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=750&fit=crop",
+        "price": "$95",
+        "category": "Accessories"
+      },
+      {
+        "id": 4,
+        "name": "Limited Edition Ritual",
+        "description": "Member exclusive. Join the Spoon & Moon experience.",
+        "image": "https://images.unsplash.com/photo-1516762126219-925ae4ae9c98?w=600&h=750&fit=crop",
+        "price": "Event Access",
+        "category": "Experiences"
+      }
+    ]
   },
   "whyMakay": {
     "heading": "Why Choose Makay",

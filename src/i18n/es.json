@@ -388,25 +388,42 @@
     "backToDashboard": "Volver al Panel"
   },
   "featured": {
-    "heading": "Colección Seleccionada",
-    "product1": {
-      "name": "Camiseta Ocean Breeze",
-      "description": "Camiseta de algodón ligero perfecta para días de playa"
-    },
-    "product2": {
-      "name": "Vestido Costero",
-      "description": "Elegante vestido de lino inspirado en vibraciones tropicales"
-    },
-    "product3": {
-      "name": "Shorts Wave",
-      "description": "Cómodos pantalones cortos con diseño costero moderno"
-    },
-    "product4": {
-      "name": "Sudadera Sunset",
-      "description": "Sudadera acogedora para noches frescas a orillas del mar"
-    },
-    "viewProduct": "Ver Producto",
-    "viewAll": "Ver Toda la Colección →"
+    "title": "Descubre Colección Makay",
+    "description": "Experimenta la esencia de comunidad y pertenencia",
+    "items": [
+      {
+        "id": 1,
+        "name": "Playera Signature",
+        "description": "Diseñada para la comunidad. Usada en reuniones bajo cielos dorados.",
+        "image": "https://images.unsplash.com/photo-1523228114739-fbf0aa74c24d?w=600&h=750&fit=crop",
+        "price": "$65",
+        "category": "Ropa"
+      },
+      {
+        "id": 2,
+        "name": "Cubrecostillas de Lino",
+        "description": "Elegancia ligera y transpirable para momentos de playa.",
+        "image": "https://images.unsplash.com/photo-1515180707541-76139ca888b9?w=600&h=750&fit=crop",
+        "price": "$85",
+        "category": "Ropa"
+      },
+      {
+        "id": 3,
+        "name": "Bolsa de Playa Canvas",
+        "description": "Lleva tus esenciales con artesanía auténtica.",
+        "image": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=750&fit=crop",
+        "price": "$95",
+        "category": "Accesorios"
+      },
+      {
+        "id": 4,
+        "name": "Experiencia Limitada",
+        "description": "Exclusiva para miembros. Únete a Spoon & Moon.",
+        "image": "https://images.unsplash.com/photo-1516762126219-925ae4ae9c98?w=600&h=750&fit=crop",
+        "price": "Acceso a Evento",
+        "category": "Experiencias"
+      }
+    ]
   },
   "whyMakay": {
     "heading": "Por Qué Elegir Makay",
