@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { animate } from 'animejs';
+import { Lightbulb, Shirt, Users, Sparkles } from 'lucide-react';
 import '../styles/how-it-works.css';
 
 export default function HowItWorks() {
@@ -52,25 +53,25 @@ export default function HowItWorks() {
       number: '01',
       title: t('step1.title'),
       description: t('step1.description'),
-      icon: '💡',
+      Icon: Lightbulb,
     },
     {
       number: '02',
       title: t('step2.title'),
       description: t('step2.description'),
-      icon: '👕',
+      Icon: Shirt,
     },
     {
       number: '03',
       title: t('step3.title'),
       description: t('step3.description'),
-      icon: '🤝',
+      Icon: Users,
     },
     {
       number: '04',
       title: t('step4.title'),
       description: t('step4.description'),
-      icon: '✨',
+      Icon: Sparkles,
     },
   ];
 
@@ -86,7 +87,9 @@ export default function HowItWorks() {
             {steps.map((step, idx) => (
               <div key={idx} className="how-step">
                 <div className="how-step-number">{step.number}</div>
-                <div className="how-step-icon">{step.icon}</div>
+                <div className="how-step-icon">
+                  <step.Icon size={40} />
+                </div>
                 <h3 className="how-step-title">{step.title}</h3>
                 <p className="how-step-description">{step.description}</p>
                 {idx < steps.length - 1 && <div className="how-step-arrow">→</div>}

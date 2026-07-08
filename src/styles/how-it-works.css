@@ -66,20 +66,36 @@
 }
 
 .how-step-icon {
-  font-size: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(212, 165, 116, 0.1);
+  border: 2px solid var(--makay-peachy-rose, #E8B4A6);
   margin-bottom: 1rem;
+  color: var(--makay-peachy-rose, #E8B4A6);
+  transition: background 300ms ease-out, box-shadow 300ms ease-out;
+}
+
+.how-step:hover .how-step-icon {
+  background: rgba(212, 165, 116, 0.2);
+  box-shadow: 0 4px 16px rgba(212, 165, 116, 0.25);
 }
 
 .how-step-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #1f2937;
+  font-family: 'Playfair Display', Georgia, serif;
+  color: var(--makay-dark-navy, #1a2332);
   margin-bottom: 0.75rem;
 }
 
 .how-step-description {
   font-size: 0.9rem;
-  color: #6b7280;
+  font-family: 'Montserrat', sans-serif;
+  color: var(--makay-mauve, #9b8ea0);
   line-height: 1.6;
 }
 
@@ -132,10 +148,6 @@
     font-size: 2rem;
   }
 
-  .how-step-icon {
-    font-size: 2.5rem;
-  }
-
   .how-heading {
     margin-bottom: 2rem;
   }
@@ -156,10 +168,30 @@
   }
 }
 
+/* Slide-up animation on scroll entry (driven by anime.js IntersectionObserver) */
+@keyframes how-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.how-step.is-visible {
+  animation: how-slide-up 300ms ease-out forwards;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .how-heading,
   .how-step {
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  .how-step.is-visible {
+    animation: none;
   }
 }
