@@ -10,6 +10,7 @@ export default function FeaturedCollection() {
   const t = useTranslations('featured');
   const sectionRef = useRef<any>(null);
   const headingRef = useRef<any>(null);
+  const items = t.raw('items') as any[];
 
   // Scroll-triggered animations
   useEffect(() => {
@@ -50,43 +51,15 @@ export default function FeaturedCollection() {
     return () => observer.disconnect();
   }, []);
 
-  const products = [
-    {
-      id: 1,
-      name: t('product1.name'),
-      description: t('product1.description'),
-      image: 'https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=400&h=500&fit=crop',
-      price: '$89',
-    },
-    {
-      id: 2,
-      name: t('product2.name'),
-      description: t('product2.description'),
-      image: 'https://images.unsplash.com/photo-1535536411ee-b64dde1fbfb0?w=400&h=500&fit=crop',
-      price: '$129',
-    },
-    {
-      id: 3,
-      name: t('product3.name'),
-      description: t('product3.description'),
-      image: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?w=400&h=500&fit=crop',
-      price: '$149',
-    },
-    {
-      id: 4,
-      name: t('product4.name'),
-      description: t('product4.description'),
-      image: 'https://images.unsplash.com/photo-1469461436442-bb4016447550?w=400&h=500&fit=crop',
-      price: '$99',
-    },
-  ];
+  const products = items;
 
   return (
     <section ref={sectionRef} className="featured-collection">
       <div className="featured-collection-container">
         <h2 ref={headingRef} className="featured-heading">
-          {t('heading')}
+          {t('title')}
         </h2>
+        <p className="featured-subtitle">{t('description')}</p>
 
         <div className="featured-grid">
           {products.map((product) => (

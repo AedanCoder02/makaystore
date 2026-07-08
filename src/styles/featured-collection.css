@@ -10,14 +10,27 @@
 }
 
 .featured-heading {
-  font-family: var(--font-playfair);
-  font-size: clamp(1.875rem, 5vw, 2.5rem);
-  font-weight: 700;
+  font-family: var(--font-playfair-display);
+  font-size: clamp(1.875rem, 5vw, 3rem);
+  font-weight: 800;
   text-align: center;
-  margin-bottom: 3rem;
-  color: var(--makay-dark-navy);
+  margin-bottom: 1rem;
+  color: var(--makay-peachy-rose);
+  letter-spacing: 0.05em;
   opacity: 0;
   transform: translateY(20px);
+}
+
+.featured-subtitle {
+  font-family: var(--font-montserrat);
+  font-size: 1rem;
+  color: var(--makay-mauve);
+  text-align: center;
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  letter-spacing: 0.02em;
 }
 
 .featured-grid {
@@ -106,7 +119,7 @@
 }
 
 .featured-name {
-  font-family: var(--font-playfair);
+  font-family: var(--font-playfair-display);
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--makay-dark-navy);
@@ -114,11 +127,13 @@
 }
 
 .featured-description {
+  font-family: var(--font-montserrat);
   font-size: 0.875rem;
   color: var(--makay-mauve);
   margin-bottom: 1rem;
   flex: 1;
-  line-height: 1.5;
+  line-height: 1.6;
+  letter-spacing: 0.02em;
 }
 
 .featured-footer {
