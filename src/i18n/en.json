@@ -502,7 +502,6 @@
   },
   "footer": {
     "brand": {
-      "title": "Makay",
       "description": "Connecting people through beach-inspired fashion and community. Your refuge of connection."
     },
     "shop": {
@@ -512,25 +511,21 @@
       "men": "Men",
       "accessories": "Accessories"
     },
-    "support": {
-      "title": "Customer Support",
-      "contact": "Contact Us",
-      "faq": "FAQ",
-      "shipping": "Shipping Info",
-      "returns": "Returns & Exchanges"
+    "community": {
+      "title": "Community",
+      "about": "About Us",
+      "events": "Events",
+      "blog": "Journal",
+      "sustainability": "Sustainability"
+    },
+    "connect": {
+      "title": "Connect"
     },
     "legal": {
-      "title": "Legal",
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
       "cookies": "Cookie Settings"
     },
-    "social": {
-      "title": "Follow Us"
-    },
-    "payment": {
-      "text": "Secure payments with major credit cards, PayPal, and Apple Pay"
-    },
-    "copyright": "All rights reserved. Made with ❤️ for the ocean community."
+    "copyright": "All rights reserved."
   }
 }
