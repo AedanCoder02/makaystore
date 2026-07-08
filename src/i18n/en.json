@@ -459,5 +459,61 @@
       "title": "Celebrate",
       "description": "Wear and share your Makay moments with the world"
     }
+  },
+  "categories": {
+    "heading": "Shop By Category",
+    "women": {
+      "name": "Women",
+      "description": "Discover our collection of beach-inspired pieces for women"
+    },
+    "men": {
+      "name": "Men",
+      "description": "Explore our curated selection for the modern beach lover"
+    },
+    "accessories": {
+      "name": "Accessories",
+      "description": "Complete your look with our carefully selected accessories"
+    }
+  },
+  "newsletter": {
+    "heading": "Stay Connected",
+    "subheading": "Get exclusive drops, community updates, and special offers delivered to your inbox",
+    "emailPlaceholder": "Enter your email...",
+    "subscribe": "Subscribe",
+    "successMessage": "Thank you for subscribing! Check your email for a special welcome offer.",
+    "privacy": "We respect your privacy. Unsubscribe at any time."
+  },
+  "footer": {
+    "brand": {
+      "title": "Makay",
+      "description": "Connecting people through beach-inspired fashion and community. Your refuge of connection."
+    },
+    "shop": {
+      "title": "Shop",
+      "allProducts": "All Products",
+      "women": "Women",
+      "men": "Men",
+      "accessories": "Accessories"
+    },
+    "support": {
+      "title": "Customer Support",
+      "contact": "Contact Us",
+      "faq": "FAQ",
+      "shipping": "Shipping Info",
+      "returns": "Returns & Exchanges"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "cookies": "Cookie Settings"
+    },
+    "social": {
+      "title": "Follow Us"
+    },
+    "payment": {
+      "text": "Secure payments with major credit cards, PayPal, and Apple Pay"
+    },
+    "copyright": "All rights reserved. Made with ❤️ for the ocean community."
   }
 }

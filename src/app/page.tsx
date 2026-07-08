@@ -3,6 +3,9 @@ import FeaturedCollection from '@/components/FeaturedCollection';
 import WhyMakay from '@/components/WhyMakay';
 import Testimonials from '@/components/Testimonials';
 import HowItWorks from '@/components/HowItWorks';
+import Categories from '@/components/Categories';
+import Newsletter from '@/components/Newsletter';
+import Footer from '@/components/Footer';
 
 export default function Home() {
   return (
@@ -12,6 +15,9 @@ export default function Home() {
       <WhyMakay />
       <Testimonials />
       <HowItWorks />
+      <Categories />
+      <Newsletter />
+      <Footer />
     </main>
   );
 }

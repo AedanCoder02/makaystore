@@ -459,5 +459,61 @@
       "title": "Celebra",
       "description": "Usa y comparte tus momentos de Makay con el mundo"
     }
+  },
+  "categories": {
+    "heading": "Compra por Categoría",
+    "women": {
+      "name": "Mujeres",
+      "description": "Descubre nuestra colección de piezas inspiradas en la playa para mujeres"
+    },
+    "men": {
+      "name": "Hombres",
+      "description": "Explora nuestra selección para el amante moderno de la playa"
+    },
+    "accessories": {
+      "name": "Accesorios",
+      "description": "Completa tu look con nuestros accesorios cuidadosamente seleccionados"
+    }
+  },
+  "newsletter": {
+    "heading": "Mantente Conectado",
+    "subheading": "Recibe exclusivas, actualizaciones de la comunidad y ofertas especiales en tu bandeja de entrada",
+    "emailPlaceholder": "Ingresa tu correo...",
+    "subscribe": "Suscribirse",
+    "successMessage": "¡Gracias por suscribirte! Revisa tu correo para una oferta especial de bienvenida.",
+    "privacy": "Respetamos tu privacidad. Puedes darte de baja en cualquier momento."
+  },
+  "footer": {
+    "brand": {
+      "title": "Makay",
+      "description": "Conectando personas a través de la moda inspirada en la playa y la comunidad. Tu refugio de conexión."
+    },
+    "shop": {
+      "title": "Tienda",
+      "allProducts": "Todos los Productos",
+      "women": "Mujeres",
+      "men": "Hombres",
+      "accessories": "Accesorios"
+    },
+    "support": {
+      "title": "Atención al Cliente",
+      "contact": "Contáctanos",
+      "faq": "Preguntas Frecuentes",
+      "shipping": "Información de Envío",
+      "returns": "Devoluciones e Intercambios"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacy": "Política de Privacidad",
+      "terms": "Términos de Servicio",
+      "cookies": "Configuración de Cookies"
+    },
+    "social": {
+      "title": "Síguenos"
+    },
+    "payment": {
+      "text": "Pagos seguros con tarjetas de crédito principales, PayPal y Apple Pay"
+    },
+    "copyright": "Todos los derechos reservados. Hecho con ❤️ para la comunidad del océano."
   }
 }

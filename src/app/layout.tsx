@@ -21,6 +21,9 @@ import "@/styles/featured-collection.css";
 import "@/styles/why-makay.css";
 import "@/styles/testimonials.css";
 import "@/styles/how-it-works.css";
+import "@/styles/categories.css";
+import "@/styles/newsletter.css";
+import "@/styles/footer.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
