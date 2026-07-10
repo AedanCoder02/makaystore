@@ -56,7 +56,7 @@ export default function Newsletter() {
   };
 
   return (
-    <section ref={sectionRef} className="newsletter">
+    <section ref={sectionRef} id="newsletter" className="newsletter">
       <div className="newsletter-container">
         <h2 ref={headingRef} className="newsletter-heading">
           {t('heading')}

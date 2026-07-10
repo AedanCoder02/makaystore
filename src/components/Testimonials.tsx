@@ -67,7 +67,7 @@ export default function Testimonials() {
   }, [testimonialList.length]);
 
   return (
-    <section ref={sectionRef} className="testimonials">
+    <section ref={sectionRef} id="testimonials" className="testimonials">
       <div className="testimonials-container">
         <h2 ref={headingRef} className="testimonials-heading">
           {t('heading')}

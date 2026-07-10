@@ -76,7 +76,7 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section ref={sectionRef} className="how-it-works">
+    <section ref={sectionRef} id="how-it-works" className="how-it-works">
       <div className="how-it-works-container">
         <h2 ref={headingRef} className="how-heading">
           {t('heading')}

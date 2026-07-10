@@ -6,11 +6,15 @@ import HowItWorks from '@/components/HowItWorks';
 import Categories from '@/components/Categories';
 import Newsletter from '@/components/Newsletter';
 import Footer from '@/components/Footer';
+import ScrollColorEngine from '@/components/ScrollColorEngine';
 
 export default function Home() {
   return (
     <main className="w-full">
-      <Hero />
+      <ScrollColorEngine />
+      <div id="hero-section">
+        <Hero />
+      </div>
       <FeaturedCollection />
       <WhyMakay />
       <Testimonials />

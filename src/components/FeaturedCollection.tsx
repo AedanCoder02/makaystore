@@ -54,7 +54,7 @@ export default function FeaturedCollection() {
   const products = items;
 
   return (
-    <section ref={sectionRef} className="featured-collection">
+    <section ref={sectionRef} id="featured-collection" className="featured-collection">
       <div className="featured-collection-container">
         <h2 ref={headingRef} className="featured-heading">
           {t('title')}

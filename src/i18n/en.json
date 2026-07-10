@@ -395,7 +395,7 @@
         "id": 1,
         "name": "Signature T-Shirt",
         "description": "Crafted for the community. Worn at gatherings under golden skies.",
-        "image": "https://images.unsplash.com/photo-1523228114739-fbf0aa74c24d?w=600&h=750&fit=crop",
+        "image": "/images/product-tshirt.jpg",
         "price": "$65",
         "category": "Apparel"
       },
@@ -403,7 +403,7 @@
         "id": 2,
         "name": "Linen Cover-Up",
         "description": "Light, breathable elegance for beach club moments.",
-        "image": "https://images.unsplash.com/photo-1515180707541-76139ca888b9?w=600&h=750&fit=crop",
+        "image": "/images/product-coverup.jpg",
         "price": "$85",
         "category": "Apparel"
       },
@@ -411,7 +411,7 @@
         "id": 3,
         "name": "Canvas Beach Tote",
         "description": "Carry your essentials with artisanal craftsmanship.",
-        "image": "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=600&h=750&fit=crop",
+        "image": "/images/product-tote.jpg",
         "price": "$95",
         "category": "Accessories"
       },
@@ -419,7 +419,7 @@
         "id": 4,
         "name": "Limited Edition Ritual",
         "description": "Member exclusive. Join the Spoon & Moon experience.",
-        "image": "https://images.unsplash.com/photo-1516762126219-925ae4ae9c98?w=600&h=750&fit=crop",
+        "image": "/images/product-event.jpg",
         "price": "Event Access",
         "category": "Experiences"
       }

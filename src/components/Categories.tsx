@@ -69,7 +69,7 @@ export default function Categories() {
   ];
 
   return (
-    <section ref={sectionRef} className="categories">
+    <section ref={sectionRef} id="categories" className="categories">
       <div className="categories-container">
         <h2 ref={headingRef} className="categories-heading">
           {t('heading')}

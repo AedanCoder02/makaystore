@@ -70,7 +70,7 @@ export default function WhyMakay() {
   ];
 
   return (
-    <section ref={sectionRef} className="why-makay">
+    <section ref={sectionRef} id="why-makay" className="why-makay">
       <div className="why-makay-container">
         <h2 ref={headingRef} className="why-heading">
           {t('heading')}
