@@ -2,21 +2,37 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import createMiddleware from "next-intl/middleware";
 
 const intlMiddleware = createMiddleware({
-  locales: ["en"],
+  locales: ["en", "es"],
   defaultLocale: "en",
+  localeDetection: false,
 });
 
-// Only protect admin/supervisor/worker routes — storefront is public
 const isProtectedRoute = createRouteMatcher([
   "/admin(.*)",
   "/supervisor(.*)",
   "/worker(.*)",
 ]);
 
+const isClerkRoute = createRouteMatcher([
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/__clerk(.*)",
+  "/en/sign-in(.*)",
+  "/es/sign-in(.*)",
+  "/en/sign-up(.*)",
+  "/es/sign-up(.*)",
+]);
+
 export default clerkMiddleware(async (auth, request) => {
   if (isProtectedRoute(request)) {
     await auth.protect();
   }
+
+  // Skip intl middleware on Clerk auth routes to prevent locale stacking
+  if (isClerkRoute(request)) {
+    return;
+  }
+
   return intlMiddleware(request);
 });
 
