@@ -37,7 +37,7 @@ export default function AdminReportsDashboard() {
   ];
 
   useEffect(() => {
-    if (!tutorialStore.completed.has('reports-tour')) {
+    if (!tutorialStore.completed.includes('reports-tour')) {
       tutorialStore.showTutorial('reports-tour');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

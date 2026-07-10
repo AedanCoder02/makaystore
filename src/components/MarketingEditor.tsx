@@ -41,7 +41,7 @@ export default function MarketingEditor() {
   } = useEditorStore();
 
   useEffect(() => {
-    if (!completed.has('editor-tour')) {
+    if (!completed.includes('editor-tour')) {
       tutorialStore.showTutorial('editor-tour');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

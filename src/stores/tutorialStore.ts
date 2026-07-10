@@ -1,12 +1,12 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type UserRole = 'worker' | 'supervisor' | 'admin';
 
 interface TutorialState {
   currentTutorial: string | null;
   currentStep: number;
-  completed: Set<string>;
+  completed: string[]; // Array instead of Set — avoids JSON serialization crash
   userRole: UserRole;
   showTutorial: (tutorialId: string) => void;
   nextStep: () => void;
@@ -14,14 +14,15 @@ interface TutorialState {
   complete: () => void;
   resetTutorial: (tutorialId: string) => void;
   setUserRole: (role: UserRole) => void;
+  isCompleted: (tutorialId: string) => boolean;
 }
 
 export const useTutorialStore = create<TutorialState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       currentTutorial: null,
       currentStep: 0,
-      completed: new Set<string>(),
+      completed: [],
       userRole: 'admin',
 
       showTutorial: (tutorialId) =>
@@ -35,7 +36,7 @@ export const useTutorialStore = create<TutorialState>()(
 
       complete: () =>
         set((state) => ({
-          completed: new Set([...Array.from(state.completed), state.currentTutorial || '']),
+          completed: [...new Set([...state.completed, state.currentTutorial || ''])],
           currentTutorial: null,
           currentStep: 0,
         })),
@@ -45,10 +46,14 @@ export const useTutorialStore = create<TutorialState>()(
 
       setUserRole: (role) =>
         set({ userRole: role }),
+
+      isCompleted: (tutorialId) =>
+        get().completed.includes(tutorialId),
     }),
     {
       name: 'makay-tutorials',
-      version: 1,
+      version: 2,
+      storage: createJSONStorage(() => localStorage),
     }
   )
 );

@@ -20,7 +20,7 @@ export default function WorkerActivityPage() {
 
   // Show tutorial on first visit
   useEffect(() => {
-    if (!completed.has('worker-clock-in')) {
+    if (!completed.includes('worker-clock-in')) {
       tutorialStore.showTutorial('worker-clock-in');
     }
   }, []);

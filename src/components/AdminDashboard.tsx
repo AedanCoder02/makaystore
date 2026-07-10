@@ -47,7 +47,7 @@ export default function AdminDashboard() {
   ];
 
   useEffect(() => {
-    if (!completed.has('admin-tour')) {
+    if (!completed.includes('admin-tour')) {
       tutorialStore.showTutorial('admin-tour');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

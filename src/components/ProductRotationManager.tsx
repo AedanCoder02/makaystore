@@ -19,7 +19,7 @@ export default function ProductRotationManager() {
   const tAdmin = useTranslations('admin');
 
   useEffect(() => {
-    if (!tutorialStore.completed.has('rotation-tour')) {
+    if (!tutorialStore.completed.includes('rotation-tour')) {
       tutorialStore.showTutorial('rotation-tour');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

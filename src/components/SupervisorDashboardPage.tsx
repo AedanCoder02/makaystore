@@ -18,7 +18,7 @@ export default function SupervisorDashboardPage() {
   const completed = tutorialStore.completed;
 
   useEffect(() => {
-    if (!completed.has('supervisor-approve')) {
+    if (!completed.includes('supervisor-approve')) {
       tutorialStore.showTutorial('supervisor-approve');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
