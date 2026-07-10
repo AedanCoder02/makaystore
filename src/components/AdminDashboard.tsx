@@ -18,19 +18,19 @@ export default function AdminDashboard() {
       icon: '📦',
       title: t('products'),
       description: t('productsDesc'),
-      href: '/admin/products',
+      href: '/admin/products/create-3d',
     },
     {
       icon: '🛒',
       title: t('orders'),
       description: t('ordersDesc'),
-      href: '/admin/orders',
+      href: '/products',
     },
     {
       icon: '👥',
       title: t('workers'),
       description: t('workersDesc'),
-      href: '/admin/workers',
+      href: '/worker/activity',
     },
     {
       icon: '📈',
@@ -42,7 +42,7 @@ export default function AdminDashboard() {
       icon: '⚙️',
       title: t('settings'),
       description: t('settingsDesc'),
-      href: '/admin/settings',
+      href: '/admin/rotation',
     },
   ];
 
