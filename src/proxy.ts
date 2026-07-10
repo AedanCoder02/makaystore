@@ -6,15 +6,15 @@ const intlMiddleware = createMiddleware({
   defaultLocale: "en",
 });
 
-const isPublicRoute = createRouteMatcher([
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/:locale/sign-in(.*)",
-  "/:locale/sign-up(.*)",
+// Only protect admin/supervisor/worker routes — storefront is public
+const isProtectedRoute = createRouteMatcher([
+  "/admin(.*)",
+  "/supervisor(.*)",
+  "/worker(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
-  if (!isPublicRoute(request)) {
+  if (isProtectedRoute(request)) {
     await auth.protect();
   }
   return intlMiddleware(request);
@@ -22,7 +22,8 @@ export default clerkMiddleware(async (auth, request) => {
 
 export const config = {
   matcher: [
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/((?!_next|[^?]*\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
     "/(api|trpc)(.*)",
+    "/__clerk/:path*",
   ],
 };
