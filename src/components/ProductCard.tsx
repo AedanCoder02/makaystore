@@ -5,14 +5,6 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Product } from '@/lib/mockData';
 
-// Emoji map for placeholder visuals
-const CATEGORY_EMOJI: Record<string, string> = {
-  Shirts: '👕',
-  Shorts: '🩳',
-  Dresses: '👗',
-  Accessories: '🧣',
-};
-
 interface Props {
   product: Product;
 }
@@ -23,14 +15,14 @@ export default function ProductCard({ product }: Props) {
 
   const variant = product.variants[selectedVariant];
   const price = variant?.price ?? product.price;
-  const emoji = CATEGORY_EMOJI[product.category] ?? '🛍️';
+  const monogram = product.category.charAt(0).toUpperCase();
 
   return (
     <div className="product-card">
       {/* Image / Placeholder */}
       <Link href={`/products/${product.id}`} className="product-image-link">
         <div className="product-image-placeholder">
-          <span className="placeholder-emoji">{emoji}</span>
+          <span className="placeholder-monogram">{monogram}</span>
           <span className="placeholder-label">{product.category}</span>
         </div>
       </Link>

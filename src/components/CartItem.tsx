@@ -16,7 +16,7 @@ export default function CartItem({ item, onRemove, onQuantityChange }: Props) {
   return (
     <div className="cart-item">
       <div className="cart-item-image">
-        <span>📦</span>
+        M
       </div>
 
       <div className="cart-item-info">
