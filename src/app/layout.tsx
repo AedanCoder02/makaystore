@@ -56,10 +56,12 @@ export default async function RootLayout({
       className={`${playfairDisplay.variable} ${montserrat.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <NavBar />
-          <LenisProvider>{children}</LenisProvider>
-        </NextIntlClientProvider>
+        <ClerkProvider>
+          <NextIntlClientProvider locale={locale} messages={messages}>
+            <NavBar />
+            <LenisProvider>{children}</LenisProvider>
+          </NextIntlClientProvider>
+        </ClerkProvider>
       </body>
     </html>
   );
