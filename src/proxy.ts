@@ -4,7 +4,7 @@ import createMiddleware from "next-intl/middleware";
 const intlMiddleware = createMiddleware({
   locales: ["en", "es"],
   defaultLocale: "en",
-  localeDetection: false,
+  localePrefix: "never",  // No /en or /es prefix in URLs
 });
 
 const isProtectedRoute = createRouteMatcher([
@@ -17,10 +17,6 @@ const isClerkRoute = createRouteMatcher([
   "/sign-in(.*)",
   "/sign-up(.*)",
   "/__clerk(.*)",
-  "/en/sign-in(.*)",
-  "/es/sign-in(.*)",
-  "/en/sign-up(.*)",
-  "/es/sign-up(.*)",
 ]);
 
 export default clerkMiddleware(async (auth, request) => {
@@ -28,7 +24,6 @@ export default clerkMiddleware(async (auth, request) => {
     await auth.protect();
   }
 
-  // Skip intl middleware on Clerk auth routes to prevent locale stacking
   if (isClerkRoute(request)) {
     return;
   }
