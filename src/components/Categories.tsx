@@ -51,19 +51,19 @@ export default function Categories() {
     {
       name: t('women.name'),
       description: t('women.description'),
-      image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=500&h=400&fit=crop',
+      image: 'https://images.unsplash.com/photo-1526413519671-785943f07879?w=500&h=400&fit=crop',
       slug: 'women',
     },
     {
       name: t('men.name'),
       description: t('men.description'),
-      image: 'https://images.unsplash.com/photo-1564846824194-346b7871b355?w=500&h=400&fit=crop',
+      image: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=500&h=400&fit=crop',
       slug: 'men',
     },
     {
       name: t('accessories.name'),
       description: t('accessories.description'),
-      image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500&h=400&fit=crop',
+      image: 'https://images.unsplash.com/photo-1473966968600-fa801b869a1a?w=500&h=400&fit=crop',
       slug: 'accessories',
     },
   ];

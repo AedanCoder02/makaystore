@@ -10,11 +10,13 @@
 }
 
 .categories-heading {
+  font-family: var(--font-playfair-display);
   font-size: clamp(1.875rem, 5vw, 2.5rem);
-  font-weight: 700;
+  font-weight: 800;
   text-align: center;
   margin-bottom: 3rem;
-  color: #1f2937;
+  color: var(--makay-peachy-rose);
+  letter-spacing: 0.05em;
   opacity: 0;
   transform: translateY(20px);
 }
