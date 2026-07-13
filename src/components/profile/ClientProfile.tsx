@@ -221,39 +221,41 @@ export default function ClientProfile() {
                 <Image
                   src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1-removebg-preview.png"
                   alt="Makay"
-                  width={90}
-                  height={30}
+                  width={100}
+                  height={34}
                   style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
                 />
-                <span className="makay-card-tier" style={{ color: tier.color }}>
+                <span className="makay-card-tier">
                   {tier.label}
                 </span>
               </div>
+
               <div className="makay-card-middle">
-                <div className="makay-card-member-row">
-                  {user.imageUrl && (
-                    <img
-                      src={user.imageUrl}
-                      alt={user.firstName ?? ''}
-                      className="makay-card-avatar"
-                    />
-                  )}
-                  <div>
-                    <p className="makay-card-name">
-                      {user.firstName} {user.lastName}
-                    </p>
-                    <p className="makay-card-tagline">Beach Club Member</p>
-                  </div>
+                {user.imageUrl && (
+                  <img
+                    src={user.imageUrl}
+                    alt={user.firstName ?? ''}
+                    className="makay-card-avatar"
+                  />
+                )}
+                <div className="makay-card-member-info">
+                  <p className="makay-card-name">
+                    {user.firstName} {user.lastName}
+                  </p>
+                  <p className="makay-card-tagline">Beach Club Member</p>
                 </div>
               </div>
+
+              <div className="makay-card-divider" />
+
               <div className="makay-card-bottom">
                 <div className="makay-card-qr">
                   {profileUrl && (
                     <QRCode
                       value={profileUrl}
-                      size={80}
+                      size={68}
                       bgColor="transparent"
-                      fgColor="#2C2C2C"
+                      fgColor="#1e1a16"
                     />
                   )}
                 </div>
