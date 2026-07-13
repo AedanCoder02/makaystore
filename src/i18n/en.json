@@ -183,7 +183,7 @@
     "archived": "Archived"
   },
   "marketing": {
-    "editor": "Marketing Editor",
+    "editor": "Editor",
     "editorSubtitle": "Create promotional pages without code",
     "createPage": "Create Page",
     "newPage": "+ New Page",
@@ -205,7 +205,6 @@
     "componentsCount": "{count} components",
     "settings": "Settings",
     "preview": "Preview",
-    "editor": "Editor",
     "previewBtn": "Preview",
     "editorBtn": "Editor",
     "saveVersion": "Save Version",
@@ -423,7 +422,9 @@
         "price": "Event Access",
         "category": "Experiences"
       }
-    ]
+    ],
+    "viewProduct": "View Product",
+    "viewAll": "View All"
   },
   "whyMakay": {
     "heading": "Why Choose Makay",
