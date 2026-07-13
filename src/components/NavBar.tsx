@@ -28,7 +28,7 @@ export default function NavBar() {
       <header className="navbar">
         <Link href="/" className="navbar-logo" onClick={closeMobile}>
           <Image
-            src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1.png"
+            src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1-removebg-preview.png"
             alt="Makay"
             width={120}
             height={40}

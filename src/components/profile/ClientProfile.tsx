@@ -219,7 +219,7 @@ export default function ClientProfile() {
             <div className="makay-card-content">
               <div className="makay-card-top">
                 <Image
-                  src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1.png"
+                  src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1-removebg-preview.png"
                   alt="Makay"
                   width={90}
                   height={30}
