@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
-import { UserButton } from '@clerk/nextjs';
+import { useUser, UserButton } from '@clerk/nextjs';
+import Image from 'next/image';
 import QRCode from 'react-qr-code';
 import { Share2, Download, Wallet, Edit3, Check, X } from 'lucide-react';
 import { animate } from 'animejs';
@@ -218,16 +218,33 @@ export default function ClientProfile() {
             <div className="makay-card-bg" />
             <div className="makay-card-content">
               <div className="makay-card-top">
-                <span className="makay-card-brand">MAKAY</span>
+                <Image
+                  src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1.png"
+                  alt="Makay"
+                  width={90}
+                  height={30}
+                  style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+                />
                 <span className="makay-card-tier" style={{ color: tier.color }}>
                   {tier.label}
                 </span>
               </div>
               <div className="makay-card-middle">
-                <p className="makay-card-name">
-                  {user.firstName} {user.lastName}
-                </p>
-                <p className="makay-card-tagline">Beach Club Member</p>
+                <div className="makay-card-member-row">
+                  {user.imageUrl && (
+                    <img
+                      src={user.imageUrl}
+                      alt={user.firstName ?? ''}
+                      className="makay-card-avatar"
+                    />
+                  )}
+                  <div>
+                    <p className="makay-card-name">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="makay-card-tagline">Beach Club Member</p>
+                  </div>
+                </div>
               </div>
               <div className="makay-card-bottom">
                 <div className="makay-card-qr">
