@@ -223,7 +223,7 @@ export default function ClientProfile() {
                   alt="Makay"
                   width={90}
                   height={30}
-                  style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+                  style={{ objectFit: 'contain', filter: 'invert(1)', mixBlendMode: 'screen' }}
                 />
                 <span className="makay-card-tier" style={{ color: tier.color }}>
                   {tier.label}
