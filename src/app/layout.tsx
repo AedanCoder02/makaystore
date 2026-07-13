@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Playfair_Display, Montserrat } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getMessages } from "next-intl/server";
+import { getMessages } from "next-intl/server";
+import { cookies } from "next/headers";
 import LenisProvider from "@/components/providers/LenisProvider";
 import NavBar from "@/components/NavBar";
 import StripeProvider from "@/components/StripeProvider";
@@ -47,8 +48,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const locale = await getLocale();
-  const messages = await getMessages();
+  const cookieStore = await cookies();
+  const locale = (cookieStore.get('NEXT_LOCALE')?.value ?? 'en') as 'en' | 'es';
+  const messages = await getMessages({ locale });
 
   return (
     <html
