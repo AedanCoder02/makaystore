@@ -12,12 +12,12 @@ export default function FeaturedCollection() {
   const headingRef = useRef<any>(null);
   const items = t.raw('items') as any[];
 
-  // Images are language-independent - same for EN and ES
+  // Real Makay product images from /public/images/
   const PRODUCT_IMAGES = [
-    'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&h=750&fit=crop', // fashion lifestyle tee
-    'https://images.unsplash.com/photo-1485230405346-71acb9518d9c?w=600&h=750&fit=crop', // beach cover-up resort wear
-    'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&h=750&fit=crop', // canvas tote beach
-    'https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=600&h=750&fit=crop', // sunset beach gathering event
+    '/images/product-tshirt.jpg',
+    '/images/product-coverup.jpg',
+    '/images/product-tote.jpg',
+    '/images/product-event.jpg',
   ];
 
   // Scroll-triggered animations
