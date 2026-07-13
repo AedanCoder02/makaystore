@@ -357,7 +357,7 @@
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.makay-card-details { text-align: right; }
+.makay-card-details { text-align: left; }
 
 .makay-card-id {
   font-family: var(--font-montserrat);

@@ -221,8 +221,8 @@ export default function ClientProfile() {
                 <Image
                   src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1-removebg-preview.png"
                   alt="Makay"
-                  width={100}
-                  height={34}
+                  width={70}
+                  height={24}
                   style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
                 />
                 <span className="makay-card-tier">
@@ -249,6 +249,12 @@ export default function ClientProfile() {
               <div className="makay-card-divider" />
 
               <div className="makay-card-bottom">
+                <div className="makay-card-details">
+                  <p className="makay-card-id">ID: {user.id?.slice(-8).toUpperCase()}</p>
+                  <p className="makay-card-since">
+                    Since {new Date(user.createdAt!).getFullYear()}
+                  </p>
+                </div>
                 <div className="makay-card-qr">
                   {profileUrl && (
                     <QRCode
@@ -258,12 +264,6 @@ export default function ClientProfile() {
                       fgColor="#1e1a16"
                     />
                   )}
-                </div>
-                <div className="makay-card-details">
-                  <p className="makay-card-id">ID: {user.id?.slice(-8).toUpperCase()}</p>
-                  <p className="makay-card-since">
-                    Since {new Date(user.createdAt!).getFullYear()}
-                  </p>
                 </div>
               </div>
             </div>
