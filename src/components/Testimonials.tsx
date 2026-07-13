@@ -9,7 +9,6 @@ export default function Testimonials() {
   const t = useTranslations('testimonials');
   const sectionRef = useRef<any>(null);
   const headingRef = useRef<any>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
   const testimonialList = [
     {
@@ -59,10 +58,6 @@ export default function Testimonials() {
   }, []);
 
   // Auto-rotate testimonials
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % testimonialList.length);
-    }, 5000);
     return () => clearInterval(interval);
   }, [testimonialList.length]);
 
@@ -77,7 +72,7 @@ export default function Testimonials() {
           {testimonialList.map((testimonial, idx) => (
             <div
               key={idx}
-              className={`testimonial-card ${idx === currentIndex ? 'active' : ''}`}
+              className="testimonial-card active"
             >
               <div className="testimonial-rating">
                 {Array.from({ length: testimonial.rating }).map((_, i) => (
@@ -101,18 +96,7 @@ export default function Testimonials() {
             </div>
           ))}
         </div>
-
-        <div className="testimonials-dots">
-          {testimonialList.map((_, idx) => (
-            <button
-              key={idx}
-              className={`dot ${idx === currentIndex ? 'active' : ''}`}
-              onClick={() => setCurrentIndex(idx)}
-              aria-label={`Go to testimonial ${idx + 1}`}
-            />
-          ))}
-        </div>
-      </div>
+</div>
     </section>
   );
 }
