@@ -30,6 +30,7 @@ export default function NavBar() {
             alt="Makay"
             width={120}
             height={40}
+            className="navbar-logo-img"
             style={{ objectFit: 'contain' }}
             priority
           />
