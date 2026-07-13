@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useCart } from '@/hooks/useCart';
 import { useUser, SignOutButton } from '@clerk/nextjs';
 import { useState } from 'react';
-import { ShoppingCart, User, ChevronDown, LayoutDashboard, ClipboardList } from 'lucide-react';
+import { ShoppingCart, User, ChevronDown, LayoutDashboard, ClipboardList, UserCircle } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 
 export default function NavBar() {
@@ -50,6 +50,11 @@ export default function NavBar() {
             </button>
             {menuOpen && (
               <div className="navbar-dropdown">
+                <Link href="/profile" className="navbar-dropdown-item" onClick={() => setMenuOpen(false)}>
+                  <UserCircle size={16} />
+                  My Profile
+                </Link>
+                <div className="navbar-dropdown-divider" />
                 <Link href="/admin/dashboard" className="navbar-dropdown-item" onClick={() => setMenuOpen(false)}>
                   <LayoutDashboard size={16} />
                   Admin
