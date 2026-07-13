@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { animate } from 'animejs';
 import '../styles/testimonials.css';
@@ -57,10 +57,6 @@ export default function Testimonials() {
     return () => observer.disconnect();
   }, []);
 
-  // Auto-rotate testimonials
-    return () => clearInterval(interval);
-  }, [testimonialList.length]);
-
   return (
     <section ref={sectionRef} id="testimonials" className="testimonials">
       <div className="testimonials-container">
@@ -76,7 +72,7 @@ export default function Testimonials() {
             >
               <div className="testimonial-rating">
                 {Array.from({ length: testimonial.rating }).map((_, i) => (
-                  <span key={i}>⭐</span>
+                  <span key={i} style={{ color: 'var(--makay-warm-gold)' }}>★</span>
                 ))}
               </div>
 
