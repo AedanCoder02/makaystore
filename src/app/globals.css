@@ -256,10 +256,11 @@ body {
 
 /* Responsive breakpoints */
 @media (max-width: 768px) {
-  .navbar-desktop { display: none; }
-  .navbar-mobile-right { display: flex; }
+  .navbar-desktop { display: none !important; }
+  .navbar-mobile-right { display: flex !important; }
 }
 
 @media (min-width: 769px) {
-  .navbar-mobile-menu { display: none; }
+  .navbar-mobile-menu { display: none !important; }
+  .navbar-mobile-right { display: none !important; }
 }

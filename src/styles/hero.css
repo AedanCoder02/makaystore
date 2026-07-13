@@ -163,24 +163,26 @@
 
 /* Mobile animated gradient — replaces WebGL ShaderGradient */
 @keyframes gradientShift {
-  0%   { background-position: 0% 50%; }
+  0%   { background-position: 0% 0%; }
   25%  { background-position: 100% 0%; }
   50%  { background-position: 100% 100%; }
   75%  { background-position: 0% 100%; }
-  100% { background-position: 0% 50%; }
+  100% { background-position: 0% 0%; }
 }
 
 .shader-mobile-gradient {
+  /* High-contrast stops: pale gold → amber → deep bronze → dark brown → amber */
   background: linear-gradient(
     135deg,
-    #f59e0b 0%,
-    #fbbf24 25%,
-    #d97706 50%,
-    #f59e0b 75%,
-    #92400e 100%
+    #fde68a 0%,
+    #f59e0b 20%,
+    #d97706 40%,
+    #92400e 60%,
+    #d97706 80%,
+    #fbbf24 100%
   );
-  background-size: 300% 300%;
-  animation: gradientShift 6s ease infinite;
+  background-size: 400% 400%;
+  animation: gradientShift 5s ease infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
