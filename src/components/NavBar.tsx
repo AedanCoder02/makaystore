@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useCart } from '@/hooks/useCart';
 import { useUser, SignOutButton } from '@clerk/nextjs';
@@ -17,7 +18,14 @@ export default function NavBar() {
   return (
     <header className="navbar">
       <Link href="/" className="navbar-logo">
-        Makay
+        <Image
+          src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1.png"
+          alt="Makay"
+          width={120}
+          height={40}
+          style={{ objectFit: 'contain' }}
+          priority
+        />
       </Link>
       <nav className="navbar-nav">
         <Link href="/products">{t('products')}</Link>
