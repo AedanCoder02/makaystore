@@ -12,6 +12,14 @@ export default function FeaturedCollection() {
   const headingRef = useRef<any>(null);
   const items = t.raw('items') as any[];
 
+  // Images are language-independent - same for EN and ES
+  const PRODUCT_IMAGES = [
+    'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=750&fit=crop',
+    'https://images.unsplash.com/photo-1564859228273-274232fdb516?w=600&h=750&fit=crop',
+    'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=750&fit=crop',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=750&fit=crop',
+  ];
+
   // Scroll-triggered animations
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -51,7 +59,7 @@ export default function FeaturedCollection() {
     return () => observer.disconnect();
   }, []);
 
-  const products = items;
+  const products = items.map((item: any, idx: number) => ({ ...item, image: PRODUCT_IMAGES[idx] ?? item.image }));
 
   return (
     <section ref={sectionRef} id="featured-collection" className="featured-collection">
