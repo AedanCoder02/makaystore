@@ -1,0 +1,204 @@
+.member-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5rem 1.5rem 3rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.member-page-bg {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(160deg, #FFF8F0 0%, #F5EFE5 60%, #ede4d8 100%);
+  z-index: 0;
+}
+
+.member-page-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.75rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+.member-brand {
+  opacity: 0.85;
+}
+
+/* Card */
+.member-card {
+  position: relative;
+  border-radius: 24px;
+  overflow: hidden;
+  aspect-ratio: 1.586;
+  width: 100%;
+  box-shadow: 0 24px 64px rgba(44, 44, 44, 0.22), 0 4px 16px rgba(0,0,0,0.12);
+}
+
+.member-card-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(150deg, #3a3028 0%, #2C2C2C 45%, #1e1a16 100%);
+}
+
+.member-card-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 90% 10%, rgba(212, 165, 116, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse at 10% 90%, rgba(212, 175, 55, 0.08) 0%, transparent 45%);
+}
+
+.member-card-inner {
+  position: relative;
+  z-index: 1;
+  padding: 1.75rem 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.member-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.member-card-tier-badge {
+  font-family: var(--font-montserrat);
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border: 1px solid rgba(212, 165, 116, 0.35);
+  color: rgba(212, 165, 116, 0.9);
+  padding: 0.3rem 0.75rem;
+  border-radius: 100px;
+}
+
+.member-card-middle {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex: 1;
+  padding: 0.5rem 0;
+}
+
+.member-card-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(212, 165, 116, 0.5);
+  flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+.member-card-name {
+  font-family: var(--font-playfair-display);
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 0.2rem;
+  line-height: 1.2;
+}
+
+.member-card-tagline {
+  font-family: var(--font-montserrat);
+  font-size: 0.62rem;
+  color: rgba(212, 165, 116, 0.7);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.member-card-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+}
+
+.member-card-bottom {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+}
+
+.member-card-qr {
+  background: rgba(255,255,255,0.94);
+  border-radius: 10px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.member-card-id {
+  font-family: var(--font-montserrat);
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  margin: 0 0 0.2rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.member-card-since {
+  font-family: var(--font-montserrat);
+  font-size: 0.62rem;
+  color: rgba(255,255,255,0.3);
+  margin: 0;
+  letter-spacing: 0.08em;
+}
+
+/* Info block */
+.member-info-block {
+  text-align: center;
+}
+
+.member-tier-desc {
+  font-family: var(--font-playfair-display);
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.4rem;
+}
+
+.member-verify-note {
+  font-family: var(--font-montserrat);
+  font-size: 0.8rem;
+  color: var(--makay-mauve);
+  margin: 0;
+}
+
+/* CTA */
+.member-shop-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  background: var(--makay-dark-navy);
+  color: #fff;
+  border-radius: 12px;
+  font-family: var(--font-montserrat);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+.member-shop-btn:hover { opacity: 0.85; }
+
+.member-footer-note {
+  font-family: var(--font-montserrat);
+  font-size: 0.75rem;
+  color: var(--makay-mauve);
+  margin: 0;
+}
+.member-footer-note a { color: var(--makay-peachy-rose); text-decoration: none; }
