@@ -134,37 +134,54 @@
     padding: 3rem 1rem;
   }
 
+  .how-steps-wrapper {
+    overflow-x: visible;
+  }
+
   .how-steps {
+    flex-direction: column;
+    min-width: unset;
     gap: 1rem;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .how-step {
-    min-width: 160px;
-    padding: 1.5rem 1rem;
+    min-width: unset;
+    width: 100%;
+    padding: 1.25rem 1.5rem;
+    flex-direction: row;
+    text-align: left;
+    align-items: flex-start;
+    gap: 1rem;
   }
 
   .how-step-number {
-    font-size: 2rem;
+    font-size: 1.75rem;
+    min-width: 2rem;
+    flex-shrink: 0;
   }
 
-  .how-heading {
-    margin-bottom: 2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .how-step {
-    min-width: 140px;
-    padding: 1.25rem 0.75rem;
+  .how-step-icon {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
   }
 
   .how-step-title {
     font-size: 1rem;
+    margin-bottom: 0.5rem;
   }
 
   .how-step-description {
-    font-size: 0.8rem;
+    font-size: 0.875rem;
+  }
+
+  .how-step-arrow {
+    display: none !important;
+  }
+
+  .how-heading {
+    margin-bottom: 2rem;
   }
 }
 

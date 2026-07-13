@@ -161,6 +161,35 @@
   }
 }
 
+/* Mobile animated gradient — replaces WebGL ShaderGradient */
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  25%  { background-position: 100% 0%; }
+  50%  { background-position: 100% 100%; }
+  75%  { background-position: 0% 100%; }
+  100% { background-position: 0% 50%; }
+}
+
+.shader-mobile-gradient {
+  background: linear-gradient(
+    135deg,
+    #f59e0b 0%,
+    #fbbf24 25%,
+    #d97706 50%,
+    #f59e0b 75%,
+    #92400e 100%
+  );
+  background-size: 300% 300%;
+  animation: gradientShift 6s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shader-mobile-gradient {
+    animation: none;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  }
+}
+
 /* Accessibility */
 @media (prefers-reduced-motion: reduce) {
   .hero-headline .char,

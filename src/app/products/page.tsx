@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import { SlidersHorizontal, X } from 'lucide-react';
 import ProductFilters, { Filters } from '@/components/ProductFilters';
 import ProductSort, { SortOption } from '@/components/ProductSort';
 import ProductGrid from '@/components/ProductGrid';
@@ -17,8 +18,8 @@ export default function ProductsPage() {
     priceMax: 160,
   });
   const [sort, setSort] = useState<SortOption>('popular');
+  const [filtersOpen, setFiltersOpen] = useState(false);
 
-  // Filter products
   const filtered = useMemo(() => {
     return mockProducts.filter((p) => {
       const matchesSearch =
@@ -31,17 +32,11 @@ export default function ProductsPage() {
     });
   }, [filters]);
 
-  // Sort products
   const sorted = useMemo(() => {
     const copy = [...filtered];
-    if (sort === 'price-low') {
-      copy.sort((a, b) => a.price - b.price);
-    } else if (sort === 'price-high') {
-      copy.sort((a, b) => b.price - a.price);
-    } else if (sort === 'newest') {
-      copy.sort((a, b) => parseInt(b.id) - parseInt(a.id));
-    }
-    // 'popular' keeps original order (mockProducts order)
+    if (sort === 'price-low') copy.sort((a, b) => a.price - b.price);
+    else if (sort === 'price-high') copy.sort((a, b) => b.price - a.price);
+    else if (sort === 'newest') copy.sort((a, b) => parseInt(b.id) - parseInt(a.id));
     return copy;
   }, [filtered, sort]);
 
@@ -54,13 +49,51 @@ export default function ProductsPage() {
         </p>
       </div>
 
+      {/* Mobile filter toggle */}
+      <div className="products-mobile-toolbar">
+        <span className="products-count">
+          <strong>{sorted.length}</strong> of {mockProducts.length}
+        </span>
+        <div className="products-mobile-toolbar-right">
+          <ProductSort sort={sort} onChange={setSort} />
+          <button
+            className="products-filter-toggle"
+            onClick={() => setFiltersOpen(true)}
+          >
+            <SlidersHorizontal size={16} /> Filters
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile filter drawer */}
+      {filtersOpen && (
+        <div className="products-filter-drawer">
+          <div className="products-filter-drawer-header">
+            <span>Filters</span>
+            <button onClick={() => setFiltersOpen(false)} className="products-filter-close">
+              <X size={20} />
+            </button>
+          </div>
+          <div className="products-filter-drawer-body">
+            <ProductFilters filters={filters} onChange={(f) => { setFilters(f); }} />
+          </div>
+          <div className="products-filter-drawer-footer">
+            <button className="products-filter-apply" onClick={() => setFiltersOpen(false)}>
+              Show {sorted.length} results
+            </button>
+          </div>
+        </div>
+      )}
+      {filtersOpen && <div className="products-filter-backdrop" onClick={() => setFiltersOpen(false)} />}
+
       <div className="products-container">
+        {/* Desktop sidebar */}
         <aside className="products-sidebar">
           <ProductFilters filters={filters} onChange={setFilters} />
         </aside>
 
         <div className="products-main">
-          <div className="products-toolbar">
+          <div className="products-toolbar products-toolbar-desktop">
             <span className="products-count">
               {t('showing')} <strong>{sorted.length}</strong> {t('of')} {mockProducts.length} {t('productsCount')}
             </span>

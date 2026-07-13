@@ -14,15 +14,7 @@ export default function ShaderGradientCanvasWrapper() {
   }, []);
 
   if (isMobile) {
-    return (
-      <div
-        className="absolute inset-0 w-full h-full"
-        style={{
-          background:
-            'linear-gradient(135deg, #F59E0B 0%, #FBBF24 40%, #D97706 70%, #92400E 100%)',
-        }}
-      />
-    );
+    return <div className="absolute inset-0 w-full h-full shader-mobile-gradient" />;
   }
 
   return (
