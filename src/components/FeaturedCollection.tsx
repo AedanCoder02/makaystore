@@ -13,11 +13,12 @@ export default function FeaturedCollection() {
   const items = t.raw('items') as any[];
 
   // Images are language-independent - same for EN and ES
+  // Beach club lifestyle: golden hour, people wearing at beach, community events
   const PRODUCT_IMAGES = [
-    'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&h=750&fit=crop',
-    'https://images.unsplash.com/photo-1564859228273-274232fdb516?w=600&h=750&fit=crop',
-    'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=600&h=750&fit=crop',
-    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=750&fit=crop',
+    'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=600&h=750&fit=crop', // person white tee beach
+    'https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=600&h=750&fit=crop', // woman beach fashion
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&h=750&fit=crop', // golden hour beach
+    'https://images.unsplash.com/photo-1533105079780-92b9be482077?w=600&h=750&fit=crop', // beach club experience
   ];
 
   // Scroll-triggered animations
