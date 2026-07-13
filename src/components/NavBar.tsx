@@ -16,6 +16,8 @@ export default function NavBar() {
   const { totalItems } = useCart();
   const t = useTranslations('nav');
   const { isSignedIn, user } = useUser();
+  const role = (user?.publicMetadata?.role as string) ?? 'customer';
+  const isStaff = role === 'admin' || role === 'supervisor' || role === 'worker';
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -64,15 +66,23 @@ export default function NavBar() {
                     <UserCircle size={16} />
                     My Profile
                   </Link>
-                  <div className="navbar-dropdown-divider" />
-                  <Link href="/admin/dashboard" className="navbar-dropdown-item" onClick={() => setMenuOpen(false)}>
-                    <LayoutDashboard size={16} />
-                    Admin
-                  </Link>
-                  <Link href="/supervisor/dashboard" className="navbar-dropdown-item" onClick={() => setMenuOpen(false)}>
-                    <ClipboardList size={16} />
-                    Supervisor
-                  </Link>
+                  {isStaff && (
+                    <>
+                      <div className="navbar-dropdown-divider" />
+                      {(role === 'admin') && (
+                        <Link href="/admin/dashboard" className="navbar-dropdown-item" onClick={() => setMenuOpen(false)}>
+                          <LayoutDashboard size={16} />
+                          Admin
+                        </Link>
+                      )}
+                      {(role === 'admin' || role === 'supervisor') && (
+                        <Link href="/supervisor/dashboard" className="navbar-dropdown-item" onClick={() => setMenuOpen(false)}>
+                          <ClipboardList size={16} />
+                          Supervisor
+                        </Link>
+                      )}
+                    </>
+                  )}
                   <div className="navbar-dropdown-divider" />
                   <SignOutButton>
                     <button className="navbar-dropdown-item navbar-dropdown-signout">
@@ -121,12 +131,16 @@ export default function NavBar() {
                 <Link href="/profile" className="navbar-mobile-link" onClick={closeMobile}>
                   <UserCircle size={18} /> My Profile
                 </Link>
-                <Link href="/admin/dashboard" className="navbar-mobile-link" onClick={closeMobile}>
-                  <LayoutDashboard size={18} /> Admin
-                </Link>
-                <Link href="/supervisor/dashboard" className="navbar-mobile-link" onClick={closeMobile}>
-                  <ClipboardList size={18} /> Supervisor
-                </Link>
+                {role === 'admin' && (
+                  <Link href="/admin/dashboard" className="navbar-mobile-link" onClick={closeMobile}>
+                    <LayoutDashboard size={18} /> Admin
+                  </Link>
+                )}
+                {(role === 'admin' || role === 'supervisor') && (
+                  <Link href="/supervisor/dashboard" className="navbar-mobile-link" onClick={closeMobile}>
+                    <ClipboardList size={18} /> Supervisor
+                  </Link>
+                )}
                 <div className="navbar-mobile-divider" />
                 <div className="navbar-mobile-lang">
                   <LanguageSwitcher />

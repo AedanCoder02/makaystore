@@ -21,8 +21,9 @@ const TIER_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function ClientProfile() {
-  const { user } = useUser();
+  const { user, isLoaded } = useUser();
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [fetchError, setFetchError] = useState(false);
   const [editingBio, setEditingBio] = useState(false);
   const [bioInput, setBioInput] = useState('');
   const [saving, setSaving] = useState(false);
@@ -33,14 +34,20 @@ export default function ClientProfile() {
     ? `${window.location.origin}/member/${user?.id}`
     : '';
 
+  // Wait for Clerk session before fetching — avoids 401 on first render
   useEffect(() => {
+    if (!isLoaded || !user) return;
     fetch('/api/profile')
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
       .then((data: UserProfile) => {
         setProfile(data);
         setBioInput(data.bio || '');
-      });
-  }, []);
+      })
+      .catch(() => setFetchError(true));
+  }, [isLoaded, user]);
 
   useEffect(() => {
     if (!profile || !heroRef.current) return;
@@ -98,6 +105,16 @@ export default function ClientProfile() {
       });
     });
   };
+
+  if (fetchError) {
+    return (
+      <div className="profile-loading">
+        <p style={{ fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)', textAlign: 'center', padding: '2rem' }}>
+          Could not load profile. Please refresh the page.
+        </p>
+      </div>
+    );
+  }
 
   if (!profile || !user) {
     return (
