@@ -27,6 +27,7 @@ import "@/styles/newsletter.css";
 import "@/styles/footer.css";
 import "@/styles/profile.css";
 import "@/styles/member.css";
+import "@/styles/seller.css";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair-display",

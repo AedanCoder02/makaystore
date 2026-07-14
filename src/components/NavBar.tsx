@@ -8,7 +8,7 @@ import { useUser, SignOutButton } from '@clerk/nextjs';
 import { useState } from 'react';
 import {
   ShoppingCart, User, ChevronDown, LayoutDashboard,
-  ClipboardList, UserCircle, Menu, X,
+  ClipboardList, UserCircle, Menu, X, Store,
 } from 'lucide-react';
 import LanguageSwitcher from './LanguageSwitcher';
 
@@ -17,7 +17,7 @@ export default function NavBar() {
   const t = useTranslations('nav');
   const { isSignedIn, user } = useUser();
   const role = (user?.publicMetadata?.role as string) ?? 'customer';
-  const isStaff = role === 'admin' || role === 'supervisor' || role === 'worker';
+  const isStaff = role === 'admin' || role === 'supervisor' || role === 'worker' || role === 'seller';
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -69,6 +69,12 @@ export default function NavBar() {
                   {isStaff && (
                     <>
                       <div className="navbar-dropdown-divider" />
+                      {(role === 'seller' || role === 'admin') && (
+                        <Link href="/seller/dashboard" className="navbar-dropdown-item" onClick={() => setMenuOpen(false)}>
+                          <Store size={16} />
+                          Seller
+                        </Link>
+                      )}
                       {(role === 'admin') && (
                         <Link href="/admin/dashboard" className="navbar-dropdown-item" onClick={() => setMenuOpen(false)}>
                           <LayoutDashboard size={16} />
@@ -131,6 +137,11 @@ export default function NavBar() {
                 <Link href="/profile" className="navbar-mobile-link" onClick={closeMobile}>
                   <UserCircle size={18} /> My Profile
                 </Link>
+                {(role === 'seller' || role === 'admin') && (
+                  <Link href="/seller/dashboard" className="navbar-mobile-link" onClick={closeMobile}>
+                    <Store size={18} /> Seller
+                  </Link>
+                )}
                 {role === 'admin' && (
                   <Link href="/admin/dashboard" className="navbar-mobile-link" onClick={closeMobile}>
                     <LayoutDashboard size={18} /> Admin
