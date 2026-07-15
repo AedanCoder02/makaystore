@@ -2,30 +2,53 @@
 
 import { useEffect } from 'react';
 
-// Each section maps to a Makay palette color
-const SECTION_COLORS: Record<string, string> = {
-  'hero-section':         '#FFF8F0',  // Premium Cream
-  'featured-collection':  '#F5EFE5',  // Sand Cream
-  'why-makay':            '#EDE0D4',  // Warm Peach
-  'testimonials':         '#F2E4DC',  // Peachy Rose
-  'how-it-works':         '#D4E8EE',  // Ocean Teal
-  'categories':           '#E8DFC8',  // Warm Gold Sand
-  'newsletter':           '#D4E4CC',  // Sage Green
-  'footer':               '#FFF8F0',  // Premium Cream
-};
+const SECTION_IDS = [
+  'hero-section',
+  'featured-collection',
+  'why-makay',
+  'testimonials',
+  'how-it-works',
+  'categories',
+  'newsletter',
+  'footer',
+];
+
+const DEFAULT_COLORS = [
+  '#FFF8F0',
+  '#F5EFE5',
+  '#EDE0D4',
+  '#F2E4DC',
+  '#D4E8EE',
+  '#E8DFC8',
+  '#D4E4CC',
+  '#FFF8F0',
+];
 
 export default function ScrollColorEngine() {
   useEffect(() => {
-    // Set initial background
+    // Read published scroll colors injected by theme (via CSS var)
+    const resolveColors = (): string[] => {
+      try {
+        const stored = getComputedStyle(document.documentElement)
+          .getPropertyValue('--scroll-colors')
+          .trim();
+        if (stored) return JSON.parse(stored);
+      } catch {}
+      return DEFAULT_COLORS;
+    };
+
+    const colors = resolveColors();
+
     document.body.style.transition = 'background-color 900ms cubic-bezier(0.4, 0, 0.2, 1)';
-    document.body.style.backgroundColor = '#FFF8F0';
+    document.body.style.backgroundColor = colors[0] ?? '#FFF8F0';
 
     const observers: IntersectionObserver[] = [];
 
-    Object.entries(SECTION_COLORS).forEach(([id, color]) => {
+    SECTION_IDS.forEach((id, idx) => {
       const el = document.getElementById(id);
       if (!el) return;
 
+      const color = colors[idx] ?? DEFAULT_COLORS[idx] ?? '#FFF8F0';
       const obs = new IntersectionObserver(
         ([entry]) => {
           if (entry.isIntersecting) {

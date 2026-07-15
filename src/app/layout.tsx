@@ -7,6 +7,7 @@ import { cookies } from "next/headers";
 import LenisProvider from "@/components/providers/LenisProvider";
 import NavBar from "@/components/NavBar";
 import StripeProvider from "@/components/StripeProvider";
+import sql from "@/lib/db";
 import "./globals.css";
 import "@/styles/cart.css";
 import "@/styles/order-confirmation.css";
@@ -28,6 +29,7 @@ import "@/styles/footer.css";
 import "@/styles/profile.css";
 import "@/styles/member.css";
 import "@/styles/seller.css";
+import "@/styles/theme-editor.css";
 
 const playfairDisplay = Playfair_Display({
   variable: "--font-playfair-display",
@@ -46,6 +48,25 @@ export const metadata: Metadata = {
   description: "Makay - Tu refugio de conexión",
 };
 
+// Only allow CSS custom property names (--makay-*) and safe value chars
+const SAFE_VAR_NAME = /^--makay-[a-z-]+$/;
+const SAFE_VAR_VALUE = /^[a-zA-Z0-9#(),%. /-]+$/;
+
+async function getThemeVars(): Promise<string> {
+  try {
+    const rows = await sql`SELECT settings FROM theme_settings WHERE id = 1`;
+    const s = rows[0]?.settings as Record<string, string> | undefined;
+    if (!s || Object.keys(s).length === 0) return '';
+    const vars = Object.entries(s)
+      .filter(([k, v]) => SAFE_VAR_NAME.test(k) && SAFE_VAR_VALUE.test(String(v)))
+      .map(([k, v]) => `${k}:${v}`)
+      .join(';');
+    return vars ? `:root{${vars}}` : '';
+  } catch {
+    return '';
+  }
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -54,12 +75,14 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const locale = (cookieStore.get('NEXT_LOCALE')?.value ?? 'en') as 'en' | 'es';
   const messages = await getMessages({ locale });
+  const themeVars = await getThemeVars();
 
   return (
     <html
       lang={locale}
       className={`${playfairDisplay.variable} ${montserrat.variable} h-full antialiased`}
     >
+      {themeVars && <style dangerouslySetInnerHTML={{ __html: themeVars }} />}
       <body className="min-h-full flex flex-col">
         <ClerkProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>

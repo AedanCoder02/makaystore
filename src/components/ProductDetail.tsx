@@ -11,14 +11,6 @@ import ProductReviewsSection from '@/components/ProductReviewsSection';
 import { useCart } from '@/hooks/useCart';
 import '@/styles/product-detail.css';
 
-// Emoji map matching ProductCard
-const CATEGORY_EMOJI: Record<string, string> = {
-  Shirts: '👕',
-  Shorts: '🩳',
-  Dresses: '👗',
-  Accessories: '🧣',
-};
-
 interface Props {
   product: Product;
 }
@@ -27,12 +19,12 @@ export default function ProductDetail({ product }: Props) {
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
+  const [viewMode, setViewMode] = useState<'photo' | '3d'>('photo');
   const t = useTranslations('storefront');
 
   const currentVariant = product.variants[selectedVariant];
   const displayPrice = currentVariant?.price ?? product.price;
   const stock = product.stock;
-  const emoji = CATEGORY_EMOJI[product.category] ?? '🛍️';
 
   const { addToCart } = useCart();
 
@@ -45,7 +37,6 @@ export default function ProductDetail({ product }: Props) {
       title: product.title,
       category: product.category,
     });
-
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
   };
@@ -53,13 +44,39 @@ export default function ProductDetail({ product }: Props) {
   return (
     <div className="product-detail-page">
       <div className="product-detail-container">
-        {/* Left column: Image & 3D viewer */}
+        {/* Left column: viewer with photo/3D toggle */}
         <div className="product-detail-left">
-          <div className="product-image-placeholder">
-            <span>{emoji}</span>
-            <p>{product.category}</p>
+          <div className="pd-viewer-toggle">
+            <button
+              className={`pd-toggle-btn${viewMode === 'photo' ? ' active' : ''}`}
+              onClick={() => setViewMode('photo')}
+            >
+              Photo
+            </button>
+            <button
+              className={`pd-toggle-btn${viewMode === '3d' ? ' active' : ''}`}
+              onClick={() => setViewMode('3d')}
+            >
+              3D
+            </button>
           </div>
-          <ProductModel3D />
+
+          <div className="pd-viewer-area">
+            {viewMode === 'photo' ? (
+              <div className="pd-photo-view">
+                <img
+                  src={product.image}
+                  alt={product.title}
+                  className="pd-product-image"
+                  onError={e => {
+                    (e.target as HTMLImageElement).src = '/images/product-tshirt.jpg';
+                  }}
+                />
+              </div>
+            ) : (
+              <ProductModel3D />
+            )}
+          </div>
         </div>
 
         {/* Right column: Info & CTA */}
