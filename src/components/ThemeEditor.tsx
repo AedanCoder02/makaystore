@@ -1,8 +1,12 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Check, RotateCcw, Eye, Palette, Type, Layers, Image as ImageIcon, ChevronDown, ChevronRight } from 'lucide-react';
+import { Check, RotateCcw, Eye, Palette, Layers, Image as ImageIcon, CreditCard, ChevronDown, ChevronRight } from 'lucide-react';
 import { mockProducts } from '@/lib/mockData';
+import CardDesigner, {
+  CardLayout, CardColors,
+  DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS,
+} from '@/components/CardDesigner';
 
 // ── Presets ──────────────────────────────────────────────────────
 const PRESETS: Record<string, Record<string, string>> = {
@@ -105,9 +109,17 @@ export default function ThemeEditor({ initialSettings, productOverrides }: Theme
     (initialSettings['--scroll-colors'] ? JSON.parse(initialSettings['--scroll-colors']) : null) ?? DEFAULT_SCROLL_COLORS
   );
   const [imgOverrides, setImgOverrides] = useState<Record<string, string>>(productOverrides);
+  const [cardLayout, setCardLayout] = useState<CardLayout>(() => {
+    try { return initialSettings['card_layout'] ? JSON.parse(initialSettings['card_layout']) : DEFAULT_CARD_LAYOUT; }
+    catch { return DEFAULT_CARD_LAYOUT; }
+  });
+  const [cardColors, setCardColors] = useState<CardColors>(() => {
+    try { return initialSettings['card_colors'] ? JSON.parse(initialSettings['card_colors']) : DEFAULT_CARD_COLORS; }
+    catch { return DEFAULT_CARD_COLORS; }
+  });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [activeTab, setActiveTab] = useState<'colors' | 'typography' | 'scroll' | 'images'>('colors');
+  const [activeTab, setActiveTab] = useState<'colors' | 'scroll' | 'images' | 'card'>('colors');
   const [openSection, setOpenSection] = useState<string | null>('preset');
 
   // Apply colors live to document root for real-time preview
@@ -154,6 +166,8 @@ export default function ThemeEditor({ initialSettings, productOverrides }: Theme
     const settings: Record<string, string> = {
       ...colors,
       '--scroll-colors': JSON.stringify(scrollColors),
+      'card_layout': JSON.stringify(cardLayout),
+      'card_colors': JSON.stringify(cardColors),
     };
     await fetch('/api/admin/theme', {
       method: 'PATCH',
@@ -189,9 +203,10 @@ export default function ThemeEditor({ initialSettings, productOverrides }: Theme
           {/* Tab nav */}
           <div className="te-tabs">
             {[
-              { key: 'colors', icon: Palette, label: 'Colors' },
-              { key: 'scroll', icon: Layers, label: 'Scroll Colors' },
-              { key: 'images', icon: ImageIcon, label: 'Product Images' },
+              { key: 'colors',  icon: Palette,     label: 'Colors' },
+              { key: 'scroll',  icon: Layers,       label: 'Scroll' },
+              { key: 'images',  icon: ImageIcon,    label: 'Images' },
+              { key: 'card',    icon: CreditCard,   label: 'Card' },
             ].map(({ key, icon: Icon, label }) => (
               <button key={key} className={`te-tab${activeTab === key ? ' active' : ''}`}
                 onClick={() => setActiveTab(key as any)}>
@@ -285,6 +300,18 @@ export default function ThemeEditor({ initialSettings, productOverrides }: Theme
                   />
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Card design tab */}
+          {activeTab === 'card' && (
+            <div className="te-panel" style={{ padding: '0.75rem', gap: 0 }}>
+              <CardDesigner
+                layout={cardLayout}
+                colors={cardColors}
+                onLayoutChange={setCardLayout}
+                onColorsChange={setCardColors}
+              />
             </div>
           )}
         </div>

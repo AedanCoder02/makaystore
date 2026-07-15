@@ -6,6 +6,10 @@ import Image from 'next/image';
 import QRCode from 'react-qr-code';
 import { Share2, Download, Wallet, Edit3, Check, X } from 'lucide-react';
 import { animate } from 'animejs';
+import {
+  CardLayout, CardColors,
+  DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS,
+} from '@/components/CardDesigner';
 import '@/styles/profile.css';
 
 interface UserProfile {
@@ -24,6 +28,8 @@ export default function ClientProfile() {
   const { user, isLoaded } = useUser();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [fetchError, setFetchError] = useState(false);
+  const [cardLayout, setCardLayout] = useState<CardLayout>(DEFAULT_CARD_LAYOUT);
+  const [cardColors, setCardColors] = useState<CardColors>(DEFAULT_CARD_COLORS);
   const [editingBio, setEditingBio] = useState(false);
   const [bioInput, setBioInput] = useState('');
   const [saving, setSaving] = useState(false);
@@ -34,19 +40,22 @@ export default function ClientProfile() {
     ? `${window.location.origin}/member/${user?.id}`
     : '';
 
-  // Wait for Clerk session before fetching — avoids 401 on first render
+  // Wait for Clerk session, then fetch profile + theme in parallel
   useEffect(() => {
     if (!isLoaded || !user) return;
-    fetch('/api/profile')
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then((data: UserProfile) => {
-        setProfile(data);
-        setBioInput(data.bio || '');
-      })
-      .catch(() => setFetchError(true));
+    Promise.all([
+      fetch('/api/profile').then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
+      fetch('/api/theme').then(r => r.json()).catch(() => ({})),
+    ]).then(([profileData, themeData]: [UserProfile, Record<string, string>]) => {
+      setProfile(profileData);
+      setBioInput(profileData.bio || '');
+      if (themeData.card_layout) {
+        try { setCardLayout(JSON.parse(themeData.card_layout)); } catch {}
+      }
+      if (themeData.card_colors) {
+        try { setCardColors(JSON.parse(themeData.card_colors)); } catch {}
+      }
+    }).catch(() => setFetchError(true));
   }, [isLoaded, user]);
 
   useEffect(() => {
@@ -214,59 +223,94 @@ export default function ClientProfile() {
             </div>
           </div>
 
-          <div className="makay-client-card" ref={cardRef}>
-            <div className="makay-card-bg" />
-            <div className="makay-card-content">
-              <div className="makay-card-top">
+          <div
+            className="makay-client-card"
+            ref={cardRef}
+            style={{ position: 'relative' }}
+          >
+            {/* Background */}
+            <div className="makay-card-bg" style={{
+              background: `linear-gradient(${cardColors.bg_angle}deg, ${cardColors.bg_from}, ${cardColors.bg_to})`,
+            }} />
+            <div className="makay-card-bg-glow" />
+
+            {/* Logo */}
+            {cardLayout.logo.visible && (
+              <div style={{ position: 'absolute', left: `${cardLayout.logo.x}%`, top: `${cardLayout.logo.y}%`, zIndex: 1 }}>
                 <Image
                   src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1-removebg-preview.png"
-                  alt="Makay"
-                  width={70}
-                  height={24}
-                  style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)' }}
+                  alt="Makay" width={70} height={24}
+                  style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', display: 'block' }}
                 />
-                <span className="makay-card-tier">
+              </div>
+            )}
+
+            {/* Tier badge */}
+            {cardLayout.tier.visible && (
+              <div style={{ position: 'absolute', left: `${cardLayout.tier.x}%`, top: `${cardLayout.tier.y}%`, zIndex: 1 }}>
+                <span className="makay-card-tier" style={{ color: cardColors.accent, borderColor: `${cardColors.accent}55` }}>
                   {tier.label}
                 </span>
               </div>
+            )}
 
-              <div className="makay-card-middle">
-                {user.imageUrl && (
-                  <img
-                    src={user.imageUrl}
-                    alt={user.firstName ?? ''}
-                    className="makay-card-avatar"
-                  />
-                )}
-                <div className="makay-card-member-info">
-                  <p className="makay-card-name">
-                    {user.firstName} {user.lastName}
-                  </p>
-                  <p className="makay-card-tagline">Beach Club Member</p>
-                </div>
+            {/* Avatar */}
+            {cardLayout.avatar.visible && user.imageUrl && (
+              <div style={{ position: 'absolute', left: `${cardLayout.avatar.x}%`, top: `${cardLayout.avatar.y}%`, zIndex: 1 }}>
+                <img src={user.imageUrl} alt={user.firstName ?? ''} className="makay-card-avatar"
+                  style={{ borderColor: `${cardColors.accent}80` }} />
               </div>
+            )}
 
-              <div className="makay-card-divider" />
+            {/* Name */}
+            {cardLayout.name.visible && (
+              <div style={{ position: 'absolute', left: `${cardLayout.name.x}%`, top: `${cardLayout.name.y}%`, zIndex: 1 }}>
+                <p className="makay-card-name" style={{ color: cardColors.text }}>
+                  {user.firstName} {user.lastName}
+                </p>
+              </div>
+            )}
 
-              <div className="makay-card-bottom">
-                <div className="makay-card-details">
-                  <p className="makay-card-id">ID: {user.id?.slice(-8).toUpperCase()}</p>
-                  <p className="makay-card-since">
-                    Since {new Date(user.createdAt!).getFullYear()}
-                  </p>
-                </div>
+            {/* Tagline */}
+            {cardLayout.tagline.visible && (
+              <div style={{ position: 'absolute', left: `${cardLayout.tagline.x}%`, top: `${cardLayout.tagline.y}%`, zIndex: 1 }}>
+                <p className="makay-card-tagline" style={{ color: `${cardColors.accent}B0` }}>Beach Club Member</p>
+              </div>
+            )}
+
+            {/* Divider */}
+            {cardLayout.divider.visible && (
+              <div style={{ position: 'absolute', left: 0, right: 0, top: `${cardLayout.divider.y}%`, zIndex: 1 }}>
+                <div className="makay-card-divider" />
+              </div>
+            )}
+
+            {/* ID */}
+            {cardLayout.id.visible && (
+              <div style={{ position: 'absolute', left: `${cardLayout.id.x}%`, top: `${cardLayout.id.y}%`, zIndex: 1 }}>
+                <p className="makay-card-id" style={{ color: `${cardColors.text}88` }}>
+                  ID: {user.id?.slice(-8).toUpperCase()}
+                </p>
+              </div>
+            )}
+
+            {/* Since */}
+            {cardLayout.since.visible && (
+              <div style={{ position: 'absolute', left: `${cardLayout.since.x}%`, top: `${cardLayout.since.y}%`, zIndex: 1 }}>
+                <p className="makay-card-since" style={{ color: `${cardColors.text}44` }}>
+                  Since {new Date(user.createdAt!).getFullYear()}
+                </p>
+              </div>
+            )}
+
+            {/* QR */}
+            {cardLayout.qr.visible && profileUrl && (
+              <div style={{ position: 'absolute', left: `${cardLayout.qr.x}%`, top: `${cardLayout.qr.y}%`, zIndex: 1 }}>
                 <div className="makay-card-qr">
-                  {profileUrl && (
-                    <QRCode
-                      value={profileUrl}
-                      size={68}
-                      bgColor="transparent"
-                      fgColor="#1e1a16"
-                    />
-                  )}
+                  <QRCode value={profileUrl} size={68} bgColor="transparent" fgColor="#1e1a16" />
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 

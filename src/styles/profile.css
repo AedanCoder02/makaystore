@@ -243,6 +243,14 @@
   background: linear-gradient(150deg, #3a3028 0%, #2C2C2C 45%, #1e1a16 100%);
 }
 
+.makay-card-bg-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 90% 10%, rgba(212, 165, 116, 0.18) 0%, transparent 55%);
+  z-index: 0;
+  pointer-events: none;
+}
+
 .makay-card-bg::before {
   content: '';
   position: absolute;
