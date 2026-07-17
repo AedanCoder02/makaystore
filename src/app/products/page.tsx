@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { SlidersHorizontal, X } from 'lucide-react';
 import ProductFilters, { Filters } from '@/components/ProductFilters';
 import ProductSort, { SortOption } from '@/components/ProductSort';
 import ProductGrid from '@/components/ProductGrid';
-import { mockProducts } from '@/lib/mockData';
+import { Product } from '@/lib/mockData';
 import '@/styles/products.css';
 
 export default function ProductsPage() {
   const t = useTranslations('storefront');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<Filters>({
     search: '',
     category: [],
@@ -20,8 +22,15 @@ export default function ProductsPage() {
   const [sort, setSort] = useState<SortOption>('popular');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  useEffect(() => {
+    fetch('/api/products')
+      .then((r) => r.json())
+      .then((data) => { setProducts(Array.isArray(data) ? data : []); setLoading(false); })
+      .catch(() => setLoading(false));
+  }, []);
+
   const filtered = useMemo(() => {
-    return mockProducts.filter((p) => {
+    return products.filter((p) => {
       const matchesSearch =
         p.title.toLowerCase().includes(filters.search.toLowerCase()) ||
         p.description.toLowerCase().includes(filters.search.toLowerCase());
@@ -30,7 +39,7 @@ export default function ProductsPage() {
         filters.category.length === 0 || filters.category.includes(p.category);
       return matchesSearch && matchesPrice && matchesCategory;
     });
-  }, [filters]);
+  }, [filters, products]);
 
   const sorted = useMemo(() => {
     const copy = [...filtered];
@@ -45,14 +54,14 @@ export default function ProductsPage() {
       <div className="products-header">
         <h1 className="products-title">{t('collection')}</h1>
         <p className="products-subtitle">
-          {t('collectionSubtitle', { count: mockProducts.length })}
+          {t('collectionSubtitle', { count: products.length })}
         </p>
       </div>
 
       {/* Mobile filter toggle */}
       <div className="products-mobile-toolbar">
         <span className="products-count">
-          <strong>{sorted.length}</strong> of {mockProducts.length}
+          <strong>{sorted.length}</strong> of {products.length}
         </span>
         <div className="products-mobile-toolbar-right">
           <ProductSort sort={sort} onChange={setSort} />
@@ -87,7 +96,6 @@ export default function ProductsPage() {
       {filtersOpen && <div className="products-filter-backdrop" onClick={() => setFiltersOpen(false)} />}
 
       <div className="products-container">
-        {/* Desktop sidebar */}
         <aside className="products-sidebar">
           <ProductFilters filters={filters} onChange={setFilters} />
         </aside>
@@ -95,12 +103,16 @@ export default function ProductsPage() {
         <div className="products-main">
           <div className="products-toolbar products-toolbar-desktop">
             <span className="products-count">
-              {t('showing')} <strong>{sorted.length}</strong> {t('of')} {mockProducts.length} {t('productsCount')}
+              {loading ? 'Loading…' : <>{t('showing')} <strong>{sorted.length}</strong> {t('of')} {products.length} {t('productsCount')}</>}
             </span>
             <ProductSort sort={sort} onChange={setSort} />
           </div>
 
-          <ProductGrid products={sorted} />
+          {loading ? (
+            <div className="products-loading">Loading products…</div>
+          ) : (
+            <ProductGrid products={sorted} />
+          )}
         </div>
       </div>
     </main>
