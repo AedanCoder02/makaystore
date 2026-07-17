@@ -46,6 +46,15 @@ h1, h2, h3, h4, h5 {
   font-family: var(--mkt-heading-font, var(--font-playfair-display), Georgia, serif);
 }
 
+/* Error boundary fallback */
+.error-boundary {
+  padding: 2rem;
+  text-align: center;
+  color: var(--makay-mauve);
+  font-family: var(--font-montserrat);
+  font-size: 0.875rem;
+}
+
 /* NavBar user menu */
 .navbar-user-menu { position: relative; }
 

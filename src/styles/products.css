@@ -49,6 +49,18 @@
   gap: 1.5rem;
 }
 
+/* Loading state */
+.products-loading {
+  grid-column: 1 / -1;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: var(--makay-mauve);
+  font-family: var(--font-montserrat);
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 /* Toolbar */
 .products-toolbar {
   display: flex;
