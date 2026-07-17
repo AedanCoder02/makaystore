@@ -16,8 +16,8 @@ export default function GenerationProgressStep({
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
   const [elapsed, setElapsed] = useState(0);
-  const startTime = useRef(Date.now());
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const startTime = useRef<number>(Date.now());
+  const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
   useEffect(() => {
     // Tick elapsed time every second for display
