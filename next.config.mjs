@@ -13,8 +13,11 @@ const nextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'localhost',
-        port: '3000',
+        hostname: '**.vercel.app',
+      },
+      {
+        protocol: 'https',
+        hostname: '**.clerk.com',
       },
     ],
   },
