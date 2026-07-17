@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Check, RotateCcw, Eye, Palette, Layers, Image as ImageIcon, CreditCard, ChevronDown, ChevronRight, HelpCircle } from 'lucide-react';
-import { mockProducts } from '@/lib/mockData';
+import { mockProducts, type Product } from '@/lib/mockData';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import CardDesigner, {
@@ -123,6 +123,14 @@ export default function ThemeEditor({ initialSettings, productOverrides }: Theme
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<'colors' | 'scroll' | 'images' | 'card'>('colors');
   const [openSection, setOpenSection] = useState<string | null>('preset');
+  const [products, setProducts] = useState<Product[]>(mockProducts);
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then((r) => r.json())
+      .then((data) => { if (Array.isArray(data)) setProducts(data); })
+      .catch(() => {});
+  }, []);
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('theme-editor-tour');
 
@@ -304,7 +312,7 @@ export default function ThemeEditor({ initialSettings, productOverrides }: Theme
             <div className="te-panel">
               <p className="te-hint">Override product images for storefront display. Enter a URL or a public /images/ path.</p>
               <div className="te-img-list">
-                {mockProducts.map(p => (
+                {products.map(p => (
                   <ProductImageRow
                     key={p.id}
                     product={p}

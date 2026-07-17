@@ -1,7 +1,8 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { mockProducts } from '@/lib/mockData';
+import { Product } from '@/lib/mockData';
 import ProductCard from '@/components/ProductCard';
 
 interface Props {
@@ -10,14 +11,20 @@ interface Props {
 }
 
 export default function RelatedProducts({ currentProductId, category }: Props) {
-  const related = mockProducts
-    .filter((p) => p.category === category && p.id !== currentProductId)
-    .slice(0, 4);
+  const [related, setRelated] = useState<Product[]>([]);
   const t = useTranslations('storefront');
 
-  if (related.length === 0) {
-    return null;
-  }
+  useEffect(() => {
+    fetch('/api/products')
+      .then((r) => r.json())
+      .then((data: Product[]) => {
+        if (!Array.isArray(data)) return;
+        setRelated(data.filter((p) => p.category === category && p.id !== currentProductId).slice(0, 4));
+      })
+      .catch(() => {});
+  }, [currentProductId, category]);
+
+  if (related.length === 0) return null;
 
   return (
     <section className="related-products">
