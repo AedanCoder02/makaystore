@@ -45,7 +45,7 @@ export default function ProductsPage() {
       <div className="products-header">
         <h1 className="products-title">{t('collection')}</h1>
         <p className="products-subtitle">
-          {mockProducts.length} {t('collectionSubtitle').replace('{count}', String(mockProducts.length))}
+          {t('collectionSubtitle', { count: mockProducts.length })}
         </p>
       </div>
 
