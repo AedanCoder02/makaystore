@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
-export type UserRole = 'worker' | 'supervisor' | 'admin';
+export type UserRole = 'worker' | 'supervisor' | 'admin' | 'seller' | 'customer';
 
 interface TutorialState {
   currentTutorial: string | null;

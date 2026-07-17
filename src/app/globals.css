@@ -18,6 +18,12 @@
   /* Typography */
   --font-playfair: var(--font-playfair-display), serif;
   --font-body: var(--font-montserrat), sans-serif;
+
+  /* Marketing Editor overrides — applied per-page by MarketingApplier */
+  --mkt-heading-font: var(--font-playfair-display), Georgia, serif;
+  --mkt-heading-scale: 1;
+  --mkt-body-size: 1rem;
+  --mkt-letter-spacing: 0.02em;
 }
 
 @theme inline {
@@ -31,8 +37,13 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-body);
+  font-size: var(--mkt-body-size, 1rem);
   line-height: 1.6;
-  letter-spacing: 0.02em;
+  letter-spacing: var(--mkt-letter-spacing, 0.02em);
+}
+
+h1, h2, h3, h4, h5 {
+  font-family: var(--mkt-heading-font, var(--font-playfair-display), Georgia, serif);
 }
 
 /* NavBar user menu */

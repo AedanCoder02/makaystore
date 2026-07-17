@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Edit3, Check, X, Plus, Tag, Truck } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Edit3, Check, X, Plus, Tag, Truck, HelpCircle } from 'lucide-react';
+import { useTutorialStore } from '@/stores/tutorialStore';
+import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
 interface ProductRow {
   id: string; title: string; description: string; price: number;
@@ -15,6 +17,15 @@ export default function SellerProducts({ products }: { products: ProductRow[] })
   const [search, setSearch] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [newProduct, setNewProduct] = useState({ title: '', price: '', description: '', image_url: '', product_type: 'storefront' });
+  const tutorialStore = useTutorialStore();
+  const tutorialUI = useTutorialOverlay('seller-products-tour');
+
+  useEffect(() => {
+    if (!tutorialStore.isCompleted('seller-products-tour') && !tutorialStore.currentTutorial) {
+      tutorialStore.showTutorial('seller-products-tour');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filtered = products.filter(p =>
     p.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -65,14 +76,16 @@ export default function SellerProducts({ products }: { products: ProductRow[] })
 
   return (
     <div className="seller-page">
+      {tutorialUI}
       <div className="seller-page-header">
         <div>
           <h1 className="seller-page-title">Products</h1>
           <p className="seller-page-sub">Edit prices, descriptions, images. Changes override defaults.</p>
         </div>
-        <button className="seller-btn-primary" onClick={() => setShowAddForm(v => !v)}>
-          <Plus size={16} /> Add Product
-        </button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-products-tour')} aria-label="Show tutorial"><HelpCircle size={16} /></button>
+          <button className="seller-btn-primary" onClick={() => setShowAddForm(v => !v)}><Plus size={16} /> Add Product</button>
+        </div>
       </div>
 
       {showAddForm && (

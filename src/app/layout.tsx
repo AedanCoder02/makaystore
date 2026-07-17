@@ -5,6 +5,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { cookies } from "next/headers";
 import LenisProvider from "@/components/providers/LenisProvider";
+import MarketingApplier from "@/components/providers/MarketingApplier";
 import NavBar from "@/components/NavBar";
 import StripeProvider from "@/components/StripeProvider";
 import sql from "@/lib/db";
@@ -86,6 +87,7 @@ export default async function RootLayout({
       <body className="min-h-full flex flex-col">
         <ClerkProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
+            <MarketingApplier />
             <NavBar />
             <LenisProvider>{children}</LenisProvider>
           </NextIntlClientProvider>

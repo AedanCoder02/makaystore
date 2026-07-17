@@ -16,7 +16,7 @@ export default function FeaturedCollection() {
   const PRODUCT_IMAGES = [
     '/images/product-tshirt.jpg',
     '/images/product-coverup.jpg',
-    'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260713_174814_3bdfe609-887c-4b9c-9b23-8eb80da8c693.png',
+    '/images/product-tote.jpg',
     '/images/product-event.jpg',
   ];
 

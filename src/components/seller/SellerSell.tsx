@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Plus, Minus, Trash2, ShoppingBag, Check, Tag, Truck, User } from 'lucide-react';
+import { Search, Plus, Minus, Trash2, ShoppingBag, Check, Tag, Truck, User, HelpCircle } from 'lucide-react';
+import { useTutorialStore } from '@/stores/tutorialStore';
+import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
 interface Client { id: string; firstName: string; lastName: string; email: string; imageUrl: string; }
 interface Product { id: string; title: string; price: number; image: string; category: string; productType: 'storefront' | 'dropshipping'; }
@@ -20,6 +22,15 @@ export default function SellerSell({ products }: { products: Product[] }) {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
+  const tutorialStore = useTutorialStore();
+  const tutorialUI = useTutorialOverlay('seller-sell-tour');
+
+  useEffect(() => {
+    if (!tutorialStore.isCompleted('seller-sell-tour') && !tutorialStore.currentTutorial) {
+      tutorialStore.showTutorial('seller-sell-tour');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (step === 'client' && clients.length === 0) {
@@ -109,6 +120,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
 
   return (
     <div className="seller-page">
+      {tutorialUI}
       <div className="seller-page-header">
         <div>
           <h1 className="seller-page-title">Sell to Client</h1>
@@ -119,6 +131,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
             <ShoppingBag size={16} /> {cart.length} item{cart.length > 1 ? 's' : ''} · ${subtotal.toFixed(2)}
           </div>
         )}
+        <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-sell-tour')} aria-label="Show tutorial"><HelpCircle size={16} /></button>
       </div>
 
       {/* Step nav */}

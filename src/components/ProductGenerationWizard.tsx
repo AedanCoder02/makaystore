@@ -1,6 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { HelpCircle } from 'lucide-react';
+import { useTutorialStore } from '@/stores/tutorialStore';
+import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import ProductSelectionStep from './ProductSelectionStep';
 import ImageUploadStep from './ImageUploadStep';
 import GenerationProgressStep from './GenerationProgressStep';
@@ -17,6 +20,15 @@ export default function ProductGenerationWizard() {
   const [requestId, setRequestId] = useState('');
   const [glbUrl, setGlbUrl] = useState('');
   const [error, setError] = useState('');
+  const tutorialStore = useTutorialStore();
+  const tutorialUI = useTutorialOverlay('admin-products');
+
+  useEffect(() => {
+    if (!tutorialStore.isCompleted('admin-products') && !tutorialStore.currentTutorial) {
+      tutorialStore.showTutorial('admin-products');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleProductSelected = (productId: string) => {
     setSelectedProductId(productId);
@@ -93,11 +105,17 @@ export default function ProductGenerationWizard() {
   };
 
   return (
-    <div className="wizard-container">
-      <h1>Generate 3D Product Model</h1>
+    <div className="wizard-container generation-wizard">
+      {tutorialUI}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+        <h1>Generate 3D Product Model</h1>
+        <button className="help-button" onClick={() => tutorialStore.showTutorial('admin-products')} aria-label="Show tutorial" style={{ background: 'none', border: 'none', cursor: 'pointer', opacity: 0.6 }}>
+          <HelpCircle size={18} />
+        </button>
+      </div>
 
       {/* Step Indicator */}
-      <div className="step-indicator">
+      <div className="step-indicator wizard-step">
         {(['select', 'upload', 'generating', 'preview', 'confirm', 'success'] as WizardStep[]).map(
           (s, idx) => (
             <div

@@ -1,21 +1,40 @@
 'use client';
 
+import { useEffect } from 'react';
 import Link from 'next/link';
-import { ShoppingBag, Package, Boxes, TrendingUp } from 'lucide-react';
+import { ShoppingBag, Package, Boxes, TrendingUp, HelpCircle } from 'lucide-react';
+import { useTutorialStore } from '@/stores/tutorialStore';
+import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
 interface Order { id: number; client_name: string; subtotal: string; created_at: string; status: string; items: any[] }
 
 export default function SellerDashboard({ recentOrders, stockSummary }: {
   recentOrders: Order[];
   stockSummary: { total: number; units: number };
+
 }) {
   const totalRevenue = recentOrders.reduce((s, o) => s + Number(o.subtotal), 0);
+  const tutorialStore = useTutorialStore();
+  const tutorialUI = useTutorialOverlay('seller-dashboard-tour');
+
+  useEffect(() => {
+    if (!tutorialStore.isCompleted('seller-dashboard-tour') && !tutorialStore.currentTutorial) {
+      tutorialStore.showTutorial('seller-dashboard-tour');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="seller-page">
+      {tutorialUI}
       <div className="seller-page-header">
-        <h1 className="seller-page-title">Dashboard</h1>
-        <p className="seller-page-sub">Welcome back — here&apos;s your overview.</p>
+        <div>
+          <h1 className="seller-page-title">Dashboard</h1>
+          <p className="seller-page-sub">Welcome back — here&apos;s your overview.</p>
+        </div>
+        <button className="help-button seller-btn-ghost" onClick={() => tutorialStore.showTutorial('seller-dashboard-tour')} aria-label="Show tutorial">
+          <HelpCircle size={16} />
+        </button>
       </div>
 
       <div className="seller-stats-grid">

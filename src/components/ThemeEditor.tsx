@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Check, RotateCcw, Eye, Palette, Layers, Image as ImageIcon, CreditCard, ChevronDown, ChevronRight } from 'lucide-react';
+import { Check, RotateCcw, Eye, Palette, Layers, Image as ImageIcon, CreditCard, ChevronDown, ChevronRight, HelpCircle } from 'lucide-react';
 import { mockProducts } from '@/lib/mockData';
+import { useTutorialStore } from '@/stores/tutorialStore';
+import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import CardDesigner, {
   CardLayout, CardColors,
   DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS,
@@ -121,6 +123,8 @@ export default function ThemeEditor({ initialSettings, productOverrides }: Theme
   const [saved, setSaved] = useState(false);
   const [activeTab, setActiveTab] = useState<'colors' | 'scroll' | 'images' | 'card'>('colors');
   const [openSection, setOpenSection] = useState<string | null>('preset');
+  const tutorialStore = useTutorialStore();
+  const tutorialUI = useTutorialOverlay('theme-editor-tour');
 
   // Apply colors live to document root for real-time preview
   const applyLive = useCallback((c: Record<string, string>) => {
@@ -181,6 +185,14 @@ export default function ThemeEditor({ initialSettings, productOverrides }: Theme
 
   const resetToDefault = () => applyPreset('makay-default');
 
+  // Auto-show tutorial on first visit
+  useEffect(() => {
+    if (!tutorialStore.isCompleted('theme-editor-tour') && !tutorialStore.currentTutorial) {
+      tutorialStore.showTutorial('theme-editor-tour');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="theme-editor">
       {/* Top bar */}
@@ -191,6 +203,7 @@ export default function ThemeEditor({ initialSettings, productOverrides }: Theme
         </div>
         <div className="theme-editor-actions">
           <button className="te-btn-ghost" onClick={resetToDefault}><RotateCcw size={14} /> Reset</button>
+          <button className="te-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('theme-editor-tour')} aria-label="Show tutorial"><HelpCircle size={16} /></button>
           <button className="te-btn-primary" onClick={publish} disabled={saving}>
             {saved ? <><Check size={14} /> Published</> : saving ? 'Publishing...' : 'Publish Theme'}
           </button>
@@ -326,6 +339,7 @@ export default function ThemeEditor({ initialSettings, productOverrides }: Theme
           </div>
         </div>
       </div>
+      {tutorialUI}
     </div>
   );
 }

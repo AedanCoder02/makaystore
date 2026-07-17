@@ -1,7 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Minus, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Minus, Check, HelpCircle } from 'lucide-react';
+import { useTutorialStore } from '@/stores/tutorialStore';
+import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
 interface StockRow { id: string; title: string; sku: string; category: string; defaultStock: number; currentStock: number; }
 
@@ -11,6 +13,15 @@ export default function SellerStock({ products }: { products: StockRow[] }) {
   );
   const [saving, setSaving] = useState<string | null>(null);
   const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const tutorialStore = useTutorialStore();
+  const tutorialUI = useTutorialOverlay('seller-stock-tour');
+
+  useEffect(() => {
+    if (!tutorialStore.isCompleted('seller-stock-tour') && !tutorialStore.currentTutorial) {
+      tutorialStore.showTutorial('seller-stock-tour');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const adjust = (id: string, delta: number) => {
     setQuantities(q => ({ ...q, [id]: Math.max(0, (q[id] ?? 0) + delta) }));
@@ -32,11 +43,13 @@ export default function SellerStock({ products }: { products: StockRow[] }) {
 
   return (
     <div className="seller-page">
+      {tutorialUI}
       <div className="seller-page-header">
         <div>
           <h1 className="seller-page-title">Stock Management</h1>
           <p className="seller-page-sub">Adjust quantities per product. Changes are saved to the database.</p>
         </div>
+        <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-stock-tour')} aria-label="Show tutorial"><HelpCircle size={16} /></button>
       </div>
 
       {lowStock.length > 0 && (

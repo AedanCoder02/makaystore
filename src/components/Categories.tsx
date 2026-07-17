@@ -51,19 +51,19 @@ export default function Categories() {
     {
       name: t('women.name'),
       description: t('women.description'),
-      image: 'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260713_173740_b8756233-df68-48bd-a858-e141c9e4e256.png',
+      image: '/images/product-event.jpg',
       slug: 'women',
     },
     {
       name: t('men.name'),
       description: t('men.description'),
-      image: 'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260713_173752_1ea532b8-b929-4e6d-9a70-9fb8976cf300.png',
+      image: '/images/product-tshirt.jpg',
       slug: 'men',
     },
     {
       name: t('accessories.name'),
       description: t('accessories.description'),
-      image: 'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260713_173759_61abba9a-31c3-44ee-a7ab-74334f32c865.png',
+      image: '/images/product-tote.jpg',
       slug: 'accessories',
     },
   ];

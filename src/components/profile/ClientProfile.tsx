@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { useUser, UserButton } from '@clerk/nextjs';
 import Image from 'next/image';
 import QRCode from 'react-qr-code';
-import { Share2, Download, Wallet, Edit3, Check, X } from 'lucide-react';
+import { Share2, Download, Wallet, Edit3, Check, X, HelpCircle } from 'lucide-react';
+import { useTutorialStore } from '@/stores/tutorialStore';
+import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import { animate } from 'animejs';
 import {
   CardLayout, CardColors,
@@ -40,6 +42,9 @@ export default function ClientProfile() {
     ? `${window.location.origin}/member/${user?.id}`
     : '';
 
+  const tutorialStore = useTutorialStore();
+  const tutorialUI = useTutorialOverlay('profile-tour');
+
   // Wait for Clerk session, then fetch profile + theme in parallel
   useEffect(() => {
     if (!isLoaded || !user) return;
@@ -56,6 +61,14 @@ export default function ClientProfile() {
         try { setCardColors(JSON.parse(themeData.card_colors)); } catch {}
       }
     }).catch(() => setFetchError(true));
+  }, [isLoaded, user]);
+
+  useEffect(() => {
+    const role = user?.publicMetadata?.role as string | undefined;
+    if (isLoaded && user && role === 'customer' && !tutorialStore.isCompleted('profile-tour') && !tutorialStore.currentTutorial) {
+      tutorialStore.showTutorial('profile-tour');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoaded, user]);
 
   useEffect(() => {
@@ -152,6 +165,9 @@ export default function ClientProfile() {
             <span className="profile-tier-badge" style={{ backgroundColor: tier.color }}>
               {tier.label}
             </span>
+            <button className="profile-help-btn" onClick={() => tutorialStore.showTutorial('profile-tour')} aria-label="Show tutorial" title="Help">
+              <HelpCircle size={14} />
+            </button>
           </div>
         </div>
 
@@ -315,6 +331,7 @@ export default function ClientProfile() {
         </div>
 
       </div>
+      {tutorialUI}
     </main>
   );
 }
