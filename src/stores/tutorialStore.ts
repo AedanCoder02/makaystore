@@ -32,7 +32,14 @@ export const useTutorialStore = create<TutorialState>()(
         set((state) => ({ currentStep: state.currentStep + 1 })),
 
       skip: () =>
-        set({ currentTutorial: null, currentStep: 0 }),
+        set((state) => ({
+          // Skipping counts as seen — won't auto-show again. HelpCircle can still replay via showTutorial().
+          completed: state.currentTutorial
+            ? [...new Set([...state.completed, state.currentTutorial])]
+            : state.completed,
+          currentTutorial: null,
+          currentStep: 0,
+        })),
 
       complete: () =>
         set((state) => ({
