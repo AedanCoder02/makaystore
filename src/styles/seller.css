@@ -451,6 +451,26 @@
 .seller-stock-save.saved { background: #2d7a4f; }
 .seller-stock-save:disabled { opacity: 0.5; }
 
+.seller-stock-row.stock-critical {
+  border-color: rgba(220, 38, 38, 0.35);
+  background: #fff5f5;
+}
+.seller-stock-row.stock-ok {
+  border-color: rgba(34, 197, 94, 0.3);
+}
+.seller-stock-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.55rem;
+  border-radius: 20px;
+  font-family: var(--font-montserrat);
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.seller-stock-badge.critical { background: #fee2e2; color: #991b1b; }
+.seller-stock-badge.ok       { background: #dcfce7; color: #166534; }
+
 /* ── Sell flow ── */
 .seller-steps {
   display: flex;

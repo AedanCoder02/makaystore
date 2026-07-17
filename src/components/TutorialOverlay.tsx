@@ -1,9 +1,11 @@
 'use client';
 
 import { CSSProperties, useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { TutorialStep } from '@/lib/tutorials';
 
 interface TutorialOverlayProps {
+  tutorialId: string;
   step: TutorialStep;
   stepIndex: number;
   totalSteps: number;
@@ -12,12 +14,14 @@ interface TutorialOverlayProps {
 }
 
 export default function TutorialOverlay({
+  tutorialId,
   step,
   stepIndex,
   totalSteps,
   onNext,
   onSkip,
 }: TutorialOverlayProps) {
+  const t = useTranslations('tutorial');
   const [position, setPosition] = useState<CSSProperties>({});
   const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
 
@@ -116,17 +120,22 @@ export default function TutorialOverlay({
         style={{ ...position, position: 'fixed' }}
       >
         <div className="tutorial-step-counter">
-          Step {stepIndex + 1} of {totalSteps}
+          {t('step')} {stepIndex + 1} {t('of')} {totalSteps}
         </div>
-        <h3 className="tutorial-title">{step.title}</h3>
-        <p className="tutorial-description">{step.description}</p>
+        <h3 className="tutorial-title">
+          {t(`tours.${tutorialId}.steps.${step.id}.title` as Parameters<typeof t>[0])}
+        </h3>
+        <p className="tutorial-description">
+          {t(`tours.${tutorialId}.steps.${step.id}.description` as Parameters<typeof t>[0])}
+        </p>
         <div className="tutorial-actions">
           <button className="btn btn-primary" onClick={handleNext}>
-            {step.actionText || (stepIndex === totalSteps - 1 ? 'Finish' : 'Next')}
+            {t(`tours.${tutorialId}.steps.${step.id}.actionText` as Parameters<typeof t>[0]) ||
+              (stepIndex === totalSteps - 1 ? t('complete') : t('next'))}
           </button>
           {step.skipAllowed !== false && (
             <button className="btn btn-secondary" onClick={onSkip}>
-              Skip
+              {t('skip')}
             </button>
           )}
         </div>

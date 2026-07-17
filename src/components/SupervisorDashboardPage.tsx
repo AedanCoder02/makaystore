@@ -6,6 +6,7 @@ import { useSupervisorDashboard } from '@/hooks/useSupervisorDashboard';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import { useSupervisorStore } from '@/stores/supervisorStore';
+import { useInitSupervisorData } from '@/hooks/useInitSupervisorData';
 import WorkerStatusOverview from './WorkerStatusOverview';
 import ActivityApprovalList from './ActivityApprovalList';
 import DailySummaryCard from './DailySummaryCard';
@@ -25,13 +26,13 @@ export default function SupervisorDashboardPage() {
   const dashboard = useSupervisorDashboard();
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('supervisor-approve');
-  const completed = tutorialStore.completed;
+  useInitSupervisorData();
 
   const store = useSupervisorStore();
   const [selectedWorker, setSelectedWorker] = useState<WorkerDetail | null>(null);
 
   useEffect(() => {
-    if (!completed.includes('supervisor-approve')) {
+    if (!tutorialStore.isCompleted('supervisor-approve')) {
       tutorialStore.showTutorial('supervisor-approve');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

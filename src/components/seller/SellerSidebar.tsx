@@ -2,14 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Package, Boxes, ShoppingBag, Box } from 'lucide-react';
+import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock } from 'lucide-react';
 
 const NAV = [
-  { href: '/seller/dashboard',          label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/seller/sell',               label: 'Sell',       icon: ShoppingBag },
-  { href: '/seller/products',           label: 'Products',   icon: Package },
-  { href: '/seller/stock',              label: 'Stock',      icon: Boxes },
-  { href: '/seller/products/create-3d', label: '3D Models',  icon: Box },
+  { href: '/seller/dashboard',          label: 'Dashboard',   icon: LayoutDashboard },
+  { href: '/seller/sell',               label: 'Sell',        icon: ShoppingBag },
+  { href: '/seller/products',           label: 'Products',    icon: Package },
+  { href: '/seller/stock',              label: 'Stock',       icon: Boxes },
+  { href: '/seller/activity',           label: 'My Activity', icon: Clock },
+  { href: '/seller/products/create-3d', label: '3D Models',   icon: Box },
 ];
 
 export default function SellerSidebar() {

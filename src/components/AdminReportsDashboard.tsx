@@ -37,10 +37,10 @@ export default function AdminReportsDashboard() {
   ];
 
   useEffect(() => {
-    if (!tutorialStore.completed.includes('reports-tour')) {
+    if (!tutorialStore.isCompleted('reports-tour')) {
       tutorialStore.showTutorial('reports-tour');
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

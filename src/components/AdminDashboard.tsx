@@ -1,55 +1,41 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { Package, ShoppingBag, Users } from 'lucide-react';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import AdminNavCard from './AdminNavCard';
 import AdminSidebar from './AdminSidebar';
 
+interface AdminStats {
+  totalProducts: number;
+  ordersThisMonth: number;
+  activeSellersToday: number;
+}
+
 export default function AdminDashboard() {
   const t = useTranslations('admin');
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('admin-tour');
-  const completed = tutorialStore.completed;
+  const [stats, setStats] = useState<AdminStats | null>(null);
 
   const NAV_ITEMS = [
-    {
-      icon: '📦',
-      title: t('products'),
-      description: t('productsDesc'),
-      href: '/admin/products/create-3d',
-    },
-    {
-      icon: '🛒',
-      title: t('orders'),
-      description: t('ordersDesc'),
-      href: '/products',
-    },
-    {
-      icon: '👥',
-      title: t('workers'),
-      description: t('workersDesc'),
-      href: '/worker/activity',
-    },
-    {
-      icon: '📈',
-      title: t('reports'),
-      description: t('reportsDesc'),
-      href: '/admin/reports',
-    },
-    {
-      icon: '⚙️',
-      title: t('settings'),
-      description: t('settingsDesc'),
-      href: '/admin/rotation',
-    },
+    { icon: '📦', title: t('products'), description: t('productsDesc'), href: '/admin/products/create-3d' },
+    { icon: '🛒', title: t('orders'),   description: t('ordersDesc'),   href: '/products' },
+    { icon: '👥', title: t('workers'),  description: t('workersDesc'),  href: '/seller/activity' },
+    { icon: '📈', title: t('reports'),  description: t('reportsDesc'),  href: '/admin/reports' },
+    { icon: '⚙️', title: t('settings'), description: t('settingsDesc'), href: '/admin/rotation' },
   ];
 
   useEffect(() => {
-    if (!completed.includes('admin-tour')) {
+    if (!tutorialStore.isCompleted('admin-tour')) {
       tutorialStore.showTutorial('admin-tour');
     }
+    fetch('/api/admin/stats')
+      .then((r) => r.json())
+      .then(setStats)
+      .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -69,6 +55,24 @@ export default function AdminDashboard() {
             ?
           </button>
         </div>
+
+        {/* Live stats strip */}
+        {stats && (
+          <div className="admin-stats-strip">
+            <div className="admin-stat-chip">
+              <Package size={15} />
+              <span>{stats.totalProducts} products</span>
+            </div>
+            <div className="admin-stat-chip">
+              <ShoppingBag size={15} />
+              <span>{stats.ordersThisMonth} orders this month</span>
+            </div>
+            <div className="admin-stat-chip">
+              <Users size={15} />
+              <span>{stats.activeSellersToday} sellers active today</span>
+            </div>
+          </div>
+        )}
 
         <p className="dashboard-welcome">{t('welcome')}</p>
 

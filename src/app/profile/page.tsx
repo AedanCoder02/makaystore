@@ -1,7 +1,9 @@
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import ClientProfile from '@/components/profile/ClientProfile';
-import WorkerProfilePlaceholder from '@/components/profile/WorkerProfilePlaceholder';
+import SellerProfile from '@/components/profile/SellerProfile';
+import SupervisorProfile from '@/components/profile/SupervisorProfile';
+import AdminProfile from '@/components/profile/AdminProfile';
 
 export const metadata = { title: 'My Profile — Makay' };
 
@@ -12,9 +14,9 @@ export default async function ProfilePage() {
   const user = await currentUser();
   const role = (user?.publicMetadata?.role as string) ?? 'customer';
 
-  if (role === 'worker' || role === 'supervisor' || role === 'admin') {
-    return <WorkerProfilePlaceholder role={role} />;
-  }
+  if (role === 'seller' || role === 'worker') return <SellerProfile />;
+  if (role === 'supervisor') return <SupervisorProfile />;
+  if (role === 'admin') return <AdminProfile />;
 
   return <ClientProfile />;
 }

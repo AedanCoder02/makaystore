@@ -14,15 +14,14 @@ export default function WorkerActivityPage() {
   const activity = useWorkerActivity();
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('worker-clock-in');
-  const completed = tutorialStore.completed;
   const t = useTranslations('worker');
   const tAdmin = useTranslations('admin');
 
-  // Show tutorial on first visit
   useEffect(() => {
-    if (!completed.includes('worker-clock-in')) {
+    if (!tutorialStore.isCompleted('worker-clock-in')) {
       tutorialStore.showTutorial('worker-clock-in');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

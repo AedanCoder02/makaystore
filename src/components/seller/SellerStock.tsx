@@ -63,10 +63,17 @@ export default function SellerStock({ products }: { products: StockRow[] }) {
         {products.map(p => {
           const qty = quantities[p.id] ?? p.currentStock;
           const isLow = qty < 10;
+          const isCritical = qty < 5;
+          const isAbundant = qty > 20;
+          const rowClass = isCritical ? ' stock-critical' : isAbundant ? ' stock-ok' : '';
           return (
-            <div key={p.id} className="seller-stock-row">
+            <div key={p.id} className={`seller-stock-row${rowClass}`}>
               <div className="seller-stock-info">
-                <span className="seller-stock-title">{p.title}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span className="seller-stock-title">{p.title}</span>
+                  {isCritical && <span className="seller-stock-badge critical">Low</span>}
+                  {isAbundant && <span className="seller-stock-badge ok">In Stock</span>}
+                </div>
                 <span className="seller-stock-sku">{p.sku} · {p.category}</span>
               </div>
               <div className="seller-stock-controls">

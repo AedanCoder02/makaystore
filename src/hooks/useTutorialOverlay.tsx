@@ -13,6 +13,7 @@ export const useTutorialOverlay = (tutorialId: string): ReactNode => {
 
   return (
     <TutorialOverlay
+      tutorialId={tutorialId}
       step={tutorial.currentStepObj}
       stepIndex={tutorial.currentStep}
       totalSteps={tutorial.totalSteps}

@@ -19,10 +19,10 @@ export default function ProductRotationManager() {
   const tAdmin = useTranslations('admin');
 
   useEffect(() => {
-    if (!tutorialStore.completed.includes('rotation-tour')) {
+    if (!tutorialStore.isCompleted('rotation-tour')) {
       tutorialStore.showTutorial('rotation-tour');
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRotateNow = (product: ProductRow) => {

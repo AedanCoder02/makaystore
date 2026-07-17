@@ -361,7 +361,132 @@
     "next": "Siguiente",
     "complete": "Completar",
     "of": "de",
-    "step": "Paso"
+    "step": "Paso",
+    "tours": {
+      "worker-clock-in": {
+        "name": "Cómo usar tu panel",
+        "steps": {
+          "step-1": { "title": "Controles de turno", "description": "Usa estos botones para marcar entrada al comenzar tu turno y salida al terminarlo.", "actionText": "" },
+          "step-2": { "title": "Registro de actividad", "description": "Cada entrada, salida y tarea completada se registra aquí en tiempo real.", "actionText": "" },
+          "step-3": { "title": "¿Necesitas ayuda?", "description": "Haz clic en este botón en cualquier momento para repetir este tutorial.", "actionText": "Entendido" }
+        }
+      },
+      "supervisor-approve": {
+        "name": "Tour del panel de supervisor",
+        "steps": {
+          "step-1": { "title": "Panel de supervisor", "description": "Este es tu centro de control. Monitorea la actividad del equipo, revisa el desempeño y gestiona turnos.", "actionText": "" },
+          "step-2": { "title": "Tu equipo", "description": "Todos los trabajadores activos aparecen aquí. Haz clic en cualquier ficha para ver su actividad detallada.", "actionText": "" },
+          "step-3": { "title": "Secciones del panel", "description": "Cada sección ofrece una vista diferente — ventas, tareas, rankings, alertas y resumen de turnos.", "actionText": "" },
+          "step-4": { "title": "¿Necesitas ayuda?", "description": "Haz clic en este botón en cualquier momento para repetir este tutorial.", "actionText": "Entendido" }
+        }
+      },
+      "admin-tour": {
+        "name": "Tour del panel de administración",
+        "steps": {
+          "step-1": { "title": "Bienvenido a Admin", "description": "Este es tu centro de gestión de Makay Store. Selecciona cualquier sección para comenzar.", "actionText": "" },
+          "step-2": { "title": "Productos y 3D", "description": "Sube productos, genera modelos 3D y administra tu inventario.", "actionText": "" },
+          "step-3": { "title": "Pedidos", "description": "Consulta y gestiona todos los pedidos de clientes.", "actionText": "" },
+          "step-4": { "title": "Gestión de equipo", "description": "Monitorea trabajadores, consulta actividad y administra tu equipo.", "actionText": "" },
+          "step-5": { "title": "¿Necesitas ayuda?", "description": "Haz clic en este botón en cualquier momento para repetir este tour.", "actionText": "Vamos" }
+        }
+      },
+      "reports-tour": {
+        "name": "Tour de reportes y análisis",
+        "steps": {
+          "step-1": { "title": "Reportes y análisis", "description": "Consulta ventas, costos, metas, inventario y métricas de rotación en un solo lugar.", "actionText": "" },
+          "step-2": { "title": "Pestañas de reportes", "description": "Cambia entre Ventas, Costos, Metas, Inventario y Rotación usando estas pestañas.", "actionText": "" },
+          "step-3": { "title": "Métricas clave", "description": "Cada tarjeta muestra un número crítico con indicadores de tendencia.", "actionText": "" },
+          "step-4": { "title": "¿Necesitas ayuda?", "description": "Repite este tour en cualquier momento usando el botón de ayuda.", "actionText": "Entendido" }
+        }
+      },
+      "rotation-tour": {
+        "name": "Tour de rotación de productos",
+        "steps": {
+          "step-1": { "title": "Rotación de productos", "description": "Programa cuándo los productos cambian entre los estados Activo, Pausado y Archivado.", "actionText": "" },
+          "step-2": { "title": "Tabla de productos", "description": "Todos los productos aparecen aquí con su estado actual. Haz clic en los encabezados para ordenar.", "actionText": "" },
+          "step-3": { "title": "¿Necesitas ayuda?", "description": "Repite este tour en cualquier momento.", "actionText": "Entendido" }
+        }
+      },
+      "admin-products": {
+        "name": "Tour del generador 3D",
+        "steps": {
+          "step-1": { "title": "Generador de productos 3D", "description": "Sube una foto del producto y un modelo de IA generará automáticamente una versión en 3D.", "actionText": "" },
+          "step-2": { "title": "Paso a paso", "description": "Sigue el flujo: selecciona producto → sube foto → genera → previsualiza → confirma.", "actionText": "Entendido" }
+        }
+      },
+      "theme-editor-tour": {
+        "name": "Tour del editor de tema",
+        "steps": {
+          "step-1": { "title": "Editor de tema", "description": "Edita el aspecto visual de toda la tienda desde aquí. Los cambios se previsilizan al instante — solo Publicar los hace definitivos.", "actionText": "" },
+          "step-2": { "title": "Cuatro áreas de control", "description": "Colores controla la paleta, Scroll configura fondos por sección, Imágenes permite cambiar fotos de productos, Tarjeta personaliza la tarjeta de membresía.", "actionText": "" },
+          "step-3": { "title": "Temas preestablecidos", "description": "Elige un preset para aplicar una paleta completa — Makay Default, Dark Luxury, Ocean Breeze, Sunset Coral o Minimal White.", "actionText": "" },
+          "step-4": { "title": "Vista previa en vivo", "description": "Cada cambio se refleja aquí en tiempo real antes de publicar.", "actionText": "" },
+          "step-5": { "title": "Publicar", "description": "Cuando estés satisfecho, haz clic en Publicar. Tu tema se activará en la tienda de inmediato.", "actionText": "Entendido" }
+        }
+      },
+      "seller-dashboard-tour": {
+        "name": "Tour del panel de vendedor",
+        "steps": {
+          "step-1": { "title": "Tus números", "description": "Ingresos, pedidos, productos rastreados y unidades en stock — todo de un vistazo.", "actionText": "" },
+          "step-2": { "title": "Acciones rápidas", "description": "Ve directo a vender, gestionar productos o actualizar stock.", "actionText": "" },
+          "step-3": { "title": "Navegación", "description": "Usa la barra lateral para cambiar entre Vender, Productos y Stock.", "actionText": "" },
+          "step-4": { "title": "¡Todo listo!", "description": "Comienza haciendo clic en 'Vender a Cliente' para procesar tu primera venta.", "actionText": "¡A vender!" }
+        }
+      },
+      "seller-products-tour": {
+        "name": "Tour de gestión de productos",
+        "steps": {
+          "step-1": { "title": "Gestión de productos", "description": "Edita el precio, descripción, imagen o tipo de cualquier producto. Los cambios aquí reemplazan los valores predeterminados.", "actionText": "" },
+          "step-2": { "title": "Buscar productos", "description": "Filtra por nombre o SKU para encontrar productos rápidamente.", "actionText": "" },
+          "step-3": { "title": "Editar un producto", "description": "Haz clic en el ícono de lápiz para editar precio, imagen, descripción o cambiar entre Tienda y Dropshipping.", "actionText": "" },
+          "step-4": { "title": "Agregar nuevos productos", "description": "Usa Agregar Producto para crear un artículo nuevo específico de tu tienda.", "actionText": "Entendido" }
+        }
+      },
+      "seller-stock-tour": {
+        "name": "Tour de gestión de stock",
+        "steps": {
+          "step-1": { "title": "Gestión de stock", "description": "Controla cuántas unidades de cada producto están disponibles.", "actionText": "" },
+          "step-2": { "title": "Ajustar cantidades", "description": "Usa los botones +1, -1, +5, -5 o escribe directamente. El stock bajo (menos de 10) se resalta en rojo.", "actionText": "" },
+          "step-3": { "title": "Guardar cada fila", "description": "Haz clic en Guardar en cada fila para persistir el nivel de stock en la base de datos.", "actionText": "Entendido" }
+        }
+      },
+      "seller-sell-tour": {
+        "name": "Tour de venta a cliente",
+        "steps": {
+          "step-1": { "title": "Proceso de 3 pasos", "description": "Vender en nombre de un cliente toma 3 pasos: seleccionar cliente, agregar productos y pagar.", "actionText": "" },
+          "step-2": { "title": "Paso 1 — Seleccionar cliente", "description": "Busca al cliente por nombre o correo y haz clic en su tarjeta para seleccionarlo.", "actionText": "" },
+          "step-3": { "title": "Tienda y Dropshipping", "description": "Mezcla productos de Tienda (enviados desde stock) y de Dropshipping (enviados por proveedor) en la misma venta.", "actionText": "" },
+          "step-4": { "title": "Completar la venta", "description": "Después de agregar productos, procede al pago, elige un método de pago y completa la venta. El pedido se guarda en el registro del cliente.", "actionText": "Entendido" }
+        }
+      },
+      "editor-tour": {
+        "name": "Tour del editor de marketing",
+        "steps": {
+          "step-1": { "title": "Seleccionar una página", "description": "Elige qué página de la tienda personalizar — Inicio, Todos los productos, Detalle de producto o Pago.", "actionText": "" },
+          "step-2": { "title": "Tres áreas de control", "description": "Colores te permite anular la paleta de esa página. Tipografía configura fuentes y escala de encabezados. Contenido edita los campos de texto.", "actionText": "" },
+          "step-3": { "title": "Vista previa en vivo", "description": "Cada cambio se refleja aquí al instante — ve exactamente cómo quedará la página antes de publicar.", "actionText": "" },
+          "step-4": { "title": "Publicar cambios", "description": "Cuando estés satisfecho, haz clic en Publicar. Tus cambios se activarán en la tienda de inmediato.", "actionText": "Entendido" }
+        }
+      },
+      "seller-3d-tour": {
+        "name": "Generador de modelos 3D",
+        "steps": {
+          "step-1": { "title": "Elige un producto", "description": "Selecciona para qué producto quieres un modelo 3D. Haz clic en cualquier tarjeta para elegirlo.", "actionText": "" },
+          "step-2": { "title": "Sube una foto", "description": "Arrastra y suelta una foto limpia del producto — mejores resultados con fondo blanco o liso.", "actionText": "" },
+          "step-3": { "title": "Generación con IA", "description": "Nuestra IA convierte tu foto en una malla 3D. Esto toma unos 2–3 minutos — puedes salir y volver.", "actionText": "" },
+          "step-4": { "title": "Previsualizar y guardar", "description": "Rota e inspecciona el modelo 3D. Si se ve bien, guárdalo — aparecerá en la página del producto para los clientes.", "actionText": "Entendido" }
+        }
+      },
+      "profile-tour": {
+        "name": "Tu perfil Makay",
+        "steps": {
+          "step-1": { "title": "Tu perfil", "description": "Este es tu perfil de Makay Beach Club. Tu avatar se gestiona desde la configuración de tu cuenta Clerk.", "actionText": "" },
+          "step-2": { "title": "Tu bio", "description": "Haz clic en Editar para agregar una bio corta que aparece en tu tarjeta de membresía.", "actionText": "" },
+          "step-3": { "title": "Cartera Makay", "description": "Tu saldo en cartera puede usarse para descuentos y beneficios exclusivos de membresía.", "actionText": "" },
+          "step-4": { "title": "Tu tarjeta de membresía", "description": "Esta es tu tarjeta digital de Makay Beach Club. Compártela o guárdala — el código QR permite al personal verificar tu membresía.", "actionText": "Disfrutar Makay" }
+        }
+      }
+    }
   },
   "auth": {
     "signIn": "Iniciar sesión",
