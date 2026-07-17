@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useRef } from 'react';
 
+const TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+
 export default function GenerationProgressStep({
   requestId,
   onComplete,
@@ -12,66 +14,96 @@ export default function GenerationProgressStep({
   onCancel: () => void;
 }) {
   const [progress, setProgress] = useState(0);
-  const [estimatedTime, setEstimatedTime] = useState(60);
   const [error, setError] = useState('');
-  const spinnerRef = useRef<HTMLDivElement>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const startTime = useRef(Date.now());
+  const intervalRef = useRef<ReturnType<typeof setInterval>>();
 
   useEffect(() => {
-    const pollInterval = setInterval(async () => {
+    // Tick elapsed time every second for display
+    const tick = setInterval(() => setElapsed(Math.floor((Date.now() - startTime.current) / 1000)), 1000);
+
+    // Timeout guard
+    const timeout = setTimeout(() => {
+      clearInterval(intervalRef.current);
+      clearInterval(tick);
+      setError('Generation timed out after 5 minutes. The server may be busy — try again.');
+    }, TIMEOUT_MS);
+
+    // Poll status
+    intervalRef.current = setInterval(async () => {
       try {
-        const response = await fetch(
-          `/api/admin/products/generate-3d/${requestId}`
-        );
-        const data = await response.json();
+        const res = await fetch(`/api/admin/products/generate-3d/${requestId}`);
+        const data = await res.json();
 
         if (data.status === 'completed' && data.glbUrl) {
+          clearInterval(intervalRef.current);
+          clearInterval(tick);
+          clearTimeout(timeout);
           onComplete(data.glbUrl);
-          clearInterval(pollInterval);
         } else if (data.status === 'failed') {
-          setError(data.errorMessage || 'Generation failed');
-          clearInterval(pollInterval);
+          clearInterval(intervalRef.current);
+          clearInterval(tick);
+          clearTimeout(timeout);
+          setError(data.errorMessage || 'Generation failed on the server.');
         } else {
           setProgress(data.progress || 0);
-          setEstimatedTime(data.estimatedTime || 30);
         }
-      } catch (err) {
-        setError('Failed to check status');
+      } catch {
+        // transient network error — keep polling
       }
-    }, 1000);
+    }, 3000);
 
-    return () => clearInterval(pollInterval);
+    return () => {
+      clearInterval(intervalRef.current);
+      clearInterval(tick);
+      clearTimeout(timeout);
+    };
   }, [requestId, onComplete]);
 
-  // Animate spinner with CSS
-  useEffect(() => {
-    if (spinnerRef.current) {
-      spinnerRef.current.style.animation = 'spin 1s linear infinite';
-    }
-  }, []);
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
 
   return (
-    <div className="step-card progress-card">
-      <div className="spinner-icon" ref={spinnerRef}>⟳</div>
-      <h2>Generating 3D Model...</h2>
-      <p>This usually takes 1-2 minutes</p>
+    <div className="wizard-step-card">
+      <div className="wizard-step-header">
+        <div className="wizard-step-icon">⚙️</div>
+        <div>
+          <h2 className="wizard-step-title">
+            {error ? 'Generation Failed' : 'Generating 3D Model…'}
+          </h2>
+          <p className="wizard-step-desc">
+            {error ? 'Something went wrong during inference' : 'TripoSR is processing your image on CPU — this takes 2–4 minutes'}
+          </p>
+        </div>
+      </div>
 
-      {error && <div className="error">{error}</div>}
-
-      {!error && (
+      {error ? (
+        <div className="gen3d-error" style={{ marginBottom: '1.5rem' }}>
+          <span>⚠</span> {error}
+        </div>
+      ) : (
         <>
-          <div className="progress-bar-container">
-            <div className="progress-bar" style={{ width: `${progress}%` }}></div>
+          <div className="gen3d-progress-track">
+            <div className="gen3d-progress-fill" style={{ width: `${Math.max(progress, 5)}%` }} />
           </div>
-          <div className="progress-info">
-            <span>{progress}%</span>
-            <span>Est. {estimatedTime}s remaining</span>
+          <div className="gen3d-progress-meta">
+            <span>{progress}% complete</span>
+            <span>Elapsed: {timeStr}</span>
           </div>
-
-          <button className="btn btn-secondary" onClick={onCancel}>
-            Cancel
-          </button>
+          <div className="gen3d-spinner-wrap">
+            <div className="gen3d-spinner" />
+            <span>Processing on Railway server…</span>
+          </div>
         </>
       )}
+
+      <div className="wizard-step-actions">
+        <button className="wizard-btn-secondary" onClick={onCancel}>
+          {error ? '← Try Again' : 'Cancel'}
+        </button>
+      </div>
     </div>
   );
 }

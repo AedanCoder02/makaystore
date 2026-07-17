@@ -365,6 +365,41 @@
   margin-bottom: 1.5rem;
 }
 
+/* New progress bar */
+.gen3d-progress-track {
+  width: 100%; height: 8px;
+  background: var(--makay-sand-cream);
+  border-radius: 8px; overflow: hidden;
+  margin: 1.25rem 0 0.5rem;
+}
+.gen3d-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--makay-peachy-rose), var(--makay-warm-gold));
+  border-radius: 8px;
+  transition: width 0.5s ease;
+}
+.gen3d-progress-meta {
+  display: flex; justify-content: space-between;
+  font-size: 0.8rem; color: var(--makay-mauve);
+  margin-bottom: 1.5rem;
+}
+.gen3d-spinner-wrap {
+  display: flex; align-items: center; gap: 0.75rem;
+  padding: 1rem;
+  background: var(--makay-sand-cream);
+  border-radius: 10px;
+  font-size: 0.85rem; color: var(--makay-mauve);
+  margin-bottom: 0.5rem;
+}
+.gen3d-spinner {
+  width: 20px; height: 20px;
+  border: 3px solid var(--makay-sand-cream);
+  border-top-color: var(--makay-peachy-rose);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
 /* Model Canvas */
 .model-canvas {
   width: 100%;
