@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useCart } from '@/hooks/useCart';
 import { useUser, SignOutButton } from '@clerk/nextjs';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   ShoppingCart, User, ChevronDown, LayoutDashboard,
   ClipboardList, UserCircle, Menu, X, Store,
@@ -21,9 +21,12 @@ export default function NavBar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   useEffect(() => { setMounted(true); }, []);
   const totalItems = mounted ? rawTotal : 0;
 
+  const openMenu = () => { clearTimeout(closeTimer.current); setMenuOpen(true); };
+  const scheduleClose = () => { closeTimer.current = setTimeout(() => setMenuOpen(false), 150); };
   const closeMobile = () => setMobileOpen(false);
 
   return (
@@ -53,11 +56,10 @@ export default function NavBar() {
           <LanguageSwitcher />
 
           {isSignedIn ? (
-            <div className="navbar-user-menu" onMouseLeave={() => setMenuOpen(false)}>
+            <div className="navbar-user-menu" onMouseEnter={openMenu} onMouseLeave={scheduleClose}>
               <button
                 className="navbar-user-btn"
                 onClick={() => setMenuOpen(!menuOpen)}
-                onMouseEnter={() => setMenuOpen(true)}
               >
                 <User size={18} />
                 <span className="navbar-user-name">{user?.firstName ?? 'Account'}</span>

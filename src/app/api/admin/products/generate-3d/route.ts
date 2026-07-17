@@ -1,45 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateProductModel } from '@/lib/services/productGeneration';
-import { useGenerationStore } from '@/stores/generationStore';
+
+const PROVIDER = process.env.GENERATION_PROVIDER || 'tripo-local';
+const TRIPO_URL = process.env.TRIPO_LOCAL_URL || '';
+const MUAPI_KEY = process.env.MUAPI_API_KEY || '';
+
+function isProviderConfigured(): { ok: boolean; reason?: string } {
+  if (PROVIDER === 'tripo-local') {
+    if (!TRIPO_URL) return { ok: false, reason: 'TRIPO_LOCAL_URL environment variable is not set. Deploy the TripoSR server and add its URL to Vercel env vars.' };
+  }
+  if (PROVIDER === 'muapi') {
+    if (!MUAPI_KEY) return { ok: false, reason: 'MUAPI_API_KEY environment variable is not set.' };
+  }
+  return { ok: true };
+}
 
 export async function POST(req: NextRequest) {
+  const { ok, reason } = isProviderConfigured();
+  if (!ok) {
+    return NextResponse.json({ error: `3D generation not configured: ${reason}` }, { status: 503 });
+  }
+
   try {
     const { productId, imageUrl } = await req.json();
 
     if (!productId || !imageUrl) {
-      return NextResponse.json(
-        { error: 'productId and imageUrl required' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'productId and imageUrl required' }, { status: 400 });
     }
 
-    // Start generation
     const result = await generateProductModel(imageUrl, productId);
 
-    // Store job in Zustand (for frontend polling)
-    const store = useGenerationStore.getState();
-    store.addJob({
+    return NextResponse.json({
       requestId: result.requestId,
-      productId,
       status: result.status,
-      progress: 0,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
+      estimatedTime: 180,
     });
-
-    return NextResponse.json(
-      {
-        requestId: result.requestId,
-        status: result.status,
-        estimatedTime: 60, // seconds
-      },
-      { status: 200 }
-    );
   } catch (error) {
-    console.error('Generation error:', error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Unknown error' },
-      { status: 500 }
-    );
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[generate-3d]', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
