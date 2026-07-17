@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import { useCart } from '@/hooks/useCart';
 import { useUser, SignOutButton } from '@clerk/nextjs';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   ShoppingCart, User, ChevronDown, LayoutDashboard,
   ClipboardList, UserCircle, Menu, X, Store,
@@ -13,13 +13,16 @@ import {
 import LanguageSwitcher from './LanguageSwitcher';
 
 export default function NavBar() {
-  const { totalItems } = useCart();
+  const { totalItems: rawTotal } = useCart();
   const t = useTranslations('nav');
   const { isSignedIn, user } = useUser();
   const role = (user?.publicMetadata?.role as string) ?? 'customer';
   const isStaff = role === 'admin' || role === 'supervisor' || role === 'worker' || role === 'seller';
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+  const totalItems = mounted ? rawTotal : 0;
 
   const closeMobile = () => setMobileOpen(false);
 
