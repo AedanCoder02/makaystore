@@ -490,6 +490,48 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
     ],
   },
 
+  // ── Seller 3D Generation ─────────────────────────────────────────
+  'seller-3d-tour': {
+    id: 'seller-3d-tour',
+    name: '3D Model Generator',
+    role: 'seller',
+    steps: [
+      {
+        id: 'step-1',
+        target: '.product-selection-grid',
+        title: 'Pick a Product',
+        description: 'Select which product you want a 3D model for. Click any card to choose it.',
+        placement: 'bottom',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-2',
+        target: '.gen3d-body',
+        title: 'Upload a Photo',
+        description: 'Drag and drop a clean product photo — best results with a white or plain background.',
+        placement: 'top',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-3',
+        target: '.gen3d-body',
+        title: 'AI Generation',
+        description: 'Our AI converts your photo into a 3D mesh. This takes about 2–3 minutes — you can leave this page and come back.',
+        placement: 'top',
+        skipAllowed: true,
+      },
+      {
+        id: 'step-4',
+        target: '.gen3d-body',
+        title: 'Preview & Save',
+        description: 'Rotate and inspect the 3D model. If it looks good, save it — it will appear on the product page for customers.',
+        placement: 'top',
+        actionText: 'Got it',
+        skipAllowed: false,
+      },
+    ],
+  },
+
   // ── Customer / Profile ───────────────────────────────────────────
   'profile-tour': {
     id: 'profile-tour',

@@ -6,6 +6,8 @@ interface Product {
   id: string;
   title: string;
   price: number;
+  image: string;
+  category: string;
 }
 
 export default function ProductSelectionStep({
@@ -15,40 +17,73 @@ export default function ProductSelectionStep({
 }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedId, setSelectedId] = useState('');
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Mock data (will fetch from Payload in production)
-    const mockProducts = [
-      { id: '1', title: 'Beach Cover-Up Dress', price: 45 },
-      { id: '2', title: 'Linen Shorts', price: 35 },
-      { id: '3', title: 'Resort Hat', price: 25 },
-    ];
-    setProducts(mockProducts);
+    fetch('/api/products')
+      .then((r) => r.json())
+      .then((data) => {
+        if (Array.isArray(data)) setProducts(data);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
   }, []);
 
-  return (
-    <div className="step-card">
-      <h2>Select Product</h2>
-      <select
-        value={selectedId}
-        onChange={(e) => setSelectedId(e.target.value)}
-        className="product-select"
-      >
-        <option value="">Choose a product...</option>
-        {products.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.title} (${p.price})
-          </option>
-        ))}
-      </select>
+  const selected = products.find((p) => p.id === selectedId);
 
-      <button
-        className="btn btn-primary"
-        onClick={() => onProductSelected(selectedId)}
-        disabled={!selectedId}
-      >
-        Next: Upload Image
-      </button>
+  return (
+    <div className="wizard-step-card">
+      <div className="wizard-step-header">
+        <div className="wizard-step-icon">🛍️</div>
+        <div>
+          <h2 className="wizard-step-title">Select a Product</h2>
+          <p className="wizard-step-desc">Choose the product you want to generate a 3D model for</p>
+        </div>
+      </div>
+
+      {loading ? (
+        <div className="wizard-loading">Loading products…</div>
+      ) : (
+        <div className="product-selection-grid">
+          {products.map((p) => (
+            <button
+              key={p.id}
+              className={`product-select-card${selectedId === p.id ? ' selected' : ''}`}
+              onClick={() => setSelectedId(p.id)}
+            >
+              <div className="psc-image-wrap">
+                {p.image ? (
+                  <img src={p.image} alt={p.title} className="psc-image" />
+                ) : (
+                  <div className="psc-placeholder">{p.category.charAt(0)}</div>
+                )}
+                {selectedId === p.id && <div className="psc-check">✓</div>}
+              </div>
+              <div className="psc-info">
+                <span className="psc-category">{p.category}</span>
+                <span className="psc-title">{p.title}</span>
+                <span className="psc-price">${p.price.toFixed(2)}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+
+      {selected && (
+        <div className="wizard-selection-summary">
+          <span>Selected: <strong>{selected.title}</strong></span>
+        </div>
+      )}
+
+      <div className="wizard-step-actions">
+        <button
+          className="wizard-btn-primary"
+          onClick={() => onProductSelected(selectedId)}
+          disabled={!selectedId}
+        >
+          Next: Upload Image →
+        </button>
+      </div>
     </div>
   );
 }
