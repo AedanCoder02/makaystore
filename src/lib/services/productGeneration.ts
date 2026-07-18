@@ -3,13 +3,94 @@
  * Provider-agnostic abstraction for 3D model generation.
  *
  * Priority order (first configured wins):
- *   1. tripo3d   — Tripo3D API (tripo3d.ai). Best quality. ~$0.04/model.
+ *   1. fal       — FAL.ai TRELLIS. Best quality. $0.02/model. Free credits on signup.
+ *                  Sign up: fal.ai → Dashboard → API Keys
+ *                  Set FAL_KEY in Vercel env.
+ *   2. tripo3d   — Tripo3D API (tripo3d.ai). ~$0.04/model.
  *                  Set TRIPO3D_API_KEY in Vercel env.
- *   2. meshy     — Meshy API (meshy.ai). Excellent quality. Free tier available.
+ *   3. meshy     — Meshy API (meshy.ai). Free tier available.
  *                  Set MESHY_API_KEY in Vercel env.
- *   3. tripo-local — Open-source TripoSR on Railway. Free, lower quality.
- *                  Set GENERATION_PROVIDER=tripo-local + TRIPO_LOCAL_URL.
+ *   4. tripo-local — Open-source TripoSR on Railway. Free, lower quality.
+ *                  Set TRIPO_LOCAL_URL in Vercel env.
  */
+
+// ─────────────────────────────────────────────────────────────
+// FAL.ai TRELLIS Provider  (https://fal.ai/models/fal-ai/trellis)
+// State-of-the-art image-to-3D. $0.02/generation. Free credits on signup.
+// Get API key: https://fal.ai → Dashboard → API Keys → Create Key
+// Add to Vercel: FAL_KEY=your_key
+// ─────────────────────────────────────────────────────────────
+class FalTrellisProvider implements GenerationProvider {
+  private apiKey: string;
+  private base = 'https://queue.fal.run/fal-ai/trellis';
+
+  constructor(apiKey: string) {
+    this.apiKey = apiKey;
+  }
+
+  private get headers() {
+    return {
+      'Authorization': `Key ${this.apiKey}`,
+      'Content-Type': 'application/json',
+    };
+  }
+
+  async generateFromImage(imageUrl: string, _productId: string) {
+    const res = await fetch(this.base, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify({
+        image_url: imageUrl,
+        texture_size: 1024,
+        mesh_simplify: 0.95,
+        ss_sampling_steps: 12,
+        slat_sampling_steps: 12,
+      }),
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`FAL TRELLIS submit error ${res.status}: ${err}`);
+    }
+
+    const data = await res.json();
+    return { requestId: data.request_id as string, status: 'pending' as const };
+  }
+
+  async getPredictionResult(requestId: string) {
+    // Check status
+    const statusRes = await fetch(`${this.base}/requests/${requestId}/status`, {
+      headers: this.headers,
+    });
+
+    if (!statusRes.ok) {
+      if (statusRes.status === 404) return { status: 'failed' as const, errorMessage: 'Request not found' };
+      throw new Error(`FAL status error ${statusRes.status}`);
+    }
+
+    const statusData = await statusRes.json();
+    const falStatus: string = statusData.status;
+
+    if (falStatus === 'COMPLETED') {
+      // Fetch result
+      const resultRes = await fetch(`${this.base}/requests/${requestId}`, {
+        headers: this.headers,
+      });
+      if (!resultRes.ok) throw new Error(`FAL result fetch error ${resultRes.status}`);
+      const result = await resultRes.json();
+      const glbUrl = result.data?.model_mesh?.url ?? result.model_mesh?.url;
+      if (!glbUrl) throw new Error('FAL returned no GLB URL in result');
+      return { status: 'completed' as const, progress: 100, outputUrl: glbUrl };
+    }
+
+    if (falStatus === 'FAILED') {
+      return { status: 'failed' as const, errorMessage: statusData.error ?? 'Generation failed' };
+    }
+
+    const progress = falStatus === 'IN_PROGRESS' ? 50 : 10;
+    return { status: 'processing' as const, progress };
+  }
+}
 
 export interface GenerationProvider {
   generateFromImage(imageUrl: string, productId: string): Promise<{
@@ -207,24 +288,28 @@ class TripoSRProvider implements GenerationProvider {
 // Factory — auto-selects best available provider
 // ─────────────────────────────────────────────────────────────
 export const getGenerationProvider = (): GenerationProvider => {
+  const falKey      = process.env.FAL_KEY;
   const tripo3dKey  = process.env.TRIPO3D_API_KEY;
   const meshyKey    = process.env.MESHY_API_KEY;
   const tripoUrl    = process.env.TRIPO_LOCAL_URL;
   const explicit    = process.env.GENERATION_PROVIDER;
 
   // Explicit override
-  if (explicit === 'tripo3d' && tripo3dKey) return new Tripo3DProvider(tripo3dKey);
-  if (explicit === 'meshy'   && meshyKey)   return new MeshyProvider(meshyKey);
-  if (explicit === 'tripo-local' && tripoUrl) return new TripoSRProvider(tripoUrl);
+  if (explicit === 'fal'         && falKey)     return new FalTrellisProvider(falKey);
+  if (explicit === 'tripo3d'     && tripo3dKey) return new Tripo3DProvider(tripo3dKey);
+  if (explicit === 'meshy'       && meshyKey)   return new MeshyProvider(meshyKey);
+  if (explicit === 'tripo-local' && tripoUrl)   return new TripoSRProvider(tripoUrl);
 
   // Auto-select: best quality first
+  if (falKey)    return new FalTrellisProvider(falKey);
   if (tripo3dKey) return new Tripo3DProvider(tripo3dKey);
   if (meshyKey)   return new MeshyProvider(meshyKey);
   if (tripoUrl)   return new TripoSRProvider(tripoUrl);
 
   throw new Error(
-    '3D generation not configured. Add TRIPO3D_API_KEY (tripo3d.ai, best quality) ' +
-    'or MESHY_API_KEY (meshy.ai, free tier) to Vercel environment variables.'
+    '3D generation not configured. ' +
+    'Add FAL_KEY (fal.ai → best quality, $0.02/model, free credits on signup) ' +
+    'or TRIPO_LOCAL_URL (Railway TripoSR fallback) to Vercel environment variables.'
   );
 };
 

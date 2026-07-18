@@ -5,9 +5,10 @@ export async function GET() {
   try {
     getGenerationProvider(); // throws if nothing configured
     const provider =
-      process.env.TRIPO3D_API_KEY ? 'tripo3d' :
-      process.env.MESHY_API_KEY   ? 'meshy'   :
-      process.env.TRIPO_LOCAL_URL ? 'tripo-local' : 'none';
+      process.env.FAL_KEY         ? 'fal-trellis' :
+      process.env.TRIPO3D_API_KEY ? 'tripo3d'     :
+      process.env.MESHY_API_KEY   ? 'meshy'        :
+      process.env.TRIPO_LOCAL_URL ? 'tripo-local'  : 'none';
     return NextResponse.json({ configured: true, provider });
   } catch (e) {
     return NextResponse.json({ configured: false, error: (e as Error).message }, { status: 503 });
