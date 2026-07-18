@@ -650,6 +650,112 @@
   margin: 0;
 }
 
+/* ── Admin Profile extras ── */
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.profile-name-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.profile-name-input {
+  font-family: var(--font-playfair-display), serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--makay-dark-navy);
+  border: 2px solid var(--makay-peachy-rose);
+  border-radius: 8px;
+  padding: 0.1rem 0.5rem;
+  outline: none;
+  background: #fff;
+  width: 220px;
+}
+
+.profile-cancel-btn {
+  background: none;
+  border: none;
+  color: var(--makay-mauve);
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+.profile-stat-alert .profile-stat-value { color: #d97706; }
+.profile-stat-alert { background: #fffbeb; border: 1px solid #fde68a; }
+
+/* Config form */
+.profile-config-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.profile-config-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profile-config-label {
+  font-family: var(--font-montserrat);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--makay-dark-navy);
+  min-width: 170px;
+}
+
+.profile-config-input {
+  flex: 1;
+  border: 1px solid var(--makay-sand-cream);
+  border-radius: 8px;
+  padding: 0.45rem 0.75rem;
+  font-family: var(--font-montserrat);
+  font-size: 0.875rem;
+  color: var(--makay-dark-navy);
+  outline: none;
+  transition: border-color 0.2s;
+  background: #fff;
+}
+.profile-config-input:focus { border-color: var(--makay-peachy-rose); }
+.profile-config-input--short { flex: 0 0 80px; }
+
+.profile-config-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 0.25rem;
+}
+
+.profile-save-config-btn {
+  padding: 0.5rem 1.25rem;
+  background: var(--makay-peachy-rose);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-montserrat);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.profile-save-config-btn:disabled { opacity: 0.65; }
+.profile-save-config-btn:hover:not(:disabled) { opacity: 0.88; }
+
+.profile-clerk-link {
+  font-family: var(--font-montserrat);
+  font-size: 0.82rem;
+  color: var(--makay-mauve);
+  text-decoration: underline;
+  transition: color 0.2s;
+}
+.profile-clerk-link:hover { color: var(--makay-peachy-rose); }
+
 @media (max-width: 480px) {
   .profile-stats-grid { grid-template-columns: repeat(2, 1fr); }
   .profile-quick-links { grid-template-columns: 1fr; }
