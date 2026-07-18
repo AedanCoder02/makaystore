@@ -1299,3 +1299,329 @@
     padding: 0.5rem;
   }
 }
+
+/* ============================================================
+   SUPERVISOR LAYOUT + SIDEBAR (A7)
+   ============================================================ */
+
+.supervisor-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.supervisor-main {
+  flex: 1;
+  background: #f9f7f4;
+  overflow-y: auto;
+}
+
+.sup-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: #2c2c2c;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 0 1rem;
+}
+
+.sup-sidebar-brand {
+  padding: 0 1.25rem 1.5rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 0.75rem;
+}
+
+.sup-sidebar-role {
+  display: block;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #f59e0b;
+  letter-spacing: 0.02em;
+}
+
+.sup-sidebar-sub {
+  display: block;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.35);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-top: 0.15rem;
+}
+
+.sup-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0 0.75rem;
+  flex: 1;
+}
+
+.sup-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  color: rgba(255,255,255,0.55);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sup-nav-item:hover {
+  background: rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.9);
+}
+
+.sup-nav-item.active {
+  background: rgba(245,158,11,0.15);
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+.sup-back-link {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 1.5rem;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.3);
+  text-decoration: none;
+  transition: color 0.15s;
+  margin-top: auto;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  padding-top: 1rem;
+}
+
+.sup-back-link:hover { color: rgba(255,255,255,0.6); }
+
+/* ── Sub-page shared styles ── */
+.sup-page {
+  padding: 2rem;
+  max-width: 900px;
+}
+
+.sup-page-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+}
+
+.sup-page-icon { color: #f59e0b; }
+
+.sup-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+  flex: 1;
+}
+
+.sup-page-count {
+  font-size: 0.8rem;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+}
+
+.sup-loading {
+  color: #9ca3af;
+  padding: 2rem;
+  font-style: italic;
+}
+
+.sup-empty-state {
+  color: #9ca3af;
+  padding: 2rem;
+  text-align: center;
+  font-style: italic;
+}
+
+/* Table */
+.sup-table-wrap {
+  background: white;
+  border-radius: 10px;
+  border: 1px solid #e8ddd5;
+  overflow: hidden;
+}
+
+.sup-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.sup-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background: #f9f7f4;
+  color: #6b7280;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid #e8ddd5;
+}
+
+.sup-table td {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid #f5f0eb;
+  color: #1f2937;
+}
+
+.sup-table tr:last-child td { border-bottom: none; }
+.sup-table tr:hover td { background: #fdf9f6; }
+
+.sup-td-name {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-weight: 600;
+}
+
+.sup-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #d4a574;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.sup-td-muted { color: #6b7280; }
+.sup-td-amount { font-weight: 700; color: #1f2937; }
+
+/* Status badges */
+.sup-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.sup-status-badge.active { background: #d1fae5; color: #065f46; }
+.sup-status-badge.inactive { background: #f3f4f6; color: #6b7280; }
+
+.sup-order-status {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+.sup-order-status--placed    { background: #fef3c7; color: #92400e; }
+.sup-order-status--confirmed { background: #dbeafe; color: #1e40af; }
+.sup-order-status--shipped   { background: #ede9fe; color: #5b21b6; }
+.sup-order-status--delivered { background: #d1fae5; color: #065f46; }
+.sup-order-status--cancelled { background: #fee2e2; color: #991b1b; }
+.sup-order-status--pending   { background: #fef3c7; color: #92400e; }
+.sup-order-status--approved  { background: #d1fae5; color: #065f46; }
+
+/* Filter tabs */
+.sup-filter-tabs {
+  display: flex;
+  gap: 0.25rem;
+  background: #f3f4f6;
+  border-radius: 8px;
+  padding: 0.2rem;
+}
+
+.sup-filter-tab {
+  padding: 0.3rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.sup-filter-tab.active {
+  background: white;
+  color: #f59e0b;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+/* Shifts grid */
+.sup-shifts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.sup-shift-card {
+  background: white;
+  border: 1px solid #e8ddd5;
+  border-radius: 10px;
+  padding: 1rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.sup-shift-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #d4a574;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.sup-shift-info { flex: 1; }
+
+.sup-shift-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #1f2937;
+  margin: 0 0 0.2rem;
+}
+
+.sup-shift-times {
+  font-size: 0.78rem;
+  color: #6b7280;
+  margin: 0 0 0.15rem;
+}
+
+.sup-shift-hours {
+  font-size: 0.78rem;
+  color: #d4a574;
+  font-weight: 600;
+  margin: 0;
+}
+
+.sup-shift-status {
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  flex-shrink: 0;
+}
+
+.sup-shift-status.active { background: #d1fae5; color: #065f46; }
+.sup-shift-status.done   { background: #f3f4f6; color: #6b7280; }
+
+@media (max-width: 768px) {
+  .sup-sidebar { display: none; }
+  .sup-page { padding: 1rem; }
+  .sup-shifts-grid { grid-template-columns: 1fr; }
+}
