@@ -57,6 +57,20 @@ export default function ModelPreviewStep({
         (gltf) => {
           model = gltf.scene;
 
+          // Enable vertex colors on every mesh in the loaded GLB
+          model.traverse((child) => {
+            if ((child as THREE.Mesh).isMesh) {
+              const mesh = child as THREE.Mesh;
+              const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+              materials.forEach((mat) => {
+                if (mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshPhongMaterial) {
+                  mat.vertexColors = true;
+                  mat.needsUpdate = true;
+                }
+              });
+            }
+          });
+
           // Auto-center and scale to fit camera
           const box = new THREE.Box3().setFromObject(model);
           const center = box.getCenter(new THREE.Vector3());
