@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Check, RotateCcw, HelpCircle, Globe, ShoppingBag, Package, CreditCard,
   Loader, ExternalLink, Wand2, Globe2, Eye, EyeOff, CreditCard as CardIcon,
+  PanelLeftClose, PanelLeftOpen,
 } from 'lucide-react';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
@@ -135,6 +136,7 @@ export default function StudioEditor() {
   const [iframeReady, setIframeReady] = useState(false);
   const [previewSrc, setPreviewSrc] = useState('/');
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [panelCollapsed, setPanelCollapsed] = useState(false);
 
   // Save states
   const [saves, setSaves] = useState<Record<string,SaveState>>({});
@@ -357,7 +359,7 @@ export default function StudioEditor() {
       </div>
 
       {/* ── Body ────────────────────────────────────────────────────── */}
-      <div className="studio-body">
+      <div className="studio-body" style={{ gridTemplateColumns: panelCollapsed ? '0 1fr' : '340px 1fr' }}>
 
         {/* ── PAGES TAB ─────────────────────────────────────────────── */}
         {section === 'pages' && (
@@ -565,6 +567,9 @@ export default function StudioEditor() {
             {/* Right: preview */}
             <div className="studio-preview">
               <div className="studio-preview-bar">
+                <button className="studio-panel-toggle" onClick={() => setPanelCollapsed(c => !c)} title={panelCollapsed ? 'Show panel' : 'Hide panel'}>
+                  {panelCollapsed ? <PanelLeftOpen size={14} /> : <PanelLeftClose size={14} />}
+                </button>
                 <span className="studio-preview-label">Live Preview</span>
                 {activePage === 'global'
                   ? <span className="studio-preview-url">color palette</span>
@@ -668,6 +673,9 @@ export default function StudioEditor() {
             {/* Right: card canvas (large) */}
             <div className="studio-preview studio-card-canvas-area">
               <div className="studio-preview-bar">
+                <button className="studio-panel-toggle" onClick={() => setPanelCollapsed(c => !c)} title={panelCollapsed ? 'Show panel' : 'Hide panel'}>
+                  {panelCollapsed ? <PanelLeftOpen size={14} /> : <PanelLeftClose size={14} />}
+                </button>
                 <span className="studio-preview-label">Card Preview</span>
                 <span className="studio-preview-url">drag elements to reposition</span>
               </div>
