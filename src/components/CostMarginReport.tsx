@@ -6,6 +6,8 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 
+import type { DateRange } from './AdminReportsDashboard';
+
 interface CostData {
   revenue: number;
   costPercent: number;
@@ -21,18 +23,19 @@ function getMarginColor(margin: number): 'green' | 'amber' | 'red' {
   return 'red';
 }
 
-export default function CostMarginReport() {
+export default function CostMarginReport({ dateRange = '30d' }: { dateRange?: DateRange }) {
   const t = useTranslations('reports');
   const [data, setData] = useState<CostData | null>(null);
   const [costInput, setCostInput] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch('/api/admin/reports/cost')
-      .then((r) => r.json())
-      .then((d) => { setData(d); setCostInput(String(d.costPercent)); })
+    setData(null);
+    fetch(`/api/admin/reports/cost?range=${dateRange}`)
+      .then((r) => r.ok ? r.json() : Promise.reject())
+      .then((d: CostData) => { setData(d); setCostInput(String(d.costPercent ?? 30)); })
       .catch(() => {});
-  }, []);
+  }, [dateRange]);
 
   async function saveCostPercent() {
     const val = Number(costInput);

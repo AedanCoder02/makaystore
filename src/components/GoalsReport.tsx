@@ -24,9 +24,9 @@ export default function GoalsReport() {
 
   useEffect(() => {
     fetch('/api/admin/reports/goals')
-      .then((r) => r.json())
-      .then((d) => { setData(d); setTargetInput(String(d.target)); })
-      .catch(() => {});
+      .then((r) => r.ok ? r.json() : Promise.reject())
+      .then((d: GoalsData) => { setData(d); setTargetInput(String(d?.target ?? 0)); })
+      .catch(() => setData({ target: 0, actual: 0, progress: 0, daysLeft: 0, daysInMonth: 30, projectedMonthEnd: 0, chart: [] }));
   }, []);
 
   async function saveTarget() {
@@ -51,9 +51,8 @@ export default function GoalsReport() {
 
   const milestones = [
     { label: 'First $50k revenue', done: data.actual >= 50000 },
-    { label: '100 orders this month', done: false },
+    { label: `${fmt(data.target)} monthly goal`, done: data.actual >= data.target && data.target > 0 },
     { label: '3D product line live', done: false },
-    { label: `${fmt(data.target)} monthly goal`, done: data.actual >= data.target },
   ];
 
   return (
@@ -85,7 +84,7 @@ export default function GoalsReport() {
         <div className="metric-card">
           <div className="metric-label">{t('daysLeft')}</div>
           <div className="metric-value">{data.daysLeft}</div>
-          <div className="metric-unit">{t('inJune')} {monthName}</div>
+          <div className="metric-unit">{monthName}</div>
         </div>
         <div className="metric-card">
           <div className="metric-label">{t('projectedFinish')}</div>

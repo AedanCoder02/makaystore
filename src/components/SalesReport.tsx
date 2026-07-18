@@ -6,6 +6,12 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
 
+import type { DateRange } from './AdminReportsDashboard';
+
+const DATE_RANGE_LABELS: Record<DateRange, string> = {
+  '7d': 'Last 7 days', '30d': 'Last 30 days', '3m': 'Last 3 months', 'all': 'All time',
+};
+
 interface SalesData {
   chart: { date: string; revenue: number }[];
   totalRevenue: number;
@@ -13,16 +19,17 @@ interface SalesData {
   avgOrder: number;
 }
 
-export default function SalesReport() {
+export default function SalesReport({ dateRange = '30d' }: { dateRange?: DateRange }) {
   const t = useTranslations('reports');
   const [data, setData] = useState<SalesData | null>(null);
 
   useEffect(() => {
-    fetch('/api/admin/reports/sales')
-      .then((r) => r.json())
-      .then(setData)
-      .catch(() => {});
-  }, []);
+    setData(null);
+    fetch(`/api/admin/reports/sales?range=${dateRange}`)
+      .then((r) => r.ok ? r.json() : Promise.reject())
+      .then((d: SalesData) => setData(d))
+      .catch(() => setData({ chart: [], totalRevenue: 0, totalOrders: 0, avgOrder: 0 }));
+  }, [dateRange]);
 
   return (
     <div className="report-container">
@@ -32,7 +39,7 @@ export default function SalesReport() {
           <div className="metric-value">
             {data ? `$${data.totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : '—'}
           </div>
-          <div className="metric-unit">{t('inJune')}</div>
+          <div className="metric-unit">{DATE_RANGE_LABELS[dateRange]}</div>
         </div>
         <div className="metric-card">
           <div className="metric-label">{t('ordersThisMonth')}</div>

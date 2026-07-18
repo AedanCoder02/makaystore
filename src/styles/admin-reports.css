@@ -54,6 +54,37 @@
   font-size: 0.9rem;
 }
 
+/* ---- Date range picker ---- */
+.reports-date-range {
+  display: flex;
+  gap: 0.25rem;
+  background: #f5efe5;
+  border-radius: 8px;
+  padding: 0.2rem;
+}
+
+.date-range-btn {
+  padding: 0.3rem 0.75rem;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: #6b7280;
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.date-range-btn:hover { color: #2c2c2c; }
+
+.date-range-btn.active {
+  background: #fff;
+  color: #d4a574;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
 /* ---- Report content area ---- */
 .report-content {
   padding-top: 0.5rem;

@@ -97,7 +97,7 @@ export default function RotationReport() {
       </div>
 
       <div style={{ marginTop: '1.5rem' }}>
-        <Link href="/admin/rotation" className="btn-primary-link">
+        <Link href="/seller/rotation" className="btn-primary-link">
           {t('manageRotation')}
         </Link>
       </div>
