@@ -2,24 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  LayoutDashboard,
-  Package,
-  ShoppingBag,
-  Users,
-  BarChart2,
-  RefreshCw,
-  Wand2,
-} from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, BarChart2 } from 'lucide-react';
 
 const SIDEBAR_ITEMS = [
-  { label: 'Panel',      href: '/admin/dashboard',          icon: LayoutDashboard },
-  { label: 'Productos',  href: '/admin/products/create-3d', icon: Package },
-  { label: 'Pedidos',    href: '/admin/orders',             icon: ShoppingBag },
-  { label: 'Usuarios',   href: '/admin/users',              icon: Users },
-  { label: 'Reportes',   href: '/admin/reports',            icon: BarChart2 },
-  { label: 'Rotación',   href: '/admin/rotation',           icon: RefreshCw },
-  { label: 'Studio',     href: '/admin/studio',             icon: Wand2 },
+  { label: 'Panel',     href: '/admin/dashboard', icon: LayoutDashboard },
+  { label: 'Pedidos',   href: '/admin/orders',    icon: ShoppingBag },
+  { label: 'Usuarios',  href: '/admin/users',     icon: Users },
+  { label: 'Reportes',  href: '/admin/reports',   icon: BarChart2 },
 ];
 
 export default function AdminSidebar() {

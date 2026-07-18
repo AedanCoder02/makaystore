@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock } from 'lucide-react';
+import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw } from 'lucide-react';
 
 export default function SellerSidebar() {
   const path = usePathname();
@@ -16,6 +16,8 @@ export default function SellerSidebar() {
     { href: '/seller/stock',              label: t('nav.stock'),     icon: Boxes },
     { href: '/seller/activity',           label: t('nav.activity'),  icon: Clock },
     { href: '/seller/products/create-3d', label: t('nav.models3d'),  icon: Box },
+    { href: '/seller/rotation',           label: t('nav.rotation'),  icon: RefreshCw },
+    { href: '/seller/studio',             label: t('nav.studio'),    icon: Wand2 },
   ];
 
   return (

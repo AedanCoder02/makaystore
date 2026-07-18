@@ -1,10 +1,5 @@
-import ProductRotationManager from '@/components/ProductRotationManager';
-import RoleBasedGuard from '@/components/RoleBasedGuard';
+import { redirect } from 'next/navigation';
 
-export default function ProductRotationPage() {
-  return (
-    <RoleBasedGuard requiredRole="supervisor">
-      <ProductRotationManager />
-    </RoleBasedGuard>
-  );
+export default function AdminRotationRedirect() {
+  redirect('/seller/rotation');
 }

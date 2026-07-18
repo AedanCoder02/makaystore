@@ -576,23 +576,101 @@ export default function StudioEditor() {
           )}
         </div>
 
-        {/* ── Right: live iframe preview ──────────────────────────── */}
+        {/* ── Right: preview ───────────────────────────────────────── */}
         <div className="studio-preview">
           <div className="studio-preview-bar">
             <span className="studio-preview-label">Live Preview</span>
-            <span className="studio-preview-url">{previewSrc}</span>
+            {(section === 'brand' || section === 'scroll' || section === 'card') ? (
+              <span className="studio-preview-url">color palette</span>
+            ) : (
+              <span className="studio-preview-url">{previewSrc}</span>
+            )}
           </div>
           <div className="studio-iframe-wrap">
-            <iframe
-              key={`${section}-${activePage}`}
-              ref={iframeRef}
-              src={previewSrc}
-              className="studio-iframe"
-              onLoad={() => { setIframeReady(true); injectStyles(pageStates[activePage] ?? makeDefaultPage()); }}
-              title="Storefront Preview"
-            />
+            {(section === 'brand' || section === 'scroll') ? (
+              <BrandColorPreview colors={colors} scrollColors={scrollColors} activeSection={section} />
+            ) : section === 'card' ? (
+              <div style={{ padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: '#f5efe5' }}>
+                <p style={{ color: '#a89080', fontSize: '0.85rem' }}>Card preview shown in the editor panel</p>
+              </div>
+            ) : (
+              <iframe
+                key={`${section}-${activePage}`}
+                ref={iframeRef}
+                src={previewSrc}
+                className="studio-iframe"
+                onLoad={() => { setIframeReady(true); injectStyles(pageStates[activePage] ?? makeDefaultPage()); }}
+                title="Storefront Preview"
+              />
+            )}
           </div>
         </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Brand color preview ───────────────────────────────────────────────────
+function BrandColorPreview({ colors, scrollColors, activeSection }: {
+  colors: Record<string, string>;
+  scrollColors: string[];
+  activeSection: 'brand' | 'scroll';
+}) {
+  const primary    = colors['--makay-peachy-rose']    ?? '#D4A574';
+  const secondary  = colors['--makay-soft-coral']     ?? '#E8B4A6';
+  const pageBg     = colors['--makay-premium-cream']  ?? '#FFF8F0';
+  const sectionBg  = colors['--makay-sand-cream']     ?? '#F5EFE5';
+  const gold       = colors['--makay-warm-gold']      ?? '#D4AF37';
+  const text       = colors['--makay-dark-navy']      ?? '#2C2C2C';
+  const muted      = colors['--makay-mauve']          ?? '#A89080';
+
+  if (activeSection === 'scroll') {
+    return (
+      <div style={{ padding: '1.5rem', background: '#fafafa', height: '100%', overflowY: 'auto' }}>
+        <p style={{ fontSize: '0.75rem', color: '#888', marginBottom: '1rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Section scroll colors</p>
+        {['Hero', 'Featured Collection', 'Why Makay', 'Testimonials', 'How It Works', 'Categories', 'Newsletter'].map((name, i) => (
+          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+            <div style={{ width: 32, height: 32, borderRadius: 6, background: scrollColors[i] ?? '#fff', border: '1px solid #e0e0e0', flexShrink: 0 }} />
+            <span style={{ fontSize: '0.82rem', color: '#555' }}>{name}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ height: '100%', overflowY: 'auto', background: pageBg }}>
+      {/* Fake navbar */}
+      <div style={{ background: pageBg, borderBottom: `1px solid ${sectionBg}`, padding: '0.75rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ fontWeight: 700, fontSize: '0.9rem', color: text }}>makay</span>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {[primary, secondary, gold].map((c, i) => <div key={i} style={{ width: 8, height: 8, borderRadius: '50%', background: c }} />)}
+        </div>
+      </div>
+      {/* Fake hero */}
+      <div style={{ background: `linear-gradient(135deg, ${primary}33, ${secondary}55)`, padding: '3rem 1.5rem', textAlign: 'center' }}>
+        <div style={{ fontSize: '1.4rem', fontWeight: 700, color: text, marginBottom: '0.5rem' }}>Your Headline Here</div>
+        <div style={{ fontSize: '0.8rem', color: muted, marginBottom: '1.25rem' }}>Subtitle text goes here</div>
+        <div style={{ display: 'inline-block', background: primary, color: pageBg, padding: '0.5rem 1.25rem', borderRadius: 6, fontSize: '0.8rem', fontWeight: 600 }}>Explore Collection</div>
+      </div>
+      {/* Fake section */}
+      <div style={{ background: sectionBg, padding: '1.5rem', display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+        {[primary, secondary, sectionBg, gold, text, muted].map((c, i) => (
+          <div key={i} style={{ textAlign: 'center' }}>
+            <div style={{ width: 36, height: 36, borderRadius: 8, background: c, border: `1px solid ${text}22`, marginBottom: '0.25rem' }} />
+            <div style={{ fontSize: '0.6rem', color: muted, maxWidth: 40, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c}</div>
+          </div>
+        ))}
+      </div>
+      {/* Fake card row */}
+      <div style={{ padding: '1.25rem 1rem', display: 'flex', gap: '0.75rem' }}>
+        {[1,2,3].map(n => (
+          <div key={n} style={{ flex: 1, background: pageBg, border: `1px solid ${sectionBg}`, borderRadius: 8, padding: '0.75rem' }}>
+            <div style={{ height: 60, background: `linear-gradient(135deg, ${primary}22, ${secondary}33)`, borderRadius: 6, marginBottom: '0.5rem' }} />
+            <div style={{ height: 8, background: text, borderRadius: 4, marginBottom: '0.35rem', opacity: 0.7 }} />
+            <div style={{ height: 6, background: muted, borderRadius: 4, opacity: 0.5 }} />
+          </div>
+        ))}
       </div>
     </div>
   );
