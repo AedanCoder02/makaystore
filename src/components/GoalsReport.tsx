@@ -1,77 +1,119 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
 
-const goalsData = [
-  { week: 'W1', target: 100000, actual: 98000 },
-  { week: 'W2', target: 100000, actual: 112000 },
-  { week: 'W3', target: 100000, actual: 105000 },
-  { week: 'W4', target: 100000, actual: 172200 },
-];
-
-const milestones = [
-  { label: 'Reach $50k revenue', done: true },
-  { label: '200 orders in a month', done: true },
-  { label: '5-star average rating', done: false },
-  { label: 'Launch 3D product line', done: false },
-  { label: '$400k monthly goal', done: true },
-];
+interface GoalsData {
+  target: number;
+  actual: number;
+  progress: number;
+  daysLeft: number;
+  daysInMonth: number;
+  projectedMonthEnd: number;
+  chart: { week: string; target: number; actual: number }[];
+}
 
 export default function GoalsReport() {
   const t = useTranslations('reports');
-  const progress = 121.8;
-  const fillWidth = Math.min(progress, 100);
+  const [data, setData] = useState<GoalsData | null>(null);
+  const [targetInput, setTargetInput] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/admin/reports/goals')
+      .then((r) => r.json())
+      .then((d) => { setData(d); setTargetInput(String(d.target)); })
+      .catch(() => {});
+  }, []);
+
+  async function saveTarget() {
+    const val = Number(targetInput);
+    if (isNaN(val) || val < 0) return;
+    setSaving(true);
+    await fetch('/api/admin/reports/goals', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target: val }),
+    });
+    const res = await fetch('/api/admin/reports/goals').then((r) => r.json());
+    setData(res);
+    setSaving(false);
+  }
+
+  if (!data) return <p className="report-loading">Loading...</p>;
+
+  const progress = Math.min(data.progress, 100);
+  const monthName = new Date().toLocaleString('default', { month: 'long' });
+  const fmt = (n: number) => `$${n.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+
+  const milestones = [
+    { label: 'First $50k revenue', done: data.actual >= 50000 },
+    { label: '100 orders this month', done: false },
+    { label: '3D product line live', done: false },
+    { label: `${fmt(data.target)} monthly goal`, done: data.actual >= data.target },
+  ];
 
   return (
     <div className="report-container">
+      <div className="cost-settings-row">
+        <label className="cost-settings-label">{t('editTarget')}:</label>
+        <input
+          type="number"
+          className="cost-percent-input"
+          value={targetInput}
+          min={0}
+          onChange={(e) => setTargetInput(e.target.value)}
+        />
+        <button className="cost-save-btn" onClick={saveTarget} disabled={saving}>
+          {saving ? '...' : t('targetSaved')}
+        </button>
+      </div>
+
       <div className="metrics-grid">
         <div className="metric-card">
           <div className="metric-label">{t('monthlyGoal')}</div>
-          <div className="metric-value">$400,000</div>
+          <div className="metric-value">{fmt(data.target)}</div>
         </div>
-        <div className="metric-card color-green">
+        <div className={`metric-card ${data.progress >= 100 ? 'color-green' : 'color-amber'}`}>
           <div className="metric-label">{t('currentProgress')}</div>
-          <div className="metric-value">{progress.toFixed(1)}%</div>
-          <div className="metric-trend">{t('onTrack')}</div>
+          <div className="metric-value">{data.progress.toFixed(1)}%</div>
+          <div className="metric-trend">{data.progress >= 100 ? t('onTrack') : `${fmt(data.actual)} actual`}</div>
         </div>
         <div className="metric-card">
           <div className="metric-label">{t('daysLeft')}</div>
-          <div className="metric-value">5</div>
-          <div className="metric-unit">{t('inJune')}</div>
+          <div className="metric-value">{data.daysLeft}</div>
+          <div className="metric-unit">{t('inJune')} {monthName}</div>
         </div>
         <div className="metric-card">
           <div className="metric-label">{t('projectedFinish')}</div>
-          <div className="metric-value">$487,200</div>
-          <div className="metric-trend">+$87,200</div>
+          <div className="metric-value">{fmt(data.projectedMonthEnd)}</div>
+          <div className="metric-trend">
+            {data.projectedMonthEnd >= data.target
+              ? `+${fmt(data.projectedMonthEnd - data.target)}`
+              : `-${fmt(data.target - data.projectedMonthEnd)}`}
+          </div>
         </div>
       </div>
 
       <div className="progress-bar-container">
-        <div className="progress-label">{t('monthlyTargetProgress')}</div>
+        <div className="progress-label">{t('monthlyTargetProgress')} — {monthName}</div>
         <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${fillWidth}%` }} />
+          <div className="progress-fill" style={{ width: `${progress}%` }} />
         </div>
-        <div className="progress-percent">{progress.toFixed(1)}%</div>
+        <div className="progress-percent">{data.progress.toFixed(1)}%</div>
       </div>
 
       <div className="chart-container">
         <h3>{t('targetVsActual')}</h3>
         <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={goalsData}>
+          <BarChart data={data.chart}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="week" />
             <YAxis />
-            <Tooltip formatter={(value) => typeof value === 'number' ? `$${value.toLocaleString()}` : value} />
+            <Tooltip formatter={(v) => typeof v === 'number' ? `$${v.toLocaleString()}` : v} />
             <Legend />
             <Bar dataKey="target" fill="#d1d5db" name="Target" />
             <Bar dataKey="actual" fill="#f59e0b" name="Actual" />

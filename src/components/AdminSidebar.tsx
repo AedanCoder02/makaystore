@@ -2,22 +2,26 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingBag,
+  Users,
+  BarChart2,
+  RefreshCw,
+  Pencil,
+  Palette,
+} from 'lucide-react';
 
-interface SidebarItem {
-  label: string;
-  href: string;
-  icon: string;
-}
-
-const SIDEBAR_ITEMS: SidebarItem[] = [
-  { label: 'Panel', href: '/admin/dashboard', icon: '📊' },
-  { label: 'Productos', href: '/admin/products', icon: '📦' },
-  { label: 'Pedidos', href: '/admin/orders', icon: '🛒' },
-  { label: 'Trabajadores', href: '/admin/workers', icon: '👥' },
-  { label: 'Reportes', href: '/admin/reports', icon: '📈' },
-  { label: 'Marketing', href: '/admin/editor', icon: '✏️' },
-  { label: 'Tema', href: '/admin/theme', icon: '🎨' },
-  { label: 'Configuración', href: '/admin/settings', icon: '⚙️' },
+const SIDEBAR_ITEMS = [
+  { label: 'Panel',      href: '/admin/dashboard',          icon: LayoutDashboard },
+  { label: 'Productos',  href: '/admin/products/create-3d', icon: Package },
+  { label: 'Pedidos',    href: '/admin/orders',             icon: ShoppingBag },
+  { label: 'Usuarios',   href: '/admin/users',              icon: Users },
+  { label: 'Reportes',   href: '/admin/reports',            icon: BarChart2 },
+  { label: 'Rotación',   href: '/admin/rotation',           icon: RefreshCw },
+  { label: 'Marketing',  href: '/admin/editor',             icon: Pencil },
+  { label: 'Tema',       href: '/admin/theme',              icon: Palette },
 ];
 
 export default function AdminSidebar() {
@@ -26,21 +30,23 @@ export default function AdminSidebar() {
   return (
     <aside className="admin-sidebar">
       <div className="sidebar-brand">
-        <span className="sidebar-brand-icon">🏪</span>
         <span className="sidebar-brand-name">Makay Admin</span>
       </div>
       <nav className="sidebar-nav" aria-label="Navegación de administración">
-        {SIDEBAR_ITEMS.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`sidebar-item${pathname === item.href ? ' active' : ''}`}
-            aria-current={pathname === item.href ? 'page' : undefined}
-          >
-            <span className="sidebar-icon">{item.icon}</span>
-            <span className="sidebar-label">{item.label}</span>
-          </Link>
-        ))}
+        {SIDEBAR_ITEMS.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`sidebar-item${pathname === item.href ? ' active' : ''}`}
+              aria-current={pathname === item.href ? 'page' : undefined}
+            >
+              <Icon size={18} className="sidebar-icon" />
+              <span className="sidebar-label">{item.label}</span>
+            </Link>
+          );
+        })}
       </nav>
     </aside>
   );

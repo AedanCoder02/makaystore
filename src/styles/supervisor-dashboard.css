@@ -1,9 +1,10 @@
 .supervisor-dashboard-container {
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem 1rem;
+  padding: 2rem 1rem 5rem;
   background: #f9f7f4;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .dashboard-header {

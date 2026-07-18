@@ -319,3 +319,232 @@
   font-weight: 500;
   color: var(--makay-dark-navy, #2C2C2C);
 }
+
+/* ---- Shared admin table pages (orders, users) ---- */
+.admin-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.admin-select,
+.admin-search-input {
+  padding: 0.6rem 0.875rem;
+  border: 1.5px solid #e5d9d0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  background: #fff;
+  min-width: 220px;
+  color: #1f2937;
+}
+
+.admin-select:focus,
+.admin-search-input:focus {
+  outline: none;
+  border-color: #f59e0b;
+}
+
+.admin-count {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin-left: auto;
+}
+
+.admin-table-wrapper {
+  overflow-x: auto;
+  border-radius: 10px;
+  border: 1.5px solid #e5d9d0;
+  background: #fff;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.admin-table th {
+  background: #fef3c7;
+  color: #92400e;
+  font-weight: 700;
+  padding: 0.875rem 1rem;
+  text-align: left;
+  border-bottom: 2px solid #e5d9d0;
+  white-space: nowrap;
+}
+
+.admin-table td {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid #f0ebe6;
+  color: #374151;
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-table tr:hover td {
+  background: #fafaf9;
+}
+
+.admin-order-id {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.admin-amount {
+  font-weight: 700;
+  color: #065f46;
+}
+
+.admin-date {
+  color: #9ca3af;
+  font-size: 0.82rem;
+}
+
+.admin-payment-badge {
+  background: #ecfdf5;
+  color: #065f46;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.admin-loading,
+.admin-empty {
+  padding: 3rem;
+  text-align: center;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* Users page */
+.admin-user-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.admin-user-avatar {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.admin-email {
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.admin-role-badge {
+  display: inline-block;
+  padding: 0.2rem 0.625rem;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.role-teal   { background: #ccfbf1; color: #0f766e; }
+.role-gold   { background: #fef3c7; color: #92400e; }
+.role-orange { background: #ffedd5; color: #c2410c; }
+.role-purple { background: #ede9fe; color: #6d28d9; }
+
+.admin-role-select {
+  padding: 0.45rem 0.75rem;
+  border: 1.5px solid #e5d9d0;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: #fff;
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.admin-role-select:focus {
+  outline: none;
+  border-color: #f59e0b;
+}
+
+.admin-save-btn {
+  padding: 0.45rem 1rem;
+  background: #f59e0b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.admin-save-btn:hover {
+  background: #d97706;
+}
+
+.admin-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: #065f46;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  z-index: 9999;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+
+/* Cost/Goals report controls */
+.cost-settings-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.25rem;
+  background: #fef3c7;
+  border-radius: 8px;
+}
+
+.cost-settings-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #92400e;
+}
+
+.cost-percent-input {
+  width: 80px;
+  padding: 0.45rem 0.75rem;
+  border: 1.5px solid #d97706;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+.cost-save-btn {
+  padding: 0.45rem 1rem;
+  background: #f59e0b;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.cost-save-btn:hover {
+  background: #d97706;
+}
+
+.report-loading,
+.report-empty {
+  padding: 2rem;
+  text-align: center;
+  color: #6b7280;
+}

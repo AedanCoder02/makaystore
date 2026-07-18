@@ -155,15 +155,37 @@
     "products": "Productos",
     "productsDesc": "Gestionar catálogo, inventario y modelos 3D",
     "orders": "Pedidos",
-    "ordersDesc": "Ver y gestionar pedidos de clientes",
+    "ordersDesc": "Ver y gestionar todos los pedidos",
+    "users": "Usuarios",
+    "usersDesc": "Gestionar roles y permisos",
     "workers": "Trabajadores",
     "workersDesc": "Gestionar equipo de trabajo y actividad",
     "reports": "Reportes",
     "reportsDesc": "Ventas, análisis y métricas de rendimiento",
+    "rotation": "Rotación",
+    "rotationDesc": "Programar ciclos de estado de productos",
+    "marketing": "Marketing",
+    "marketingDesc": "Crear y publicar páginas promocionales",
+    "theme": "Tema",
+    "themeDesc": "Personalizar el aspecto de la tienda",
     "settings": "Configuración",
     "settingsDesc": "Configuración de la tienda y preferencias",
     "showTutorial": "Mostrar tutorial",
-    "help": "Ayuda"
+    "help": "Ayuda",
+    "userManagement": "Gestión de Usuarios",
+    "searchUsers": "Buscar por nombre o email...",
+    "roleUpdated": "Rol actualizado exitosamente",
+    "saveRole": "Guardar",
+    "allOrders": "Todos los Pedidos",
+    "filterBySeller": "Filtrar por vendedor",
+    "allSellers": "Todos los vendedores",
+    "orderNumber": "Pedido #",
+    "seller": "Vendedor",
+    "client": "Cliente",
+    "total": "Total",
+    "items": "Artículos",
+    "date": "Fecha",
+    "paymentMethod": "Método de Pago"
   },
   "products": {
     "createProduct": "Crear Producto",
@@ -315,7 +337,33 @@
     "next": "Próximo",
     "date": "Fecha",
     "manageRotation": "Gestionar Rotación",
-    "inJune": "en Junio"
+    "inJune": "este mes",
+    "thisMonth": "Este Mes",
+    "costPercent": "% Costo",
+    "adjustCostPercent": "Ajustar % de costo",
+    "editTarget": "Editar meta",
+    "targetSaved": "Meta guardada"
+  },
+  "seller": {
+    "dashboard": "Panel",
+    "welcome": "Bienvenido — aquí está tu resumen.",
+    "revenue": "Ingresos Totales",
+    "recentOrders": "Pedidos Recientes",
+    "productsTracked": "Productos Rastreados",
+    "unitsInStock": "Unidades en Stock",
+    "quickActions": "Acciones Rápidas",
+    "sellToClient": "Vender a Cliente",
+    "sellToClientDesc": "Procesa una venta en nombre del cliente",
+    "manageProducts": "Gestionar Productos",
+    "manageProductsDesc": "Editar precios, descripciones e imágenes",
+    "updateStock": "Actualizar Stock",
+    "updateStockDesc": "Ajustar cantidades de inventario",
+    "myActivity": "Mi Actividad",
+    "myActivityDesc": "Registra tus turnos y fichaje",
+    "recentSales": "Ventas Recientes",
+    "noSales": "Aún no hay ventas.",
+    "items": "artículo(s)",
+    "showTutorial": "Mostrar tutorial"
   },
   "rotation": {
     "title": "Rotación de Productos",
@@ -374,20 +422,29 @@
       "supervisor-approve": {
         "name": "Tour del panel de supervisor",
         "steps": {
-          "step-1": { "title": "Panel de supervisor", "description": "Este es tu centro de control. Monitorea la actividad del equipo, revisa el desempeño y gestiona turnos.", "actionText": "" },
-          "step-2": { "title": "Tu equipo", "description": "Todos los trabajadores activos aparecen aquí. Haz clic en cualquier ficha para ver su actividad detallada.", "actionText": "" },
-          "step-3": { "title": "Secciones del panel", "description": "Cada sección ofrece una vista diferente — ventas, tareas, rankings, alertas y resumen de turnos.", "actionText": "" },
-          "step-4": { "title": "¿Necesitas ayuda?", "description": "Haz clic en este botón en cualquier momento para repetir este tutorial.", "actionText": "Entendido" }
+          "step-1":  { "title": "Panel de supervisor",       "description": "Este es tu centro de control. Monitorea la actividad del equipo, revisa el desempeño y gestiona turnos en tiempo real.", "actionText": "" },
+          "step-2":  { "title": "Fichas del equipo",         "description": "Cada ficha muestra un trabajador y si está actualmente fichado. Haz clic en cualquiera para ver sus detalles.", "actionText": "" },
+          "step-3":  { "title": "Tarjetas de estado",        "description": "Estas tarjetas te dan una vista en vivo — quién trabaja, horas registradas y actividad total del equipo.", "actionText": "" },
+          "step-4":  { "title": "Actividad en vivo",         "description": "Cada entrada y salida aparece aquí al instante. Úsalo para confirmar que tu equipo está en horario.", "actionText": "" },
+          "step-5":  { "title": "Rendimiento de ventas",     "description": "Ve los totales de ventas del día y los ingresos por vendedor. Identifica a tus mejores performers.", "actionText": "" },
+          "step-6":  { "title": "Tablero de tareas",         "description": "Asigna tareas a tu equipo, establece prioridades y rastrea el avance. Arrastra las tarjetas entre columnas.", "actionText": "" },
+          "step-7":  { "title": "Rankings de rendimiento",   "description": "Esta sección clasifica vendedores por ingresos, pedidos y horas. Úsalo para revisiones e incentivos.", "actionText": "" },
+          "step-8":  { "title": "Panel de alertas",          "description": "Actividad inusual — salidas sin fichar, stock bajo, transacciones marcadas — aparece aquí para tu revisión.", "actionText": "" },
+          "step-9":  { "title": "Aprobar actividad",         "description": "Las entradas y salidas de los trabajadores requieren tu aprobación. Aprueba para confirmar o rechaza para marcar.", "actionText": "" },
+          "step-10": { "title": "¿Necesitas ayuda?",         "description": "Haz clic en este botón en cualquier momento para repetir este tour completo.", "actionText": "Entendido" }
         }
       },
       "admin-tour": {
         "name": "Tour del panel de administración",
         "steps": {
-          "step-1": { "title": "Bienvenido a Admin", "description": "Este es tu centro de gestión de Makay Store. Selecciona cualquier sección para comenzar.", "actionText": "" },
-          "step-2": { "title": "Productos y 3D", "description": "Sube productos, genera modelos 3D y administra tu inventario.", "actionText": "" },
-          "step-3": { "title": "Pedidos", "description": "Consulta y gestiona todos los pedidos de clientes.", "actionText": "" },
-          "step-4": { "title": "Gestión de equipo", "description": "Monitorea trabajadores, consulta actividad y administra tu equipo.", "actionText": "" },
-          "step-5": { "title": "¿Necesitas ayuda?", "description": "Haz clic en este botón en cualquier momento para repetir este tour.", "actionText": "Vamos" }
+          "step-1": { "title": "Bienvenido a Admin",       "description": "Este es tu centro de gestión de Makay Store. Todas las herramientas que necesitas están aquí.", "actionText": "" },
+          "step-2": { "title": "Estadísticas en vivo",     "description": "Esta barra muestra totales en tiempo real — productos, pedidos del mes y vendedores activos hoy.", "actionText": "" },
+          "step-3": { "title": "Productos y 3D",           "description": "Crea productos y genera modelos 3D a partir de una foto del producto usando IA.", "actionText": "" },
+          "step-4": { "title": "Pedidos",                  "description": "Consulta todos los pedidos de tus vendedores, filtra por vendedor y revisa los detalles.", "actionText": "" },
+          "step-5": { "title": "Usuarios y Roles",         "description": "Asigna roles a cada usuario — cliente, vendedor, supervisor o administrador. El rol controla a qué panel accede.", "actionText": "" },
+          "step-6": { "title": "Reportes",                 "description": "Gráficas de ventas, análisis de costo/margen, seguimiento de metas e inventario — todo con datos reales.", "actionText": "" },
+          "step-7": { "title": "Navegación del menú",      "description": "El menú lateral te da acceso inmediato a las 7 secciones. Tu sección actual aparece resaltada.", "actionText": "" },
+          "step-8": { "title": "¿Necesitas ayuda?",        "description": "Haz clic en este botón en cualquier momento para repetir este tour.", "actionText": "Vamos" }
         }
       },
       "reports-tour": {
@@ -427,10 +484,13 @@
       "seller-dashboard-tour": {
         "name": "Tour del panel de vendedor",
         "steps": {
-          "step-1": { "title": "Tus números", "description": "Ingresos, pedidos, productos rastreados y unidades en stock — todo de un vistazo.", "actionText": "" },
-          "step-2": { "title": "Acciones rápidas", "description": "Ve directo a vender, gestionar productos o actualizar stock.", "actionText": "" },
-          "step-3": { "title": "Navegación", "description": "Usa la barra lateral para cambiar entre Vender, Productos y Stock.", "actionText": "" },
-          "step-4": { "title": "¡Todo listo!", "description": "Comienza haciendo clic en 'Vender a Cliente' para procesar tu primera venta.", "actionText": "¡A vender!" }
+          "step-1": { "title": "Tus números",           "description": "Ingresos, pedidos, productos rastreados y unidades en stock — actualizados en cada visita.", "actionText": "" },
+          "step-2": { "title": "Tarjeta de ingresos",   "description": "Estos son tus ingresos totales de todas las ventas procesadas. Incluye el total de todos los pedidos.", "actionText": "" },
+          "step-3": { "title": "Acciones rápidas",      "description": "Ve directo a vender, gestionar productos, actualizar stock o ver tu actividad de turno.", "actionText": "" },
+          "step-4": { "title": "Vender a Cliente",      "description": "Esta es tu herramienta principal. Busca un cliente, añade productos y completa la venta en 3 pasos.", "actionText": "" },
+          "step-5": { "title": "Ventas recientes",      "description": "Tus últimas ventas completadas aparecen aquí. Haz clic en cualquier fila para ver los detalles del pedido.", "actionText": "" },
+          "step-6": { "title": "Navegación lateral",    "description": "Cambia entre Vender, Productos, Stock y Actividad usando la barra lateral. La sección actual aparece resaltada.", "actionText": "" },
+          "step-7": { "title": "¡Todo listo!",          "description": "Haz clic en este botón para repetir el tour. Comienza haciendo clic en 'Vender a Cliente' para tu primera venta.", "actionText": "¡A vender!" }
         }
       },
       "seller-products-tour": {
