@@ -4,8 +4,14 @@ export async function GET(req: NextRequest) {
   const url = req.nextUrl.searchParams.get('url');
   if (!url) return NextResponse.json({ error: 'Missing url' }, { status: 400 });
 
-  // Only allow proxying from our known TripoSR Railway domain
-  if (!url.startsWith('https://makay-tripo-server-production.up.railway.app/')) {
+  // Only allow proxying from known 3D generation domains
+  const allowed = [
+    'https://makay-tripo-server-production.up.railway.app/',
+    'https://fal.media/',
+    'https://storage.googleapis.com/fal',
+    'https://v3.fal.media/',
+  ];
+  if (!allowed.some((prefix) => url.startsWith(prefix))) {
     return NextResponse.json({ error: 'Forbidden origin' }, { status: 403 });
   }
 

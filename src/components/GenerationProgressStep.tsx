@@ -30,10 +30,11 @@ export default function GenerationProgressStep({
       const sec = Math.floor((Date.now() - startTime.current) / 1000);
       setElapsed(sec);
       // Update status text based on elapsed time
-      if (sec < 30)       setStatusText('Sending image to AI…');
-      else if (sec < 120) setStatusText('Loading 3D reconstruction model…');
-      else if (sec < 600) setStatusText('Reconstructing 3D mesh from image — this takes 10-20 min on CPU…');
-      else                setStatusText('Still working — CPU inference is slow but making progress…');
+      if (sec < 15)       setStatusText('Sending image to TRELLIS.2…');
+      else if (sec < 40)  setStatusText('Generating 3D structure…');
+      else if (sec < 90)  setStatusText('Baking 2048px textures…');
+      else if (sec < 180) setStatusText('Finalising mesh and GLB export…');
+      else                setStatusText('Almost done — exporting high-resolution model…');
     }, 1000);
 
     const timeout = setTimeout(() => {
@@ -92,7 +93,7 @@ export default function GenerationProgressStep({
           <p className="wizard-step-desc">
             {error
               ? 'Something went wrong during inference'
-              : 'Running on CPU — keep this tab open while the model processes'}
+              : 'TRELLIS.2 on FAL.ai — high-quality textured 3D, usually under 2 minutes'}
           </p>
         </div>
       </div>
@@ -122,7 +123,7 @@ export default function GenerationProgressStep({
               </p>
             )}
             <p className="gen3d-warning">
-              Do not close this tab. CPU inference takes 10–20 minutes.
+              Keep this tab open. Generation takes 1–3 minutes.
             </p>
           </div>
         </>

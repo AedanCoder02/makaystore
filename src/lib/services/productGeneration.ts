@@ -15,14 +15,14 @@
  */
 
 // ─────────────────────────────────────────────────────────────
-// FAL.ai TRELLIS Provider  (https://fal.ai/models/fal-ai/trellis)
-// State-of-the-art image-to-3D. $0.02/generation. Free credits on signup.
-// Get API key: https://fal.ai → Dashboard → API Keys → Create Key
+// FAL.ai TRELLIS 2 LoRA Provider  (https://fal.ai/models/fal-ai/trellis-2-lora)
+// Microsoft TRELLIS.2 — state-of-the-art image-to-3D, textured GLB output.
+// $0.02/generation. Sign up at fal.ai → Dashboard → API Keys.
 // Add to Vercel: FAL_KEY=your_key
 // ─────────────────────────────────────────────────────────────
 class FalTrellisProvider implements GenerationProvider {
   private apiKey: string;
-  private base = 'https://queue.fal.run/fal-ai/trellis';
+  private base = 'https://queue.fal.run/fal-ai/trellis-2-lora';
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
@@ -41,10 +41,12 @@ class FalTrellisProvider implements GenerationProvider {
       headers: this.headers,
       body: JSON.stringify({
         image_url: imageUrl,
-        texture_size: 1024,
-        mesh_simplify: 0.95,
+        resolution: '512',
+        texture_size: '2048',
+        decimation_target: 500000,
         ss_sampling_steps: 12,
-        slat_sampling_steps: 12,
+        shape_slat_sampling_steps: 12,
+        tex_slat_sampling_steps: 12,
       }),
     });
 
@@ -58,7 +60,6 @@ class FalTrellisProvider implements GenerationProvider {
   }
 
   async getPredictionResult(requestId: string) {
-    // Check status
     const statusRes = await fetch(`${this.base}/requests/${requestId}/status`, {
       headers: this.headers,
     });
@@ -72,13 +73,13 @@ class FalTrellisProvider implements GenerationProvider {
     const falStatus: string = statusData.status;
 
     if (falStatus === 'COMPLETED') {
-      // Fetch result
       const resultRes = await fetch(`${this.base}/requests/${requestId}`, {
         headers: this.headers,
       });
       if (!resultRes.ok) throw new Error(`FAL result fetch error ${resultRes.status}`);
       const result = await resultRes.json();
-      const glbUrl = result.data?.model_mesh?.url ?? result.model_mesh?.url;
+      // trellis-2-lora output: { model_glb: { url: "..." } }
+      const glbUrl = result.data?.model_glb?.url ?? result.model_glb?.url;
       if (!glbUrl) throw new Error('FAL returned no GLB URL in result');
       return { status: 'completed' as const, progress: 100, outputUrl: glbUrl };
     }
