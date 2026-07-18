@@ -64,18 +64,25 @@ interface Props {
   onColorsChange: (c: CardColors) => void;
 }
 
-export default function CardDesigner({ layout, colors, onLayoutChange, onColorsChange }: Props) {
-  const cardRef = useRef<HTMLDivElement>(null);
-  const [dragging, setDragging] = useState<keyof CardLayout | null>(null);
-  const [activeEl, setActiveEl] = useState<keyof CardLayout | null>(null);
+// ── CardCanvas: the draggable card preview only ────────────────────────────
+export interface CardCanvasProps {
+  layout: CardLayout;
+  colors: CardColors;
+  activeEl: keyof CardLayout | null;
+  onLayoutChange: (l: CardLayout) => void;
+  onActiveElChange: (key: keyof CardLayout) => void;
+  cardRef: React.RefObject<HTMLDivElement | null>;
+}
 
+export function CardCanvas({ layout, colors, activeEl, onLayoutChange, onActiveElChange, cardRef }: CardCanvasProps) {
+  const [dragging, setDragging] = useState<keyof CardLayout | null>(null);
   const cardBg = `linear-gradient(${colors.bg_angle}deg, ${colors.bg_from}, ${colors.bg_to})`;
 
   const startDrag = useCallback((e: React.MouseEvent, key: keyof CardLayout) => {
     e.preventDefault();
     if (!layout[key].visible) return;
     setDragging(key);
-    setActiveEl(key);
+    onActiveElChange(key);
 
     const card = cardRef.current;
     if (!card) return;
@@ -86,44 +93,31 @@ export default function CardDesigner({ layout, colors, onLayoutChange, onColorsC
       const y = Math.max(0, Math.min(92, ((mv.clientY - rect.top) / rect.height) * 100));
       onLayoutChange({ ...layout, [key]: { ...layout[key], x, y } });
     };
-
     const onUp = () => {
       setDragging(null);
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     };
-
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
-  }, [layout, onLayoutChange]);
+  }, [layout, onLayoutChange, onActiveElChange, cardRef]);
 
-  const toggleVisible = (key: keyof CardLayout) => {
-    onLayoutChange({ ...layout, [key]: { ...layout[key], visible: !layout[key].visible } });
-  };
-
-  const resetLayout = () => onLayoutChange(DEFAULT_CARD_LAYOUT);
-
-  // Render a positioned element on the card
-  const El = ({ id, children, className = '' }: { id: keyof CardLayout; children: React.ReactNode; className?: string }) => {
+  const El = ({ id, children }: { id: keyof CardLayout; children: React.ReactNode }) => {
     const pos = layout[id];
     const isActive = activeEl === id;
     return (
       <div
         style={{
-          position: 'absolute',
-          left: `${pos.x}%`,
-          top: `${pos.y}%`,
-          cursor: pos.visible ? 'grab' : 'not-allowed',
-          opacity: pos.visible ? 1 : 0.25,
-          outline: isActive ? `2px dashed rgba(212,165,116,0.8)` : 'none',
-          outlineOffset: 3,
-          userSelect: 'none',
-          zIndex: isActive ? 10 : 1,
+          position: 'absolute', left: `${pos.x}%`, top: `${pos.y}%`,
+          cursor: pos.visible ? (dragging === id ? 'grabbing' : 'grab') : 'not-allowed',
+          opacity: pos.visible ? 1 : 0.2,
+          outline: isActive ? '2px dashed rgba(212,165,116,0.9)' : 'none',
+          outlineOffset: 4, userSelect: 'none', zIndex: isActive ? 10 : 1,
+          transition: 'outline 0.1s',
         }}
-        className={className}
         onMouseDown={e => startDrag(e, id)}
-        onClick={() => setActiveEl(id)}
-        title={`Drag to move ${ELEMENT_LABELS[id]}`}
+        onClick={() => onActiveElChange(id)}
+        title={`Drag to reposition ${ELEMENT_LABELS[id]}`}
       >
         {children}
       </div>
@@ -131,81 +125,59 @@ export default function CardDesigner({ layout, colors, onLayoutChange, onColorsC
   };
 
   return (
+    <div
+      className="cd-card"
+      ref={cardRef}
+      style={{ background: cardBg, cursor: dragging ? 'grabbing' : 'default' }}
+    >
+      <div className="cd-card-glow" />
+      <El id="logo">
+        <Image src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1-removebg-preview.png"
+          alt="Makay" width={70} height={24}
+          style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', display: 'block' }}
+          draggable={false} />
+      </El>
+      <El id="tier">
+        <span className="cd-tier-badge" style={{ borderColor: `${colors.accent}55`, color: colors.accent }}>Explorer</span>
+      </El>
+      <El id="avatar">
+        <div className="cd-avatar" style={{ borderColor: `${colors.accent}80` }}>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={colors.accent} strokeWidth="1.5">
+            <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+          </svg>
+        </div>
+      </El>
+      <El id="name"><p className="cd-name" style={{ color: colors.text }}>Aedan Proger</p></El>
+      <El id="tagline"><p className="cd-tagline" style={{ color: `${colors.accent}B0` }}>BEACH CLUB MEMBER</p></El>
+      <El id="divider"><div className="cd-divider" /></El>
+      <El id="id"><p className="cd-id-text" style={{ color: `${colors.text}88` }}>ID: TXUHKW2T</p></El>
+      <El id="since"><p className="cd-since-text" style={{ color: `${colors.text}44` }}>Since 2026</p></El>
+      <El id="qr">
+        <div className="cd-qr-wrap">
+          <QRCode value="https://makaystore-sandy.vercel.app" size={56} bgColor="transparent" fgColor="#1e1a16" />
+        </div>
+      </El>
+    </div>
+  );
+}
+
+// ── CardDesigner: legacy all-in-one (kept for backward compat) ─────────────
+export default function CardDesigner({ layout, colors, onLayoutChange, onColorsChange }: Props) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [activeEl, setActiveEl] = useState<keyof CardLayout | null>(null);
+
+  const toggleVisible = (key: keyof CardLayout) =>
+    onLayoutChange({ ...layout, [key]: { ...layout[key], visible: !layout[key].visible } });
+  const resetLayout = () => onLayoutChange(DEFAULT_CARD_LAYOUT);
+
+  return (
     <div className="card-designer">
-      {/* Card preview */}
       <div className="cd-preview-wrap">
         <p className="cd-hint">Drag elements to reposition. Click to select.</p>
-        <div
-          className="cd-card"
-          ref={cardRef}
-          style={{ background: cardBg, cursor: dragging ? 'grabbing' : 'default' }}
-        >
-          {/* Radial glow overlay */}
-          <div className="cd-card-glow" />
-
-          {/* Logo */}
-          <El id="logo">
-            <Image
-              src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1-removebg-preview.png"
-              alt="Makay" width={70} height={24}
-              style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', display: 'block' }}
-              draggable={false}
-            />
-          </El>
-
-          {/* Tier badge */}
-          <El id="tier">
-            <span className="cd-tier-badge" style={{ borderColor: `${colors.accent}55`, color: colors.accent }}>
-              Explorer
-            </span>
-          </El>
-
-          {/* Avatar */}
-          <El id="avatar">
-            <div className="cd-avatar" style={{ borderColor: `${colors.accent}80` }}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={colors.accent} strokeWidth="1.5">
-                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-              </svg>
-            </div>
-          </El>
-
-          {/* Name */}
-          <El id="name">
-            <p className="cd-name" style={{ color: colors.text }}>Aedan Proger</p>
-          </El>
-
-          {/* Tagline */}
-          <El id="tagline">
-            <p className="cd-tagline" style={{ color: `${colors.accent}B0` }}>BEACH CLUB MEMBER</p>
-          </El>
-
-          {/* Divider */}
-          <El id="divider">
-            <div className="cd-divider" />
-          </El>
-
-          {/* ID */}
-          <El id="id">
-            <p className="cd-id-text" style={{ color: `${colors.text}88` }}>ID: TXUHKW2T</p>
-          </El>
-
-          {/* Since */}
-          <El id="since">
-            <p className="cd-since-text" style={{ color: `${colors.text}44` }}>Since 2026</p>
-          </El>
-
-          {/* QR */}
-          <El id="qr">
-            <div className="cd-qr-wrap">
-              <QRCode value="https://makaystore-sandy.vercel.app" size={56} bgColor="transparent" fgColor="#1e1a16" />
-            </div>
-          </El>
-        </div>
+        <CardCanvas layout={layout} colors={colors} activeEl={activeEl}
+          onLayoutChange={onLayoutChange} onActiveElChange={setActiveEl} cardRef={cardRef} />
       </div>
-
-      {/* Controls */}
       <div className="cd-controls">
-        {/* Element visibility */}
         <div className="cd-control-section">
           <div className="cd-control-header">
             <span>Elements</span>
@@ -215,44 +187,29 @@ export default function CardDesigner({ layout, colors, onLayoutChange, onColorsC
           </div>
           <div className="cd-element-list">
             {(Object.keys(ELEMENT_LABELS) as Array<keyof CardLayout>).map(key => (
-              <div
-                key={key}
-                className={`cd-element-row${activeEl === key ? ' active' : ''}`}
-                onClick={() => setActiveEl(key)}
-              >
+              <div key={key} className={`cd-element-row${activeEl === key ? ' active' : ''}`} onClick={() => setActiveEl(key)}>
                 <span className="cd-element-name">{ELEMENT_LABELS[key]}</span>
-                <div className="cd-element-pos">
-                  {Math.round(layout[key].x)}%, {Math.round(layout[key].y)}%
-                </div>
-                <button
-                  className="cd-vis-btn"
-                  onClick={e => { e.stopPropagation(); toggleVisible(key); }}
-                  title={layout[key].visible ? 'Hide' : 'Show'}
-                >
+                <div className="cd-element-pos">{Math.round(layout[key].x)}%, {Math.round(layout[key].y)}%</div>
+                <button className="cd-vis-btn" onClick={e => { e.stopPropagation(); toggleVisible(key); }}>
                   {layout[key].visible ? <Eye size={14} /> : <EyeOff size={14} />}
                 </button>
               </div>
             ))}
           </div>
         </div>
-
-        {/* Card colors */}
         <div className="cd-control-section">
           <div className="cd-control-header"><span>Card Colors</span></div>
           <div className="cd-color-grid">
             <CardColorRow label="Background (from)" value={colors.bg_from} onChange={v => onColorsChange({ ...colors, bg_from: v })} />
-            <CardColorRow label="Background (to)" value={colors.bg_to} onChange={v => onColorsChange({ ...colors, bg_to: v })} />
-            <CardColorRow label="Text color" value={colors.text} onChange={v => onColorsChange({ ...colors, text: v })} />
-            <CardColorRow label="Accent color" value={colors.accent} onChange={v => onColorsChange({ ...colors, accent: v })} />
+            <CardColorRow label="Background (to)"   value={colors.bg_to}   onChange={v => onColorsChange({ ...colors, bg_to: v })} />
+            <CardColorRow label="Text color"        value={colors.text}    onChange={v => onColorsChange({ ...colors, text: v })} />
+            <CardColorRow label="Accent color"      value={colors.accent}  onChange={v => onColorsChange({ ...colors, accent: v })} />
             <div className="cd-color-row">
               <label className="te-color-label">Gradient angle</label>
               <div className="cd-angle-wrap">
-                <input
-                  type="range" min={0} max={360}
-                  value={colors.bg_angle}
+                <input type="range" min={0} max={360} value={colors.bg_angle}
                   onChange={e => onColorsChange({ ...colors, bg_angle: Number(e.target.value) })}
-                  className="cd-angle-slider"
-                />
+                  className="cd-angle-slider" />
                 <span className="cd-angle-val">{colors.bg_angle}°</span>
               </div>
             </div>
