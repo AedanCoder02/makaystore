@@ -18,7 +18,42 @@
   bottom: 0;
   z-index: 20;
   gap: 0.25rem;
+  transition: width 0.22s ease;
+  overflow: hidden;
 }
+
+/* Collapsed state — icon only */
+.seller-sidebar.sidebar-collapsed {
+  width: 52px;
+  padding: 1.5rem 0.35rem;
+}
+.seller-sidebar.sidebar-collapsed .seller-sidebar-sub,
+.seller-sidebar.sidebar-collapsed .seller-sidebar-role { display: none; }
+.seller-sidebar.sidebar-collapsed .seller-sidebar-brand { padding: 0 0 1rem; }
+.seller-sidebar.sidebar-collapsed .seller-nav-item { padding: 0.75rem; justify-content: center; gap: 0; }
+.seller-sidebar.sidebar-collapsed .seller-nav-label { display: none; }
+.seller-sidebar.sidebar-collapsed .seller-back-link { padding: 0.5rem; justify-content: center; }
+.seller-sidebar.sidebar-collapsed .seller-back-link-label { display: none; }
+.seller-sidebar.sidebar-collapsed .sidebar-toggle { justify-content: center; }
+
+/* Toggle button */
+.sidebar-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  padding: 0.5rem 0.5rem 0;
+  font-size: 0.72rem;
+  transition: color 0.2s;
+  width: 100%;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  margin-top: auto;
+  padding-top: 0.75rem;
+}
+.sidebar-toggle:hover { color: rgba(255,255,255,0.6); }
 
 .seller-sidebar-brand {
   display: flex;
@@ -80,7 +115,9 @@
   margin-left: 220px;
   background: var(--makay-premium-cream);
   min-height: calc(100vh - 64px);
+  transition: margin-left 0.22s ease;
 }
+.seller-layout.sidebar-collapsed .seller-main { margin-left: 52px; }
 
 /* ── Page shell ── */
 .seller-page {
