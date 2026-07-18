@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.5.13",
+    "@fal-ai/client": "^1.10.1",
     "@fiddle-digital/string-tune": "^1.2.0",
     "@payloadcms/db-postgres": "^3.85.2",
     "@payloadcms/richtext-lexical": "^3.85.2",
