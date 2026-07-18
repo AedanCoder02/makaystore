@@ -131,7 +131,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
         </div>
         {cart.length > 0 && (
           <div className="seller-cart-badge">
-            <ShoppingBag size={16} /> {cart.length} item{cart.length > 1 ? 's' : ''} · ${subtotal.toFixed(2)}
+            <ShoppingBag size={16} /> {cart.length} {t('items')} · ${subtotal.toFixed(2)}
           </div>
         )}
         <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-sell-tour')} aria-label={t('showTutorial')}><HelpCircle size={16} /></button>
@@ -272,11 +272,11 @@ export default function SellerSell({ products }: { products: Product[] }) {
             </div>
 
             <div className="seller-checkout-form">
-              <h3 className="seller-section-title">{ts('payment')}</h3>
+              <h3 className="seller-section-title">{ts('paymentLabel')}</h3>
               <div className="seller-payment-options">
                 {['cash', 'card', 'transfer', 'credit'].map(m => (
                   <button key={m} className={`seller-payment-btn${paymentMethod === m ? ' selected' : ''}`} onClick={() => setPaymentMethod(m)}>
-                    {m.charAt(0).toUpperCase() + m.slice(1)}
+                    {ts(`paymentMethods.${m}`)}
                   </button>
                 ))}
               </div>

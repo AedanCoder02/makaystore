@@ -360,7 +360,7 @@
     "myActivityDesc": "Registra tus turnos y fichaje",
     "recentSales": "Ventas Recientes",
     "noSales": "Aún no hay ventas.",
-    "items": "artículo(s)",
+    "items": "artículos",
     "showTutorial": "Mostrar tutorial",
     "role": "Vendedor",
     "storeName": "Makay Store",
@@ -393,7 +393,13 @@
       "subtotal": "Subtotal",
       "proceedToCheckout": "Proceder al Pago →",
       "orderSummary": "Resumen del Pedido",
-      "payment": "Pago",
+      "paymentLabel": "Pago",
+      "paymentMethods": {
+        "cash": "Efectivo",
+        "card": "Tarjeta",
+        "transfer": "Transferencia",
+        "credit": "Crédito"
+      },
       "notesLabel": "Notas (opcional)",
       "notesPlaceholder": "Añade notas sobre esta venta...",
       "back": "← Volver",

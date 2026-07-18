@@ -360,7 +360,7 @@
     "myActivityDesc": "Track your shifts and clock in/out",
     "recentSales": "Recent Sales",
     "noSales": "No sales yet.",
-    "items": "item(s)",
+    "items": "items",
     "showTutorial": "Show tutorial",
     "role": "Seller",
     "storeName": "Makay Store",
@@ -393,7 +393,13 @@
       "subtotal": "Subtotal",
       "proceedToCheckout": "Proceed to Checkout →",
       "orderSummary": "Order Summary",
-      "payment": "Payment",
+      "paymentLabel": "Payment",
+      "paymentMethods": {
+        "cash": "Cash",
+        "card": "Card",
+        "transfer": "Transfer",
+        "credit": "Credit"
+      },
       "notesLabel": "Notes (optional)",
       "notesPlaceholder": "Add any notes about this sale...",
       "back": "← Back",
