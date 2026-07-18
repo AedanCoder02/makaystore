@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Edit3, Check, X, Plus, Tag, Truck, HelpCircle } from 'lucide-react';
+
+import { useTranslations } from 'next-intl';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
@@ -11,6 +13,9 @@ interface ProductRow {
 }
 
 export default function SellerProducts({ products }: { products: ProductRow[] }) {
+  const t = useTranslations('seller.products');
+  const ts = useTranslations('seller');
+  const tc = useTranslations('common');
   const [editing, setEditing] = useState<string | null>(null);
   const [drafts, setDrafts] = useState<Record<string, Partial<ProductRow>>>({});
   const [saving, setSaving] = useState(false);
@@ -79,38 +84,38 @@ export default function SellerProducts({ products }: { products: ProductRow[] })
       {tutorialUI}
       <div className="seller-page-header">
         <div>
-          <h1 className="seller-page-title">Products</h1>
-          <p className="seller-page-sub">Edit prices, descriptions, images. Changes override defaults.</p>
+          <h1 className="seller-page-title">{t('title')}</h1>
+          <p className="seller-page-sub">{t('subtitle')}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-products-tour')} aria-label="Show tutorial"><HelpCircle size={16} /></button>
-          <button className="seller-btn-primary" onClick={() => setShowAddForm(v => !v)}><Plus size={16} /> Add Product</button>
+          <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-products-tour')} aria-label={ts('showTutorial')}><HelpCircle size={16} /></button>
+          <button className="seller-btn-primary" onClick={() => setShowAddForm(v => !v)}><Plus size={16} /> {t('addProduct')}</button>
         </div>
       </div>
 
       {showAddForm && (
         <div className="seller-add-form">
-          <h3 className="seller-form-title">New Product</h3>
+          <h3 className="seller-form-title">{t('newProduct')}</h3>
           <div className="seller-form-grid">
-            <input className="seller-input" placeholder="Product name *" value={newProduct.title} onChange={e => setNewProduct(v => ({ ...v, title: e.target.value }))} />
-            <input className="seller-input" placeholder="Price * (e.g. 49.99)" type="number" value={newProduct.price} onChange={e => setNewProduct(v => ({ ...v, price: e.target.value }))} />
-            <input className="seller-input" placeholder="Image URL" value={newProduct.image_url} onChange={e => setNewProduct(v => ({ ...v, image_url: e.target.value }))} />
+            <input className="seller-input" placeholder={t('namePlaceholder')} value={newProduct.title} onChange={e => setNewProduct(v => ({ ...v, title: e.target.value }))} />
+            <input className="seller-input" placeholder={t('pricePlaceholder')} type="number" value={newProduct.price} onChange={e => setNewProduct(v => ({ ...v, price: e.target.value }))} />
+            <input className="seller-input" placeholder={t('imageUrlPlaceholder')} value={newProduct.image_url} onChange={e => setNewProduct(v => ({ ...v, image_url: e.target.value }))} />
             <select className="seller-input" value={newProduct.product_type} onChange={e => setNewProduct(v => ({ ...v, product_type: e.target.value }))}>
-              <option value="storefront">Storefront</option>
-              <option value="dropshipping">Dropshipping</option>
+              <option value="storefront">{t('storefront')}</option>
+              <option value="dropshipping">{t('dropshipping')}</option>
             </select>
           </div>
-          <textarea className="seller-textarea" placeholder="Description" value={newProduct.description} onChange={e => setNewProduct(v => ({ ...v, description: e.target.value }))} />
+          <textarea className="seller-textarea" placeholder={t('descriptionPlaceholder')} value={newProduct.description} onChange={e => setNewProduct(v => ({ ...v, description: e.target.value }))} />
           <div className="seller-form-actions">
             <button className="seller-btn-primary" onClick={addProduct} disabled={saving}>
-              {saving ? 'Saving...' : 'Save Product'}
+              {saving ? t('saving') : t('saveProduct')}
             </button>
-            <button className="seller-btn-ghost" onClick={() => setShowAddForm(false)}>Cancel</button>
+            <button className="seller-btn-ghost" onClick={() => setShowAddForm(false)}>{tc('cancel')}</button>
           </div>
         </div>
       )}
 
-      <input className="seller-search" placeholder="Search by name or SKU..." value={search} onChange={e => setSearch(e.target.value)} />
+      <input className="seller-search" placeholder={t('searchPlaceholder')} value={search} onChange={e => setSearch(e.target.value)} />
 
       <div className="seller-products-list">
         {filtered.map(p => (
@@ -126,32 +131,32 @@ export default function SellerProducts({ products }: { products: ProductRow[] })
                   {p.productType === 'dropshipping' ? <Truck size={11} /> : <Tag size={11} />}
                   {p.productType}
                 </span>
-                {p.hasOverride && <span className="seller-override-badge">Modified</span>}
+                {p.hasOverride && <span className="seller-override-badge">{t('modified')}</span>}
               </div>
               <span className="seller-product-sku">{p.sku}</span>
 
               {editing === p.id ? (
                 <div className="seller-edit-fields">
                   <div className="seller-edit-row">
-                    <label className="seller-label">Price ($)</label>
+                    <label className="seller-label">{t('priceLabel')}</label>
                     <input className="seller-input sm" type="number" value={drafts[p.id]?.price ?? p.price}
                       onChange={e => setDrafts(d => ({ ...d, [p.id]: { ...d[p.id], price: Number(e.target.value) } }))} />
                   </div>
                   <div className="seller-edit-row">
-                    <label className="seller-label">Image URL</label>
+                    <label className="seller-label">{t('imageLabel')}</label>
                     <input className="seller-input sm" value={drafts[p.id]?.image ?? p.image}
                       onChange={e => setDrafts(d => ({ ...d, [p.id]: { ...d[p.id], image: e.target.value } }))} />
                   </div>
                   <div className="seller-edit-row">
-                    <label className="seller-label">Type</label>
+                    <label className="seller-label">{t('typeLabel')}</label>
                     <select className="seller-input sm" value={drafts[p.id]?.productType ?? p.productType}
                       onChange={e => setDrafts(d => ({ ...d, [p.id]: { ...d[p.id], productType: e.target.value } }))}>
-                      <option value="storefront">Storefront</option>
-                      <option value="dropshipping">Dropshipping</option>
+                      <option value="storefront">{t('storefront')}</option>
+                      <option value="dropshipping">{t('dropshipping')}</option>
                     </select>
                   </div>
                   <div className="seller-edit-row full">
-                    <label className="seller-label">Description</label>
+                    <label className="seller-label">{t('descriptionLabel')}</label>
                     <textarea className="seller-textarea sm" value={drafts[p.id]?.description ?? p.description}
                       onChange={e => setDrafts(d => ({ ...d, [p.id]: { ...d[p.id], description: e.target.value } }))} rows={2} />
                   </div>

@@ -2,24 +2,27 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock } from 'lucide-react';
-
-const NAV = [
-  { href: '/seller/dashboard',          label: 'Dashboard',   icon: LayoutDashboard },
-  { href: '/seller/sell',               label: 'Sell',        icon: ShoppingBag },
-  { href: '/seller/products',           label: 'Products',    icon: Package },
-  { href: '/seller/stock',              label: 'Stock',       icon: Boxes },
-  { href: '/seller/activity',           label: 'My Activity', icon: Clock },
-  { href: '/seller/products/create-3d', label: '3D Models',   icon: Box },
-];
 
 export default function SellerSidebar() {
   const path = usePathname();
+  const t = useTranslations('seller');
+
+  const NAV = [
+    { href: '/seller/dashboard',          label: t('nav.dashboard'), icon: LayoutDashboard },
+    { href: '/seller/sell',               label: t('nav.sell'),      icon: ShoppingBag },
+    { href: '/seller/products',           label: t('nav.products'),  icon: Package },
+    { href: '/seller/stock',              label: t('nav.stock'),     icon: Boxes },
+    { href: '/seller/activity',           label: t('nav.activity'),  icon: Clock },
+    { href: '/seller/products/create-3d', label: t('nav.models3d'),  icon: Box },
+  ];
+
   return (
     <aside className="seller-sidebar">
       <div className="seller-sidebar-brand">
-        <span className="seller-sidebar-role">Seller</span>
-        <span className="seller-sidebar-sub">Makay Store</span>
+        <span className="seller-sidebar-role">{t('role')}</span>
+        <span className="seller-sidebar-sub">{t('storeName')}</span>
       </div>
       <nav className="seller-sidebar-nav">
         {NAV.map(({ href, label, icon: Icon }) => (
@@ -33,7 +36,7 @@ export default function SellerSidebar() {
           </Link>
         ))}
       </nav>
-      <Link href="/" className="seller-back-link">← Back to Store</Link>
+      <Link href="/" className="seller-back-link">{t('backToStore')}</Link>
     </aside>
   );
 }

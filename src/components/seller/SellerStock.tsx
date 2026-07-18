@@ -2,12 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Minus, Check, HelpCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
 interface StockRow { id: string; title: string; sku: string; category: string; defaultStock: number; currentStock: number; }
 
 export default function SellerStock({ products }: { products: StockRow[] }) {
+  const t = useTranslations('seller.stock');
+  const ts = useTranslations('seller');
   const [quantities, setQuantities] = useState<Record<string, number>>(
     Object.fromEntries(products.map(p => [p.id, p.currentStock]))
   );
@@ -46,15 +49,15 @@ export default function SellerStock({ products }: { products: StockRow[] }) {
       {tutorialUI}
       <div className="seller-page-header">
         <div>
-          <h1 className="seller-page-title">Stock Management</h1>
-          <p className="seller-page-sub">Adjust quantities per product. Changes are saved to the database.</p>
+          <h1 className="seller-page-title">{t('title')}</h1>
+          <p className="seller-page-sub">{t('subtitle')}</p>
         </div>
-        <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-stock-tour')} aria-label="Show tutorial"><HelpCircle size={16} /></button>
+        <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-stock-tour')} aria-label={ts('showTutorial')}><HelpCircle size={16} /></button>
       </div>
 
       {lowStock.length > 0 && (
         <div className="seller-alert">
-          <strong>{lowStock.length} product{lowStock.length > 1 ? 's' : ''} low on stock</strong>
+          <strong>{t('lowStockAlert', { count: lowStock.length })}</strong>
           {' — '}{lowStock.map(p => p.title).join(', ')}
         </div>
       )}
@@ -71,8 +74,8 @@ export default function SellerStock({ products }: { products: StockRow[] }) {
               <div className="seller-stock-info">
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                   <span className="seller-stock-title">{p.title}</span>
-                  {isCritical && <span className="seller-stock-badge critical">Low</span>}
-                  {isAbundant && <span className="seller-stock-badge ok">In Stock</span>}
+                  {isCritical && <span className="seller-stock-badge critical">{t('badgeLow')}</span>}
+                  {isAbundant && <span className="seller-stock-badge ok">{t('badgeInStock')}</span>}
                 </div>
                 <span className="seller-stock-sku">{p.sku} · {p.category}</span>
               </div>
@@ -94,7 +97,7 @@ export default function SellerStock({ products }: { products: StockRow[] }) {
                 onClick={() => save(p.id)}
                 disabled={saving === p.id}
               >
-                {saved[p.id] ? <><Check size={14} /> Saved</> : saving === p.id ? 'Saving...' : 'Save'}
+                {saved[p.id] ? <><Check size={14} /> {t('saved')}</> : saving === p.id ? t('saving') : t('save')}
               </button>
             </div>
           );

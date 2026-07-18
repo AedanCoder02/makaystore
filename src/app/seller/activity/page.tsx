@@ -17,6 +17,7 @@ function formatDate(iso: string) {
 
 export default function SellerActivityPage() {
   const t = useTranslations('worker');
+  const ts = useTranslations('seller');
   const activity = useSellerActivity();
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('worker-clock-in');
@@ -72,7 +73,7 @@ export default function SellerActivityPage() {
           <div className="seller-stat-card">
             <CheckCircle size={20} style={{ color: 'var(--makay-ocean-teal)' }} />
             <p className="seller-stat-value">{activity.todaySessions}</p>
-            <p className="seller-stat-label">Sessions today</p>
+            <p className="seller-stat-label">{ts('sessionsToday')}</p>
           </div>
         </div>
 

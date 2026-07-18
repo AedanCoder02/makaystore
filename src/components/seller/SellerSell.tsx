@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Search, Plus, Minus, Trash2, ShoppingBag, Check, Tag, Truck, User, HelpCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
@@ -12,6 +13,8 @@ interface CartItem extends Product { qty: number; }
 type Step = 'client' | 'products' | 'checkout' | 'done';
 
 export default function SellerSell({ products }: { products: Product[] }) {
+  const t = useTranslations('seller');
+  const ts = useTranslations('seller.sell');
   const [step, setStep] = useState<Step>('client');
   const [clients, setClients] = useState<Client[]>([]);
   const [clientSearch, setClientSearch] = useState('');
@@ -96,9 +99,9 @@ export default function SellerSell({ products }: { products: Product[] }) {
 
   // Step indicators
   const STEPS = [
-    { key: 'client', label: '1. Select Client' },
-    { key: 'products', label: '2. Add Products' },
-    { key: 'checkout', label: '3. Checkout' },
+    { key: 'client',   label: ts('step1') },
+    { key: 'products', label: ts('step2') },
+    { key: 'checkout', label: ts('step3') },
   ];
 
   if (step === 'done') {
@@ -106,13 +109,13 @@ export default function SellerSell({ products }: { products: Product[] }) {
       <div className="seller-page">
         <div className="seller-done">
           <div className="seller-done-icon"><Check size={32} /></div>
-          <h2 className="seller-done-title">Sale Complete</h2>
-          <p className="seller-done-sub">Order #{orderId} for {selectedClient?.firstName} {selectedClient?.lastName}</p>
+          <h2 className="seller-done-title">{ts('saleComplete')}</h2>
+          <p className="seller-done-sub">{ts('orderFor', { id: String(orderId ?? ''), name: `${selectedClient?.firstName} ${selectedClient?.lastName}` })}</p>
           <p className="seller-done-amount">${subtotal.toFixed(2)} · {paymentMethod}</p>
           <div className="seller-done-items">
             {cart.map(i => <span key={i.id} className="seller-done-item">{i.title} × {i.qty}</span>)}
           </div>
-          <button className="seller-btn-primary" onClick={reset}>New Sale</button>
+          <button className="seller-btn-primary" onClick={reset}>{ts('newSale')}</button>
         </div>
       </div>
     );
@@ -123,15 +126,15 @@ export default function SellerSell({ products }: { products: Product[] }) {
       {tutorialUI}
       <div className="seller-page-header">
         <div>
-          <h1 className="seller-page-title">Sell to Client</h1>
-          <p className="seller-page-sub">Select a client, build their cart, and process the sale.</p>
+          <h1 className="seller-page-title">{ts('title')}</h1>
+          <p className="seller-page-sub">{ts('subtitle')}</p>
         </div>
         {cart.length > 0 && (
           <div className="seller-cart-badge">
             <ShoppingBag size={16} /> {cart.length} item{cart.length > 1 ? 's' : ''} · ${subtotal.toFixed(2)}
           </div>
         )}
-        <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-sell-tour')} aria-label="Show tutorial"><HelpCircle size={16} /></button>
+        <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-sell-tour')} aria-label={t('showTutorial')}><HelpCircle size={16} /></button>
       </div>
 
       {/* Step nav */}
@@ -148,10 +151,10 @@ export default function SellerSell({ products }: { products: Product[] }) {
         <div className="seller-step-content">
           <div className="seller-search-wrap">
             <Search size={16} className="seller-search-icon" />
-            <input className="seller-search with-icon" placeholder="Search clients by name or email..." value={clientSearch} onChange={e => setClientSearch(e.target.value)} />
+            <input className="seller-search with-icon" placeholder={ts('searchClients')} value={clientSearch} onChange={e => setClientSearch(e.target.value)} />
           </div>
           <div className="seller-clients-grid">
-            {filteredClients.length === 0 && <p className="seller-empty">No clients found.</p>}
+            {filteredClients.length === 0 && <p className="seller-empty">{ts('noClients')}</p>}
             {filteredClients.map(c => (
               <button key={c.id} className={`seller-client-card${selectedClient?.id === c.id ? ' selected' : ''}`} onClick={() => setSelectedClient(c)}>
                 {c.imageUrl ? <img src={c.imageUrl} alt={c.firstName} className="seller-client-avatar" /> : <div className="seller-client-avatar-placeholder"><User size={20} /></div>}
@@ -165,7 +168,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
           </div>
           <div className="seller-step-footer">
             <button className="seller-btn-primary" disabled={!selectedClient} onClick={() => setStep('products')}>
-              Continue to Products →
+              {ts('continueToProducts')}
             </button>
           </div>
         </div>
@@ -177,12 +180,12 @@ export default function SellerSell({ products }: { products: Product[] }) {
           <div className="seller-sell-layout">
             <div className="seller-product-panel">
               <div className="seller-selected-client-bar">
-                <User size={14} /> Selling to: <strong>{selectedClient?.firstName} {selectedClient?.lastName}</strong>
-                <button className="seller-change-btn" onClick={() => setStep('client')}>Change</button>
+                <User size={14} /> {ts('sellingTo')} <strong>{selectedClient?.firstName} {selectedClient?.lastName}</strong>
+                <button className="seller-change-btn" onClick={() => setStep('client')}>{ts('change')}</button>
               </div>
               <div className="seller-search-wrap">
                 <Search size={16} className="seller-search-icon" />
-                <input className="seller-search with-icon" placeholder="Search products..." value={productSearch} onChange={e => setProductSearch(e.target.value)} />
+                <input className="seller-search with-icon" placeholder={ts('searchProducts')} value={productSearch} onChange={e => setProductSearch(e.target.value)} />
               </div>
               <div className="seller-sell-products">
                 {filteredProducts.map(p => {
@@ -210,9 +213,9 @@ export default function SellerSell({ products }: { products: Product[] }) {
             </div>
 
             <div className="seller-cart-panel">
-              <h3 className="seller-cart-title">Cart</h3>
+              <h3 className="seller-cart-title">{ts('cartTitle')}</h3>
               {cart.length === 0 ? (
-                <p className="seller-empty">Add products from the left.</p>
+                <p className="seller-empty">{ts('cartEmpty')}</p>
               ) : (
                 <>
                   <div className="seller-cart-items">
@@ -230,11 +233,11 @@ export default function SellerSell({ products }: { products: Product[] }) {
                     ))}
                   </div>
                   <div className="seller-cart-subtotal">
-                    <span>Subtotal</span>
+                    <span>{ts('subtotal')}</span>
                     <strong>${subtotal.toFixed(2)}</strong>
                   </div>
                   <button className="seller-btn-primary full" onClick={() => setStep('checkout')}>
-                    Proceed to Checkout →
+                    {ts('proceedToCheckout')}
                   </button>
                 </>
               )}
@@ -248,7 +251,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
         <div className="seller-step-content">
           <div className="seller-checkout-layout">
             <div className="seller-checkout-summary">
-              <h3 className="seller-section-title">Order Summary</h3>
+              <h3 className="seller-section-title">{ts('orderSummary')}</h3>
               <div className="seller-checkout-client">
                 <User size={16} />
                 <div>
@@ -263,13 +266,13 @@ export default function SellerSell({ products }: { products: Product[] }) {
                 </div>
               ))}
               <div className="seller-checkout-total">
-                <strong>Total</strong>
+                <strong>{ts('subtotal')}</strong>
                 <strong>${subtotal.toFixed(2)}</strong>
               </div>
             </div>
 
             <div className="seller-checkout-form">
-              <h3 className="seller-section-title">Payment</h3>
+              <h3 className="seller-section-title">{ts('payment')}</h3>
               <div className="seller-payment-options">
                 {['cash', 'card', 'transfer', 'credit'].map(m => (
                   <button key={m} className={`seller-payment-btn${paymentMethod === m ? ' selected' : ''}`} onClick={() => setPaymentMethod(m)}>
@@ -277,12 +280,12 @@ export default function SellerSell({ products }: { products: Product[] }) {
                   </button>
                 ))}
               </div>
-              <label className="seller-label">Notes (optional)</label>
-              <textarea className="seller-textarea" placeholder="Add any notes about this sale..." value={notes} onChange={e => setNotes(e.target.value)} rows={3} />
+              <label className="seller-label">{ts('notesLabel')}</label>
+              <textarea className="seller-textarea" placeholder={ts('notesPlaceholder')} value={notes} onChange={e => setNotes(e.target.value)} rows={3} />
               <div className="seller-checkout-actions">
-                <button className="seller-btn-ghost" onClick={() => setStep('products')}>← Back</button>
+                <button className="seller-btn-ghost" onClick={() => setStep('products')}>{ts('back')}</button>
                 <button className="seller-btn-primary" onClick={submitOrder} disabled={submitting}>
-                  {submitting ? 'Processing...' : `Complete Sale · $${subtotal.toFixed(2)}`}
+                  {submitting ? ts('processing') : `${ts('completeSale')} · $${subtotal.toFixed(2)}`}
                 </button>
               </div>
             </div>
