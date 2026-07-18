@@ -164,10 +164,8 @@
     "reportsDesc": "Ventas, análisis y métricas de rendimiento",
     "rotation": "Rotación",
     "rotationDesc": "Programar ciclos de estado de productos",
-    "marketing": "Marketing",
-    "marketingDesc": "Crear y publicar páginas promocionales",
-    "theme": "Tema",
-    "themeDesc": "Personalizar el aspecto de la tienda",
+    "studio": "Studio de Tienda",
+    "studioDesc": "Marca, páginas, contenido — un solo editor",
     "settings": "Configuración",
     "settingsDesc": "Configuración de la tienda y preferencias",
     "showTutorial": "Mostrar tutorial",
@@ -442,9 +440,11 @@
           "step-3": { "title": "Productos y 3D",           "description": "Crea productos y genera modelos 3D a partir de una foto del producto usando IA.", "actionText": "" },
           "step-4": { "title": "Pedidos",                  "description": "Consulta todos los pedidos de tus vendedores, filtra por vendedor y revisa los detalles.", "actionText": "" },
           "step-5": { "title": "Usuarios y Roles",         "description": "Asigna roles a cada usuario — cliente, vendedor, supervisor o administrador. El rol controla a qué panel accede.", "actionText": "" },
-          "step-6": { "title": "Reportes",                 "description": "Gráficas de ventas, análisis de costo/margen, seguimiento de metas e inventario — todo con datos reales.", "actionText": "" },
-          "step-7": { "title": "Navegación del menú",      "description": "El menú lateral te da acceso inmediato a las 7 secciones. Tu sección actual aparece resaltada.", "actionText": "" },
-          "step-8": { "title": "¿Necesitas ayuda?",        "description": "Haz clic en este botón en cualquier momento para repetir este tour.", "actionText": "Vamos" }
+          "step-6":  { "title": "Reportes",             "description": "Gráficas de ventas, análisis de costo/margen, seguimiento de metas e inventario — todo con datos reales.", "actionText": "" },
+          "step-7":  { "title": "Rotación de Productos", "description": "Programa cuándo los productos cambian entre Activo, Pausado y Archivado. Mantén tu catálogo fresco automáticamente.", "actionText": "" },
+          "step-8":  { "title": "Studio de Tienda",     "description": "Un editor para todo: paleta de marca, colores de scroll, tipografía por página, contenido, imágenes y tarjeta de miembro.", "actionText": "" },
+          "step-9":  { "title": "Navegación lateral",   "description": "El menú lateral te da acceso inmediato a las 7 secciones — Panel, Productos, Pedidos, Usuarios, Reportes, Rotación y Studio.", "actionText": "" },
+          "step-10": { "title": "¿Necesitas ayuda?",    "description": "Haz clic en este botón en cualquier momento para repetir este tour.", "actionText": "Vamos" }
         }
       },
       "reports-tour": {

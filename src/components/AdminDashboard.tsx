@@ -26,8 +26,7 @@ export default function AdminDashboard() {
     { icon: '👥', title: t('users'),     description: t('usersDesc'),     href: '/admin/users' },
     { icon: '📈', title: t('reports'),   description: t('reportsDesc'),   href: '/admin/reports' },
     { icon: '🔄', title: t('rotation'),  description: t('rotationDesc'),  href: '/admin/rotation' },
-    { icon: '✏️', title: t('marketing'), description: t('marketingDesc'), href: '/admin/editor' },
-    { icon: '🎨', title: t('theme'),     description: t('themeDesc'),     href: '/admin/theme' },
+    { icon: '🪄', title: t('studio'),    description: t('studioDesc'),    href: '/admin/studio' },
   ];
 
   useEffect(() => {

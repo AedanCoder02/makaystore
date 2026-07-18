@@ -9,8 +9,7 @@ import {
   Users,
   BarChart2,
   RefreshCw,
-  Pencil,
-  Palette,
+  Wand2,
 } from 'lucide-react';
 
 const SIDEBAR_ITEMS = [
@@ -20,8 +19,7 @@ const SIDEBAR_ITEMS = [
   { label: 'Usuarios',   href: '/admin/users',              icon: Users },
   { label: 'Reportes',   href: '/admin/reports',            icon: BarChart2 },
   { label: 'Rotación',   href: '/admin/rotation',           icon: RefreshCw },
-  { label: 'Marketing',  href: '/admin/editor',             icon: Pencil },
-  { label: 'Tema',       href: '/admin/theme',              icon: Palette },
+  { label: 'Studio',     href: '/admin/studio',             icon: Wand2 },
 ];
 
 export default function AdminSidebar() {

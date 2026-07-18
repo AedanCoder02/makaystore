@@ -164,10 +164,8 @@
     "reportsDesc": "Sales, analytics and performance metrics",
     "rotation": "Rotation",
     "rotationDesc": "Schedule product status cycles",
-    "marketing": "Marketing",
-    "marketingDesc": "Create and publish promotional pages",
-    "theme": "Theme",
-    "themeDesc": "Customize the store look and feel",
+    "studio": "Storefront Studio",
+    "studioDesc": "Brand, pages, content — one editor",
     "settings": "Settings",
     "settingsDesc": "Store settings and preferences",
     "showTutorial": "Show tutorial",
@@ -442,9 +440,11 @@
           "step-3": { "title": "Products & 3D",       "description": "Create products and generate 3D models from a single product photo using AI.", "actionText": "" },
           "step-4": { "title": "Orders",              "description": "View every order placed by your sellers, filter by seller, and inspect order details.", "actionText": "" },
           "step-5": { "title": "Users & Roles",       "description": "Assign roles to every user — customer, seller, supervisor, or admin. Role controls which panel they access.", "actionText": "" },
-          "step-6": { "title": "Reports",             "description": "Sales charts, cost/margin analysis, monthly goal tracking, and inventory health — all with real data.", "actionText": "" },
-          "step-7": { "title": "Sidebar Navigation",  "description": "The sidebar gives you instant access to all 7 sections. Your current section is highlighted.", "actionText": "" },
-          "step-8": { "title": "Need Help?",          "description": "Click this button anytime to replay this tour.", "actionText": "Let's go" }
+          "step-6":  { "title": "Reports",             "description": "Sales charts, cost/margin analysis, monthly goal tracking, and inventory health — all with real data.", "actionText": "" },
+          "step-7":  { "title": "Product Rotation",   "description": "Schedule when products cycle between Active, Paused, and Archived. Keep your catalog fresh automatically.", "actionText": "" },
+          "step-8":  { "title": "Storefront Studio",  "description": "One editor for everything: brand palette, scroll colors, per-page typography, content overrides, product images, and member card design.", "actionText": "" },
+          "step-9":  { "title": "Sidebar Navigation", "description": "The sidebar gives you instant access to all 7 sections — Panel, Products, Orders, Users, Reports, Rotation, and Studio.", "actionText": "" },
+          "step-10": { "title": "Need Help?",         "description": "Click this button anytime to replay this tour.", "actionText": "Let's go" }
         }
       },
       "reports-tour": {
