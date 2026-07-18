@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 
-const TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
+const TIMEOUT_MS = 25 * 60 * 1000; // 25 minutes — CPU inference takes 15-20 min
 
 export default function GenerationProgressStep({
   requestId,
@@ -16,30 +16,43 @@ export default function GenerationProgressStep({
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState('');
   const [elapsed, setElapsed] = useState(0);
+  const [statusText, setStatusText] = useState('Sending image to AI…');
   const startTime = useRef<number>(Date.now());
   const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(undefined);
 
   useEffect(() => {
-    // Tick elapsed time every second for display
-    const tick = setInterval(() => setElapsed(Math.floor((Date.now() - startTime.current) / 1000)), 1000);
+    // Persist requestId so page refresh can resume
+    if (requestId) {
+      try { sessionStorage.setItem('tripo_request_id', requestId); } catch {}
+    }
 
-    // Timeout guard
+    const tick = setInterval(() => {
+      const sec = Math.floor((Date.now() - startTime.current) / 1000);
+      setElapsed(sec);
+      // Update status text based on elapsed time
+      if (sec < 30)       setStatusText('Sending image to AI…');
+      else if (sec < 120) setStatusText('Loading 3D reconstruction model…');
+      else if (sec < 600) setStatusText('Reconstructing 3D mesh from image — this takes 10-20 min on CPU…');
+      else                setStatusText('Still working — CPU inference is slow but making progress…');
+    }, 1000);
+
     const timeout = setTimeout(() => {
       clearInterval(intervalRef.current);
       clearInterval(tick);
-      setError('Generation timed out after 5 minutes. The server may be busy — try again.');
+      setError('Generation timed out after 25 minutes. The job may still be running on the server — check back or try again.');
     }, TIMEOUT_MS);
 
-    // Poll status
     intervalRef.current = setInterval(async () => {
       try {
         const res = await fetch(`/api/admin/products/generate-3d/${requestId}`);
+        if (!res.ok) return; // transient error — keep polling
         const data = await res.json();
 
         if (data.status === 'completed' && data.glbUrl) {
           clearInterval(intervalRef.current);
           clearInterval(tick);
           clearTimeout(timeout);
+          try { sessionStorage.removeItem('tripo_request_id'); } catch {}
           onComplete(data.glbUrl);
         } else if (data.status === 'failed') {
           clearInterval(intervalRef.current);
@@ -52,7 +65,7 @@ export default function GenerationProgressStep({
       } catch {
         // transient network error — keep polling
       }
-    }, 3000);
+    }, 5000); // poll every 5s (was 3s — reduce load on CPU server)
 
     return () => {
       clearInterval(intervalRef.current);
@@ -64,17 +77,22 @@ export default function GenerationProgressStep({
   const mins = Math.floor(elapsed / 60);
   const secs = elapsed % 60;
   const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+  const estimatedRemaining = Math.max(0, 15 * 60 - elapsed);
+  const remMins = Math.floor(estimatedRemaining / 60);
+  const remSecs = estimatedRemaining % 60;
 
   return (
     <div className="wizard-step-card">
       <div className="wizard-step-header">
-        <div className="wizard-step-icon">⚙️</div>
+        <div className="wizard-step-icon">{error ? '⚙️' : '🔄'}</div>
         <div>
           <h2 className="wizard-step-title">
             {error ? 'Generation Failed' : 'Generating 3D Model…'}
           </h2>
           <p className="wizard-step-desc">
-            {error ? 'Something went wrong during inference' : 'TripoSR is processing your image on CPU — this takes 2–4 minutes'}
+            {error
+              ? 'Something went wrong during inference'
+              : 'Running on CPU — keep this tab open while the model processes'}
           </p>
         </div>
       </div>
@@ -86,15 +104,26 @@ export default function GenerationProgressStep({
       ) : (
         <>
           <div className="gen3d-progress-track">
-            <div className="gen3d-progress-fill" style={{ width: `${Math.max(progress, 5)}%` }} />
+            <div className="gen3d-progress-fill" style={{ width: `${Math.max(progress, 3)}%` }} />
           </div>
           <div className="gen3d-progress-meta">
             <span>{progress}% complete</span>
             <span>Elapsed: {timeStr}</span>
           </div>
-          <div className="gen3d-spinner-wrap">
-            <div className="gen3d-spinner" />
-            <span>Processing on Railway server…</span>
+
+          <div className="gen3d-status-box">
+            <div className="gen3d-spinner-wrap">
+              <div className="gen3d-spinner" />
+              <span>{statusText}</span>
+            </div>
+            {elapsed > 60 && estimatedRemaining > 0 && (
+              <p className="gen3d-eta">
+                Est. remaining: ~{remMins}m {remSecs}s
+              </p>
+            )}
+            <p className="gen3d-warning">
+              Do not close this tab. CPU inference takes 10–20 minutes.
+            </p>
           </div>
         </>
       )}
