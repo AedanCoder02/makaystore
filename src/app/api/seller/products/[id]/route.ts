@@ -32,6 +32,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   `;
 
   if (!row[0]) return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+
+  // Keep product_overrides in sync so storefront COALESCE picks up the new price/image/description
+  await sql`
+    UPDATE product_overrides
+    SET price       = ${price},
+        image_url   = ${image ?? ''},
+        description = ${description ?? ''},
+        updated_at  = NOW()
+    WHERE product_id = ${id}
+  `.catch(() => {});
+
   return NextResponse.json(row[0]);
 }
 
