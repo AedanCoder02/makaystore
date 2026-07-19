@@ -12,7 +12,7 @@ export async function GET() {
     const rows = await sql`
       SELECT id, title, sku, status, last_rotated_at
       FROM products
-      ORDER BY CAST(id AS integer) ASC
+      ORDER BY id ASC
     `;
     return NextResponse.json(rows);
   } catch (e: any) {

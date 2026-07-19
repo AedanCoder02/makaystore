@@ -18,7 +18,7 @@ export async function GET() {
       WHERE p.status = 'active'
       GROUP BY p.id, p.title, p.description, p.category, p.variants, p.sku, p.status,
                po.price, po.image_url, po.product_type
-      ORDER BY CAST(p.id AS integer) ASC
+      ORDER BY p.id ASC
     `;
     const parsed = rows.map((r: any) => ({
       ...r,
