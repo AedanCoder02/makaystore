@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import RotationStatusBadge from './RotationStatusBadge';
 import { useRotationStore } from '@/stores/rotationStore';
@@ -13,52 +14,73 @@ export interface ProductRow {
   sku: string;
 }
 
-export const PRODUCTS_MOCK: ProductRow[] = [
-  { id: 'prod-001', name: 'Linen Shirt', status: 'active', lastRotated: '2026-06-15', sku: 'LINEN-001' },
-  { id: 'prod-002', name: 'Cotton Pants', status: 'active', lastRotated: '2026-06-10', sku: 'COTTON-002' },
-  { id: 'prod-003', name: 'Silk Blend Top', status: 'paused', lastRotated: '2026-05-20', sku: 'SILK-001' },
-  { id: 'prod-004', name: 'Wool Sweater', status: 'archived', lastRotated: '2026-04-01', sku: 'WOOL-001' },
-  { id: 'prod-005', name: 'Denim Jacket', status: 'active', lastRotated: '2026-06-12', sku: 'DENIM-001' },
-  { id: 'prod-006', name: 'Beach Shorts', status: 'active', lastRotated: '2026-06-20', sku: 'BEACH-001' },
-  { id: 'prod-007', name: 'Winter Coat', status: 'paused', lastRotated: '2026-03-15', sku: 'WINTER-001' },
-  { id: 'prod-008', name: 'Summer Dress', status: 'active', lastRotated: '2026-06-18', sku: 'DRESS-001' },
-  { id: 'prod-009', name: 'Cargo Pants', status: 'active', lastRotated: '2026-06-05', sku: 'CARGO-001' },
-  { id: 'prod-010', name: 'Polo Shirt', status: 'active', lastRotated: '2026-06-14', sku: 'POLO-001' },
-  { id: 'prod-011', name: 'Blazer Classic', status: 'paused', lastRotated: '2026-05-01', sku: 'BLAZ-001' },
-  { id: 'prod-012', name: 'Running Tee', status: 'active', lastRotated: '2026-06-22', sku: 'RUN-001' },
-  { id: 'prod-013', name: 'Chino Shorts', status: 'active', lastRotated: '2026-06-11', sku: 'CHINO-001' },
-  { id: 'prod-014', name: 'Cashmere Scarf', status: 'archived', lastRotated: '2026-02-15', sku: 'CASH-001' },
-  { id: 'prod-015', name: 'Leather Belt', status: 'active', lastRotated: '2026-06-08', sku: 'BELT-001' },
-  { id: 'prod-016', name: 'Canvas Tote', status: 'active', lastRotated: '2026-06-19', sku: 'TOTE-001' },
-  { id: 'prod-017', name: 'Sport Hoodie', status: 'paused', lastRotated: '2026-04-20', sku: 'HOOD-001' },
-];
-
 interface RotationTableProps {
   onRotateNow: (product: ProductRow) => void;
   onSchedule: (product: ProductRow) => void;
+  onProductsLoaded?: (products: ProductRow[]) => void;
 }
 
-export default function RotationTable({ onRotateNow, onSchedule }: RotationTableProps) {
+export default function RotationTable({ onRotateNow, onSchedule, onProductsLoaded }: RotationTableProps) {
   const { selectProduct, deselectProduct, selectedProducts } = useRotationStore();
   const t = useTranslations('rotation');
+  const [products, setProducts] = useState<ProductRow[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const allSelected = PRODUCTS_MOCK.every((p) => selectedProducts.includes(p.id));
+  useEffect(() => {
+    fetch('/api/seller/rotation')
+      .then(r => r.ok ? r.json() : [])
+      .then((rows: { id: number | string; title: string; sku: string | null; status: string; last_rotated_at: string | null }[]) => {
+        const mapped: ProductRow[] = rows.map(r => ({
+          id: String(r.id),
+          name: r.title,
+          sku: r.sku ?? `SKU-${r.id}`,
+          status: (['active','paused','archived'].includes(r.status) ? r.status : 'active') as RotationStatus,
+          lastRotated: r.last_rotated_at
+            ? new Date(r.last_rotated_at).toISOString().split('T')[0]
+            : '—',
+        }));
+        setProducts(mapped);
+        onProductsLoaded?.(mapped);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [onProductsLoaded]);
+
+  const reload = () => {
+    setLoading(true);
+    fetch('/api/seller/rotation')
+      .then(r => r.ok ? r.json() : [])
+      .then((rows: { id: number | string; title: string; sku: string | null; status: string; last_rotated_at: string | null }[]) => {
+        setProducts(rows.map(r => ({
+          id: String(r.id),
+          name: r.title,
+          sku: r.sku ?? `SKU-${r.id}`,
+          status: (['active','paused','archived'].includes(r.status) ? r.status : 'active') as RotationStatus,
+          lastRotated: r.last_rotated_at ? new Date(r.last_rotated_at).toISOString().split('T')[0] : '—',
+        })));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  };
+
+  // Expose reload so parent can call it after rotate
+  const handleRotateNow = (product: ProductRow) => {
+    onRotateNow({ ...product, _reload: reload } as ProductRow & { _reload: () => void });
+  };
+
+  const allSelected = products.length > 0 && products.every(p => selectedProducts.includes(p.id));
 
   const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      PRODUCTS_MOCK.forEach((p) => selectProduct(p.id));
-    } else {
-      PRODUCTS_MOCK.forEach((p) => deselectProduct(p.id));
-    }
+    products.forEach(p => checked ? selectProduct(p.id) : deselectProduct(p.id));
   };
 
-  const handleRowToggle = (productId: string) => {
-    if (selectedProducts.includes(productId)) {
-      deselectProduct(productId);
-    } else {
-      selectProduct(productId);
-    }
-  };
+  if (loading) {
+    return <div style={{ padding: '2rem', color: 'var(--makay-mauve)', fontStyle: 'italic' }}>Loading products…</div>;
+  }
+
+  if (products.length === 0) {
+    return <div style={{ padding: '2rem', color: 'var(--makay-mauve)', fontStyle: 'italic' }}>No products found.</div>;
+  }
 
   return (
     <div className="table-container">
@@ -66,12 +88,8 @@ export default function RotationTable({ onRotateNow, onSchedule }: RotationTable
         <thead>
           <tr>
             <th>
-              <input
-                type="checkbox"
-                aria-label={t('selectAll')}
-                checked={allSelected}
-                onChange={(e) => handleSelectAll(e.target.checked)}
-              />
+              <input type="checkbox" aria-label={t('selectAll')} checked={allSelected}
+                onChange={e => handleSelectAll(e.target.checked)} />
             </th>
             <th>{t('productName')}</th>
             <th>{t('sku')}</th>
@@ -81,17 +99,14 @@ export default function RotationTable({ onRotateNow, onSchedule }: RotationTable
           </tr>
         </thead>
         <tbody>
-          {PRODUCTS_MOCK.map((product) => {
+          {products.map(product => {
             const isSelected = selectedProducts.includes(product.id);
             return (
               <tr key={product.id} className={isSelected ? 'selected' : ''}>
-                <td data-label="Select">
-                  <input
-                    type="checkbox"
-                    checked={isSelected}
-                    onChange={() => handleRowToggle(product.id)}
-                    aria-label={t('selectProduct').replace('{name}', product.name)}
-                  />
+                <td>
+                  <input type="checkbox" checked={isSelected}
+                    onChange={() => isSelected ? deselectProduct(product.id) : selectProduct(product.id)}
+                    aria-label={t('selectProduct').replace('{name}', product.name)} />
                 </td>
                 <td data-label={t('productName')}>{product.name}</td>
                 <td data-label={t('sku')}>{product.sku}</td>
@@ -100,17 +115,11 @@ export default function RotationTable({ onRotateNow, onSchedule }: RotationTable
                 </td>
                 <td data-label={t('lastRotated')}>{product.lastRotated}</td>
                 <td data-label={t('actions')} className="action-buttons">
-                  <button
-                    className="btn btn-small"
-                    onClick={() => onRotateNow(product)}
-                    disabled={product.status === 'archived'}
-                  >
+                  <button className="btn btn-small" onClick={() => handleRotateNow(product)}
+                    disabled={product.status === 'archived'}>
                     {t('rotateNow')}
                   </button>
-                  <button
-                    className="btn btn-small btn-secondary"
-                    onClick={() => onSchedule(product)}
-                  >
+                  <button className="btn btn-small btn-secondary" onClick={() => onSchedule(product)}>
                     {t('schedule')}
                   </button>
                 </td>

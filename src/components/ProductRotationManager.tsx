@@ -25,9 +25,17 @@ export default function ProductRotationManager() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleRotateNow = (product: ProductRow) => {
+  const handleRotateNow = async (product: ProductRow & { _reload?: () => void }) => {
+    const nextStatus = product.status === 'active' ? 'paused' : 'active';
     if (window.confirm(t('rotateNowConfirm').replace('{name}', product.name).replace('{from}', product.status))) {
-      rotateNow(product.id, product.status, 'paused');
+      rotateNow(product.id, product.status, nextStatus);
+      // Persist to DB
+      await fetch('/api/seller/rotation', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: product.id, status: nextStatus }),
+      });
+      product._reload?.();
     }
   };
 
