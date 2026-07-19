@@ -20,10 +20,39 @@ interface UserProfile {
   membership_tier: string;
 }
 
+interface OrderSummary {
+  id: string;
+  total: number;
+  status: string;
+  created_at: string;
+  items: Array<{ title: string; quantity: number }>;
+}
+
 const TIER_LABELS: Record<string, { label: string; color: string }> = {
-  free: { label: 'Explorer', color: '#A89080' },
-  member: { label: 'Member', color: '#D4AF37' },
-  vip: { label: 'VIP', color: '#D4A574' },
+  free:   { label: 'Explorer', color: '#A89080' },
+  bronze: { label: 'Bronze',   color: '#CD7F32' },
+  silver: { label: 'Silver',   color: '#A8A9AD' },
+  gold:   { label: 'Gold',     color: '#D4AF37' },
+  vip:    { label: 'VIP',      color: '#D4A574' },
+  member: { label: 'Member',   color: '#D4AF37' },
+};
+
+const TIER_PERKS: Record<string, string[]> = {
+  free:   ['Access to the Makay catalog', 'Member QR card'],
+  bronze: ['Early access to new drops', 'Member QR card', '5% loyalty credit'],
+  silver: ['Priority event tickets', 'Bronze perks', '10% loyalty credit'],
+  gold:   ['VIP event access', 'Silver perks', '15% loyalty credit', 'Personal stylist'],
+  vip:    ['All perks', 'Exclusive collections', '20% loyalty credit', 'Complimentary alterations'],
+  member: ['Access to the Makay catalog', 'Member QR card'],
+};
+
+const TIER_NEXT: Record<string, { next: string; spend: number }> = {
+  free:   { next: 'Bronze', spend: 100  },
+  bronze: { next: 'Silver', spend: 300  },
+  silver: { next: 'Gold',   spend: 700  },
+  gold:   { next: 'VIP',    spend: 1500 },
+  vip:    { next: '',       spend: 0    },
+  member: { next: 'Bronze', spend: 100  },
 };
 
 export default function ClientProfile() {
@@ -35,6 +64,7 @@ export default function ClientProfile() {
   const [editingBio, setEditingBio] = useState(false);
   const [bioInput, setBioInput] = useState('');
   const [saving, setSaving] = useState(false);
+  const [orders, setOrders] = useState<OrderSummary[]>([]);
   const cardRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
 
@@ -51,9 +81,11 @@ export default function ClientProfile() {
     Promise.all([
       fetch('/api/profile').then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
       fetch('/api/theme').then(r => r.json()).catch(() => ({})),
-    ]).then(([profileData, themeData]: [UserProfile, Record<string, string>]) => {
+      fetch('/api/orders').then(r => r.ok ? r.json() : []).catch(() => []),
+    ]).then(([profileData, themeData, ordersData]: [UserProfile, Record<string, string>, OrderSummary[]]) => {
       setProfile(profileData);
       setBioInput(profileData.bio || '');
+      setOrders(Array.isArray(ordersData) ? ordersData.slice(0, 5) : []);
       if (themeData.card_layout) {
         try { setCardLayout(JSON.parse(themeData.card_layout)); } catch {}
       }
@@ -224,6 +256,49 @@ export default function ClientProfile() {
             <span className="profile-wallet-tag">Makay Credits</span>
           </div>
         </div>
+
+        {/* Membership Perks */}
+        <div className="profile-section">
+          <div className="profile-section-header">
+            <h2 className="profile-section-title">Membership — {tier.label}</h2>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {(TIER_PERKS[profile.membership_tier] ?? TIER_PERKS.free).map((perk, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', color: 'var(--makay-dark-navy)' }}>
+                <span style={{ color: tier.color, fontSize: '1rem' }}>✓</span> {perk}
+              </div>
+            ))}
+          </div>
+          {TIER_NEXT[profile.membership_tier]?.next && (
+            <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: 'var(--makay-mauve)', marginTop: '0.75rem' }}>
+              Spend ${TIER_NEXT[profile.membership_tier].spend} total to unlock {TIER_NEXT[profile.membership_tier].next}.
+            </p>
+          )}
+        </div>
+
+        {/* Recent Orders */}
+        {orders.length > 0 && (
+          <div className="profile-section">
+            <div className="profile-section-header">
+              <h2 className="profile-section-title">Recent Orders</h2>
+              <a href="/orders" style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.8rem', color: 'var(--makay-peachy-rose)', textDecoration: 'none' }}>View all →</a>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {orders.map(o => (
+                <a key={o.id} href={`/orders/${o.id}`} style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem 1rem', background: 'var(--makay-sand-cream)', borderRadius: '10px', gap: '1rem' }}>
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontFamily: 'var(--font-montserrat)', fontWeight: 600, fontSize: '0.8rem', color: 'var(--makay-dark-navy)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.id}</p>
+                    <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', color: 'var(--makay-mauve)', margin: 0 }}>{new Date(o.created_at).toLocaleDateString()}</p>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexShrink: 0 }}>
+                    <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 600, textTransform: 'capitalize', color: o.status === 'delivered' ? '#10b981' : o.status === 'shipped' ? '#8b5cf6' : '#f59e0b' }}>{o.status}</span>
+                    <span style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: '0.95rem', color: 'var(--makay-peachy-rose)' }}>${Number(o.total).toFixed(2)}</span>
+                  </div>
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Client Card */}
         <div className="profile-section">

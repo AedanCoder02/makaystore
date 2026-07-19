@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, ShoppingBag, Users, BarChart2, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, BarChart2, Calendar, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 const NAV = [
   { label: 'Panel',    href: '/admin/dashboard', icon: LayoutDashboard },
   { label: 'Pedidos',  href: '/admin/orders',    icon: ShoppingBag },
   { label: 'Usuarios', href: '/admin/users',      icon: Users },
   { label: 'Reportes', href: '/admin/reports',    icon: BarChart2 },
+  { label: 'Events',   href: '/admin/events',     icon: Calendar },
 ];
 
 export default function AdminSidebar() {

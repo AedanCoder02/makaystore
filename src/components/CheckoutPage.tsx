@@ -10,7 +10,7 @@ import ShippingMethodSelector, {
 } from '@/components/ShippingMethodSelector';
 import StripePaymentForm from '@/components/StripePaymentForm';
 import OrderSummaryCheckout from '@/components/OrderSummaryCheckout';
-import { createOrder } from '@/lib/mockOrders';
+// orders are persisted via /api/orders
 import '@/styles/checkout.css';
 
 interface FormData {
@@ -64,20 +64,30 @@ export default function CheckoutPage() {
     setStep('payment');
   };
 
-  const handlePaymentSuccess = (paymentIntentId: string) => {
+  const handlePaymentSuccess = async (paymentIntentId: string) => {
     setLoading(true);
-
-    const order = createOrder({
-      items,
-      total: finalTotal,
-      shippingAddress: formData,
-      shippingMethod: shippingMethod as 'standard' | 'express' | 'overnight',
-      shippingCost,
-      paymentId: paymentIntentId,
-    });
-
-    clearCart();
-    router.push(`/order-confirmation/${order.id}`);
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items,
+          subtotal: totalPrice,
+          shipping_cost: shippingCost,
+          total: finalTotal,
+          shipping_address: formData,
+          shipping_method: shippingMethod,
+          payment_id: paymentIntentId,
+          customer_email: formData.email,
+        }),
+      });
+      const order = await res.json();
+      clearCart();
+      router.push(`/order-confirmation/${order.id}`);
+    } catch {
+      setError('Order could not be saved. Please contact support.');
+      setLoading(false);
+    }
   };
 
   const handlePaymentError = (paymentError: string) => {
