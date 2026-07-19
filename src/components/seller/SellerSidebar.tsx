@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, Crown, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 export default function SellerSidebar() {
   const path = usePathname();
@@ -42,6 +42,7 @@ export default function SellerSidebar() {
     { href: '/seller/rotation',           label: t('nav.rotation'),  icon: RefreshCw,       key: 'rotation' },
     { href: '/seller/studio',             label: t('nav.studio'),    icon: Wand2,           key: 'studio' },
     { href: '/seller/events',             label: 'Events',            icon: Calendar,        key: 'events' },
+    { href: '/seller/memberships',        label: 'Memberships',       icon: Crown,           key: 'memberships' },
   ];
   // If permissions are set, filter to allowed sections; dashboard is always visible
   const NAV = permissions
