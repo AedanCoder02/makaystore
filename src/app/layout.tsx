@@ -81,10 +81,10 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${playfairDisplay.variable} ${montserrat.variable} h-full antialiased`}
+      className={`${playfairDisplay.variable} ${montserrat.variable} antialiased`}
     >
       {themeVars && <style dangerouslySetInnerHTML={{ __html: themeVars }} />}
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-screen">
         <ClerkProvider>
           <NextIntlClientProvider locale={locale} messages={messages}>
             <MarketingApplier />

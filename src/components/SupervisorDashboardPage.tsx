@@ -81,8 +81,8 @@ export default function SupervisorDashboardPage() {
         <div className="sup-section">
           <div className="sup-section-header">
             <span className="sup-section-icon-placeholder" />
-            <h2 className="sup-section-title">Worker Profiles</h2>
-            <span className="sup-section-hint">Click a worker to view details</span>
+            <h2 className="sup-section-title">{t('workerProfiles')}</h2>
+            <span className="sup-section-hint">{t('clickWorker')}</span>
           </div>
           <div className="worker-profile-list">
             {store.workerDetails.map((wd) => (

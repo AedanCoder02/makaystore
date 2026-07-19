@@ -1,6 +1,7 @@
 'use client';
 
 import { ClipboardList } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export type TaskPriority = 'High' | 'Medium' | 'Low';
 export type TaskStatus = 'todo' | 'in-progress' | 'done';
@@ -24,15 +25,16 @@ const PRIORITY_COLORS: Record<TaskPriority, string> = {
   Low: 'task-priority-low',
 };
 
-const COLUMNS: { key: TaskStatus; label: string }[] = [
-  { key: 'todo', label: 'To Do' },
-  { key: 'in-progress', label: 'In Progress' },
-  { key: 'done', label: 'Done' },
-];
-
 export default function TaskBoard({ tasks }: TaskBoardProps) {
-  const workers = Array.from(new Set(tasks.map((t) => t.assignedTo)));
+  const t = useTranslations('supervisor');
 
+  const COLUMNS: { key: TaskStatus; label: string }[] = [
+    { key: 'todo',        label: t('toDo') },
+    { key: 'in-progress', label: t('inProgress') },
+    { key: 'done',        label: t('done') },
+  ];
+
+  const workers = Array.from(new Set(tasks.map((t) => t.assignedTo)));
   const workerCompletion = workers.map((w) => {
     const workerTasks = tasks.filter((t) => t.assignedTo === w);
     const done = workerTasks.filter((t) => t.status === 'done').length;
@@ -43,7 +45,7 @@ export default function TaskBoard({ tasks }: TaskBoardProps) {
     <div className="sup-section">
       <div className="sup-section-header">
         <ClipboardList size={20} className="sup-section-icon" />
-        <h2 className="sup-section-title">Task Board</h2>
+        <h2 className="sup-section-title">{t('taskBoard')}</h2>
       </div>
 
       <div className="taskboard-worker-completion">
@@ -56,7 +58,7 @@ export default function TaskBoard({ tasks }: TaskBoardProps) {
 
       <div className="taskboard-columns">
         {COLUMNS.map((col) => {
-          const colTasks = tasks.filter((t) => t.status === col.key);
+          const colTasks = tasks.filter((task) => task.status === col.key);
           return (
             <div key={col.key} className={`taskboard-column taskboard-column-${col.key}`}>
               <div className="taskboard-col-header">
@@ -76,9 +78,7 @@ export default function TaskBoard({ tasks }: TaskBoardProps) {
                     </span>
                   </div>
                 ))}
-                {colTasks.length === 0 && (
-                  <p className="sup-empty-col">No tasks</p>
-                )}
+                {colTasks.length === 0 && <p className="sup-empty-col">{t('noTasks')}</p>}
               </div>
             </div>
           );

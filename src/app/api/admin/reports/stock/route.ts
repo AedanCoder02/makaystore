@@ -11,10 +11,11 @@ export async function GET() {
       p.id,
       p.title,
       p.sku,
-      COALESCE(ps.quantity, 0)::int AS qty
+      COALESCE(SUM(ps.quantity), p.stock, 0)::int AS qty
     FROM products p
     LEFT JOIN product_stock ps ON ps.product_id = p.id
     WHERE p.status = 'active'
+    GROUP BY p.id, p.title, p.sku, p.stock
     ORDER BY qty DESC
   `.catch(() => []);
 

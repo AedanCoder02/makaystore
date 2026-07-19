@@ -6,6 +6,7 @@ import {
   Loader, ExternalLink, Wand2, Globe2, Eye, EyeOff, CreditCard as CardIcon,
   PanelLeftClose, PanelLeftOpen, Calendar, Crown,
 } from 'lucide-react';
+import ImageUpload from '@/components/seller/ImageUpload';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import { CardCanvas, type CardLayout, type CardColors, DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS } from '@/components/CardDesigner';
@@ -39,8 +40,8 @@ const SECTION_NAMES = ['Hero','Featured Collection','Why Makay','Testimonials','
 const PAGES = [
   { id: 'global',         label: 'Global Brand',   icon: Globe2,      src: '/'           },
   { id: 'home',           label: 'Home',            icon: Globe,       src: '/'           },
-  { id: 'events',         label: 'Events Section',  icon: Calendar,    src: '/'           },
-  { id: 'memberships',    label: 'Memberships',     icon: Crown,       src: '/'           },
+  { id: 'events',         label: 'Events Section',  icon: Calendar,    src: '/#events'      },
+  { id: 'memberships',    label: 'Memberships',     icon: Crown,       src: '/#memberships' },
   { id: 'products',       label: 'Products',        icon: ShoppingBag, src: '/products'   },
   { id: 'product-detail', label: 'Product Detail',  icon: Package,     src: '/products/1' },
   { id: 'checkout',       label: 'Checkout',        icon: CreditCard,  src: '/cart'       },
@@ -64,7 +65,7 @@ const PAGE_COLOR_CONTROLS = [
   { key: 'text',      label: 'Body Text',           cssVar: '--makay-dark-navy',     default: '#2C2C2C' },
   { key: 'muted',     label: 'Muted / Labels',      cssVar: '--makay-mauve',         default: '#A89080' },
 ];
-const CONTENT_FIELDS: Record<string, {key:string;label:string;type:'text'|'textarea';placeholder:string}[]> = {
+const CONTENT_FIELDS: Record<string, {key:string;label:string;type:'text'|'textarea'|'image';placeholder:string}[]> = {
   home: [
     { key:'heroTitle',       label:'Hero Headline',           type:'text',     placeholder:'Your Connection Refuge'    },
     { key:'heroSubtitle',    label:'Hero Subtitle',           type:'textarea', placeholder:'Discover clothing...'      },
@@ -89,7 +90,7 @@ const CONTENT_FIELDS: Record<string, {key:string;label:string;type:'text'|'texta
     { key:'placeOrderBtn',label:'Place Order Button',     type:'text', placeholder:'Place Order'   },
   ],
   events: [
-    { key:'bg_image',   label:'Background Image URL',  type:'text',     placeholder:'https://...' },
+    { key:'bg_image',   label:'Background Image',       type:'image',    placeholder:'https://...' },
     { key:'tag_label',  label:'Tag Label (small caps)', type:'text',     placeholder:'Beach Club Events' },
     { key:'heading',    label:'Section Heading',         type:'text',     placeholder:'Upcoming Experiences' },
     { key:'view_all',   label:'"View All" Link Text',    type:'text',     placeholder:'View all events' },
@@ -99,23 +100,27 @@ const CONTENT_FIELDS: Record<string, {key:string;label:string;type:'text'|'texta
     { key:'heading',        label:'Section Heading',           type:'text',     placeholder:'Join the Beach Club' },
     { key:'tag_label',      label:'Tag Label (small caps)',    type:'text',     placeholder:'Membership Program' },
     { key:'bronze_label',   label:'Bronze Tier Name',          type:'text',     placeholder:'Bronze' },
-    { key:'bronze_image',   label:'Bronze Image URL',          type:'text',     placeholder:'https://...' },
+    { key:'bronze_image',   label:'Bronze Image',               type:'image',    placeholder:'https://...' },
     { key:'bronze_perks',   label:'Bronze Perks (one per line)', type:'textarea', placeholder:'Full catalog access\nEarly drop access\n5% credit back' },
     { key:'silver_label',   label:'Silver Tier Name',          type:'text',     placeholder:'Silver' },
-    { key:'silver_image',   label:'Silver Image URL',          type:'text',     placeholder:'https://...' },
+    { key:'silver_image',   label:'Silver Image',               type:'image',    placeholder:'https://...' },
     { key:'silver_perks',   label:'Silver Perks (one per line)', type:'textarea', placeholder:'Bronze perks\nPriority event tickets\n10% credit back' },
     { key:'gold_label',     label:'Gold Tier Name',            type:'text',     placeholder:'Gold' },
-    { key:'gold_image',     label:'Gold Image URL',            type:'text',     placeholder:'https://...' },
+    { key:'gold_image',     label:'Gold Image',                 type:'image',    placeholder:'https://...' },
     { key:'gold_perks',     label:'Gold Perks (one per line)', type:'textarea', placeholder:'Silver perks\nVIP event access\n15% credit back' },
   ],
 };
 
 interface PageState { colors: Record<string,string>; typography: Record<string,string>; content: Record<string,string>; }
-function makeDefaultPage(): PageState {
+function makeDefaultPage(pageId?: string): PageState {
+  const content: Record<string,string> = {};
+  if (pageId && CONTENT_FIELDS[pageId]) {
+    CONTENT_FIELDS[pageId].forEach(f => { if (f.type !== 'image') content[f.key] = f.placeholder; });
+  }
   return {
     colors: Object.fromEntries(PAGE_COLOR_CONTROLS.map(c=>[c.key,c.default])),
     typography: { headingFont:'playfair', headingScale:'md', bodySize:'md', letterSpacing:'normal' },
-    content: {},
+    content,
   };
 }
 
@@ -145,7 +150,7 @@ export default function StudioEditor() {
 
   // Per-page states
   const [pageStates, setPageStates] = useState<Record<string,PageState>>(
-    Object.fromEntries(PAGES.filter(p=>p.id!=='global').map(p=>[p.id, makeDefaultPage()]))
+    Object.fromEntries(PAGES.filter(p=>p.id!=='global').map(p=>[p.id, makeDefaultPage(p.id)]))
   );
 
   // Card
@@ -178,7 +183,7 @@ export default function StudioEditor() {
       setPageStates(prev => {
         const next = { ...prev };
         PAGES.filter(p=>p.id!=='global').forEach(({ id: pid }) => {
-          const ps = makeDefaultPage();
+          const ps = makeDefaultPage(pid);
           Object.entries(data).forEach(([k, v]) => {
             const cm = k.match(new RegExp(`^page:${pid}:colors:(.+)$`));    if (cm) { ps.colors[cm[1]] = v; return; }
             const tm = k.match(new RegExp(`^page:${pid}:typography:(.+)$`)); if (tm) { ps.typography[tm[1]] = v; return; }
@@ -570,6 +575,11 @@ export default function StudioEditor() {
                             {field.type === 'textarea' ? (
                               <textarea className="studio-textarea" rows={2} placeholder={field.placeholder}
                                 value={current.content[field.key]??''} onChange={e => updatePageContent(field.key, e.target.value)} />
+                            ) : field.type === 'image' ? (
+                              <ImageUpload
+                                value={current.content[field.key]??''}
+                                onChange={url => updatePageContent(field.key, url)}
+                              />
                             ) : (
                               <input type="text" className="studio-input" placeholder={field.placeholder}
                                 value={current.content[field.key]??''} onChange={e => updatePageContent(field.key, e.target.value)} />

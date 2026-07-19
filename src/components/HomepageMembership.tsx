@@ -56,7 +56,7 @@ export default function HomepageMembership() {
   const tagLabel = themeData['page:memberships:content:tag_label'] || t('sectionTag');
 
   return (
-    <section style={{ background: '#0e0b08', position: 'relative', overflow: 'hidden' }}>
+    <section id="memberships" style={{ background: '#0e0b08', position: 'relative', overflow: 'hidden' }}>
       <style>{`
         @keyframes mem-fade-in {
           from { opacity: 0; transform: scale(1.04); }
