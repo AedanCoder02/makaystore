@@ -41,7 +41,7 @@ function renderReport(activeTab: ReportTab, dateRange: DateRange) {
     case 'cost':     return <CostMarginReport dateRange={dateRange} />;
     case 'goals':    return <GoalsReport />;
     case 'stock':    return <StockReport />;
-    case 'rotation': return <RotationReport />;
+    case 'rotation': return <RotationReport dateRange={dateRange} />;
   }
 }
 
