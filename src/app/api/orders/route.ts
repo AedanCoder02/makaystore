@@ -89,7 +89,31 @@ export async function POST(req: NextRequest) {
     RETURNING *
   `;
 
-  if (userId) await updateMembershipTier(userId);
+  if (userId) {
+    await updateMembershipTier(userId);
+    // Check if any item is a membership product and upgrade directly
+    const membershipSkus: Record<string, string> = {
+      'MEM-BRONZE': 'bronze', 'MEM-SILVER': 'silver', 'MEM-GOLD': 'gold',
+    };
+    const tierPriority: Record<string, number> = { free: 0, bronze: 1, silver: 2, gold: 3, vip: 4 };
+    let highestTier = '';
+    for (const item of (items as Array<{ productId?: string; category?: string }>) ) {
+      const pid = String(item.productId ?? '');
+      if (pid.startsWith('membership-')) {
+        const fromId = pid.replace('membership-', ''); // bronze | silver | gold
+        if (tierPriority[fromId] !== undefined && (tierPriority[fromId] ?? 0) > (tierPriority[highestTier] ?? -1)) {
+          highestTier = fromId;
+        }
+      }
+    }
+    if (highestTier) {
+      await sql`
+        INSERT INTO user_profiles (clerk_id, membership_tier)
+        VALUES (${userId}, ${highestTier})
+        ON CONFLICT (clerk_id) DO UPDATE SET membership_tier = ${highestTier}, updated_at = NOW()
+      `.catch(() => {});
+    }
+  }
 
   return NextResponse.json(row[0], { status: 201 });
 }
