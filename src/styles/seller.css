@@ -407,6 +407,169 @@
 .seller-icon-btn.cancel { background: var(--makay-sand-cream); color: var(--makay-mauve); }
 .seller-icon-btn:disabled { opacity: 0.5; }
 
+/* ── Products table (B1) ── */
+.sp-tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  border-bottom: 1px solid var(--makay-sand-cream);
+  padding-bottom: 0;
+}
+.sp-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.875rem;
+  border: none;
+  background: none;
+  font-family: var(--font-montserrat);
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--makay-mauve);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.sp-tab.active { color: var(--makay-dark-navy); border-bottom-color: var(--makay-peachy-rose); font-weight: 600; }
+.sp-tab:hover:not(.active) { color: var(--makay-dark-navy); }
+.sp-tab-count {
+  background: var(--makay-sand-cream);
+  color: var(--makay-mauve);
+  font-size: 0.7rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 100px;
+  font-weight: 600;
+}
+.sp-tab.active .sp-tab-count { background: rgba(212,165,116,0.2); color: var(--makay-dark-navy); }
+
+.sp-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.sp-bulk {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.sp-bulk-count {
+  font-family: var(--font-montserrat);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--makay-dark-navy);
+  padding-right: 0.25rem;
+}
+.sp-bulk-btn {
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  border: none;
+  font-family: var(--font-montserrat);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.sp-bulk-btn:disabled { opacity: 0.5; }
+.sp-bulk-btn.green  { background: rgba(16,185,129,0.12); color: #059669; }
+.sp-bulk-btn.amber  { background: rgba(245,158,11,0.12); color: #d97706; }
+.sp-bulk-btn.gray   { background: rgba(156,163,175,0.15); color: #6b7280; }
+.sp-bulk-btn.red    { background: rgba(239,68,68,0.1); color: #dc2626; }
+.sp-bulk-btn.ghost  { background: var(--makay-sand-cream); color: var(--makay-mauve); }
+
+.sp-table-wrap {
+  background: #fff;
+  border: 1px solid var(--makay-sand-cream);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.sp-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-montserrat);
+  font-size: 0.85rem;
+}
+.sp-table thead tr {
+  background: var(--makay-sand-cream);
+}
+.sp-table th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--makay-mauve);
+  white-space: nowrap;
+}
+.sp-table td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+  border-bottom: 1px solid var(--makay-sand-cream);
+}
+.sp-row:last-child td { border-bottom: none; }
+.sp-row.editing td { background: rgba(212,165,116,0.04); }
+.sp-row:hover td { background: rgba(248,247,244,0.6); }
+.sp-row.editing:hover td { background: rgba(212,165,116,0.07); }
+
+.sp-thumb {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--makay-sand-cream);
+  display: block;
+}
+.sp-title {
+  font-weight: 600;
+  color: var(--makay-dark-navy);
+  display: block;
+}
+.sp-meta {
+  font-size: 0.72rem;
+  color: var(--makay-mauve);
+  display: block;
+  margin-top: 0.15rem;
+}
+.sp-sku, .sp-cat { color: var(--makay-mauve); font-size: 0.8rem; }
+
+.sp-status-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 0.4rem;
+  flex-shrink: 0;
+}
+.sp-status-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: var(--makay-dark-navy);
+}
+
+.sp-edit-row td { padding: 0 !important; border-bottom: 1px solid var(--makay-peachy-rose) !important; }
+.sp-edit-panel {
+  padding: 1.25rem;
+  background: rgba(212,165,116,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .sp-table { font-size: 0.78rem; }
+  .sp-table th, .sp-table td { padding: 0.6rem 0.75rem; }
+  .sp-table thead th:nth-child(4),
+  .sp-table thead th:nth-child(5),
+  .sp-table tbody td:nth-child(4),
+  .sp-table tbody td:nth-child(5) { display: none; }
+  .seller-form-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Stock ── */
 .seller-alert {
   background: rgba(212,165,116,0.1);
