@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Clock } from 'lucide-react';
 
 interface ActivityEntry {
@@ -13,6 +14,7 @@ interface ActivityEntry {
 }
 
 export default function SupervisorShiftsPage() {
+  const t = useTranslations('supervisor');
   const [entries, setEntries] = useState<ActivityEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -23,7 +25,6 @@ export default function SupervisorShiftsPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  // Group by worker for a shift summary view
   const byWorker: Record<string, { name: string; events: ActivityEntry[] }> = {};
   for (const e of entries) {
     if (!byWorker[e.workerId]) byWorker[e.workerId] = { name: e.workerName, events: [] };
@@ -34,14 +35,14 @@ export default function SupervisorShiftsPage() {
     <div className="sup-page">
       <div className="sup-page-header">
         <Clock size={22} className="sup-page-icon" />
-        <h1 className="sup-page-title">Shifts</h1>
-        <span className="sup-page-count">Today&apos;s activity log</span>
+        <h1 className="sup-page-title">{t('shifts')}</h1>
+        <span className="sup-page-count">{t('date')}</span>
       </div>
 
       {loading ? (
         <p className="sup-loading">Loading…</p>
       ) : entries.length === 0 ? (
-        <p className="sup-empty-state">No shift activity recorded today.</p>
+        <p className="sup-empty-state">{t('noShifts')}</p>
       ) : (
         <div className="sup-shifts-grid">
           {Object.entries(byWorker).map(([id, { name, events }]) => {
@@ -60,12 +61,12 @@ export default function SupervisorShiftsPage() {
                   <p className="sup-shift-times">
                     In: {clockIn ? new Date(clockIn.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—'}
                     {' · '}
-                    Out: {clockOut ? new Date(clockOut.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'active'}
+                    Out: {clockOut ? new Date(clockOut.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : t('active')}
                   </p>
-                  <p className="sup-shift-hours">{hours} worked</p>
+                  <p className="sup-shift-hours">{hours} {t('hoursWorked')}</p>
                 </div>
                 <span className={`sup-shift-status ${clockOut ? 'done' : 'active'}`}>
-                  {clockOut ? 'Done' : 'Active'}
+                  {clockOut ? t('offline') : t('active')}
                 </span>
               </div>
             );
@@ -78,7 +79,7 @@ export default function SupervisorShiftsPage() {
           <h2 className="sup-section-title" style={{ marginBottom: '0.75rem', fontSize: '1rem' }}>Full Log</h2>
           <table className="sup-table">
             <thead>
-              <tr><th>Time</th><th>Worker</th><th>Action</th><th>Status</th></tr>
+              <tr><th>{t('date')}</th><th>{t('worker')}</th><th>{t('status')}</th><th>{t('status')}</th></tr>
             </thead>
             <tbody>
               {[...entries].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).map((e) => (

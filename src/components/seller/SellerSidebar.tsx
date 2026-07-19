@@ -4,12 +4,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { useUser } from '@clerk/nextjs';
+import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 export default function SellerSidebar() {
   const path = usePathname();
   const t = useTranslations('seller');
   const [collapsed, setCollapsed] = useState(false);
+  const { user } = useUser();
+  const permissions = (user?.unsafeMetadata?.permissions as string[] | undefined);
 
   useEffect(() => {
     const saved = localStorage.getItem('seller-sidebar-collapsed');
@@ -29,17 +32,21 @@ export default function SellerSidebar() {
     document.querySelector('.seller-layout')?.classList.toggle('sidebar-collapsed', collapsed);
   }, [collapsed]);
 
-  const NAV = [
-    { href: '/seller/dashboard',          label: t('nav.dashboard'), icon: LayoutDashboard },
-    { href: '/seller/sell',               label: t('nav.sell'),      icon: ShoppingBag },
-    { href: '/seller/products',           label: t('nav.products'),  icon: Package },
-    { href: '/seller/stock',              label: t('nav.stock'),     icon: Boxes },
-    { href: '/seller/activity',           label: t('nav.activity'),  icon: Clock },
-    { href: '/seller/products/create-3d', label: t('nav.models3d'),  icon: Box },
-    { href: '/seller/rotation',           label: t('nav.rotation'),  icon: RefreshCw },
-    { href: '/seller/studio',             label: t('nav.studio'),    icon: Wand2 },
+  const ALL_NAV = [
+    { href: '/seller/dashboard',          label: t('nav.dashboard'), icon: LayoutDashboard, key: null },
+    { href: '/seller/sell',               label: t('nav.sell'),      icon: ShoppingBag,     key: 'sell' },
+    { href: '/seller/products',           label: t('nav.products'),  icon: Package,         key: 'products' },
+    { href: '/seller/stock',              label: t('nav.stock'),     icon: Boxes,           key: 'stock' },
+    { href: '/seller/activity',           label: t('nav.activity'),  icon: Clock,           key: 'activity' },
+    { href: '/seller/products/create-3d', label: t('nav.models3d'),  icon: Box,             key: 'models3d' },
+    { href: '/seller/rotation',           label: t('nav.rotation'),  icon: RefreshCw,       key: 'rotation' },
+    { href: '/seller/studio',             label: t('nav.studio'),    icon: Wand2,           key: 'studio' },
+    { href: '/seller/events',             label: 'Events',            icon: Calendar,        key: 'events' },
   ];
-
+  // If permissions are set, filter to allowed sections; dashboard is always visible
+  const NAV = permissions
+    ? ALL_NAV.filter(n => n.key === null || permissions.includes(n.key))
+    : ALL_NAV;
   return (
     <aside className={`seller-sidebar${collapsed ? ' sidebar-collapsed' : ''}`}>
       <div className="seller-sidebar-brand">

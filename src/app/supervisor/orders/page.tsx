@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ShoppingBag } from 'lucide-react';
 
 interface Order {
@@ -11,15 +12,8 @@ interface Order {
   created_at: string;
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  placed: 'Placed',
-  confirmed: 'Confirmed',
-  shipped: 'Shipped',
-  delivered: 'Delivered',
-  cancelled: 'Cancelled',
-};
-
 export default function SupervisorOrdersPage() {
+  const t = useTranslations('supervisor');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending'>('pending');
@@ -39,27 +33,27 @@ export default function SupervisorOrdersPage() {
     <div className="sup-page">
       <div className="sup-page-header">
         <ShoppingBag size={22} className="sup-page-icon" />
-        <h1 className="sup-page-title">Orders</h1>
+        <h1 className="sup-page-title">{t('orders')}</h1>
         <div className="sup-filter-tabs">
-          <button className={`sup-filter-tab${filter === 'pending' ? ' active' : ''}`} onClick={() => setFilter('pending')}>Pending</button>
-          <button className={`sup-filter-tab${filter === 'all' ? ' active' : ''}`} onClick={() => setFilter('all')}>All</button>
+          <button className={`sup-filter-tab${filter === 'pending' ? ' active' : ''}`} onClick={() => setFilter('pending')}>{t('ordersPending')}</button>
+          <button className={`sup-filter-tab${filter === 'all' ? ' active' : ''}`} onClick={() => setFilter('all')}>{t('ordersAll')}</button>
         </div>
       </div>
 
       {loading ? (
         <p className="sup-loading">Loading…</p>
       ) : visible.length === 0 ? (
-        <p className="sup-empty-state">{filter === 'pending' ? 'No pending orders.' : 'No orders yet.'}</p>
+        <p className="sup-empty-state">{t('noOrders')}</p>
       ) : (
         <div className="sup-table-wrap">
           <table className="sup-table">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Customer</th>
-                <th>Status</th>
-                <th>Amount</th>
-                <th>Date</th>
+                <th>{t('orderId')}</th>
+                <th>{t('client')}</th>
+                <th>{t('status')}</th>
+                <th>{t('total')}</th>
+                <th>{t('date')}</th>
               </tr>
             </thead>
             <tbody>
@@ -69,7 +63,7 @@ export default function SupervisorOrdersPage() {
                   <td>{o.customer_name || '—'}</td>
                   <td>
                     <span className={`sup-order-status sup-order-status--${o.status}`}>
-                      {STATUS_LABELS[o.status] ?? o.status}
+                      {o.status}
                     </span>
                   </td>
                   <td className="sup-td-amount">${Number(o.subtotal).toFixed(2)}</td>

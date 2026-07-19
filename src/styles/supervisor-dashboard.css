@@ -1312,7 +1312,6 @@
 .supervisor-main {
   flex: 1;
   background: #f9f7f4;
-  overflow-y: auto;
 }
 
 .sup-sidebar {

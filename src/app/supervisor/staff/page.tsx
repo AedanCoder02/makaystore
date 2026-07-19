@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Users, CheckCircle, XCircle } from 'lucide-react';
 
 interface SellerRow {
@@ -12,6 +13,7 @@ interface SellerRow {
 }
 
 export default function SupervisorStaffPage() {
+  const t = useTranslations('supervisor');
   const [sellers, setSellers] = useState<SellerRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -26,23 +28,23 @@ export default function SupervisorStaffPage() {
     <div className="sup-page">
       <div className="sup-page-header">
         <Users size={22} className="sup-page-icon" />
-        <h1 className="sup-page-title">Staff</h1>
-        <span className="sup-page-count">{sellers.length} sellers</span>
+        <h1 className="sup-page-title">{t('staff')}</h1>
+        <span className="sup-page-count">{sellers.length} {t('sellers')}</span>
       </div>
 
       {loading ? (
         <p className="sup-loading">Loading…</p>
       ) : sellers.length === 0 ? (
-        <p className="sup-empty-state">No seller accounts found.</p>
+        <p className="sup-empty-state">{t('noSellers')}</p>
       ) : (
         <div className="sup-table-wrap">
           <table className="sup-table">
             <thead>
               <tr>
-                <th>Name</th>
-                <th>Status</th>
-                <th>Clocked In Since</th>
-                <th>Sales This Month</th>
+                <th>{t('name')}</th>
+                <th>{t('status')}</th>
+                <th>{t('clockedInSince')}</th>
+                <th>{t('salesThisMonth')}</th>
               </tr>
             </thead>
             <tbody>
@@ -55,7 +57,7 @@ export default function SupervisorStaffPage() {
                   <td>
                     <span className={`sup-status-badge ${s.clockedIn ? 'active' : 'inactive'}`}>
                       {s.clockedIn ? <CheckCircle size={12} /> : <XCircle size={12} />}
-                      {s.clockedIn ? 'Active' : 'Offline'}
+                      {s.clockedIn ? t('active') : t('offline')}
                     </span>
                   </td>
                   <td className="sup-td-muted">
