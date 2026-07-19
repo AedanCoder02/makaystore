@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { useRotationStore } from '@/stores/rotationStore';
 import type { DateRange } from './AdminReportsDashboard';
 
@@ -60,11 +60,7 @@ export default function RotationReport({ dateRange = '30d' }: { dateRange?: Date
 
   const pendingInQueue = queue.filter(j => !j.completedDate).length;
 
-  const chartData = [
-    { name: 'Active',   count: active,   fill: '#10b981' },
-    { name: 'Paused',   count: paused,   fill: '#f59e0b' },
-    { name: 'Archived', count: archived, fill: '#9ca3af' },
-  ];
+  const chartData = [{ name: 'Products', count: active, paused, archived }];
 
   if (loading) return <p className="report-loading">Loading…</p>;
 
@@ -101,11 +97,11 @@ export default function RotationReport({ dateRange = '30d' }: { dateRange?: Date
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
-              <Tooltip formatter={(v: number) => [`${v} products`, '']} />
+              <Tooltip formatter={(v) => typeof v === 'number' ? [`${v} products`, ''] : v} />
               <Legend />
-              <Bar dataKey="count" name="Products" radius={[4,4,0,0]}>
-                {chartData.map((entry, i) => <Cell key={i} fill={entry.fill} />)}
-              </Bar>
+              <Bar dataKey="count" name="Active" fill="#10b981" radius={[4,4,0,0]} />
+              <Bar dataKey="paused" name="Paused" fill="#f59e0b" radius={[4,4,0,0]} />
+              <Bar dataKey="archived" name="Archived" fill="#9ca3af" radius={[4,4,0,0]} />
             </BarChart>
           </ResponsiveContainer>
         )}
