@@ -614,22 +614,43 @@ export default function StudioEditor() {
                 {/* Element list */}
                 <div className="cd-element-list" style={{ marginBottom:'1.25rem' }}>
                   {(Object.keys(CARD_ELEMENT_LABELS) as Array<keyof CardLayout>).map(key => (
-                    <div
-                      key={key}
-                      className={`cd-element-row${activeCardEl === key ? ' active' : ''}`}
-                      onClick={() => setActiveCardEl(key)}
-                    >
-                      <span className="cd-element-name">{CARD_ELEMENT_LABELS[key]}</span>
-                      <div className="cd-element-pos">
-                        {Math.round(cardLayout[key].x)}%, {Math.round(cardLayout[key].y)}%
-                      </div>
-                      <button
-                        className="cd-vis-btn"
-                        onClick={e => { e.stopPropagation(); setCardLayout(l => ({ ...l, [key]: { ...l[key], visible: !l[key].visible } })); }}
-                        title={cardLayout[key].visible ? 'Hide' : 'Show'}
+                    <div key={key}>
+                      <div
+                        className={`cd-element-row${activeCardEl === key ? ' active' : ''}`}
+                        onClick={() => setActiveCardEl(activeCardEl === key ? null : key)}
                       >
-                        {cardLayout[key].visible ? <Eye size={14} /> : <EyeOff size={14} />}
-                      </button>
+                        <span className="cd-element-name">{CARD_ELEMENT_LABELS[key]}</span>
+                        <div className="cd-element-pos">
+                          {Math.round(cardLayout[key].x)}%, {Math.round(cardLayout[key].y)}%
+                        </div>
+                        <button
+                          className="cd-vis-btn"
+                          onClick={e => { e.stopPropagation(); setCardLayout(l => ({ ...l, [key]: { ...l[key], visible: !l[key].visible } })); }}
+                          title={cardLayout[key].visible ? 'Hide' : 'Show'}
+                        >
+                          {cardLayout[key].visible ? <Eye size={14} /> : <EyeOff size={14} />}
+                        </button>
+                      </div>
+                      {/* Scale slider — shown when element is selected */}
+                      {activeCardEl === key && (
+                        <div className="cd-scale-row">
+                          <span className="cd-scale-label">Size</span>
+                          <input
+                            type="range" min={0.4} max={2.2} step={0.05}
+                            value={cardLayout[key].scale ?? 1}
+                            onChange={e => setCardLayout(l => ({ ...l, [key]: { ...l[key], scale: Number(e.target.value) } }))}
+                            className="cd-scale-slider"
+                          />
+                          <span className="cd-scale-val">{((cardLayout[key].scale ?? 1) * 100).toFixed(0)}%</span>
+                          <button
+                            className="cd-scale-reset"
+                            onClick={() => setCardLayout(l => ({ ...l, [key]: { ...l[key], scale: 1 } }))}
+                            title="Reset size"
+                          >
+                            <RotateCcw size={10} />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

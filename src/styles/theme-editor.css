@@ -653,6 +653,56 @@
 }
 .cd-vis-btn:hover { color: var(--makay-peachy-rose); }
 
+/* Scale slider row (appears when element selected) */
+.cd-scale-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem 0.6rem 1.25rem;
+  background: rgba(212,165,116,0.04);
+  border-bottom: 1px solid var(--makay-sand-cream);
+}
+
+.cd-scale-label {
+  font-family: var(--font-montserrat);
+  font-size: 0.7rem;
+  color: var(--makay-mauve);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  width: 28px;
+}
+
+.cd-scale-slider {
+  flex: 1;
+  height: 3px;
+  accent-color: var(--makay-peachy-rose);
+  cursor: pointer;
+}
+
+.cd-scale-val {
+  font-family: var(--font-montserrat);
+  font-size: 0.7rem;
+  color: var(--makay-dark-navy);
+  font-weight: 600;
+  min-width: 34px;
+  text-align: right;
+}
+
+.cd-scale-reset {
+  background: none;
+  border: none;
+  color: var(--makay-mauve);
+  cursor: pointer;
+  padding: 0.15rem;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+.cd-scale-reset:hover { color: var(--makay-peachy-rose); }
+
 .cd-color-grid {
   display: flex;
   flex-direction: column;

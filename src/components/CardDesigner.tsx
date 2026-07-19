@@ -9,6 +9,7 @@ export interface CardElementPos {
   x: number; // % of card width
   y: number; // % of card height
   visible: boolean;
+  scale: number; // 0.5–2.0, default 1.0
 }
 
 export interface CardLayout {
@@ -32,15 +33,15 @@ export interface CardColors {
 }
 
 export const DEFAULT_CARD_LAYOUT: CardLayout = {
-  logo:    { x: 4,  y: 6,  visible: true },
-  tier:    { x: 62, y: 6,  visible: true },
-  avatar:  { x: 4,  y: 38, visible: true },
-  name:    { x: 24, y: 40, visible: true },
-  tagline: { x: 24, y: 54, visible: true },
-  divider: { x: 0,  y: 66, visible: true },
-  id:      { x: 4,  y: 74, visible: true },
-  since:   { x: 4,  y: 84, visible: true },
-  qr:      { x: 66, y: 68, visible: true },
+  logo:    { x: 4,  y: 6,  visible: true, scale: 1 },
+  tier:    { x: 62, y: 6,  visible: true, scale: 1 },
+  avatar:  { x: 4,  y: 38, visible: true, scale: 1 },
+  name:    { x: 24, y: 40, visible: true, scale: 1 },
+  tagline: { x: 24, y: 54, visible: true, scale: 1 },
+  divider: { x: 0,  y: 66, visible: true, scale: 1 },
+  id:      { x: 4,  y: 74, visible: true, scale: 1 },
+  since:   { x: 4,  y: 84, visible: true, scale: 1 },
+  qr:      { x: 66, y: 68, visible: true, scale: 1 },
 };
 
 export const DEFAULT_CARD_COLORS: CardColors = {
@@ -105,6 +106,7 @@ export function CardCanvas({ layout, colors, activeEl, onLayoutChange, onActiveE
   const El = ({ id, children }: { id: keyof CardLayout; children: React.ReactNode }) => {
     const pos = layout[id];
     const isActive = activeEl === id;
+    const scale = pos.scale ?? 1;
     return (
       <div
         style={{
@@ -113,6 +115,8 @@ export function CardCanvas({ layout, colors, activeEl, onLayoutChange, onActiveE
           opacity: pos.visible ? 1 : 0.2,
           outline: isActive ? '2px dashed rgba(212,165,116,0.9)' : 'none',
           outlineOffset: 4, userSelect: 'none', zIndex: isActive ? 10 : 1,
+          transform: scale !== 1 ? `scale(${scale})` : undefined,
+          transformOrigin: 'top left',
           transition: 'outline 0.1s',
         }}
         onMouseDown={e => startDrag(e, id)}
