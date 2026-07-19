@@ -11,6 +11,14 @@ const TIER_LABELS: Record<string, { label: string; color: string; desc: string }
   vip:    { label: 'VIP',       color: '#D4A574', desc: 'Beach Club VIP — Full Access' },
 };
 
+interface CardColors {
+  bg_from: string;
+  bg_to: string;
+  bg_angle: number;
+  text: string;
+  accent: string;
+}
+
 interface Props {
   firstName: string;
   lastName: string;
@@ -18,11 +26,15 @@ interface Props {
   membershipTier: string;
   memberSince: number;
   userId: string;
+  cardColors?: CardColors;
 }
 
-export default function MemberCard({ firstName, lastName, imageUrl, membershipTier, memberSince, userId }: Props) {
+export default function MemberCard({ firstName, lastName, imageUrl, membershipTier, memberSince, userId, cardColors }: Props) {
   const tier = TIER_LABELS[membershipTier] ?? TIER_LABELS.free;
   const cardUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const gradient = cardColors
+    ? `linear-gradient(${cardColors.bg_angle}deg, ${cardColors.bg_from}, ${cardColors.bg_to})`
+    : undefined;
 
   return (
     <main className="member-page">
@@ -42,7 +54,7 @@ export default function MemberCard({ firstName, lastName, imageUrl, membershipTi
 
         {/* Card */}
         <div className="member-card">
-          <div className="member-card-bg" />
+          <div className="member-card-bg" style={gradient ? { background: gradient } : undefined} />
           <div className="member-card-inner">
             {/* Top */}
             <div className="member-card-top">

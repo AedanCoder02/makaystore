@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { animate } from 'animejs';
 import Link from 'next/link';
@@ -12,7 +12,6 @@ export default function FeaturedCollection() {
   const headingRef = useRef<any>(null);
   const items = t.raw('items') as any[];
 
-  // Real Makay product images from /public/images/
   const PRODUCT_IMAGES = [
     '/images/product-tshirt.jpg',
     '/images/product-coverup.jpg',
@@ -20,33 +19,35 @@ export default function FeaturedCollection() {
     '/images/product-event.jpg',
   ];
 
-  // Scroll-triggered animations
+  const [featuredTitle, setFeaturedTitle]       = useState('');
+  const [featuredSubtitle, setFeaturedSubtitle] = useState('');
+
+  useEffect(() => {
+    fetch('/api/theme')
+      .then(r => r.ok ? r.json() : {})
+      .then((d: Record<string, string>) => {
+        setFeaturedTitle(d['page:home:content:featuredTitle']    || '');
+        setFeaturedSubtitle(d['page:home:content:featuredSubtitle'] || '');
+      })
+      .catch(() => {});
+  }, []);
+
+  const displayTitle    = featuredTitle    || t('title');
+  const displaySubtitle = featuredSubtitle || t('description');
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return;
 
-        // Animate heading
         if (headingRef.current) {
-          animate(headingRef.current, {
-            opacity: [0, 1],
-            translateY: [20, 0],
-            duration: 700,
-            easing: 'easeOutQuad',
-          });
+          animate(headingRef.current, { opacity: [0, 1], translateY: [20, 0], duration: 700, easing: 'easeOutQuad' });
         }
 
-        // Stagger product cards
         const cards = sectionRef.current?.querySelectorAll('.product-card-featured');
         if (cards) {
           Array.from(cards).forEach((card: any, idx) => {
-            animate(card, {
-              opacity: [0, 1],
-              translateY: [30, 0],
-              duration: 600,
-              delay: idx * 100,
-              easing: 'easeOutQuad',
-            });
+            animate(card, { opacity: [0, 1], translateY: [30, 0], duration: 600, delay: idx * 100, easing: 'easeOutQuad' });
           });
         }
 
@@ -65,19 +66,15 @@ export default function FeaturedCollection() {
     <section ref={sectionRef} id="featured-collection" className="featured-collection">
       <div className="featured-collection-container">
         <h2 ref={headingRef} className="featured-heading">
-          {t('title')}
+          {displayTitle}
         </h2>
-        <p className="featured-subtitle">{t('description')}</p>
+        <p className="featured-subtitle">{displaySubtitle}</p>
 
         <div className="featured-grid">
           {products.map((product) => (
             <div key={product.id} className="product-card-featured">
               <div className="featured-image-wrapper">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  className="featured-image"
-                />
+                <img src={product.image} alt={product.name} className="featured-image" />
                 <div className="featured-overlay">
                   <Link href={`/products/${product.id}`} className="featured-view-link">
                     {t('viewProduct')}

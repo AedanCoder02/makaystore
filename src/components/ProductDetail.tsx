@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Product } from '@/lib/mockData';
 import ProductModel3D from '@/components/ProductModel3D';
@@ -22,9 +22,24 @@ export default function ProductDetail({ product }: Props) {
   const [viewMode, setViewMode] = useState<'photo' | '3d'>('photo');
   const t = useTranslations('storefront');
 
+  const [addToCartLabel, setAddToCartLabel]   = useState('');
+  const [reviewsTitle, setReviewsTitle]       = useState('');
+  const [relatedTitle, setRelatedTitle]       = useState('');
+
+  useEffect(() => {
+    fetch('/api/theme')
+      .then(r => r.ok ? r.json() : {})
+      .then((d: Record<string, string>) => {
+        setAddToCartLabel(d['page:product-detail:content:addToCart']   || '');
+        setReviewsTitle(d['page:product-detail:content:reviewsTitle']  || '');
+        setRelatedTitle(d['page:product-detail:content:relatedTitle']  || '');
+      })
+      .catch(() => {});
+  }, []);
+
   const currentVariant = product.variants[selectedVariant];
-  const displayPrice = currentVariant?.price ?? product.price;
-  const stock = product.stock;
+  const displayPrice   = currentVariant?.price ?? product.price;
+  const stock          = product.stock;
 
   const { addToCart } = useCart();
 
@@ -47,18 +62,8 @@ export default function ProductDetail({ product }: Props) {
         {/* Left column: viewer with photo/3D toggle */}
         <div className="product-detail-left">
           <div className="pd-viewer-toggle">
-            <button
-              className={`pd-toggle-btn${viewMode === 'photo' ? ' active' : ''}`}
-              onClick={() => setViewMode('photo')}
-            >
-              Photo
-            </button>
-            <button
-              className={`pd-toggle-btn${viewMode === '3d' ? ' active' : ''}`}
-              onClick={() => setViewMode('3d')}
-            >
-              3D
-            </button>
+            <button className={`pd-toggle-btn${viewMode === 'photo' ? ' active' : ''}`} onClick={() => setViewMode('photo')}>Photo</button>
+            <button className={`pd-toggle-btn${viewMode === '3d' ? ' active' : ''}`} onClick={() => setViewMode('3d')}>3D</button>
           </div>
 
           <div className="pd-viewer-area">
@@ -68,9 +73,7 @@ export default function ProductDetail({ product }: Props) {
                   src={product.image}
                   alt={product.title}
                   className="pd-product-image"
-                  onError={e => {
-                    (e.target as HTMLImageElement).src = '/images/product-tshirt.jpg';
-                  }}
+                  onError={e => { (e.target as HTMLImageElement).src = '/images/product-tshirt.jpg'; }}
                 />
               </div>
             ) : (
@@ -108,12 +111,8 @@ export default function ProductDetail({ product }: Props) {
             onChange={setSelectedQuantity}
           />
 
-          <button
-            className="add-to-cart-btn"
-            onClick={handleAddToCart}
-            disabled={stock === 0}
-          >
-            {stock === 0 ? t('outOfStock') : t('addToCart')}
+          <button className="add-to-cart-btn" onClick={handleAddToCart} disabled={stock === 0}>
+            {stock === 0 ? t('outOfStock') : (addToCartLabel || t('addToCart'))}
           </button>
 
           {addedToCart && (
@@ -127,9 +126,10 @@ export default function ProductDetail({ product }: Props) {
       <RelatedProducts
         currentProductId={product.id}
         category={product.category}
+        titleOverride={relatedTitle || undefined}
       />
 
-      <ProductReviewsSection />
+      <ProductReviewsSection titleOverride={reviewsTitle || undefined} />
     </div>
   );
 }

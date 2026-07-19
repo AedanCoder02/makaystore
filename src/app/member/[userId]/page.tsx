@@ -32,9 +32,18 @@ export default async function MemberPage({ params }: { params: Promise<{ userId:
   try {
     const rows = await sql`SELECT membership_tier FROM user_profiles WHERE clerk_id = ${userId}`;
     if (rows.length > 0) membershipTier = (rows[0].membership_tier as string) ?? 'free';
-  } catch {
-    // stays free
-  }
+  } catch {}
+
+  // Load card colors from theme settings
+  let cardColors = { bg_from: '#1E1A14', bg_to: '#2C2416', bg_angle: 135, text: '#F5EFE5', accent: '#D4AF37' };
+  try {
+    const rows = await sql`SELECT settings FROM theme_settings WHERE id = 1`;
+    const s = rows[0]?.settings as Record<string, string> | undefined;
+    if (s?.card_colors) {
+      const parsed = JSON.parse(s.card_colors);
+      cardColors = { ...cardColors, ...parsed };
+    }
+  } catch {}
 
   return (
     <MemberCard
@@ -44,6 +53,7 @@ export default async function MemberPage({ params }: { params: Promise<{ userId:
       membershipTier={membershipTier}
       memberSince={new Date(user.createdAt).getFullYear()}
       userId={userId}
+      cardColors={cardColors}
     />
   );
 }

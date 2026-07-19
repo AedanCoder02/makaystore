@@ -13,21 +13,32 @@ export default function ProductsPage() {
   const t = useTranslations('storefront');
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filters, setFilters] = useState<Filters>({
-    search: '',
-    category: [],
-    priceMin: 0,
-    priceMax: 160,
-  });
+  const [filters, setFilters] = useState<Filters>({ search: '', category: [], priceMin: 0, priceMax: 160 });
   const [sort, setSort] = useState<SortOption>('popular');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
+  const [pageTitle, setPageTitle]       = useState('');
+  const [pageSubtitle, setPageSubtitle] = useState('');
+  const [emptyText, setEmptyText]       = useState('');
+
   useEffect(() => {
     fetch('/api/products')
-      .then((r) => r.json())
-      .then((data) => { setProducts(Array.isArray(data) ? data : []); setLoading(false); })
+      .then(r => r.json())
+      .then(data => { setProducts(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
+
+    fetch('/api/theme')
+      .then(r => r.ok ? r.json() : {})
+      .then((d: Record<string, string>) => {
+        setPageTitle(d['page:products:content:pageTitle']    || '');
+        setPageSubtitle(d['page:products:content:pageSubtitle'] || '');
+        setEmptyText(d['page:products:content:emptyState']   || '');
+      })
+      .catch(() => {});
   }, []);
+
+  const displayTitle    = pageTitle    || t('collection');
+  const displaySubtitle = pageSubtitle || '';
 
   const filtered = useMemo(() => {
     return products.filter((p) => {
@@ -35,8 +46,7 @@ export default function ProductsPage() {
         p.title.toLowerCase().includes(filters.search.toLowerCase()) ||
         p.description.toLowerCase().includes(filters.search.toLowerCase());
       const matchesPrice = p.price >= filters.priceMin && p.price <= filters.priceMax;
-      const matchesCategory =
-        filters.category.length === 0 || filters.category.includes(p.category);
+      const matchesCategory = filters.category.length === 0 || filters.category.includes(p.category);
       return matchesSearch && matchesPrice && matchesCategory;
     });
   }, [filters, products]);
@@ -52,9 +62,9 @@ export default function ProductsPage() {
   return (
     <main className="products-page">
       <div className="products-header">
-        <h1 className="products-title">{t('collection')}</h1>
+        <h1 className="products-title">{displayTitle}</h1>
         <p className="products-subtitle">
-          {t('collectionSubtitle', { count: products.length })}
+          {displaySubtitle || t('collectionSubtitle', { count: products.length })}
         </p>
       </div>
 
@@ -65,23 +75,17 @@ export default function ProductsPage() {
         </span>
         <div className="products-mobile-toolbar-right">
           <ProductSort sort={sort} onChange={setSort} />
-          <button
-            className="products-filter-toggle"
-            onClick={() => setFiltersOpen(true)}
-          >
+          <button className="products-filter-toggle" onClick={() => setFiltersOpen(true)}>
             <SlidersHorizontal size={16} /> Filters
           </button>
         </div>
       </div>
 
-      {/* Mobile filter drawer */}
       {filtersOpen && (
         <div className="products-filter-drawer">
           <div className="products-filter-drawer-header">
             <span>Filters</span>
-            <button onClick={() => setFiltersOpen(false)} className="products-filter-close">
-              <X size={20} />
-            </button>
+            <button onClick={() => setFiltersOpen(false)} className="products-filter-close"><X size={20} /></button>
           </div>
           <div className="products-filter-drawer-body">
             <ProductFilters filters={filters} onChange={(f) => { setFilters(f); }} />
@@ -111,7 +115,7 @@ export default function ProductsPage() {
           {loading ? (
             <div className="products-loading">Loading products…</div>
           ) : (
-            <ProductGrid products={sorted} />
+            <ProductGrid products={sorted} emptyText={emptyText} />
           )}
         </div>
       </div>

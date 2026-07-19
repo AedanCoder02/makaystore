@@ -8,9 +8,10 @@ import ProductCard from '@/components/ProductCard';
 interface Props {
   currentProductId: string;
   category: string;
+  titleOverride?: string;
 }
 
-export default function RelatedProducts({ currentProductId, category }: Props) {
+export default function RelatedProducts({ currentProductId, category, titleOverride }: Props) {
   const [related, setRelated] = useState<Product[]>([]);
   const t = useTranslations('storefront');
 
@@ -28,7 +29,7 @@ export default function RelatedProducts({ currentProductId, category }: Props) {
 
   return (
     <section className="related-products">
-      <h2>{t('relatedProducts')}</h2>
+      <h2>{titleOverride || t('relatedProducts')}</h2>
       <div className="related-grid">
         {related.map((product) => (
           <ProductCard key={product.id} product={product} />
