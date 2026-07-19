@@ -141,8 +141,21 @@
   background: #fff;
   border-right: 1.5px solid var(--makay-sand-cream, #F5EFE5);
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
+  scroll-behavior: smooth;
+}
+
+/* Polished thin scrollbar for the controls panel */
+.studio-controls::-webkit-scrollbar { width: 4px; }
+.studio-controls::-webkit-scrollbar-track { background: transparent; }
+.studio-controls::-webkit-scrollbar-thumb {
+  background: var(--makay-soft-coral, #E8B4A6);
+  border-radius: 4px;
+}
+.studio-controls::-webkit-scrollbar-thumb:hover {
+  background: var(--makay-peachy-rose, #D4A574);
 }
 
 .studio-panel {
@@ -169,13 +182,17 @@
   z-index: 5;
 }
 
-/* ── Sub-tabs ─────────────────────────────────────────────── */
+/* ── Sub-tabs (sticky below panel header) ─────────────────── */
 .studio-subtabs {
   display: flex;
   gap: 0;
   border-bottom: 1.5px solid var(--makay-sand-cream, #F5EFE5);
   padding: 0 0.75rem;
   background: #fff;
+  position: sticky;
+  top: 52px; /* below .studio-panel-header */
+  z-index: 4;
+  flex-shrink: 0;
 }
 
 .studio-subtab {
@@ -549,7 +566,7 @@
 
 /* Smooth panel collapse */
 .studio-body { transition: grid-template-columns 0.22s ease; }
-.studio-controls { transition: width 0.22s ease; overflow: hidden; }
+.studio-controls { transition: width 0.22s ease; }
 
 .studio-preview-label {
   font-family: var(--font-montserrat, sans-serif);

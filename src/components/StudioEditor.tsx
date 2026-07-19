@@ -392,7 +392,7 @@ export default function StudioEditor() {
         {section === 'pages' && (
           <>
             {/* Left: controls */}
-            <div className="studio-controls">
+            <div className="studio-controls" data-lenis-prevent>
               <div className="studio-panel">
 
                 {/* Page selector */}
@@ -629,7 +629,7 @@ export default function StudioEditor() {
         {section === 'card' && (
           <>
             {/* Left: card controls */}
-            <div className="studio-controls">
+            <div className="studio-controls" data-lenis-prevent>
               <div className="studio-panel">
                 <div className="studio-panel-header">
                   <span>Card Elements</span>
