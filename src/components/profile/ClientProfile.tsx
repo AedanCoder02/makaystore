@@ -180,6 +180,22 @@ export default function ClientProfile() {
 
   const tier = TIER_LABELS[profile.membership_tier] ?? TIER_LABELS.free;
 
+  // Helper: absolute element wrapper that applies position + scale from cardLayout
+  const CardEl = ({ id, children }: { id: keyof typeof cardLayout; children: React.ReactNode }) => {
+    const pos = cardLayout[id];
+    if (!pos.visible) return null;
+    const scale = pos.scale ?? 1;
+    return (
+      <div style={{
+        position: 'absolute', left: `${pos.x}%`, top: `${pos.y}%`, zIndex: 1,
+        transform: scale !== 1 ? `scale(${scale})` : undefined,
+        transformOrigin: 'top left',
+      }}>
+        {children}
+      </div>
+    );
+  };
+
   return (
     <main className="profile-page">
       <div className="profile-container" ref={heroRef}>
@@ -326,50 +342,42 @@ export default function ClientProfile() {
             <div className="makay-card-bg-glow" />
 
             {/* Logo */}
-            {cardLayout.logo.visible && (
-              <div style={{ position: 'absolute', left: `${cardLayout.logo.x}%`, top: `${cardLayout.logo.y}%`, zIndex: 1 }}>
-                <Image
-                  src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1-removebg-preview.png"
-                  alt="Makay" width={70} height={24}
-                  style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', display: 'block' }}
-                />
-              </div>
-            )}
+            <CardEl id="logo">
+              <Image
+                src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1-removebg-preview.png"
+                alt="Makay" width={70} height={24}
+                style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', display: 'block' }}
+              />
+            </CardEl>
 
             {/* Tier badge */}
-            {cardLayout.tier.visible && (
-              <div style={{ position: 'absolute', left: `${cardLayout.tier.x}%`, top: `${cardLayout.tier.y}%`, zIndex: 1 }}>
-                <span className="makay-card-tier" style={{ color: cardColors.accent, borderColor: `${cardColors.accent}55` }}>
-                  {tier.label}
-                </span>
-              </div>
-            )}
+            <CardEl id="tier">
+              <span className="makay-card-tier" style={{ color: cardColors.accent, borderColor: `${cardColors.accent}55` }}>
+                {tier.label}
+              </span>
+            </CardEl>
 
             {/* Avatar */}
-            {cardLayout.avatar.visible && user.imageUrl && (
-              <div style={{ position: 'absolute', left: `${cardLayout.avatar.x}%`, top: `${cardLayout.avatar.y}%`, zIndex: 1 }}>
+            {user.imageUrl && (
+              <CardEl id="avatar">
                 <img src={user.imageUrl} alt={user.firstName ?? ''} className="makay-card-avatar"
                   style={{ borderColor: `${cardColors.accent}80` }} />
-              </div>
+              </CardEl>
             )}
 
             {/* Name */}
-            {cardLayout.name.visible && (
-              <div style={{ position: 'absolute', left: `${cardLayout.name.x}%`, top: `${cardLayout.name.y}%`, zIndex: 1 }}>
-                <p className="makay-card-name" style={{ color: cardColors.text }}>
-                  {user.firstName} {user.lastName}
-                </p>
-              </div>
-            )}
+            <CardEl id="name">
+              <p className="makay-card-name" style={{ color: cardColors.text }}>
+                {user.firstName} {user.lastName}
+              </p>
+            </CardEl>
 
             {/* Tagline */}
-            {cardLayout.tagline.visible && (
-              <div style={{ position: 'absolute', left: `${cardLayout.tagline.x}%`, top: `${cardLayout.tagline.y}%`, zIndex: 1 }}>
-                <p className="makay-card-tagline" style={{ color: `${cardColors.accent}B0` }}>Beach Club Member</p>
-              </div>
-            )}
+            <CardEl id="tagline">
+              <p className="makay-card-tagline" style={{ color: `${cardColors.accent}B0` }}>Beach Club Member</p>
+            </CardEl>
 
-            {/* Divider */}
+            {/* Divider — spans full width, skip x positioning */}
             {cardLayout.divider.visible && (
               <div style={{ position: 'absolute', left: 0, right: 0, top: `${cardLayout.divider.y}%`, zIndex: 1 }}>
                 <div className="makay-card-divider" />
@@ -377,30 +385,26 @@ export default function ClientProfile() {
             )}
 
             {/* ID */}
-            {cardLayout.id.visible && (
-              <div style={{ position: 'absolute', left: `${cardLayout.id.x}%`, top: `${cardLayout.id.y}%`, zIndex: 1 }}>
-                <p className="makay-card-id" style={{ color: `${cardColors.text}88` }}>
-                  ID: {user.id?.slice(-8).toUpperCase()}
-                </p>
-              </div>
-            )}
+            <CardEl id="id">
+              <p className="makay-card-id" style={{ color: `${cardColors.text}88` }}>
+                ID: {user.id?.slice(-8).toUpperCase()}
+              </p>
+            </CardEl>
 
             {/* Since */}
-            {cardLayout.since.visible && (
-              <div style={{ position: 'absolute', left: `${cardLayout.since.x}%`, top: `${cardLayout.since.y}%`, zIndex: 1 }}>
-                <p className="makay-card-since" style={{ color: `${cardColors.text}44` }}>
-                  Since {new Date(user.createdAt!).getFullYear()}
-                </p>
-              </div>
-            )}
+            <CardEl id="since">
+              <p className="makay-card-since" style={{ color: `${cardColors.text}44` }}>
+                Since {new Date(user.createdAt!).getFullYear()}
+              </p>
+            </CardEl>
 
             {/* QR */}
-            {cardLayout.qr.visible && profileUrl && (
-              <div style={{ position: 'absolute', left: `${cardLayout.qr.x}%`, top: `${cardLayout.qr.y}%`, zIndex: 1 }}>
+            {profileUrl && (
+              <CardEl id="qr">
                 <div className="makay-card-qr">
                   <QRCode value={profileUrl} size={68} bgColor="transparent" fgColor="#1e1a16" />
                 </div>
-              </div>
+              </CardEl>
             )}
           </div>
         </div>

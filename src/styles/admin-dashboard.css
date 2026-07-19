@@ -11,6 +11,7 @@
   min-height: 100vh;
   background: #f9f7f4;
   transition: grid-template-columns 0.22s ease;
+  padding-top: 64px; /* account for fixed navbar */
 }
 .admin-layout.sidebar-collapsed { grid-template-columns: 52px 1fr; }
 
@@ -19,10 +20,10 @@
   background: #ffffff;
   border-right: 2px solid #e5d9d0;
   position: fixed;
-  top: 0;
+  top: 64px; /* below fixed navbar */
   left: 0;
   width: 240px;
-  height: 100vh;
+  height: calc(100vh - 64px);
   overflow-y: auto;
   z-index: 100;
   display: flex;

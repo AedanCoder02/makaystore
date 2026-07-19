@@ -47,7 +47,7 @@ export default function EventsListing() {
         position: 'relative',
         background: 'linear-gradient(160deg, #1e1611 0%, #2c1f14 50%, #1a1208 100%)',
         color: '#fff',
-        padding: 'clamp(4rem, 10vw, 8rem) 1.25rem clamp(3rem, 8vw, 6rem)',
+        padding: 'clamp(6rem, 12vw, 9rem) 1.25rem clamp(3rem, 8vw, 6rem)',
         textAlign: 'center',
         overflow: 'hidden',
       }}>

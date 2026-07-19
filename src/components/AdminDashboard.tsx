@@ -21,9 +21,11 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<AdminStats | null>(null);
 
   const NAV_ITEMS = [
-    { icon: '🛒', title: t('orders'),  description: t('ordersDesc'),  href: '/admin/orders' },
-    { icon: '👥', title: t('users'),   description: t('usersDesc'),   href: '/admin/users' },
-    { icon: '📈', title: t('reports'), description: t('reportsDesc'), href: '/admin/reports' },
+    { icon: '🛒', title: t('orders'),       description: t('ordersDesc'),       href: '/admin/orders' },
+    { icon: '👥', title: t('users'),        description: t('usersDesc'),        href: '/admin/users' },
+    { icon: '📈', title: t('reports'),      description: t('reportsDesc'),      href: '/admin/reports' },
+    { icon: '📅', title: 'Events',          description: 'Manage beach club events and tickets', href: '/admin/events' },
+    { icon: '👑', title: 'Memberships',     description: 'Membership sales, tiers & analytics', href: '/admin/memberships' },
   ];
 
   useEffect(() => {

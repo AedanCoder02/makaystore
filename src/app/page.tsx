@@ -1,8 +1,8 @@
 import Hero from '@/components/Hero';
-import FeaturedCollection from '@/components/FeaturedCollection';
-import WhyMakay from '@/components/WhyMakay';
 import HomepageEvents from '@/components/HomepageEvents';
 import HomepageMembership from '@/components/HomepageMembership';
+import FeaturedCollection from '@/components/FeaturedCollection';
+import WhyMakay from '@/components/WhyMakay';
 import Testimonials from '@/components/Testimonials';
 import HowItWorks from '@/components/HowItWorks';
 import Categories from '@/components/Categories';
@@ -17,10 +17,10 @@ export default function Home() {
       <div id="hero-section">
         <Hero />
       </div>
-      <FeaturedCollection />
-      <WhyMakay />
       <HomepageEvents />
       <HomepageMembership />
+      <FeaturedCollection />
+      <WhyMakay />
       <Testimonials />
       <HowItWorks />
       <Categories />

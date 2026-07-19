@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Crown, Shield, Award, Star, ArrowRight } from 'lucide-react';
 
 const BG_AERIAL   = 'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260719_020230_6a4f1f46-d219-41e6-b51a-50a560eb6cab.png';
@@ -15,6 +16,7 @@ const TIERS = [
 ];
 
 export default function HomepageMembership() {
+  const t = useTranslations('homepage.membership');
   return (
     <section style={{ position: 'relative', overflow: 'hidden', background: '#0e0b08' }}>
       {/* Split layout: left image panel, right content */}
@@ -36,7 +38,7 @@ export default function HomepageMembership() {
             <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, rgba(14,11,8,0.8) 0%, transparent 60%)' }} />
             <div style={{ position: 'absolute', bottom: '1rem', left: '1.25rem' }}>
               <p style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1rem', fontWeight: 700, color: '#fff', margin: 0 }}>Makay Beach Club</p>
-              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', color: 'var(--makay-peachy-rose)', margin: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Membership Card</p>
+              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', color: 'var(--makay-peachy-rose)', margin: 0, letterSpacing: '0.1em', textTransform: 'uppercase' }}>{t('cardLabel')}</p>
             </div>
           </div>
         </div>
@@ -44,13 +46,13 @@ export default function HomepageMembership() {
         {/* Right — tier info */}
         <div style={{ padding: 'clamp(3rem, 6vw, 5rem) clamp(2rem, 5vw, 4rem)', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
           <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--makay-peachy-rose)', marginBottom: '0.875rem' }}>
-            Membership Program
+            {t('sectionTag')}
           </p>
           <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: 'clamp(2rem, 4vw, 2.75rem)', fontWeight: 700, color: '#fff', margin: '0 0 1rem', lineHeight: 1.15 }}>
-            Join the Beach Club
+            {t('title')}
           </h2>
           <p style={{ fontFamily: 'var(--font-montserrat)', color: 'rgba(255,255,255,0.55)', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: '2rem', maxWidth: 460 }}>
-            Every tier unlocks new benefits. Shop more, earn more, access exclusive events and collections only available to Makay members.
+            {t('desc')}
           </p>
 
           {/* Tier grid */}
@@ -85,7 +87,7 @@ export default function HomepageMembership() {
               color: '#fff', borderRadius: '100px', fontFamily: 'var(--font-montserrat)',
               fontWeight: 700, fontSize: '0.88rem', textDecoration: 'none',
             }}>
-              <Crown size={15} /> Join Now
+              <Crown size={15} /> {t('joinNow')}
             </Link>
             <Link href="/events" style={{
               display: 'inline-flex', alignItems: 'center', gap: '0.4rem',
@@ -93,7 +95,7 @@ export default function HomepageMembership() {
               color: 'rgba(255,255,255,0.6)', fontFamily: 'var(--font-montserrat)',
               fontWeight: 600, fontSize: '0.88rem', textDecoration: 'none',
             }}>
-              See events <ArrowRight size={14} />
+              {t('seeEvents')} <ArrowRight size={14} />
             </Link>
           </div>
         </div>

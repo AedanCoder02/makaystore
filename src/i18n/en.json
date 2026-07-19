@@ -818,5 +818,26 @@
       "cookies": "Cookie Settings"
     },
     "copyright": "All rights reserved."
+  },
+  "homepage": {
+    "events": {
+      "sectionTag": "Beach Club Events",
+      "title": "Upcoming Experiences",
+      "viewAll": "View all events",
+      "noEvents": "No upcoming events yet. Check back soon.",
+      "free": "Free",
+      "soldOut": "Sold Out",
+      "getTickets": "Get Tickets"
+    },
+    "membership": {
+      "sectionTag": "Membership Program",
+      "title": "Join the Beach Club",
+      "desc": "Every tier unlocks new benefits. Shop more, earn more, access exclusive events and collections only available to Makay members.",
+      "joinNow": "Join Now",
+      "seeEvents": "See events",
+      "cardLabel": "Membership Card",
+      "allMembers": "All members",
+      "fromSpend": "From ${amount} total spend"
+    }
   }
 }

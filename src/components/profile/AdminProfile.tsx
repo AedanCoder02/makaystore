@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
-import { LayoutDashboard, BarChart2, Users, Settings, Check, Pencil, ShoppingBag, Wand2 } from 'lucide-react';
+import { LayoutDashboard, BarChart2, Users, Settings, Check, Pencil, ShoppingBag, Wand2, Camera } from 'lucide-react';
 import '@/styles/profile.css';
 
 interface AdminStats {
@@ -92,6 +92,19 @@ export default function AdminProfile() {
     setTimeout(() => setConfigSaved(false), 2500);
   }
 
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+    setAvatarUploading(true);
+    try {
+      await user.setProfileImage({ file });
+    } catch {}
+    setAvatarUploading(false);
+  }
+
   const memberSince = user?.createdAt
     ? new Date(user.createdAt).toLocaleDateString([], { month: 'long', year: 'numeric' })
     : '—';
@@ -103,10 +116,32 @@ export default function AdminProfile() {
 
       {/* ── Header ── */}
       <div className="profile-header">
-        <div className="profile-avatar-wrap">
+        <div className="profile-avatar-wrap" style={{ position: 'relative' }}>
           {user?.imageUrl
             ? <img src={user.imageUrl} alt="avatar" className="profile-avatar" />
             : <div className="profile-avatar-placeholder">{user?.firstName?.[0] ?? '?'}</div>}
+          <button
+            onClick={() => avatarInputRef.current?.click()}
+            disabled={avatarUploading}
+            title="Change profile picture"
+            style={{
+              position: 'absolute', bottom: 0, right: 0,
+              width: 28, height: 28, borderRadius: '50%',
+              background: 'var(--makay-dark-navy)', color: '#fff',
+              border: '2px solid #fff', cursor: 'pointer',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              opacity: avatarUploading ? 0.5 : 1, transition: 'opacity 0.2s',
+            }}
+          >
+            <Camera size={13} />
+          </button>
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={handleAvatarChange}
+          />
         </div>
         <div className="profile-header-info">
           {editingName ? (

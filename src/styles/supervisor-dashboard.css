@@ -1307,6 +1307,7 @@
 .supervisor-layout {
   display: flex;
   min-height: 100vh;
+  padding-top: 64px; /* account for fixed navbar */
 }
 
 .supervisor-main {
@@ -1318,6 +1319,7 @@
   width: 200px;
   flex-shrink: 0;
   background: #2c2c2c;
+  min-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
   padding: 1.5rem 0 1rem;

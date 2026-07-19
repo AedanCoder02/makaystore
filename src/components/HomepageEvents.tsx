@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Calendar, MapPin, Ticket, ArrowRight } from 'lucide-react';
 
 const BG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260719_020223_13228ad3-42dc-44fe-88f5-9624ff49e7b9.png';
@@ -13,6 +14,7 @@ interface Event {
 }
 
 export default function HomepageEvents() {
+  const t = useTranslations('homepage.events');
   const [events, setEvents] = useState<Event[]>([]);
 
   useEffect(() => {
@@ -34,10 +36,10 @@ export default function HomepageEvents() {
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 'clamp(2rem, 4vw, 3rem)', gap: '1rem', flexWrap: 'wrap' }}>
           <div>
             <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--makay-peachy-rose)', marginBottom: '0.75rem' }}>
-              Beach Club Events
+              {t('sectionTag')}
             </p>
             <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.1 }}>
-              Upcoming Experiences
+              {t('title')}
             </h2>
           </div>
           <Link href="/events" style={{
@@ -46,7 +48,7 @@ export default function HomepageEvents() {
             fontSize: '0.82rem', fontWeight: 600, textDecoration: 'none',
             transition: 'color 0.2s', whiteSpace: 'nowrap',
           }}>
-            View all events <ArrowRight size={14} />
+            {t('viewAll')} <ArrowRight size={14} />
           </Link>
         </div>
 
@@ -54,7 +56,7 @@ export default function HomepageEvents() {
           <div style={{ textAlign: 'center', padding: '3rem 0' }}>
             <Calendar size={40} style={{ color: 'rgba(255,255,255,0.2)', marginBottom: '1rem', display: 'block', margin: '0 auto 1rem' }} />
             <p style={{ fontFamily: 'var(--font-montserrat)', color: 'rgba(255,255,255,0.45)', fontSize: '0.9rem' }}>
-              No upcoming events yet. Check back soon.
+              {t('noEvents')}
             </p>
           </div>
         ) : (
@@ -95,7 +97,7 @@ export default function HomepageEvents() {
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <span style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: '1.1rem', color: 'var(--makay-peachy-rose)' }}>
-                          {Number(ev.price) === 0 ? 'Free' : `$${Number(ev.price).toFixed(2)}`}
+                          {Number(ev.price) === 0 ? t('free') : `$${Number(ev.price).toFixed(2)}`}
                         </span>
                         <span style={{
                           display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
@@ -103,7 +105,7 @@ export default function HomepageEvents() {
                           background: soldOut ? 'rgba(255,255,255,0.08)' : 'var(--makay-peachy-rose)',
                           color: '#fff', fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', fontWeight: 600,
                         }}>
-                          <Ticket size={12} /> {soldOut ? 'Sold Out' : 'Get Tickets'}
+                          <Ticket size={12} /> {soldOut ? t('soldOut') : t('getTickets')}
                         </span>
                       </div>
                     </div>

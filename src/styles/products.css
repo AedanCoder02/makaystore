@@ -2,7 +2,7 @@
 .products-page {
   min-height: 100vh;
   background: #F5EFE5;
-  padding: 3rem 1rem;
+  padding: calc(64px + 2.5rem) 1rem 3rem;
 }
 
 .products-header {
