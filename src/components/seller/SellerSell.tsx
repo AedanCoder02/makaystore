@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
-interface Client { id: string; firstName: string; lastName: string; email: string; imageUrl: string; }
+interface Client { id: string; name: string; email: string; imageUrl: string; }
 interface Product { id: string; title: string; price: number; image: string; category: string; productType: 'storefront' | 'dropshipping'; }
 interface CartItem extends Product { qty: number; }
 
@@ -42,7 +42,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
   }, [step, clients.length]);
 
   const filteredClients = clients.filter(c =>
-    `${c.firstName} ${c.lastName} ${c.email}`.toLowerCase().includes(clientSearch.toLowerCase())
+    `${c.name} ${c.email}`.toLowerCase().includes(clientSearch.toLowerCase())
   );
 
   const filteredProducts = products.filter(p =>
@@ -73,7 +73,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         client_id: selectedClient.id,
-        client_name: `${selectedClient.firstName} ${selectedClient.lastName}`,
+        client_name: selectedClient.name,
         client_email: selectedClient.email,
         items: cart.map(i => ({ id: i.id, title: i.title, price: i.price, qty: i.qty, productType: i.productType })),
         subtotal,
@@ -110,7 +110,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
         <div className="seller-done">
           <div className="seller-done-icon"><Check size={32} /></div>
           <h2 className="seller-done-title">{ts('saleComplete')}</h2>
-          <p className="seller-done-sub">{ts('orderFor', { id: String(orderId ?? ''), name: `${selectedClient?.firstName} ${selectedClient?.lastName}` })}</p>
+          <p className="seller-done-sub">{ts('orderFor', { id: String(orderId ?? ''), name: selectedClient?.name ?? '' })}</p>
           <p className="seller-done-amount">${subtotal.toFixed(2)} · {paymentMethod}</p>
           <div className="seller-done-items">
             {cart.map(i => <span key={i.id} className="seller-done-item">{i.title} × {i.qty}</span>)}
@@ -157,9 +157,9 @@ export default function SellerSell({ products }: { products: Product[] }) {
             {filteredClients.length === 0 && <p className="seller-empty">{ts('noClients')}</p>}
             {filteredClients.map(c => (
               <button key={c.id} className={`seller-client-card${selectedClient?.id === c.id ? ' selected' : ''}`} onClick={() => setSelectedClient(c)}>
-                {c.imageUrl ? <img src={c.imageUrl} alt={c.firstName} className="seller-client-avatar" /> : <div className="seller-client-avatar-placeholder"><User size={20} /></div>}
+                {c.imageUrl ? <img src={c.imageUrl} alt={c.name} className="seller-client-avatar" /> : <div className="seller-client-avatar-placeholder"><User size={20} /></div>}
                 <div className="seller-client-info">
-                  <span className="seller-client-name">{c.firstName} {c.lastName}</span>
+                  <span className="seller-client-name">{c.name}</span>
                   <span className="seller-client-email">{c.email}</span>
                 </div>
                 {selectedClient?.id === c.id && <Check size={16} className="seller-client-check" />}
@@ -180,7 +180,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
           <div className="seller-sell-layout">
             <div className="seller-product-panel">
               <div className="seller-selected-client-bar">
-                <User size={14} /> {ts('sellingTo')} <strong>{selectedClient?.firstName} {selectedClient?.lastName}</strong>
+                <User size={14} /> {ts('sellingTo')} <strong>{selectedClient?.name}</strong>
                 <button className="seller-change-btn" onClick={() => setStep('client')}>{ts('change')}</button>
               </div>
               <div className="seller-search-wrap">
@@ -255,7 +255,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
               <div className="seller-checkout-client">
                 <User size={16} />
                 <div>
-                  <p className="seller-checkout-client-name">{selectedClient?.firstName} {selectedClient?.lastName}</p>
+                  <p className="seller-checkout-client-name">{selectedClient?.name}</p>
                   <p className="seller-checkout-client-email">{selectedClient?.email}</p>
                 </div>
               </div>

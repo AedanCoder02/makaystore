@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Edit3, Check, X, Plus, Trash2, HelpCircle, ChevronDown } from 'lucide-react';
+import ImageUpload from './ImageUpload';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
@@ -242,8 +243,11 @@ export default function SellerProducts() {
               <option value="paused">Paused</option>
               <option value="archived">Archived</option>
             </select>
-            <input className="seller-input" placeholder="Image URL" value={newForm.image}
-              onChange={e => setNewForm(f => ({ ...f, image: e.target.value }))} />
+            <ImageUpload
+              value={newForm.image}
+              onChange={url => setNewForm(f => ({ ...f, image: url }))}
+              label="Product Image"
+            />
             <input className="seller-input" placeholder="Sizes (comma-separated: S, M, L, XL)" value={newForm.sizes}
               onChange={e => setNewForm(f => ({ ...f, sizes: e.target.value }))} />
           </div>
@@ -398,9 +402,11 @@ export default function SellerProducts() {
                               </select>
                             </div>
                             <div>
-                              <label className="seller-label">Image URL</label>
-                              <input className="seller-input" value={editDraft.image}
-                                onChange={e => setEditDraft(d => ({ ...d, image: e.target.value }))} />
+                              <ImageUpload
+                                value={editDraft.image}
+                                onChange={url => setEditDraft(d => ({ ...d, image: url }))}
+                                label="Product Image"
+                              />
                             </div>
                             <div>
                               <label className="seller-label">Sizes (comma-sep)</label>

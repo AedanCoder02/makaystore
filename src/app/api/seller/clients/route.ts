@@ -15,10 +15,10 @@ export async function GET() {
     })
     .map(u => ({
       id: u.id,
-      firstName: u.firstName ?? '',
-      lastName: u.lastName ?? '',
+      name: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.emailAddresses[0]?.emailAddress?.split('@')[0] || 'Customer',
       email: u.emailAddresses[0]?.emailAddress ?? '',
       imageUrl: u.imageUrl,
+      tier: (u.unsafeMetadata?.membership_tier as string) ?? 'free',
     }));
 
   return NextResponse.json(customers);

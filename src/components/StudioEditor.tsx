@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Check, RotateCcw, HelpCircle, Globe, ShoppingBag, Package, CreditCard,
   Loader, ExternalLink, Wand2, Globe2, Eye, EyeOff, CreditCard as CardIcon,
-  PanelLeftClose, PanelLeftOpen,
+  PanelLeftClose, PanelLeftOpen, Calendar, Crown,
 } from 'lucide-react';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
@@ -39,6 +39,8 @@ const SECTION_NAMES = ['Hero','Featured Collection','Why Makay','Testimonials','
 const PAGES = [
   { id: 'global',         label: 'Global Brand',   icon: Globe2,      src: '/'           },
   { id: 'home',           label: 'Home',            icon: Globe,       src: '/'           },
+  { id: 'events',         label: 'Events Section',  icon: Calendar,    src: '/'           },
+  { id: 'memberships',    label: 'Memberships',     icon: Crown,       src: '/'           },
   { id: 'products',       label: 'Products',        icon: ShoppingBag, src: '/products'   },
   { id: 'product-detail', label: 'Product Detail',  icon: Package,     src: '/products/1' },
   { id: 'checkout',       label: 'Checkout',        icon: CreditCard,  src: '/cart'       },
@@ -85,6 +87,26 @@ const CONTENT_FIELDS: Record<string, {key:string;label:string;type:'text'|'texta
     { key:'shippingTitle',label:'Shipping Section Title', type:'text', placeholder:'Shipping Info' },
     { key:'summaryTitle', label:'Order Summary Title',    type:'text', placeholder:'Order Summary' },
     { key:'placeOrderBtn',label:'Place Order Button',     type:'text', placeholder:'Place Order'   },
+  ],
+  events: [
+    { key:'bg_image',   label:'Background Image URL',  type:'text',     placeholder:'https://...' },
+    { key:'tag_label',  label:'Tag Label (small caps)', type:'text',     placeholder:'Beach Club Events' },
+    { key:'heading',    label:'Section Heading',         type:'text',     placeholder:'Upcoming Experiences' },
+    { key:'view_all',   label:'"View All" Link Text',    type:'text',     placeholder:'View all events' },
+    { key:'no_events',  label:'Empty State Message',     type:'text',     placeholder:'No upcoming events yet.' },
+  ],
+  memberships: [
+    { key:'heading',        label:'Section Heading',           type:'text',     placeholder:'Join the Beach Club' },
+    { key:'tag_label',      label:'Tag Label (small caps)',    type:'text',     placeholder:'Membership Program' },
+    { key:'bronze_label',   label:'Bronze Tier Name',          type:'text',     placeholder:'Bronze' },
+    { key:'bronze_image',   label:'Bronze Image URL',          type:'text',     placeholder:'https://...' },
+    { key:'bronze_perks',   label:'Bronze Perks (one per line)', type:'textarea', placeholder:'Full catalog access\nEarly drop access\n5% credit back' },
+    { key:'silver_label',   label:'Silver Tier Name',          type:'text',     placeholder:'Silver' },
+    { key:'silver_image',   label:'Silver Image URL',          type:'text',     placeholder:'https://...' },
+    { key:'silver_perks',   label:'Silver Perks (one per line)', type:'textarea', placeholder:'Bronze perks\nPriority event tickets\n10% credit back' },
+    { key:'gold_label',     label:'Gold Tier Name',            type:'text',     placeholder:'Gold' },
+    { key:'gold_image',     label:'Gold Image URL',            type:'text',     placeholder:'https://...' },
+    { key:'gold_perks',     label:'Gold Perks (one per line)', type:'textarea', placeholder:'Silver perks\nVIP event access\n15% credit back' },
   ],
 };
 

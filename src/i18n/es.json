@@ -832,6 +832,12 @@
     "membership": {
       "sectionTag": "Programa de Membresía",
       "title": "Únete al Beach Club",
+      "bronzeLabel": "Bronce",
+      "silverLabel": "Plata",
+      "goldLabel": "Oro",
+      "bronzePerks": "Acceso completo al catálogo|Acceso anticipado|5% crédito de vuelta|Tarjeta QR de miembro",
+      "silverPerks": "Beneficios Bronce|Boletos prioritarios a eventos|10% crédito de vuelta|Acceso al beach club",
+      "goldPerks": "Beneficios Plata|Acceso VIP a eventos|15% crédito de vuelta|Estilista personal",
       "desc": "Cada nivel desbloquea nuevos beneficios. Compra más, gana más, accede a eventos y colecciones exclusivas disponibles solo para miembros Makay.",
       "joinNow": "Únete Ahora",
       "seeEvents": "Ver eventos",

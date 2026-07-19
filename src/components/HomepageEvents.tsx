@@ -16,17 +16,26 @@ interface Event {
 export default function HomepageEvents() {
   const t = useTranslations('homepage.events');
   const [events, setEvents] = useState<Event[]>([]);
+  const [themeData, setThemeData] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    fetch('/api/theme').then(r => r.ok ? r.json() : {}).then(setThemeData).catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch('/api/events').then(r => r.ok ? r.json() : []).then(d => setEvents(Array.isArray(d) ? d.slice(0, 3) : [])).catch(() => {});
   }, []);
+
+  const bgImage = themeData['page:events:content:bg_image'] || BG;
+  const heading  = themeData['page:events:content:heading']  || t('title');
+  const tagLabel = themeData['page:events:content:tag_label'] || t('sectionTag');
 
   return (
     <section style={{ position: 'relative', overflow: 'hidden' }}>
       {/* Beach background with overlay */}
       <div style={{
         position: 'absolute', inset: 0,
-        backgroundImage: `url(${BG})`,
+        backgroundImage: `url(${bgImage})`,
         backgroundSize: 'cover', backgroundPosition: 'center',
       }} />
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(28,22,17,0.75) 0%, rgba(28,22,17,0.88) 100%)' }} />
@@ -36,10 +45,10 @@ export default function HomepageEvents() {
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 'clamp(2rem, 4vw, 3rem)', gap: '1rem', flexWrap: 'wrap' }}>
           <div>
             <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--makay-peachy-rose)', marginBottom: '0.75rem' }}>
-              {t('sectionTag')}
+              {tagLabel}
             </p>
             <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.1 }}>
-              {t('title')}
+              {heading}
             </h2>
           </div>
           <Link href="/events" style={{

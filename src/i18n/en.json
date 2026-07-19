@@ -832,6 +832,12 @@
     "membership": {
       "sectionTag": "Membership Program",
       "title": "Join the Beach Club",
+      "bronzeLabel": "Bronze",
+      "silverLabel": "Silver",
+      "goldLabel": "Gold",
+      "bronzePerks": "Full catalog access|Early drop access|5% credit back|Member QR card",
+      "silverPerks": "Bronze perks|Priority event tickets|10% credit back|Beach club access",
+      "goldPerks": "Silver perks|VIP event access|15% credit back|Personal stylist",
       "desc": "Every tier unlocks new benefits. Shop more, earn more, access exclusive events and collections only available to Makay members.",
       "joinNow": "Join Now",
       "seeEvents": "See events",
