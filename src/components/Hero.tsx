@@ -19,6 +19,7 @@ export default function Hero() {
       : false;
 
   const [themeLoaded, setThemeLoaded] = useState(false);
+  const [heroVideo, setHeroVideo]       = useState('');
   const [heroTitle, setHeroTitle]       = useState('');
   const [heroSubtitle, setHeroSubtitle] = useState('');
   const [heroCta, setHeroCta]           = useState('');
@@ -27,6 +28,7 @@ export default function Hero() {
     fetch('/api/theme')
       .then(r => r.ok ? r.json() : {})
       .then((d: Record<string, string>) => {
+        setHeroVideo(d['page:home:content:heroVideo']    || '');
         setHeroTitle(d['page:home:content:heroTitle']    || '');
         setHeroSubtitle(d['page:home:content:heroSubtitle'] || '');
         setHeroCta(d['page:home:content:ctaText']        || '');
@@ -117,7 +119,19 @@ export default function Hero() {
 
   return (
     <section ref={heroRef} className="hero">
-      <ShaderGradientCanvasWrapper />
+      {heroVideo ? (
+        <video
+          key={heroVideo}
+          src={heroVideo}
+          autoPlay
+          muted
+          loop
+          playsInline
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
+        />
+      ) : (
+        <ShaderGradientCanvasWrapper />
+      )}
 
       <div className="hero-content">
         <h1 ref={headlineRef} className="hero-headline">

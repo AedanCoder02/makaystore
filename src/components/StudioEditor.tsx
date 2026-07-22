@@ -7,6 +7,7 @@ import {
   PanelLeftClose, PanelLeftOpen, Calendar, Crown,
 } from 'lucide-react';
 import ImageUpload from '@/components/seller/ImageUpload';
+import MediaUpload from '@/components/seller/MediaUpload';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import { CardCanvas, type CardLayout, type CardColors, DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS } from '@/components/CardDesigner';
@@ -65,8 +66,9 @@ const PAGE_COLOR_CONTROLS = [
   { key: 'text',      label: 'Body Text',           cssVar: '--makay-dark-navy',     default: '#2C2C2C' },
   { key: 'muted',     label: 'Muted / Labels',      cssVar: '--makay-mauve',         default: '#A89080' },
 ];
-const CONTENT_FIELDS: Record<string, {key:string;label:string;type:'text'|'textarea'|'image';placeholder:string}[]> = {
+const CONTENT_FIELDS: Record<string, {key:string;label:string;type:'text'|'textarea'|'image'|'video';placeholder:string}[]> = {
   home: [
+    { key:'heroVideo',       label:'Hero Background Video',   type:'video',    placeholder:''                          },
     { key:'heroTitle',       label:'Hero Headline',           type:'text',     placeholder:'Your Connection Refuge'    },
     { key:'heroSubtitle',    label:'Hero Subtitle',           type:'textarea', placeholder:'Discover clothing...'      },
     { key:'ctaText',         label:'CTA Button',              type:'text',     placeholder:'Explore Collection'        },
@@ -575,6 +577,11 @@ export default function StudioEditor() {
                             {field.type === 'textarea' ? (
                               <textarea className="studio-textarea" rows={2} placeholder={field.placeholder}
                                 value={current.content[field.key]??''} onChange={e => updatePageContent(field.key, e.target.value)} />
+                            ) : field.type === 'video' ? (
+                              <MediaUpload
+                                value={current.content[field.key]??''}
+                                onChange={url => updatePageContent(field.key, url)}
+                              />
                             ) : field.type === 'image' ? (
                               <ImageUpload
                                 value={current.content[field.key]??''}
