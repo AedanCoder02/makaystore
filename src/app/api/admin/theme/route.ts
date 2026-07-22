@@ -11,9 +11,10 @@ export async function PATCH(req: NextRequest) {
   if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const settings = await req.json();
+  // Cast to jsonb so PostgreSQL stores an object, not a string
   await sql`
     INSERT INTO theme_settings (id, settings, updated_at)
-    VALUES (1, ${JSON.stringify(settings)}, NOW())
+    VALUES (1, ${JSON.stringify(settings)}::jsonb, NOW())
     ON CONFLICT (id) DO UPDATE
     SET settings = EXCLUDED.settings, updated_at = NOW()
   `;
