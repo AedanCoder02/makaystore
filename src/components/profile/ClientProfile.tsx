@@ -14,10 +14,20 @@ import {
 } from '@/components/CardDesigner';
 import '@/styles/profile.css';
 
+interface WalletTransaction {
+  id: number;
+  type: 'earn' | 'spend' | 'admin_credit';
+  points: number;
+  description: string;
+  created_at: string;
+}
+
 interface UserProfile {
   bio: string;
   wallet_balance: string;
+  wallet_points: number;
   membership_tier: string;
+  discount_override: number | null;
 }
 
 interface OrderSummary {
@@ -65,6 +75,8 @@ export default function ClientProfile() {
   const [bioInput, setBioInput] = useState('');
   const [saving, setSaving] = useState(false);
   const [orders, setOrders] = useState<OrderSummary[]>([]);
+  const [walletPoints, setWalletPoints] = useState(0);
+  const [walletTx, setWalletTx] = useState<WalletTransaction[]>([]);
   const cardRef = useRef<HTMLDivElement>(null);
   const heroRef = useRef<HTMLDivElement>(null);
 
@@ -82,10 +94,13 @@ export default function ClientProfile() {
       fetch('/api/profile').then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }),
       fetch('/api/theme').then(r => r.json()).catch(() => ({})),
       fetch('/api/orders').then(r => r.ok ? r.json() : []).catch(() => []),
-    ]).then(([profileData, themeData, ordersData]: [UserProfile, Record<string, string>, OrderSummary[]]) => {
+      fetch('/api/wallet').then(r => r.ok ? r.json() : { points: 0, transactions: [] }).catch(() => ({ points: 0, transactions: [] })),
+    ]).then(([profileData, themeData, ordersData, walletData]: [UserProfile, Record<string, string>, OrderSummary[], { points: number; transactions: WalletTransaction[] }]) => {
       setProfile(profileData);
       setBioInput(profileData.bio || '');
       setOrders(Array.isArray(ordersData) ? ordersData.slice(0, 5) : []);
+      setWalletPoints(walletData.points ?? 0);
+      setWalletTx(walletData.transactions ?? []);
       if (themeData.card_layout) {
         try { setCardLayout(JSON.parse(themeData.card_layout)); } catch {}
       }
@@ -264,13 +279,31 @@ export default function ClientProfile() {
           <div className="profile-wallet-card">
             <Wallet size={28} className="profile-wallet-icon" />
             <div className="profile-wallet-info">
-              <span className="profile-wallet-label">Available Balance</span>
-              <span className="profile-wallet-amount">
-                ${parseFloat(profile.wallet_balance).toFixed(2)}
-              </span>
+              <span className="profile-wallet-label">Points Balance</span>
+              <span className="profile-wallet-amount">{walletPoints.toLocaleString()} pts</span>
             </div>
-            <span className="profile-wallet-tag">Makay Credits</span>
+            <span className="profile-wallet-tag">Makay Points</span>
           </div>
+
+          {walletTx.length > 0 && (
+            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--makay-mauve)', margin: '0 0 0.35rem' }}>Recent Activity</p>
+              {walletTx.slice(0, 8).map(tx => {
+                const isEarn = tx.type === 'earn' || tx.type === 'admin_credit';
+                return (
+                  <div key={tx.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.55rem 0.75rem', background: 'var(--makay-sand-cream)', borderRadius: 8, gap: '0.75rem' }}>
+                    <div style={{ minWidth: 0 }}>
+                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-dark-navy)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.description || (isEarn ? 'Points earned' : 'Points redeemed')}</p>
+                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', color: 'var(--makay-mauve)', margin: 0 }}>{new Date(tx.created_at).toLocaleDateString()}</p>
+                    </div>
+                    <span style={{ fontFamily: 'var(--font-montserrat)', fontWeight: 700, fontSize: '0.88rem', color: isEarn ? '#10b981' : '#ef4444', flexShrink: 0 }}>
+                      {isEarn ? '+' : '-'}{Math.abs(tx.points)} pts
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Membership Perks */}
