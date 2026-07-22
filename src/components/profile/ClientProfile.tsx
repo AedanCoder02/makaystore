@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useUser, UserButton } from '@clerk/nextjs';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import QRCode from 'react-qr-code';
 import { Share2, Download, Wallet, Edit3, Check, X, HelpCircle } from 'lucide-react';
@@ -67,6 +68,7 @@ const TIER_NEXT: Record<string, { next: string; spend: number }> = {
 
 export default function ClientProfile() {
   const { user, isLoaded } = useUser();
+  const tp = useTranslations('profile');
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [fetchError, setFetchError] = useState(false);
   const [cardLayout, setCardLayout] = useState<CardLayout>(DEFAULT_CARD_LAYOUT);
@@ -274,26 +276,26 @@ export default function ClientProfile() {
         {/* Wallet */}
         <div className="profile-section">
           <div className="profile-section-header">
-            <h2 className="profile-section-title">Wallet</h2>
+            <h2 className="profile-section-title">{tp('wallet')}</h2>
           </div>
           <div className="profile-wallet-card">
             <Wallet size={28} className="profile-wallet-icon" />
             <div className="profile-wallet-info">
-              <span className="profile-wallet-label">Points Balance</span>
+              <span className="profile-wallet-label">{tp('pointsBalance')}</span>
               <span className="profile-wallet-amount">{walletPoints.toLocaleString()} pts</span>
             </div>
-            <span className="profile-wallet-tag">Makay Points</span>
+            <span className="profile-wallet-tag">{tp('makayPoints')}</span>
           </div>
 
           {walletTx.length > 0 && (
             <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--makay-mauve)', margin: '0 0 0.35rem' }}>Recent Activity</p>
+              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--makay-mauve)', margin: '0 0 0.35rem' }}>{tp('recentActivity')}</p>
               {walletTx.slice(0, 8).map(tx => {
                 const isEarn = tx.type === 'earn' || tx.type === 'admin_credit';
                 return (
                   <div key={tx.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.55rem 0.75rem', background: 'var(--makay-sand-cream)', borderRadius: 8, gap: '0.75rem' }}>
                     <div style={{ minWidth: 0 }}>
-                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-dark-navy)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.description || (isEarn ? 'Points earned' : 'Points redeemed')}</p>
+                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-dark-navy)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tx.description || (isEarn ? tp('pointsEarned') : tp('pointsRedeemed'))}</p>
                       <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', color: 'var(--makay-mauve)', margin: 0 }}>{new Date(tx.created_at).toLocaleDateString()}</p>
                     </div>
                     <span style={{ fontFamily: 'var(--font-montserrat)', fontWeight: 700, fontSize: '0.88rem', color: isEarn ? '#10b981' : '#ef4444', flexShrink: 0 }}>

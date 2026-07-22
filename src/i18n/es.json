@@ -32,7 +32,8 @@
     "signIn": "Iniciar sesión",
     "signUp": "Registrarse",
     "signOut": "Cerrar sesión",
-    "myAccount": "Mi cuenta"
+    "myAccount": "Mi cuenta",
+    "allies": "Aliados"
   },
   "hero": {
     "headline": "Tu Refugio de Conexión",
@@ -868,6 +869,30 @@
       "cookies": "Configuración de Cookies"
     },
     "copyright": "Todos los derechos reservados."
+  },
+  "allies": {
+    "tag": "Beneficios de Aliados",
+    "title": "Nuestros Aliados",
+    "subtitle": "Descuentos exclusivos en nuestros establecimientos aliados, desbloqueados por tu nivel de membresía Makay.",
+    "getMembership": "Obtener Membresía",
+    "loading": "Cargando aliados…",
+    "noAllies": "Sin aliados listados aún.",
+    "off": "de descuento",
+    "membershipRequired": "Requiere membresía {tier}",
+    "join": "Unirse →",
+    "accessByTier": "Acceso por nivel",
+    "bronzePlus": "Bronce+",
+    "silverPlus": "Plata+",
+    "goldPlus": "Oro+",
+    "vip": "VIP"
+  },
+  "profile": {
+    "wallet": "Cartera",
+    "pointsBalance": "Saldo de Puntos",
+    "makayPoints": "Puntos Makay",
+    "recentActivity": "Actividad Reciente",
+    "pointsEarned": "Puntos ganados",
+    "pointsRedeemed": "Puntos canjeados"
   },
   "homepage": {
     "events": {

@@ -32,7 +32,8 @@
     "signIn": "Sign In",
     "signUp": "Sign Up",
     "signOut": "Sign Out",
-    "myAccount": "My Account"
+    "myAccount": "My Account",
+    "allies": "Allies"
   },
   "hero": {
     "headline": "Your Connection Refuge",
@@ -868,6 +869,30 @@
       "cookies": "Cookie Settings"
     },
     "copyright": "All rights reserved."
+  },
+  "allies": {
+    "tag": "Partner Benefits",
+    "title": "Our Allies",
+    "subtitle": "Exclusive discounts at our partner venues, unlocked by your Makay membership tier.",
+    "getMembership": "Get Membership",
+    "loading": "Loading partners…",
+    "noAllies": "No allies listed yet.",
+    "off": "off",
+    "membershipRequired": "{tier} membership required",
+    "join": "Join →",
+    "accessByTier": "Access by tier",
+    "bronzePlus": "Bronze+",
+    "silverPlus": "Silver+",
+    "goldPlus": "Gold+",
+    "vip": "VIP"
+  },
+  "profile": {
+    "wallet": "Wallet",
+    "pointsBalance": "Points Balance",
+    "makayPoints": "Makay Points",
+    "recentActivity": "Recent Activity",
+    "pointsEarned": "Points earned",
+    "pointsRedeemed": "Points redeemed"
   },
   "homepage": {
     "events": {

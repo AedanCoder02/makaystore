@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
+import { useTranslations } from 'next-intl';
 import { Lock, Copy, Check } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import Footer from '@/components/Footer';
@@ -18,8 +19,8 @@ interface Ally {
   has_access: boolean;
 }
 
-const TIER_LABEL: Record<string, string> = {
-  bronze: 'Bronze+', silver: 'Silver+', gold: 'Gold+', vip: 'VIP',
+const TIER_KEY: Record<string, string> = {
+  bronze: 'bronzePlus', silver: 'silverPlus', gold: 'goldPlus', vip: 'vip',
 };
 
 const TIER_COLOR: Record<string, string> = {
@@ -28,7 +29,7 @@ const TIER_COLOR: Record<string, string> = {
 
 const AVATAR_COLORS = ['#CD7F32', '#A8A9AD', '#D4AF37', '#D4A574', '#A89080', '#8b6e5a'];
 
-function AllyCard({ ally }: { ally: Ally }) {
+function AllyCard({ ally, t }: { ally: Ally; t: ReturnType<typeof useTranslations<'allies'>> }) {
   const [copied, setCopied] = useState(false);
 
   const copy = async () => {
@@ -41,7 +42,7 @@ function AllyCard({ ally }: { ally: Ally }) {
   const avatarColor = AVATAR_COLORS[ally.id % AVATAR_COLORS.length];
   const initials = ally.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
   const tierColor = TIER_COLOR[ally.min_tier] ?? '#CD7F32';
-  const tierLabel = TIER_LABEL[ally.min_tier] ?? 'Bronze+';
+  const tierLabel = t(TIER_KEY[ally.min_tier] as keyof typeof TIER_KEY ?? 'bronzePlus');
 
   return (
     <div style={{
@@ -86,7 +87,7 @@ function AllyCard({ ally }: { ally: Ally }) {
           padding: '0.4rem 0.7rem', textAlign: 'center',
         }}>
           <p style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: '1.4rem', color: tierColor, margin: 0, lineHeight: 1 }}>{ally.discount_percent}%</p>
-          <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.6rem', color: tierColor, margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>off</p>
+          <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.6rem', color: tierColor, margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{t('off')}</p>
         </div>
       </div>
 
@@ -120,13 +121,13 @@ function AllyCard({ ally }: { ally: Ally }) {
           }}>
             <Lock size={14} color="#b0a090" />
             <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: '#b0a090', flex: 1 }}>
-              {TIER_LABEL[ally.min_tier] ?? 'Bronze+'} membership required
+              {t('membershipRequired', { tier: tierLabel })}
             </span>
             <Link href="/products" style={{
               fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700,
               color: 'var(--makay-peachy-rose)', textDecoration: 'none', whiteSpace: 'nowrap',
             }}>
-              Join →
+              {t('join')}
             </Link>
           </div>
         )}
@@ -137,6 +138,7 @@ function AllyCard({ ally }: { ally: Ally }) {
 
 export default function AlliesPage() {
   const { isLoaded } = useUser();
+  const t = useTranslations('allies');
   const [allies, setAllies] = useState<Ally[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -147,6 +149,8 @@ export default function AlliesPage() {
       .then((d: Ally[]) => { setAllies(d); setLoading(false); })
       .catch(() => setLoading(false));
   }, [isLoaded]);
+
+  const tierLegend = Object.entries(TIER_KEY) as [string, string][];
 
   return (
     <>
@@ -160,13 +164,13 @@ export default function AlliesPage() {
           textAlign: 'center',
         }}>
           <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#D4AF37', marginBottom: '0.75rem' }}>
-            Partner Benefits
+            {t('tag')}
           </p>
           <h1 style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: 'clamp(2rem, 5vw, 3rem)', color: '#fff', margin: '0 0 1rem', lineHeight: 1.15 }}>
-            Our Allies
+            {t('title')}
           </h1>
           <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.95rem', color: 'rgba(255,255,255,0.65)', maxWidth: 480, margin: '0 auto 2rem', lineHeight: 1.6 }}>
-            Exclusive discounts at our partner venues, unlocked by your Makay membership tier.
+            {t('subtitle')}
           </p>
           <Link href="/products" style={{
             display: 'inline-block', fontFamily: 'var(--font-montserrat)', fontWeight: 700,
@@ -174,7 +178,7 @@ export default function AlliesPage() {
             padding: '0.75rem 1.75rem', borderRadius: 10, textDecoration: 'none',
             background: '#D4AF37', color: '#fff',
           }}>
-            Get Membership
+            {t('getMembership')}
           </Link>
         </div>
 
@@ -182,11 +186,11 @@ export default function AlliesPage() {
 
           {loading ? (
             <div style={{ textAlign: 'center', padding: '4rem', fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)' }}>
-              Loading partners…
+              {t('loading')}
             </div>
           ) : allies.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '4rem', fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)' }}>
-              No allies listed yet.
+              {t('noAllies')}
             </div>
           ) : (
             <div style={{
@@ -194,7 +198,7 @@ export default function AlliesPage() {
               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
               gap: '1.25rem',
             }}>
-              {allies.map(ally => <AllyCard key={ally.id} ally={ally} />)}
+              {allies.map(ally => <AllyCard key={ally.id} ally={ally} t={t} />)}
             </div>
           )}
 
@@ -205,12 +209,12 @@ export default function AlliesPage() {
             gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center',
           }}>
             <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', margin: '0 auto 0 0', alignSelf: 'center' }}>
-              Access by tier
+              {t('accessByTier')}
             </p>
-            {Object.entries(TIER_LABEL).map(([tier, label]) => (
+            {tierLegend.map(([tier, key]) => (
               <div key={tier} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', background: TIER_COLOR[tier] ?? '#ccc', flexShrink: 0 }} />
-                <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-dark-navy)' }}>{label}</span>
+                <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-dark-navy)' }}>{t(key as Parameters<typeof t>[0])}</span>
               </div>
             ))}
           </div>
