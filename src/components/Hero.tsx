@@ -20,6 +20,7 @@ export default function Hero() {
 
   const [themeLoaded, setThemeLoaded] = useState(false);
   const [heroVideo, setHeroVideo]       = useState('');
+  const [videoFailed, setVideoFailed]   = useState(false);
   const [heroTitle, setHeroTitle]       = useState('');
   const [heroSubtitle, setHeroSubtitle] = useState('');
   const [heroCta, setHeroCta]           = useState('');
@@ -119,7 +120,7 @@ export default function Hero() {
 
   return (
     <section ref={heroRef} className="hero">
-      {heroVideo ? (
+      {heroVideo && !videoFailed ? (
         <video
           key={heroVideo}
           src={heroVideo}
@@ -127,6 +128,7 @@ export default function Hero() {
           muted
           loop
           playsInline
+          onError={() => setVideoFailed(true)}
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
         />
       ) : (
