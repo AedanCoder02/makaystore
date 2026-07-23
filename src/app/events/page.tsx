@@ -1,3 +1,2 @@
-import EventsListing from '@/components/events/EventsListing';
-export const metadata = { title: 'Events — Makay Beach Club' };
-export default function EventsPage() { return <EventsListing />; }
+import { redirect } from 'next/navigation';
+export default function EventsPage() { redirect('/membership'); }

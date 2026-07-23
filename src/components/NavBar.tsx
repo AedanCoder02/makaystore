@@ -47,8 +47,7 @@ export default function NavBar() {
         {/* Desktop nav */}
         <nav className="navbar-nav navbar-desktop">
           <Link href="/products">{t('products')}</Link>
-          <Link href="/events">Events</Link>
-          <Link href="/allies">{t('allies')}</Link>
+          <Link href="/membership">{t('membership')}</Link>
           <Link href="/cart" className="cart-link">
             <ShoppingCart size={20} />
             <span className={`cart-badge${totalItems > 0 ? ' active' : ''}`}>
@@ -138,8 +137,8 @@ export default function NavBar() {
             <Link href="/products" className="navbar-mobile-link" onClick={closeMobile}>
               {t('products')}
             </Link>
-            <Link href="/allies" className="navbar-mobile-link" onClick={closeMobile}>
-              {t('allies')}
+            <Link href="/membership" className="navbar-mobile-link" onClick={closeMobile}>
+              {t('membership')}
             </Link>
 
             {isSignedIn ? (

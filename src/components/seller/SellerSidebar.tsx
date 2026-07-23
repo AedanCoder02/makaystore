@@ -41,8 +41,8 @@ export default function SellerSidebar() {
     { href: '/seller/products/create-3d', label: t('nav.models3d'),  icon: Box,             key: 'models3d' },
     { href: '/seller/rotation',           label: t('nav.rotation'),  icon: RefreshCw,       key: 'rotation' },
     { href: '/seller/studio',             label: t('nav.studio'),    icon: Wand2,           key: 'studio' },
-    { href: '/seller/events',             label: 'Events',            icon: Calendar,        key: 'events' },
-    { href: '/seller/memberships',        label: 'Memberships',       icon: Crown,           key: 'memberships' },
+    { href: '/seller/events',             label: t('nav.events'),      icon: Calendar,        key: 'events' },
+    { href: '/seller/memberships',        label: t('nav.memberships'), icon: Crown,           key: 'memberships' },
   ];
   // If permissions are set, filter to allowed sections; dashboard is always visible
   const NAV = permissions

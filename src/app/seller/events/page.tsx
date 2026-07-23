@@ -35,7 +35,7 @@ export default function SellerEventsPage() {
           <h1 className="seller-page-title">Upcoming Events</h1>
           <p className="seller-page-sub">Share these events with your clients to drive engagement.</p>
         </div>
-        <Link href="/events" target="_blank" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.65rem 1.25rem', background: 'var(--makay-sand-cream)', borderRadius: '10px', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-dark-navy)', textDecoration: 'none', fontWeight: 600 }}>
+        <Link href="/membership" target="_blank" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.65rem 1.25rem', background: 'var(--makay-sand-cream)', borderRadius: '10px', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-dark-navy)', textDecoration: 'none', fontWeight: 600 }}>
           <ExternalLink size={14} /> Customer View
         </Link>
       </div>
