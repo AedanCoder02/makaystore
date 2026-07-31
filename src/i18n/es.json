@@ -944,10 +944,12 @@
   "profile": {
     "wallet": "Cartera",
     "pointsBalance": "Saldo de Puntos",
+    "makayBalance": "Saldo Makay",
     "makayPoints": "Puntos Makay",
     "recentActivity": "Actividad Reciente",
     "pointsEarned": "Puntos ganados",
-    "pointsRedeemed": "Puntos canjeados"
+    "pointsRedeemed": "Puntos canjeados",
+    "earnPtsPerDollar": "Gana {pts} pts por cada $1 gastado"
   },
   "homepage": {
     "events": {

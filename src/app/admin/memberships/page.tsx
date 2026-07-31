@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
-import { Crown, TrendingUp, Users, Percent, Edit2, Check, X, Star, Coins } from 'lucide-react';
+import { Crown, TrendingUp, Users, Percent, Edit2, Check, X, Star, Coins, DollarSign, Calendar, Settings } from 'lucide-react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 
 interface Stats {
@@ -25,7 +25,13 @@ interface MemberRow {
   membership_tier: string;
   discount_override: number | null;
   wallet_points: number;
+  dollar_balance: number;
   created_at: string;
+}
+
+interface WalletConfig {
+  pts_per_dollar: number;
+  default_credit_interest: number;
 }
 
 const TIER_COLOR: Record<string, string> = {
@@ -34,28 +40,40 @@ const TIER_COLOR: Record<string, string> = {
 
 const TIER_ORDER = ['free', 'bronze', 'silver', 'gold', 'vip'];
 
-type Tab = 'overview' | 'discounts' | 'members';
+type Tab = 'overview' | 'discounts' | 'members' | 'config';
 
 export default function AdminMembershipsPage() {
   const [tab, setTab] = useState<Tab>('overview');
   const [stats, setStats] = useState<Stats | null>(null);
   const [tierConfig, setTierConfig] = useState<TierConfig[]>([]);
   const [members, setMembers] = useState<MemberRow[]>([]);
+  const [walletConfig, setWalletConfig] = useState<WalletConfig | null>(null);
+
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [loadingMembers, setLoadingMembers] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
+  const [savingWallet, setSavingWallet] = useState(false);
+
   const [configDraft, setConfigDraft] = useState<Record<string, number>>({});
+  const [walletDraft, setWalletDraft] = useState({ pts_per_dollar: 10, default_credit_interest: 5 });
+
   const [editingOverride, setEditingOverride] = useState<number | null>(null);
   const [overrideDraft, setOverrideDraft] = useState<Record<number, string>>({});
   const [tierDraft, setTierDraft] = useState<Record<number, string>>({});
   const [savingMember, setSavingMember] = useState<number | null>(null);
-  const [toast, setToast] = useState('');
+
   const [creditTarget, setCreditTarget] = useState<number | null>(null);
+  const [creditMode, setCreditMode] = useState<'points' | 'dollar'>('points');
   const [creditPoints, setCreditPoints] = useState('');
   const [creditDesc, setCreditDesc] = useState('');
+  const [dollarAmount, setDollarAmount] = useState('');
+  const [dollarInterest, setDollarInterest] = useState('');
+  const [dollarDueDate, setDollarDueDate] = useState('');
+  const [dollarNotes, setDollarNotes] = useState('');
   const [creditSaving, setCreditSaving] = useState(false);
 
+  const [toast, setToast] = useState('');
   const showToast = (msg: string) => { setToast(msg); setTimeout(() => setToast(''), 2500); };
 
   useEffect(() => {
@@ -90,10 +108,26 @@ export default function AdminMembershipsPage() {
       .catch(() => setLoadingMembers(false));
   }, [members.length]);
 
+  const loadWalletConfig = useCallback(() => {
+    if (walletConfig) return;
+    fetch('/api/admin/wallet-config')
+      .then(r => r.ok ? r.json() : null)
+      .then((d: WalletConfig | null) => {
+        if (!d) return;
+        setWalletConfig(d);
+        setWalletDraft({
+          pts_per_dollar: d.pts_per_dollar,
+          default_credit_interest: Math.round(d.default_credit_interest * 100),
+        });
+      })
+      .catch(() => {});
+  }, [walletConfig]);
+
   useEffect(() => {
     if (tab === 'discounts') loadConfig();
     if (tab === 'members') loadMembers();
-  }, [tab, loadConfig, loadMembers]);
+    if (tab === 'config') loadWalletConfig();
+  }, [tab, loadConfig, loadMembers, loadWalletConfig]);
 
   const saveConfig = async () => {
     setSavingConfig(true);
@@ -110,6 +144,24 @@ export default function AdminMembershipsPage() {
       showToast('Discount rates saved.');
     }
     setSavingConfig(false);
+  };
+
+  const saveWalletConfig = async () => {
+    setSavingWallet(true);
+    const res = await fetch('/api/admin/wallet-config', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        pts_per_dollar: walletDraft.pts_per_dollar,
+        default_credit_interest: walletDraft.default_credit_interest / 100,
+      }),
+    });
+    if (res.ok) {
+      const updated: WalletConfig = await res.json();
+      setWalletConfig(updated);
+      showToast('Wallet config saved.');
+    }
+    setSavingWallet(false);
   };
 
   const saveMember = async (profileId: number) => {
@@ -134,7 +186,18 @@ export default function AdminMembershipsPage() {
     setSavingMember(null);
   };
 
-  const creditMember = async (profileId: number) => {
+  const resetCredit = () => {
+    setCreditTarget(null);
+    setCreditMode('points');
+    setCreditPoints('');
+    setCreditDesc('');
+    setDollarAmount('');
+    setDollarInterest('');
+    setDollarDueDate('');
+    setDollarNotes('');
+  };
+
+  const issuePoints = async (profileId: number) => {
     const pts = parseInt(creditPoints, 10);
     if (!pts || pts <= 0) return;
     setCreditSaving(true);
@@ -146,10 +209,33 @@ export default function AdminMembershipsPage() {
     if (res.ok) {
       const { wallet_points } = await res.json();
       setMembers(prev => prev.map(m => m.id === profileId ? { ...m, wallet_points } : m));
-      setCreditTarget(null);
-      setCreditPoints('');
-      setCreditDesc('');
+      resetCredit();
       showToast(`${pts} points credited.`);
+    }
+    setCreditSaving(false);
+  };
+
+  const issueDollarCredit = async (profileId: number) => {
+    const amount = parseFloat(dollarAmount);
+    const interestRate = (parseFloat(dollarInterest) || 5) / 100;
+    if (!amount || amount <= 0 || !dollarDueDate) return;
+    setCreditSaving(true);
+    const res = await fetch('/api/admin/credit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        profile_id: profileId,
+        principal: amount,
+        interest_rate: interestRate,
+        due_date: dollarDueDate,
+        notes: dollarNotes || undefined,
+      }),
+    });
+    if (res.ok) {
+      const { dollar_balance } = await res.json();
+      setMembers(prev => prev.map(m => m.id === profileId ? { ...m, dollar_balance } : m));
+      resetCredit();
+      showToast(`$${amount.toFixed(2)} credit line issued.`);
     }
     setCreditSaving(false);
   };
@@ -163,9 +249,12 @@ export default function AdminMembershipsPage() {
     color: TIER_COLOR[d.tier] ?? '#ccc',
   }));
 
-  const label = (s: string) => s.toLowerCase();
-  const sectionCard = { background: '#fff', border: '1px solid var(--makay-sand-cream)', borderRadius: 16, padding: '1.5rem' };
-  const heading = { fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.06em', color: 'var(--makay-mauve)', marginBottom: '1rem' };
+  const sectionCard: React.CSSProperties = { background: '#fff', border: '1px solid var(--makay-sand-cream)', borderRadius: 16, padding: '1.5rem' };
+  const heading: React.CSSProperties = { fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', marginBottom: '1rem' };
+  const fieldLabel: React.CSSProperties = { fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--makay-mauve)', display: 'block', marginBottom: '0.35rem' };
+  const fieldInput: React.CSSProperties = { width: '100%', padding: '0.5rem 0.75rem', borderRadius: 8, border: '1px solid var(--makay-sand-cream)', fontFamily: 'var(--font-montserrat)', fontSize: '0.88rem', color: 'var(--makay-dark-navy)', boxSizing: 'border-box' };
+  const fieldHint: React.CSSProperties = { fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', color: 'var(--makay-mauve)', marginTop: '0.3rem', marginBottom: 0 };
+  const TAB_LABELS: Record<Tab, string> = { overview: 'Overview', discounts: 'Discounts', members: 'Members', config: 'Wallet Config' };
 
   return (
     <div className="admin-layout">
@@ -178,16 +267,18 @@ export default function AdminMembershipsPage() {
         {toast && <div className="admin-toast">{toast}</div>}
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--makay-sand-cream)', paddingBottom: '0.75rem' }}>
-          {(['overview', 'discounts', 'members'] as Tab[]).map(t => (
+        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.75rem', borderBottom: '1px solid var(--makay-sand-cream)', paddingBottom: '0.75rem', flexWrap: 'wrap' }}>
+          {(['overview', 'discounts', 'members', 'config'] as Tab[]).map(t => (
             <button key={t} onClick={() => setTab(t)} style={{
               fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', fontWeight: 700,
-              textTransform: 'capitalize', padding: '0.45rem 1rem', borderRadius: 8,
-              border: 'none', cursor: 'pointer',
+              padding: '0.45rem 1rem', borderRadius: 8, border: 'none', cursor: 'pointer',
               background: tab === t ? 'var(--makay-dark-navy)' : 'transparent',
               color: tab === t ? '#fff' : 'var(--makay-mauve)',
-              transition: 'all 0.15s',
-            }}>{t}</button>
+              transition: 'all 0.15s', display: 'flex', alignItems: 'center', gap: '0.4rem',
+            }}>
+              {t === 'config' && <Settings size={12} />}
+              {TAB_LABELS[t]}
+            </button>
           ))}
         </div>
 
@@ -199,7 +290,6 @@ export default function AdminMembershipsPage() {
               <div className="admin-stat-chip"><Crown size={14} /> {paidMembers} paid members</div>
               <div className="admin-stat-chip"><TrendingUp size={14} /> ${totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })} membership revenue</div>
             </div>
-
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
               <div style={sectionCard}>
                 <h3 style={heading}>Tier Distribution</h3>
@@ -217,7 +307,6 @@ export default function AdminMembershipsPage() {
                   <p style={{ textAlign: 'center', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', padding: '2rem 0' }}>No member profiles yet.</p>
                 )}
               </div>
-
               <div style={sectionCard}>
                 <h3 style={heading}>Revenue by Tier</h3>
                 {(stats?.revenue ?? []).length > 0 ? (
@@ -236,7 +325,6 @@ export default function AdminMembershipsPage() {
                 )}
               </div>
             </div>
-
             {(stats?.recent ?? []).length > 0 && (
               <div style={{ ...sectionCard, padding: 0, overflow: 'hidden' }}>
                 <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--makay-sand-cream)' }}>
@@ -267,19 +355,13 @@ export default function AdminMembershipsPage() {
             <div style={sectionCard}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
                 <h3 style={{ ...heading, marginBottom: 0 }}><Percent size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} />Global Discount Rates</h3>
-                <button onClick={saveConfig} disabled={savingConfig} style={{
-                  fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700,
-                  padding: '0.45rem 1.1rem', borderRadius: 8, border: 'none', cursor: 'pointer',
-                  background: 'var(--makay-dark-navy)', color: '#fff',
-                }}>
+                <button onClick={saveConfig} disabled={savingConfig} style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, padding: '0.45rem 1.1rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--makay-dark-navy)', color: '#fff' }}>
                   {savingConfig ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
-
               <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)', marginBottom: '1.5rem' }}>
                 These percentages apply automatically at checkout for all members of each tier, unless overridden individually in the Members tab.
               </p>
-
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {tierConfig.map(c => (
                   <div key={c.tier} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.875rem 1rem', background: 'var(--makay-sand-cream)', borderRadius: 10 }}>
@@ -292,12 +374,9 @@ export default function AdminMembershipsPage() {
                       <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)', fontStyle: 'italic' }}>Per-user override only</span>
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                        <input
-                          type="number" min={0} max={100}
-                          value={configDraft[c.tier] ?? c.discount_percent}
+                        <input type="number" min={0} max={100} value={configDraft[c.tier] ?? c.discount_percent}
                           onChange={e => setConfigDraft(prev => ({ ...prev, [c.tier]: parseInt(e.target.value, 10) || 0 }))}
-                          style={{ width: 64, padding: '0.35rem 0.5rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', fontFamily: 'var(--font-montserrat)', fontSize: '0.88rem', fontWeight: 700, textAlign: 'center', color: 'var(--makay-dark-navy)' }}
-                        />
+                          style={{ width: 64, padding: '0.35rem 0.5rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', fontFamily: 'var(--font-montserrat)', fontSize: '0.88rem', fontWeight: 700, textAlign: 'center', color: 'var(--makay-dark-navy)' }} />
                         <span style={{ fontFamily: 'var(--font-montserrat)', fontWeight: 700, color: 'var(--makay-dark-navy)', fontSize: '0.88rem' }}>%</span>
                       </div>
                     )}
@@ -324,38 +403,31 @@ export default function AdminMembershipsPage() {
                 return (
                   <div key={m.id} style={{ background: '#fff', border: '1px solid var(--makay-sand-cream)', borderRadius: 12, padding: '0.875rem 1.125rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-                      {/* Identity */}
                       <div style={{ flex: 1, minWidth: 140 }}>
-                        <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: 'var(--makay-mauve)', margin: 0 }}>
-                          ID #{m.id} · {new Date(m.created_at).toLocaleDateString()}
-                        </p>
+                        <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: 'var(--makay-mauve)', margin: 0 }}>ID #{m.id} · {new Date(m.created_at).toLocaleDateString()}</p>
                         <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', color: 'var(--makay-mauve)', margin: 0, wordBreak: 'break-all' }}>{m.clerk_id}</p>
                       </div>
 
-                      {/* Tier select */}
-                      <select
-                        value={currentTier}
-                        onChange={e => setTierDraft(prev => ({ ...prev, [m.id]: e.target.value }))}
-                        style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', fontWeight: 700, padding: '0.35rem 0.6rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', color: TIER_COLOR[currentTier] ?? 'inherit', cursor: 'pointer' }}
-                      >
-                        {TIER_ORDER.map(t => <option key={t} value={t} style={{ color: TIER_COLOR[t] }}>{label(t)}</option>)}
+                      <select value={currentTier} onChange={e => setTierDraft(prev => ({ ...prev, [m.id]: e.target.value }))}
+                        style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', fontWeight: 700, padding: '0.35rem 0.6rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', color: TIER_COLOR[currentTier] ?? 'inherit', cursor: 'pointer' }}>
+                        {TIER_ORDER.map(t => <option key={t} value={t} style={{ color: TIER_COLOR[t] }}>{t}</option>)}
                       </select>
 
-                      {/* Points */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-dark-navy)', fontWeight: 600 }}>
-                        <Star size={13} color="#D4AF37" />
-                        {m.wallet_points} pts
+                        <Star size={13} color="#D4AF37" /> {m.wallet_points} pts
                       </div>
 
-                      {/* Override % */}
+                      {Number(m.dollar_balance) > 0 && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: '#16a34a', fontWeight: 600 }}>
+                          <DollarSign size={13} /> {Number(m.dollar_balance).toFixed(2)}
+                        </div>
+                      )}
+
                       {isEditing ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-                          <input
-                            type="number" min={0} max={100} placeholder="Override %"
-                            value={overrideVal}
+                          <input type="number" min={0} max={100} placeholder="Override %" value={overrideVal}
                             onChange={e => setOverrideDraft(prev => ({ ...prev, [m.id]: e.target.value }))}
-                            style={{ width: 80, padding: '0.3rem 0.5rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem' }}
-                          />
+                            style={{ width: 80, padding: '0.3rem 0.5rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem' }} />
                           <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-mauve)' }}>%</span>
                         </div>
                       ) : (
@@ -364,14 +436,14 @@ export default function AdminMembershipsPage() {
                         </span>
                       )}
 
-                      {/* Actions */}
                       <div style={{ display: 'flex', gap: '0.4rem' }}>
                         {isEditing ? (
                           <>
                             <button onClick={() => saveMember(m.id)} disabled={isSaving} style={{ padding: '0.3rem 0.6rem', borderRadius: 6, border: 'none', background: 'var(--makay-dark-navy)', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem' }}>
                               <Check size={12} /> {isSaving ? '…' : 'Save'}
                             </button>
-                            <button onClick={() => { setEditingOverride(null); setOverrideDraft(p => { const n = {...p}; delete n[m.id]; return n; }); setTierDraft(p => { const n = {...p}; delete n[m.id]; return n; }); }} style={{ padding: '0.3rem 0.6rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                            <button onClick={() => { setEditingOverride(null); setOverrideDraft(p => { const n = {...p}; delete n[m.id]; return n; }); setTierDraft(p => { const n = {...p}; delete n[m.id]; return n; }); }}
+                              style={{ padding: '0.3rem 0.6rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                               <X size={12} />
                             </button>
                           </>
@@ -380,7 +452,8 @@ export default function AdminMembershipsPage() {
                             <button onClick={() => setEditingOverride(m.id)} style={{ padding: '0.3rem 0.6rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: 'var(--makay-mauve)' }}>
                               <Edit2 size={11} /> Edit
                             </button>
-                            <button onClick={() => setCreditTarget(m.id)} style={{ padding: '0.3rem 0.6rem', borderRadius: 6, border: '1px solid #D4AF37', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: '#D4AF37' }}>
+                            <button onClick={() => { setCreditTarget(m.id); setCreditMode('points'); }}
+                              style={{ padding: '0.3rem 0.6rem', borderRadius: 6, border: '1px solid #D4AF37', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: '#D4AF37' }}>
                               <Coins size={11} /> Credit
                             </button>
                           </>
@@ -388,19 +461,60 @@ export default function AdminMembershipsPage() {
                       </div>
                     </div>
 
-                    {/* Credit panel */}
                     {creditTarget === m.id && (
-                      <div style={{ marginTop: '0.75rem', padding: '0.875rem', background: 'var(--makay-sand-cream)', borderRadius: 8, display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                        <input type="number" min={1} placeholder="Points" value={creditPoints} onChange={e => setCreditPoints(e.target.value)}
-                          style={{ width: 90, padding: '0.3rem 0.5rem', borderRadius: 6, border: '1px solid #e5e0d8', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem' }} />
-                        <input type="text" placeholder="Description (optional)" value={creditDesc} onChange={e => setCreditDesc(e.target.value)}
-                          style={{ flex: 1, minWidth: 140, padding: '0.3rem 0.5rem', borderRadius: 6, border: '1px solid #e5e0d8', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem' }} />
-                        <button onClick={() => creditMember(m.id)} disabled={creditSaving} style={{ padding: '0.3rem 0.75rem', borderRadius: 6, border: 'none', background: '#D4AF37', color: '#fff', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
-                          {creditSaving ? '…' : 'Credit'}
-                        </button>
-                        <button onClick={() => setCreditTarget(null)} style={{ padding: '0.3rem 0.5rem', borderRadius: 6, border: '1px solid #e5e0d8', background: 'transparent', cursor: 'pointer' }}>
-                          <X size={12} />
-                        </button>
+                      <div style={{ marginTop: '0.75rem', padding: '1rem', background: 'var(--makay-sand-cream)', borderRadius: 10 }}>
+                        <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '0.875rem' }}>
+                          {(['points', 'dollar'] as const).map(mode => (
+                            <button key={mode} onClick={() => setCreditMode(mode)} style={{
+                              fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', fontWeight: 700,
+                              padding: '0.3rem 0.75rem', borderRadius: 6, border: 'none', cursor: 'pointer',
+                              background: creditMode === mode ? 'var(--makay-dark-navy)' : 'rgba(0,0,0,0.06)',
+                              color: creditMode === mode ? '#fff' : 'var(--makay-mauve)',
+                              display: 'flex', alignItems: 'center', gap: 4,
+                            }}>
+                              {mode === 'points' ? <><Star size={10} /> Points</> : <><DollarSign size={10} /> $ Credit Line</>}
+                            </button>
+                          ))}
+                          <button onClick={resetCredit} style={{ marginLeft: 'auto', padding: '0.3rem 0.5rem', borderRadius: 6, border: '1px solid #e5e0d8', background: 'transparent', cursor: 'pointer' }}>
+                            <X size={12} />
+                          </button>
+                        </div>
+
+                        {creditMode === 'points' ? (
+                          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <input type="number" min={1} placeholder="Points" value={creditPoints} onChange={e => setCreditPoints(e.target.value)}
+                              style={{ width: 90, padding: '0.3rem 0.5rem', borderRadius: 6, border: '1px solid #e5e0d8', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem' }} />
+                            <input type="text" placeholder="Description (optional)" value={creditDesc} onChange={e => setCreditDesc(e.target.value)}
+                              style={{ flex: 1, minWidth: 140, padding: '0.3rem 0.5rem', borderRadius: 6, border: '1px solid #e5e0d8', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem' }} />
+                            <button onClick={() => issuePoints(m.id)} disabled={creditSaving} style={{ padding: '0.3rem 0.75rem', borderRadius: 6, border: 'none', background: '#D4AF37', color: '#fff', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
+                              {creditSaving ? '…' : 'Credit'}
+                            </button>
+                          </div>
+                        ) : (
+                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem' }}>
+                            <div>
+                              <label style={fieldLabel}>Amount ($)</label>
+                              <input type="number" min={1} step={0.01} placeholder="e.g. 200.00" value={dollarAmount} onChange={e => setDollarAmount(e.target.value)} style={fieldInput} />
+                            </div>
+                            <div>
+                              <label style={fieldLabel}>Interest Rate (% / year)</label>
+                              <input type="number" min={0} max={100} step={0.1} placeholder="e.g. 5" value={dollarInterest} onChange={e => setDollarInterest(e.target.value)} style={fieldInput} />
+                            </div>
+                            <div>
+                              <label style={fieldLabel}>Payment Due Date</label>
+                              <input type="date" value={dollarDueDate} onChange={e => setDollarDueDate(e.target.value)} style={fieldInput} />
+                            </div>
+                            <div>
+                              <label style={fieldLabel}>Notes (optional)</label>
+                              <input type="text" placeholder="Internal note" value={dollarNotes} onChange={e => setDollarNotes(e.target.value)} style={fieldInput} />
+                            </div>
+                            <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end' }}>
+                              <button onClick={() => issueDollarCredit(m.id)} disabled={creditSaving} style={{ padding: '0.4rem 1rem', borderRadius: 8, border: 'none', background: 'var(--makay-dark-navy)', color: '#fff', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <DollarSign size={13} /> {creditSaving ? 'Issuing…' : 'Issue Credit Line'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -408,6 +522,72 @@ export default function AdminMembershipsPage() {
               })}
             </div>
           )
+        )}
+
+        {/* WALLET CONFIG */}
+        {tab === 'config' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={sectionCard}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+                <div>
+                  <h3 style={{ ...heading, marginBottom: '0.2rem' }}>Wallet Configuration</h3>
+                  <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)', margin: 0 }}>
+                    Controls how customers earn points and how credit lines are structured.
+                  </p>
+                </div>
+                <button onClick={saveWalletConfig} disabled={savingWallet} style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, padding: '0.5rem 1.25rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--makay-dark-navy)', color: '#fff' }}>
+                  {savingWallet ? 'Saving…' : 'Save'}
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                <div>
+                  <div style={{ padding: '1.25rem', background: 'linear-gradient(135deg, #D4AF3718, #D4A57410)', border: '1px solid #D4AF3730', borderRadius: 12, marginBottom: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#D4AF3720', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Star size={18} color="#D4AF37" />
+                    </div>
+                    <div>
+                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--makay-mauve)', margin: '0 0 0.15rem' }}>Points Rate</p>
+                      <p style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: 0, lineHeight: 1.1 }}>
+                        $1 = {walletDraft.pts_per_dollar} pts
+                      </p>
+                    </div>
+                  </div>
+                  <label style={fieldLabel}>Points per $1 spent</label>
+                  <input type="number" min={1} max={1000} value={walletDraft.pts_per_dollar}
+                    onChange={e => setWalletDraft(p => ({ ...p, pts_per_dollar: parseInt(e.target.value, 10) || 1 }))}
+                    style={fieldInput} />
+                  <p style={fieldHint}>Customers earn this many points for every dollar spent. Applied automatically on order completion.</p>
+                </div>
+
+                <div>
+                  <div style={{ padding: '1.25rem', background: 'linear-gradient(135deg, #0f172a0e, #1e2d3d0e)', border: '1px solid #0f172a18', borderRadius: 12, marginBottom: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#0f172a10', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Calendar size={18} color="var(--makay-dark-navy)" />
+                    </div>
+                    <div>
+                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--makay-mauve)', margin: '0 0 0.15rem' }}>Default APR</p>
+                      <p style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: 0, lineHeight: 1.1 }}>
+                        {walletDraft.default_credit_interest}%
+                      </p>
+                    </div>
+                  </div>
+                  <label style={fieldLabel}>Default credit interest (% per year)</label>
+                  <input type="number" min={0} max={100} step={0.1} value={walletDraft.default_credit_interest}
+                    onChange={e => setWalletDraft(p => ({ ...p, default_credit_interest: parseFloat(e.target.value) || 0 }))}
+                    style={fieldInput} />
+                  <p style={fieldHint}>Pre-filled when issuing credit lines in the Members tab. Each line can have a custom rate.</p>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ ...sectionCard, background: '#f8f6f3', border: '1px solid #ece8e1' }}>
+              <h3 style={{ ...heading, display: 'flex', alignItems: 'center', gap: 6 }}><DollarSign size={14} />How to Issue Credit Lines</h3>
+              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-mauve)', margin: 0, lineHeight: 1.75 }}>
+                To issue a credit line to a specific customer, go to the <strong style={{ color: 'var(--makay-dark-navy)' }}>Members</strong> tab, click <strong style={{ color: 'var(--makay-dark-navy)' }}>Credit</strong> on any member row, then switch to <strong style={{ color: 'var(--makay-dark-navy)' }}>$ Credit Line</strong> mode. Enter the principal amount, interest rate, and due date. The dollar balance is added to the customer&apos;s wallet and shown on their profile with interest accumulating daily.
+              </p>
+            </div>
+          </div>
         )}
       </main>
     </div>

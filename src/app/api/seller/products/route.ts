@@ -5,6 +5,7 @@ import sql from '@/lib/db';
 async function ensureColumns() {
   await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS sizes TEXT[] DEFAULT '{}'`;
   await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS colors JSONB DEFAULT '[]'`;
+  await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS provider TEXT DEFAULT ''`;
 }
 
 // GET — all products (all statuses) for seller panel
@@ -16,9 +17,9 @@ export async function GET() {
 
   const rows = await sql`
     SELECT id, title, description, price, image, sku, stock, category, status,
-           sizes, colors, variants, created_at, updated_at
+           sizes, colors, variants, provider, markup_percent, markup_amount, created_at, updated_at
     FROM products
-    ORDER BY created_at DESC
+    ORDER BY provider ASC, title ASC
   `;
   return NextResponse.json(rows);
 }
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
   await ensureColumns();
 
   const body = await req.json();
-  const { title, price, description, image, sku, stock, category, status, sizes, colors } = body;
+  const { title, price, description, image, sku, stock, category, status, sizes, colors, provider, markup_percent, markup_amount } = body;
 
   if (!title || price === undefined) {
     return NextResponse.json({ error: 'title and price required' }, { status: 400 });
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
 
   const id = `custom-${Date.now()}`;
   const row = await sql`
-    INSERT INTO products (id, title, description, price, image, sku, stock, category, status, sizes, colors, variants)
+    INSERT INTO products (id, title, description, price, image, sku, stock, category, status, sizes, colors, variants, provider, markup_percent, markup_amount)
     VALUES (
       ${id},
       ${title},
@@ -52,7 +53,10 @@ export async function POST(req: NextRequest) {
       ${status ?? 'active'},
       ${sizes ?? []},
       ${JSON.stringify(colors ?? [])},
-      '[]'
+      '[]',
+      ${provider ?? ''},
+      ${markup_percent ?? false},
+      ${Number(markup_amount ?? 0)}
     )
     RETURNING *
   `;

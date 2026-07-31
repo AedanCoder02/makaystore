@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Crown, Check, Users } from 'lucide-react';
+import { Crown, Check, Users, AlertTriangle } from 'lucide-react';
 
 interface Client { id: string; name: string; email: string; tier?: string }
 interface Tier { key: string; label: string; price: number; description: string; color: string }
@@ -22,11 +22,13 @@ export default function SellerMembershipsPage() {
   const [success, setSuccess] = useState('');
   const [error, setError]     = useState('');
   const [recentSales, setRecentSales] = useState<any[]>([]);
+  const [expiringMembers, setExpiringMembers] = useState<any[]>([]);
 
   useEffect(() => {
     fetch('/api/memberships').then(r => r.json()).then(setTiers).catch(() => {});
     fetch('/api/seller/clients').then(r => r.ok ? r.json() : []).then(setClients).catch(() => {});
     fetch('/api/memberships/stats').then(r => r.ok ? r.json() : null).then((d: any) => setRecentSales(d?.recent ?? [])).catch(() => {});
+    fetch('/api/seller/memberships-expiring').then(r => r.ok ? r.json() : []).then(setExpiringMembers).catch(() => {});
   }, []);
 
   const filteredClients = clients.filter(c =>
@@ -183,6 +185,43 @@ export default function SellerMembershipsPage() {
                 {submitting ? 'Processing…' : 'Complete Sale'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Próximas a vencer */}
+      {expiringMembers.length > 0 && (
+        <div style={{ marginTop: '2.5rem' }}>
+          <h2 style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#f59e0b', marginBottom: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+            <AlertTriangle size={13} /> Próximas a vencer ({expiringMembers.length})
+          </h2>
+          <div className="sp-table-wrap">
+            <table className="sp-table">
+              <thead>
+                <tr>
+                  <th>ID Cliente</th>
+                  <th>Tier</th>
+                  <th>Duración</th>
+                  <th>Vence</th>
+                  <th style={{ textAlign: 'right' }}>Días restantes</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expiringMembers.map((m: any) => (
+                  <tr key={m.clerk_id} className="sp-row">
+                    <td className="sp-sku">{String(m.clerk_id).slice(-8).toUpperCase()}</td>
+                    <td><span style={{ fontWeight: 700, textTransform: 'capitalize', color: TIER_COLOR[m.membership_tier] ?? 'inherit' }}>{m.membership_tier}</span></td>
+                    <td className="sp-cat" style={{ textTransform: 'capitalize' }}>{m.membership_duration ?? '—'}</td>
+                    <td className="sp-sku">{new Date(m.membership_expires_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                    <td style={{ textAlign: 'right' }}>
+                      <span style={{ fontWeight: 700, color: (m.days_remaining ?? 14) <= 7 ? '#ef4444' : '#f59e0b' }}>
+                        {m.days_remaining ?? '—'}d
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

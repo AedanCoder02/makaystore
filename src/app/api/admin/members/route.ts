@@ -16,6 +16,7 @@ export async function GET() {
       up.membership_tier,
       up.discount_override,
       up.wallet_points,
+      COALESCE(up.dollar_balance, 0) AS dollar_balance,
       up.created_at
     FROM user_profiles up
     ORDER BY up.created_at DESC

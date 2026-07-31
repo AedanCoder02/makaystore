@@ -8,7 +8,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const { id } = await params;
   const body = await req.json();
-  const { title, price, description, image, sku, stock, category, status, sizes, colors } = body;
+  const { title, price, description, image, sku, stock, category, status, sizes, colors, provider, markup_percent, markup_amount } = body;
 
   if (!title || price === undefined) {
     return NextResponse.json({ error: 'title and price required' }, { status: 400 });
@@ -26,7 +26,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       status      = ${status ?? 'active'},
       sizes       = ${sizes ?? []},
       colors      = ${JSON.stringify(colors ?? [])},
-      updated_at  = NOW()
+      provider        = ${provider ?? ''},
+      markup_percent  = ${markup_percent ?? false},
+      markup_amount   = ${Number(markup_amount ?? 0)},
+      updated_at      = NOW()
     WHERE id = ${id}
     RETURNING *
   `;

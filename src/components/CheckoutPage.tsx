@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCart } from '@/hooks/useCart';
 import ShippingForm from '@/components/ShippingForm';
-import ShippingMethodSelector, {
-  getShippingCost,
-} from '@/components/ShippingMethodSelector';
-import StripePaymentForm from '@/components/StripePaymentForm';
+import ShippingMethodSelector, { getShippingCost } from '@/components/ShippingMethodSelector';
+import PaymentStep, { type PaymentEntry } from '@/components/PaymentStep';
 import OrderSummaryCheckout from '@/components/OrderSummaryCheckout';
-// orders are persisted via /api/orders
+import StripeProvider from '@/components/StripeProvider';
 import '@/styles/checkout.css';
 
 interface FormData {
@@ -28,14 +26,8 @@ export default function CheckoutPage() {
   const t = useTranslations('checkout');
 
   const [formData, setFormData] = useState<FormData>({
-    name: '',
-    email: '',
-    address: '',
-    city: '',
-    zip: '',
-    country: '',
+    name: '', email: '', address: '', city: '', zip: '', country: '',
   });
-
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [step, setStep] = useState<'shipping' | 'payment'>('shipping');
   const [loading, setLoading] = useState(false);
@@ -57,15 +49,12 @@ export default function CheckoutPage() {
   }
 
   const handleFormChange = (field: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleShippingSubmit = () => {
-    setStep('payment');
-  };
-
-  const handlePaymentSuccess = async (paymentIntentId: string) => {
+  const handlePaymentSuccess = async (paymentMethods: PaymentEntry[]) => {
     setLoading(true);
+    setError('');
     try {
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -77,34 +66,30 @@ export default function CheckoutPage() {
           total: finalTotal,
           shipping_address: formData,
           shipping_method: shippingMethod,
-          payment_id: paymentIntentId,
+          payment_id: paymentMethods[0]?.receipt_url ?? '',
           customer_email: formData.email,
+          payment_methods: paymentMethods,
         }),
       });
       const order = await res.json();
       clearCart();
       router.push(`/order-confirmation/${order.id}`);
     } catch {
-      setError('Order could not be saved. Please contact support.');
+      setError('No se pudo guardar el pedido. Contacta soporte.');
       setLoading(false);
     }
-  };
-
-  const handlePaymentError = (paymentError: string) => {
-    setError(paymentError);
   };
 
   return (
     <div className="checkout-page">
       <div className="checkout-container">
-        {/* Left column: Forms */}
         <div className="checkout-forms">
           {step === 'shipping' && (
             <>
               <ShippingForm
                 formData={formData}
                 onChange={handleFormChange}
-                onSubmit={handleShippingSubmit}
+                onSubmit={() => setStep('payment')}
                 loading={loading}
               />
               <ShippingMethodSelector
@@ -115,25 +100,18 @@ export default function CheckoutPage() {
           )}
 
           {step === 'payment' && (
-            <>
-              <button
-                className="btn-back"
-                onClick={() => setStep('shipping')}
-              >
-                &larr; {t('backToShipping')}
-              </button>
-              <StripePaymentForm
-                amount={finalTotal}
+            <StripeProvider>
+              <PaymentStep
+                total={finalTotal}
                 onSuccess={handlePaymentSuccess}
-                onError={handlePaymentError}
+                onBack={() => setStep('shipping')}
                 loading={loading}
+                error={error}
               />
-              {error && <div className="error-message">{error}</div>}
-            </>
+            </StripeProvider>
           )}
         </div>
 
-        {/* Right column: Summary */}
         <aside className="checkout-summary">
           <OrderSummaryCheckout
             items={items}

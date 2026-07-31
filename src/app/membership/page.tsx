@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
-import { Calendar, MapPin, Users, Ticket, Star, Crown, Award, Shield, Lock, Copy, Check } from 'lucide-react';
+import { Calendar, MapPin, Users, Ticket, Star, Crown, Award, Shield, Lock, Copy, Check, Percent, Umbrella, Trophy, ChevronRight } from 'lucide-react';
+import MembershipLeadForm from '@/components/membership/MembershipLeadForm';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,6 +20,7 @@ interface Ally {
   discount_percent: number; discount_code: string | null;
   min_tier: string; has_access: boolean;
 }
+type BenefitTier = 'bronze' | 'silver' | 'gold';
 
 /* ── Constants ───────────────────────────────────────────────── */
 const TIER_COLOR: Record<string, string> = {
@@ -28,12 +30,44 @@ const AVATAR_COLORS = ['#CD7F32', '#A8A9AD', '#D4AF37', '#D4A574', '#A89080', '#
 const TIER_KEY: Record<string, string> = {
   bronze: 'bronzePlus', silver: 'silverPlus', gold: 'goldPlus', vip: 'vip',
 };
-const TIERS = [
-  { key: 'free',   icon: Shield, color: '#A89080', spendKey: 'allMembers'  as const, labelKey: 'tierExplorer' as const, perksKey: 'perksExplorer' as const },
-  { key: 'bronze', icon: Award,  color: '#CD7F32', spendKey: 'fromSpend'   as const, spend: 100,  labelKey: 'tierBronze'   as const, perksKey: 'perksBronze'   as const },
-  { key: 'silver', icon: Star,   color: '#A8A9AD', spendKey: 'fromSpend'   as const, spend: 300,  labelKey: 'tierSilver'   as const, perksKey: 'perksSilver'   as const },
-  { key: 'gold',   icon: Star,   color: '#D4AF37', spendKey: 'fromSpend'   as const, spend: 700,  labelKey: 'tierGold'     as const, perksKey: 'perksGold'     as const },
-  { key: 'vip',    icon: Crown,  color: '#D4A574', spendKey: 'fromSpend'   as const, spend: 1500, labelKey: 'tierVip'      as const, perksKey: 'perksVip'      as const },
+
+const BENEFIT_TIERS: Array<{
+  key: BenefitTier;
+  label: string;
+  color: string;
+  price: string;
+  benefits: Array<{ icon: typeof Percent; text: string }>;
+}> = [
+  {
+    key: 'bronze',
+    label: 'Bronce',
+    color: '#CD7F32',
+    price: 'Desde $100',
+    benefits: [
+      { icon: Percent, text: '10% de descuento en todos los productos' },
+    ],
+  },
+  {
+    key: 'silver',
+    label: 'Plata',
+    color: '#A8A9AD',
+    price: 'Desde $300',
+    benefits: [
+      { icon: Percent,  text: '10% de descuento en todos los productos' },
+      { icon: Umbrella, text: 'Toldo gratis en temporada baja' },
+    ],
+  },
+  {
+    key: 'gold',
+    label: 'Oro',
+    color: '#D4AF37',
+    price: 'Desde $700',
+    benefits: [
+      { icon: Percent,  text: '10% de descuento en todos los productos' },
+      { icon: Umbrella, text: 'Toldo gratis en temporada baja' },
+      { icon: Trophy,   text: 'Cancha de Beach Tennis gratis en Makay La Marina' },
+    ],
+  },
 ];
 
 /* ── Ally card ───────────────────────────────────────────────── */
@@ -119,6 +153,7 @@ export default function MembershipPage() {
   const [allies, setAllies] = useState<Ally[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [loadingAllies, setLoadingAllies] = useState(true);
+  const [leadTier, setLeadTier] = useState<BenefitTier | null>(null);
 
   useEffect(() => {
     fetch('/api/events')
@@ -137,7 +172,7 @@ export default function MembershipPage() {
 
   return (
     <main>
-      {/* ── Hero ── */}
+      {/* ── 1. Hero — Membresías y Experiencias ── */}
       <section style={{
         position: 'relative',
         background: 'linear-gradient(160deg, #1e1611 0%, #2c1f14 50%, #1a1208 100%)',
@@ -157,13 +192,72 @@ export default function MembershipPage() {
           <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: 'clamp(0.9rem, 2vw, 1.1rem)', color: 'rgba(255,255,255,0.65)', lineHeight: 1.7, marginBottom: '2rem' }}>
             {t('heroParagraph')}
           </p>
-          <Link href="#events" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.875rem 2rem', background: 'var(--makay-peachy-rose)', color: '#fff', borderRadius: '100px', fontFamily: 'var(--font-montserrat)', fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none' }}>
-            <Ticket size={16} /> {t('browseEvents')}
-          </Link>
+          <button
+            onClick={() => { document.getElementById('benefits')?.scrollIntoView({ behavior: 'smooth' }); }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.875rem 2rem', background: 'var(--makay-peachy-rose)', color: '#fff', borderRadius: '100px', fontFamily: 'var(--font-montserrat)', fontWeight: 600, fontSize: '0.9rem', border: 'none', cursor: 'pointer' }}
+          >
+            Ver membresías <ChevronRight size={16} />
+          </button>
         </div>
       </section>
 
-      {/* ── Events ── */}
+      {/* ── 2. Desbloquea tus Beneficios ── */}
+      <section id="benefits" style={{ background: 'var(--makay-premium-cream)', padding: 'clamp(4rem, 8vw, 6rem) 1.25rem' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--makay-peachy-rose)', marginBottom: '0.75rem' }}>
+              Membresías
+            </p>
+            <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: '0 0 0.75rem' }}>
+              Desbloquea tus Beneficios
+            </h2>
+            <p style={{ fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)', fontSize: '0.95rem', maxWidth: 540, margin: '0 auto' }}>
+              Elige el nivel que mejor se adapta a ti y empieza a disfrutar del club.
+            </p>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem', justifyContent: 'center' }}>
+            {BENEFIT_TIERS.map(tier => (
+              <button
+                key={tier.key}
+                onClick={() => setLeadTier(tier.key)}
+                style={{ background: '#fff', border: `2px solid ${tier.color}30`, borderRadius: 20, padding: '2rem', textAlign: 'left', cursor: 'pointer', transition: 'box-shadow 0.2s, transform 0.2s, border-color 0.2s', position: 'relative', overflow: 'hidden' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 12px 40px ${tier.color}25`; (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLButtonElement).style.borderColor = `${tier.color}60`; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none'; (e.currentTarget as HTMLButtonElement).style.transform = 'none'; (e.currentTarget as HTMLButtonElement).style.borderColor = `${tier.color}30`; }}
+              >
+                {/* Tier glow blob */}
+                <div style={{ position: 'absolute', top: '-30%', right: '-15%', width: '60%', height: '60%', borderRadius: '50%', background: `radial-gradient(circle, ${tier.color}18 0%, transparent 70%)`, pointerEvents: 'none' }} />
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', position: 'relative' }}>
+                  <div>
+                    <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: tier.color, margin: '0 0 0.2rem' }}>Membresía</p>
+                    <h3 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: 0 }}>{tier.label}</h3>
+                  </div>
+                  <div style={{ background: `${tier.color}15`, borderRadius: 10, padding: '0.4rem 0.75rem', textAlign: 'center' }}>
+                    <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, color: tier.color, margin: 0, whiteSpace: 'nowrap' }}>{tier.price}</p>
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem', position: 'relative' }}>
+                  {tier.benefits.map(({ icon: Icon, text }) => (
+                    <div key={text} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
+                      <Icon size={14} color={tier.color} style={{ flexShrink: 0, marginTop: 2 }} />
+                      <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.83rem', color: 'var(--makay-dark-navy)', lineHeight: 1.4 }}>{text}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', position: 'relative' }}>
+                  <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', fontWeight: 700, color: tier.color }}>Ver opciones</span>
+                  <ChevronRight size={14} color={tier.color} />
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 3. Próximos Eventos ── */}
       <section id="events" style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(3rem, 6vw, 5rem) 1.25rem' }}>
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
           <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: '0 0 0.75rem' }}>
@@ -231,7 +325,7 @@ export default function MembershipPage() {
         )}
       </section>
 
-      {/* ── Partner Benefits ── */}
+      {/* ── 4. Nuestros Aliados ── */}
       <section id="partners" style={{ background: 'var(--makay-warm-white, #fff8f0)', padding: 'clamp(3rem, 6vw, 5rem) 1.25rem' }}>
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
@@ -250,7 +344,6 @@ export default function MembershipPage() {
             </div>
           )}
 
-          {/* Tier legend */}
           <div style={{ marginTop: '3rem', padding: '1.5rem', background: '#fff', border: '1px solid #f0ebe4', borderRadius: 14, display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', margin: '0 auto 0 0', alignSelf: 'center' }}>{ta('accessByTier')}</p>
             {Object.entries(TIER_KEY).map(([tier, key]) => (
@@ -263,50 +356,13 @@ export default function MembershipPage() {
         </div>
       </section>
 
-      {/* ── Membership tiers ── */}
-      <section style={{ background: 'linear-gradient(160deg, #1e1611, #2c1f14)', padding: 'clamp(4rem, 8vw, 7rem) 1.25rem', color: '#fff' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: 'clamp(2.5rem, 5vw, 4rem)' }}>
-            <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--makay-peachy-rose)', marginBottom: '0.875rem' }}>{t('tierTitle')}</p>
-            <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 700, margin: '0 0 1rem' }}>{t('tierHeading')}</h2>
-            <p style={{ fontFamily: 'var(--font-montserrat)', color: 'rgba(255,255,255,0.55)', fontSize: '0.95rem', maxWidth: 520, margin: '0 auto' }}>{t('tierSubtitle')}</p>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '1rem' }}>
-            {TIERS.map(tier => {
-              const Icon = tier.icon;
-              const isVip = tier.key === 'vip';
-              const perks = (t.raw(tier.perksKey) as string).split('|');
-              return (
-                <div key={tier.key} style={{ background: isVip ? 'linear-gradient(135deg, rgba(212,165,116,0.2), rgba(212,132,87,0.1))' : 'rgba(255,255,255,0.04)', border: `1px solid ${isVip ? tier.color + '40' : 'rgba(255,255,255,0.08)'}`, borderRadius: '16px', padding: '1.5rem', position: 'relative', overflow: 'hidden' }}>
-                  {isVip && <div style={{ position: 'absolute', top: 0, right: 0, background: tier.color, color: '#fff', fontSize: '0.6rem', fontWeight: 700, letterSpacing: '0.1em', padding: '0.2rem 0.6rem', borderRadius: '0 16px 0 8px', fontFamily: 'var(--font-montserrat)' }}>TOP</div>}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.875rem' }}>
-                    <Icon size={18} style={{ color: tier.color }} />
-                    <span style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1rem', fontWeight: 700, color: tier.color }}>{t(tier.labelKey)}</span>
-                  </div>
-                  <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', color: 'rgba(255,255,255,0.4)', marginBottom: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    {tier.key === 'free' ? t('allMembers') : t('fromSpend', { amount: tier.spend ?? 0 })}
-                  </p>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
-                    {perks.map(perk => (
-                      <li key={perk} style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: 'rgba(255,255,255,0.65)', display: 'flex', alignItems: 'flex-start', gap: '0.4rem' }}>
-                        <span style={{ color: tier.color, fontWeight: 700, flexShrink: 0 }}>✓</span> {perk}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              );
-            })}
-          </div>
-
-          <div style={{ textAlign: 'center', marginTop: '3rem' }}>
-            <Link href="/sign-up" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '1rem 2.5rem', background: 'var(--makay-peachy-rose)', color: '#fff', borderRadius: '100px', fontFamily: 'var(--font-montserrat)', fontWeight: 700, fontSize: '0.9rem', textDecoration: 'none' }}>
-              {t('joinBtn')}
-            </Link>
-            <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.35)', marginTop: '0.875rem' }}>{t('joinHint')}</p>
-          </div>
-        </div>
-      </section>
+      {/* Lead form modal */}
+      {leadTier && (
+        <MembershipLeadForm
+          tier={leadTier}
+          onClose={() => setLeadTier(null)}
+        />
+      )}
     </main>
   );
 }

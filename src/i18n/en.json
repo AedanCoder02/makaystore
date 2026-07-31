@@ -944,10 +944,12 @@
   "profile": {
     "wallet": "Wallet",
     "pointsBalance": "Points Balance",
+    "makayBalance": "Makay Balance",
     "makayPoints": "Makay Points",
     "recentActivity": "Recent Activity",
     "pointsEarned": "Points earned",
-    "pointsRedeemed": "Points redeemed"
+    "pointsRedeemed": "Points redeemed",
+    "earnPtsPerDollar": "Earn {pts} pts per $1 spent"
   },
   "homepage": {
     "events": {
