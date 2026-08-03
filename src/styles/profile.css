@@ -311,12 +311,12 @@
 
 .makay-card-avatar {
   width: 58px;
-  height: 58px;
-  border-radius: 50%;
+  height: 68px;
+  border-radius: 10px;
   object-fit: cover;
   border: 2px solid rgba(212, 165, 116, 0.5);
   flex-shrink: 0;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
 }
 
 .makay-card-member-info { display: flex; flex-direction: column; gap: 0.2rem; }

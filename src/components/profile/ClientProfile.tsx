@@ -11,7 +11,7 @@ import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import { animate } from 'animejs';
 import {
   CardLayout, CardColors,
-  DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS,
+  DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS, mergeLayout,
 } from '@/components/CardDesigner';
 import '@/styles/profile.css';
 
@@ -150,7 +150,7 @@ export default function ClientProfile() {
         expiry_warning: membershipStatus.expiry_warning ?? false,
       });
       if (themeData.card_layout) {
-        try { setCardLayout(JSON.parse(themeData.card_layout)); } catch {}
+        try { setCardLayout(mergeLayout(JSON.parse(themeData.card_layout))); } catch {}
       }
       if (themeData.card_colors) {
         try { setCardColors(JSON.parse(themeData.card_colors)); } catch {}
@@ -435,10 +435,31 @@ export default function ClientProfile() {
             {profileUrl && (
               <CardEl id="qr">
                 <div className="makay-card-qr">
-                  <QRCode value={profileUrl} size={68} bgColor="transparent" fgColor="#1e1a16" />
+                  <QRCode value={profileUrl} size={68} bgColor="transparent" fgColor={cardColors.text} />
                 </div>
               </CardEl>
             )}
+
+            {/* Custom text elements */}
+            {(['custom1', 'custom2', 'custom3'] as const).map(key => {
+              const el = cardLayout[key];
+              if (!el?.visible || !el?.text) return null;
+              return (
+                <CardEl key={key} id={key}>
+                  <p style={{
+                    fontFamily: 'var(--font-montserrat)',
+                    fontSize: '0.6rem',
+                    fontWeight: 600,
+                    letterSpacing: '0.06em',
+                    color: cardColors.text,
+                    margin: 0,
+                    whiteSpace: 'nowrap',
+                  }}>
+                    {el.text}
+                  </p>
+                </CardEl>
+              );
+            })}
 
             {/* ── Wallet overlay (inside card, middle-bottom) ── */}
             <div style={{

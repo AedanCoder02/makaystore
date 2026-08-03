@@ -10,7 +10,7 @@ import ImageUpload from '@/components/seller/ImageUpload';
 import MediaUpload from '@/components/seller/MediaUpload';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
-import { CardCanvas, type CardLayout, type CardColors, DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS } from '@/components/CardDesigner';
+import { CardCanvas, type CardLayout, type CardColors, DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS, CARD_TEMPLATES, ELEMENT_LABELS, mergeLayout } from '@/components/CardDesigner';
 
 // ── Brand presets ──────────────────────────────────────────────────────────
 const PRESETS: Record<string, Record<string, string>> = {
@@ -52,6 +52,7 @@ const FONT_OPTIONS = [
   { id: 'montserrat', label: 'Montserrat',        value: "'Montserrat', sans-serif" },
   { id: 'georgia',    label: 'Georgia',           value: 'Georgia, serif' },
   { id: 'system',     label: 'System UI',         value: 'system-ui, sans-serif' },
+  { id: 'custom',     label: '+ Google Font personalizada', value: '' },
 ];
 const SCALE_OPTIONS = [
   {id:'xs',label:'XS',value:'0.82'},{id:'sm',label:'SM',value:'0.92'},{id:'md',label:'MD',value:'1.0'},
@@ -126,10 +127,8 @@ function makeDefaultPage(pageId?: string): PageState {
   };
 }
 
-const CARD_ELEMENT_LABELS: Record<keyof CardLayout, string> = {
-  logo:'Logo', tier:'Tier Badge', avatar:'Avatar', name:'Name', tagline:'Tagline',
-  divider:'Divider', id:'Member ID', since:'Since Year', qr:'QR Code',
-};
+// Imported from CardDesigner: ELEMENT_LABELS covers all keys including custom1/2/3
+const CARD_ELEMENT_LABELS = ELEMENT_LABELS;
 
 type StudioSection = 'pages' | 'card';
 type PageSubTab = 'colors' | 'typography' | 'content';
@@ -180,7 +179,7 @@ export default function StudioEditor() {
       Object.keys(COLOR_LABELS).forEach(k => { if (data[k]) loaded[k] = data[k]; });
       if (Object.keys(loaded).length) setColors(c => ({ ...c, ...loaded }));
       if (data['--scroll-colors']) { try { setScrollColors(JSON.parse(data['--scroll-colors'])); } catch {} }
-      if (data['card_layout']) { try { setCardLayout(JSON.parse(data['card_layout'])); } catch {} }
+      if (data['card_layout']) { try { setCardLayout(mergeLayout(JSON.parse(data['card_layout']))); } catch {} }
       if (data['card_colors']) { try { setCardColors(JSON.parse(data['card_colors'])); } catch {} }
       setPageStates(prev => {
         const next = { ...prev };
@@ -188,7 +187,7 @@ export default function StudioEditor() {
           const ps = makeDefaultPage(pid);
           Object.entries(data).forEach(([k, v]) => {
             const cm = k.match(new RegExp(`^page:${pid}:colors:(.+)$`));    if (cm) { ps.colors[cm[1]] = v; return; }
-            const tm = k.match(new RegExp(`^page:${pid}:typography:(.+)$`)); if (tm) { ps.typography[tm[1]] = v; return; }
+            const tm = k.match(new RegExp(`^page:${pid}:typography:(.+)$`)); if (tm) { ps.typography[tm[1]] = v; return; }  // includes headingFontCustomName
             const nm = k.match(new RegExp(`^page:${pid}:content:(.+)$`));   if (nm) { ps.content[nm[1]] = v; }
           });
           next[pid] = ps;
@@ -280,10 +279,11 @@ export default function StudioEditor() {
     const ps = pageStates[activePage] ?? makeDefaultPage();
     const patch: Record<string,string> = {};
     PAGE_COLOR_CONTROLS.forEach(c => { patch[`page:${activePage}:colors:${c.key}`] = ps.colors[c.key] ?? c.default; });
-    patch[`page:${activePage}:typography:headingFont`]   = ps.typography.headingFont;
-    patch[`page:${activePage}:typography:headingScale`]  = ps.typography.headingScale;
-    patch[`page:${activePage}:typography:bodySize`]      = ps.typography.bodySize;
-    patch[`page:${activePage}:typography:letterSpacing`] = ps.typography.letterSpacing;
+    patch[`page:${activePage}:typography:headingFont`]           = ps.typography.headingFont;
+    patch[`page:${activePage}:typography:headingFontCustomName`] = ps.typography.headingFontCustomName ?? '';
+    patch[`page:${activePage}:typography:headingScale`]          = ps.typography.headingScale;
+    patch[`page:${activePage}:typography:bodySize`]              = ps.typography.bodySize;
+    patch[`page:${activePage}:typography:letterSpacing`]         = ps.typography.letterSpacing;
     Object.entries(ps.content).forEach(([k,v]) => { if (v) patch[`page:${activePage}:content:${k}`] = v; });
     await patchSettings(patch);
     setSaveState(key, 'saved');
@@ -295,10 +295,11 @@ export default function StudioEditor() {
     PAGES.filter(p=>p.id!=='global').forEach(({ id: pid }) => {
       const ps = pageStates[pid] ?? makeDefaultPage();
       PAGE_COLOR_CONTROLS.forEach(c => { patch[`page:${pid}:colors:${c.key}`] = ps.colors[c.key] ?? c.default; });
-      patch[`page:${pid}:typography:headingFont`]   = ps.typography.headingFont;
-      patch[`page:${pid}:typography:headingScale`]  = ps.typography.headingScale;
-      patch[`page:${pid}:typography:bodySize`]      = ps.typography.bodySize;
-      patch[`page:${pid}:typography:letterSpacing`] = ps.typography.letterSpacing;
+      patch[`page:${pid}:typography:headingFont`]           = ps.typography.headingFont;
+      patch[`page:${pid}:typography:headingFontCustomName`] = ps.typography.headingFontCustomName ?? '';
+      patch[`page:${pid}:typography:headingScale`]          = ps.typography.headingScale;
+      patch[`page:${pid}:typography:bodySize`]              = ps.typography.bodySize;
+      patch[`page:${pid}:typography:letterSpacing`]         = ps.typography.letterSpacing;
       Object.entries(ps.content).forEach(([k,v]) => { if (v) patch[`page:${pid}:content:${k}`] = v; });
     });
     const existing = await getExistingSettings();
@@ -535,12 +536,41 @@ export default function StudioEditor() {
                     {pageSubTab === 'typography' && (
                       <div className="studio-typography-list">
                         <div className="studio-type-group">
-                          <label className="studio-color-label">Heading Font</label>
+                          <label className="studio-color-label">Tipografía de encabezado</label>
                           <div className="studio-font-options">
                             {FONT_OPTIONS.map(f => (
-                              <button key={f.id} className={`studio-font-btn${current.typography.headingFont===f.id?' active':''}`} style={{ fontFamily: f.value }} onClick={() => updatePageTypography('headingFont', f.id)}>{f.label}</button>
+                              <button key={f.id} className={`studio-font-btn${current.typography.headingFont===f.id?' active':''}`} style={{ fontFamily: f.value || undefined }} onClick={() => updatePageTypography('headingFont', f.id)}>{f.label}</button>
                             ))}
                           </div>
+                          {current.typography.headingFont === 'custom' && (
+                            <div style={{ marginTop: '0.5rem' }}>
+                              <input
+                                type="text"
+                                className="studio-input"
+                                style={{ margin: 0 }}
+                                placeholder="Nombre de Google Font, ej. Lato"
+                                value={current.typography.headingFontCustomName ?? ''}
+                                onChange={e => {
+                                  updatePageTypography('headingFontCustomName', e.target.value);
+                                  // Live-load the font for preview
+                                  const name = e.target.value.trim();
+                                  if (name.length > 2) {
+                                    const linkId = `gf-preview-${name.replace(/\s+/g,'-')}`;
+                                    if (!document.getElementById(linkId)) {
+                                      const link = document.createElement('link');
+                                      link.id = linkId; link.rel = 'stylesheet';
+                                      link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(name)}:wght@400;700&display=swap`;
+                                      document.head.appendChild(link);
+                                    }
+                                    document.documentElement.style.setProperty('--mkt-heading-font', `'${name}', sans-serif`);
+                                  }
+                                }}
+                              />
+                              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', color: 'var(--makay-mauve)', margin: '0.35rem 0 0' }}>
+                                Ingresa el nombre exacto de Google Fonts
+                              </p>
+                            </div>
+                          )}
                         </div>
                         <div className="studio-type-group">
                           <label className="studio-color-label">Heading Size</label>
@@ -639,59 +669,99 @@ export default function StudioEditor() {
             <div className="studio-controls" data-lenis-prevent>
               <div className="studio-panel">
                 <div className="studio-panel-header">
-                  <span>Card Elements</span>
+                  <span>Tarjeta de Membresía</span>
                   <div style={{ display:'flex', gap:'0.4rem' }}>
-                    <button className="studio-reset-btn" style={{ margin:0 }} onClick={() => setCardLayout(DEFAULT_CARD_LAYOUT)}>
+                    <button className="studio-reset-btn" style={{ margin:0 }} onClick={() => { setCardLayout(DEFAULT_CARD_LAYOUT); setCardColors(DEFAULT_CARD_COLORS); }}>
                       <RotateCcw size={12} /> Reset
                     </button>
                     <SaveBtn id="card" onClick={saveCard} />
                   </div>
                 </div>
 
-                <p className="studio-hint" style={{ marginBottom:'0.75rem' }}>Click an element in the preview to select. Drag to reposition.</p>
+                {/* Template selector */}
+                <div style={{ padding: '0.75rem', borderBottom: '1px solid var(--makay-sand-cream)' }}>
+                  <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', margin: '0 0 0.5rem' }}>Plantilla</p>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    {Object.entries(CARD_TEMPLATES).map(([key, tmpl]) => (
+                      <button
+                        key={key}
+                        onClick={() => { setCardLayout(tmpl.layout); setCardColors(tmpl.colors); }}
+                        style={{ flex: 1, padding: '0.5rem 0.4rem', border: '1.5px solid var(--makay-sand-cream)', borderRadius: 8, background: '#fff', cursor: 'pointer', fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 600, color: 'var(--makay-dark-navy)', transition: 'border-color 0.15s' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--makay-peachy-rose)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.borderColor = 'var(--makay-sand-cream)'; }}
+                      >
+                        <div style={{ width: '100%', height: 20, borderRadius: 4, marginBottom: 4, background: `linear-gradient(135deg, ${tmpl.colors.bg_from}, ${tmpl.colors.bg_to})`, border: '1px solid rgba(0,0,0,0.08)' }} />
+                        {tmpl.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <p className="studio-hint" style={{ margin: '0.625rem 0.75rem' }}>Haz clic para seleccionar · Arrastra para mover · Usa el control de tamaño para escalar.</p>
 
                 {/* Element list */}
                 <div className="cd-element-list" style={{ marginBottom:'1.25rem' }}>
-                  {(Object.keys(CARD_ELEMENT_LABELS) as Array<keyof CardLayout>).map(key => (
-                    <div key={key}>
-                      <div
-                        className={`cd-element-row${activeCardEl === key ? ' active' : ''}`}
-                        onClick={() => setActiveCardEl(activeCardEl === key ? null : key)}
-                      >
-                        <span className="cd-element-name">{CARD_ELEMENT_LABELS[key]}</span>
-                        <div className="cd-element-pos">
-                          {Math.round(cardLayout[key].x)}%, {Math.round(cardLayout[key].y)}%
-                        </div>
-                        <button
-                          className="cd-vis-btn"
-                          onClick={e => { e.stopPropagation(); setCardLayout(l => ({ ...l, [key]: { ...l[key], visible: !l[key].visible } })); }}
-                          title={cardLayout[key].visible ? 'Hide' : 'Show'}
+                  {(Object.keys(CARD_ELEMENT_LABELS) as Array<keyof CardLayout>).map(key => {
+                    const isCustom = key.startsWith('custom');
+                    const pos = cardLayout[key];
+                    if (!pos) return null;
+                    return (
+                      <div key={key}>
+                        <div
+                          className={`cd-element-row${activeCardEl === key ? ' active' : ''}`}
+                          onClick={() => setActiveCardEl(activeCardEl === key ? null : key)}
                         >
-                          {cardLayout[key].visible ? <Eye size={14} /> : <EyeOff size={14} />}
-                        </button>
-                      </div>
-                      {/* Scale slider — shown when element is selected */}
-                      {activeCardEl === key && (
-                        <div className="cd-scale-row">
-                          <span className="cd-scale-label">Size</span>
-                          <input
-                            type="range" min={0.4} max={2.2} step={0.05}
-                            value={cardLayout[key].scale ?? 1}
-                            onChange={e => setCardLayout(l => ({ ...l, [key]: { ...l[key], scale: Number(e.target.value) } }))}
-                            className="cd-scale-slider"
-                          />
-                          <span className="cd-scale-val">{((cardLayout[key].scale ?? 1) * 100).toFixed(0)}%</span>
+                          <span className="cd-element-name">{CARD_ELEMENT_LABELS[key]}</span>
+                          <div className="cd-element-pos">
+                            {Math.round(pos.x)}%, {Math.round(pos.y)}%
+                          </div>
                           <button
-                            className="cd-scale-reset"
-                            onClick={() => setCardLayout(l => ({ ...l, [key]: { ...l[key], scale: 1 } }))}
-                            title="Reset size"
+                            className="cd-vis-btn"
+                            onClick={e => { e.stopPropagation(); setCardLayout(l => ({ ...l, [key]: { ...l[key], visible: !l[key].visible } })); }}
+                            title={pos.visible ? 'Ocultar' : 'Mostrar'}
                           >
-                            <RotateCcw size={10} />
+                            {pos.visible ? <Eye size={14} /> : <EyeOff size={14} />}
                           </button>
                         </div>
-                      )}
-                    </div>
-                  ))}
+
+                        {/* Expanded controls when selected */}
+                        {activeCardEl === key && (
+                          <>
+                            <div className="cd-scale-row">
+                              <span className="cd-scale-label">Tamaño</span>
+                              <input
+                                type="range" min={0.4} max={2.8} step={0.05}
+                                value={pos.scale ?? 1}
+                                onChange={e => setCardLayout(l => ({ ...l, [key]: { ...l[key], scale: Number(e.target.value) } }))}
+                                className="cd-scale-slider"
+                              />
+                              <span className="cd-scale-val">{((pos.scale ?? 1) * 100).toFixed(0)}%</span>
+                              <button
+                                className="cd-scale-reset"
+                                onClick={() => setCardLayout(l => ({ ...l, [key]: { ...l[key], scale: 1 } }))}
+                                title="Restablecer tamaño"
+                              >
+                                <RotateCcw size={10} />
+                              </button>
+                            </div>
+                            {/* Custom text input */}
+                            {isCustom && (
+                              <div style={{ padding: '0.4rem 0.75rem 0.65rem 1.25rem', background: 'rgba(212,165,116,0.04)', borderBottom: '1px solid var(--makay-sand-cream)' }}>
+                                <input
+                                  type="text"
+                                  className="studio-input"
+                                  style={{ margin: 0, fontSize: '0.78rem' }}
+                                  placeholder="Escribe el texto aquí…"
+                                  value={pos.text ?? ''}
+                                  onChange={e => setCardLayout(l => ({ ...l, [key]: { ...l[key], text: e.target.value } }))}
+                                />
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 {/* Card colors */}

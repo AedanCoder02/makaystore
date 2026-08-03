@@ -52,6 +52,23 @@ const LETTER_SPACING_VALUES: Record<string, string> = {
 export default function MarketingApplier() {
   const pathname = usePathname();
 
+  // Apply global brand colors once on mount — fixes palette changes not reflecting on site
+  useEffect(() => {
+    fetch('/api/theme')
+      .then(r => r.json())
+      .then((settings: Record<string, string>) => {
+        const globalParts: string[] = [];
+        Object.entries(settings).forEach(([k, v]) => {
+          if (k.startsWith('--makay-') && !k.includes(':')) globalParts.push(`${k}:${v}`);
+        });
+        if (!globalParts.length) return;
+        let el = document.getElementById('mkt-global-vars') as HTMLStyleElement | null;
+        if (!el) { el = document.createElement('style'); el.id = 'mkt-global-vars'; document.head.appendChild(el); }
+        el.textContent = `:root{${globalParts.join(';')}}`;
+      })
+      .catch(() => {});
+  }, []);
+
   useEffect(() => {
     const pageId = resolvePageId(pathname);
 
@@ -83,7 +100,24 @@ export default function MarketingApplier() {
             const cssVar = TYPO_VAR_MAP[tKey];
             if (!cssVar) return;
             let cssValue = value;
-            if (tKey === 'headingFont')   cssValue = FONT_VALUES[value]   ?? value;
+            if (tKey === 'headingFont') {
+              if (value === 'custom') {
+                // Custom Google Font — look for the font name in settings
+                const customName = settings[key.replace('headingFont', 'headingFontCustomName')];
+                if (customName) {
+                  const linkId = `gf-${customName.replace(/\s+/g, '-')}`;
+                  if (!document.getElementById(linkId)) {
+                    const link = document.createElement('link');
+                    link.id = linkId; link.rel = 'stylesheet';
+                    link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(customName)}:wght@400;600;700&display=swap`;
+                    document.head.appendChild(link);
+                  }
+                  cssValue = `'${customName}', sans-serif`;
+                } else { cssValue = FONT_VALUES['playfair']; }
+              } else {
+                cssValue = FONT_VALUES[value] ?? value;
+              }
+            }
             if (tKey === 'headingScale')  cssValue = SCALE_VALUES[value]  ?? value;
             if (tKey === 'bodySize')      cssValue = BODY_SIZE_VALUES[value]   ?? value;
             if (tKey === 'letterSpacing') cssValue = LETTER_SPACING_VALUES[value] ?? value;
