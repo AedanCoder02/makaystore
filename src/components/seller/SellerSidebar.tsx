@@ -5,12 +5,13 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, Crown, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, Crown, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
 
 export default function SellerSidebar() {
   const path = usePathname();
   const t = useTranslations('seller');
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useUser();
   const permissions = (user?.unsafeMetadata?.permissions as string[] | undefined);
 
@@ -19,15 +20,22 @@ export default function SellerSidebar() {
     if (saved === 'true') setCollapsed(true);
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => { setMobileOpen(false); }, [path]);
+
+  // Prevent body scroll when mobile menu open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
   const toggle = () => {
     const next = !collapsed;
     setCollapsed(next);
     localStorage.setItem('seller-sidebar-collapsed', String(next));
-    // Propagate to layout for margin transition
     document.querySelector('.seller-layout')?.classList.toggle('sidebar-collapsed', next);
   };
 
-  // Sync layout class on mount
   useEffect(() => {
     document.querySelector('.seller-layout')?.classList.toggle('sidebar-collapsed', collapsed);
   }, [collapsed]);
@@ -41,41 +49,62 @@ export default function SellerSidebar() {
     { href: '/seller/products/create-3d', label: t('nav.models3d'),  icon: Box,             key: 'models3d' },
     { href: '/seller/rotation',           label: t('nav.rotation'),  icon: RefreshCw,       key: 'rotation' },
     { href: '/seller/studio',             label: t('nav.studio'),    icon: Wand2,           key: 'studio' },
-    { href: '/seller/events',             label: t('nav.events'),      icon: Calendar,        key: 'events' },
-    { href: '/seller/memberships',        label: t('nav.memberships'), icon: Crown,           key: 'memberships' },
+    { href: '/seller/events',             label: t('nav.events'),    icon: Calendar,        key: 'events' },
+    { href: '/seller/memberships',        label: t('nav.memberships'), icon: Crown,         key: 'memberships' },
   ];
-  // If permissions are set, filter to allowed sections; dashboard is always visible
   const NAV = permissions
     ? ALL_NAV.filter(n => n.key === null || permissions.includes(n.key))
     : ALL_NAV;
+
   return (
-    <aside className={`seller-sidebar${collapsed ? ' sidebar-collapsed' : ''}`}>
-      <div className="seller-sidebar-brand">
-        {!collapsed && <span className="seller-sidebar-role">{t('role')}</span>}
-        {!collapsed && <span className="seller-sidebar-sub">{t('storeName')}</span>}
-      </div>
-      <nav className="seller-sidebar-nav">
-        {NAV.map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className={`seller-nav-item${path.startsWith(href) ? ' active' : ''}`}
-            title={collapsed ? label : undefined}
-          >
-            <Icon size={18} />
-            {!collapsed && <span className="seller-nav-label">{label}</span>}
-          </Link>
-        ))}
-      </nav>
-      {!collapsed && (
-        <Link href="/" className="seller-back-link">
-          <span className="seller-back-link-label">{t('backToStore')}</span>
-        </Link>
-      )}
-      <button className="sidebar-toggle" onClick={toggle} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-        {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
-        {!collapsed && <span>Collapse</span>}
+    <>
+      {/* Mobile hamburger — fixed, always visible on mobile */}
+      <button
+        className="sidebar-ham-btn sidebar-ham-btn--seller"
+        onClick={() => setMobileOpen(true)}
+        aria-label="Abrir menú"
+      >
+        <Menu size={20} />
       </button>
-    </aside>
+
+      {/* Overlay backdrop */}
+      {mobileOpen && (
+        <div className="sidebar-mobile-overlay" onClick={() => setMobileOpen(false)} />
+      )}
+
+      <aside className={`seller-sidebar${collapsed ? ' sidebar-collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
+        {/* Mobile close button */}
+        <button className="sidebar-close-mobile" onClick={() => setMobileOpen(false)} aria-label="Cerrar menú">
+          <X size={18} />
+        </button>
+
+        <div className="seller-sidebar-brand">
+          {!collapsed && <span className="seller-sidebar-role">{t('role')}</span>}
+          {!collapsed && <span className="seller-sidebar-sub">{t('storeName')}</span>}
+        </div>
+        <nav className="seller-sidebar-nav">
+          {NAV.map(({ href, label, icon: Icon }) => (
+            <Link
+              key={href}
+              href={href}
+              className={`seller-nav-item${path.startsWith(href) ? ' active' : ''}`}
+              title={collapsed ? label : undefined}
+            >
+              <Icon size={18} />
+              {!collapsed && <span className="seller-nav-label">{label}</span>}
+            </Link>
+          ))}
+        </nav>
+        {!collapsed && (
+          <Link href="/" className="seller-back-link">
+            <span className="seller-back-link-label">{t('backToStore')}</span>
+          </Link>
+        )}
+        <button className="sidebar-toggle" onClick={toggle} title={collapsed ? 'Expandir' : 'Contraer'}>
+          {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+          {!collapsed && <span>Contraer</span>}
+        </button>
+      </aside>
+    </>
   );
 }

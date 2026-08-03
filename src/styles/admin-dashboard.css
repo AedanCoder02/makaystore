@@ -293,38 +293,68 @@
   color: #6b7280;
 }
 
-/* ---- Mobile (≤768px) ---- */
+/* ── Admin Responsive ──────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .admin-main { padding: 1.75rem 1.5rem; }
+  .dashboard-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+}
+
 @media (max-width: 768px) {
-  .admin-layout {
-    grid-template-columns: 1fr;
-  }
+  /* Layout — sidebar handled via shared drawer in mobile block below */
+  .admin-layout { grid-template-columns: 1fr; }
+  .admin-main   { grid-column: 1; padding: 1.25rem 1rem 5rem; }
 
-  .admin-sidebar {
-    display: none;
+  /* Dashboard header — stack */
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
+  .dashboard-header h1 { font-size: 1.5rem; }
 
-  .admin-main {
-    grid-column: 1;
-    padding: 1.25rem 1rem;
-  }
+  /* Nav grid — single column, no min-width overflow */
+  .dashboard-grid { grid-template-columns: minmax(0, 1fr); }
 
-  .dashboard-header h1 {
-    font-size: 1.5rem;
-  }
+  .admin-nav-card { min-height: 72px; padding: 1rem; }
+  .card-icon      { font-size: 1.75rem; min-width: 36px; }
 
-  .dashboard-grid {
-    grid-template-columns: 1fr;
+  /* Filter row — wrap + full width inputs */
+  .admin-filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
   }
+  .admin-select,
+  .admin-search-input {
+    min-width: 0;
+    width: 100%;
+  }
+  .admin-count { margin-left: 0; }
 
-  .admin-nav-card {
-    min-height: 80px;
-    padding: 1.25rem;
-  }
+  /* Admin tables */
+  .admin-table { font-size: 0.78rem; }
+  .admin-table th,
+  .admin-table td { padding: 0.55rem 0.6rem; white-space: normal; }
+  /* Hide lower-priority columns in orders/users tables */
+  .admin-table thead th:nth-child(n+5),
+  .admin-table tbody td:nth-child(n+5) { display: none; }
 
-  .card-icon {
-    font-size: 2rem;
-    min-width: 44px;
-  }
+  /* Stats strip — wrap chips */
+  .admin-stats-strip { gap: 0.5rem; }
+  .admin-stat-chip   { font-size: 0.75rem; padding: 0.3rem 0.65rem; }
+
+  /* Sidebar-collapsed: no margin on mobile */
+  .admin-layout.sidebar-collapsed .admin-main { grid-column: 1; }
+}
+
+@media (max-width: 480px) {
+  .admin-main         { padding: 1rem 0.75rem 5rem; }
+  .dashboard-header h1 { font-size: 1.25rem; }
+  .admin-nav-card     { min-height: 60px; padding: 0.875rem; }
+  .admin-table        { font-size: 0.72rem; }
+  .admin-table th,
+  .admin-table td     { padding: 0.4rem 0.5rem; }
 }
 
 /* Live stats strip */
@@ -663,3 +693,143 @@
   font-weight: 700;
 }
 .perm-chip:hover:not(.on) { border-color: #f59e0b; color: #92400e; }
+
+/* ══════════════════════════════════════════════════════════
+   SHARED PANEL MOBILE — hamburger, overlay, drawer
+   Loaded globally from root layout — applies to all panels
+   ══════════════════════════════════════════════════════════ */
+
+.sidebar-ham-btn {
+  display: none;
+  position: fixed;
+  top: 72px;
+  left: 0;
+  z-index: 250;
+  border: none;
+  border-radius: 0 8px 8px 0;
+  padding: 0.6rem 0.7rem;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.18);
+  transition: opacity 0.2s;
+}
+.sidebar-ham-btn--seller { background: #2c2825; color: rgba(255,255,255,0.85); }
+.sidebar-ham-btn--admin  { background: #1e1e2e; color: rgba(255,255,255,0.85); }
+.sidebar-ham-btn--sup    { background: #2c2c2c; color: rgba(255,255,255,0.85); }
+.sidebar-ham-btn:hover   { opacity: 0.85; }
+
+.sidebar-mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 280;
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: mobileOverlayIn 0.2s ease;
+}
+@keyframes mobileOverlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+.sidebar-close-mobile {
+  display: none;
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255,255,255,0.45);
+  padding: 0.3rem;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-close-mobile:hover { color: #fff; background: rgba(255,255,255,0.1); }
+
+/* Supervisor collapse button — replaces inline styles */
+.sup-collapse-btn {
+  background: none;
+  border: none;
+  border-top: 1px solid rgba(255,255,255,0.07);
+  color: rgba(255,255,255,0.3);
+  cursor: pointer;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: auto;
+  font-size: 0.72rem;
+  font-family: var(--font-montserrat, sans-serif);
+  transition: color 0.2s;
+}
+.sup-collapse-btn:hover { color: rgba(255,255,255,0.65); }
+
+@media (max-width: 768px) {
+  /* Show mobile controls */
+  .sidebar-ham-btn      { display: flex !important; }
+  .sidebar-close-mobile { display: flex !important; }
+
+  /* ── Seller sidebar → off-screen drawer ── */
+  .seller-sidebar {
+    display: flex !important;
+    transform: translateX(-110%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 300;
+    position: fixed;
+    top: 64px;
+    bottom: 0;
+    left: 0;
+    width: 220px !important;
+    border-radius: 0 !important;
+    overflow-y: auto;
+  }
+  .seller-sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 40px rgba(0,0,0,0.35);
+  }
+
+  /* ── Admin sidebar → off-screen drawer ── */
+  .admin-sidebar {
+    display: flex !important;
+    flex-direction: column;
+    transform: translateX(-110%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 300;
+    position: fixed;
+    top: 64px;
+    bottom: 0;
+    left: 0;
+    width: 240px !important;
+    overflow-y: auto;
+  }
+  .admin-sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 40px rgba(0,0,0,0.35);
+  }
+
+  /* ── Supervisor sidebar → off-screen drawer ── */
+  .sup-sidebar {
+    display: flex !important;
+    transform: translateX(-110%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 300;
+    position: fixed;
+    top: 64px;
+    bottom: 0;
+    left: 0;
+    width: 210px !important;
+    overflow-y: auto;
+  }
+  .sup-sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 4px 0 40px rgba(0,0,0,0.35);
+  }
+
+  /* Prevent sidebar-collapsed margin from activating on mobile */
+  .seller-layout.sidebar-collapsed .seller-main,
+  .admin-layout.sidebar-collapsed .admin-main { margin-left: 0 !important; }
+}

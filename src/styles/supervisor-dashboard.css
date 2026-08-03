@@ -1634,8 +1634,83 @@
 .sup-shift-status.active { background: #d1fae5; color: #065f46; }
 .sup-shift-status.done   { background: #f3f4f6; color: #6b7280; }
 
+/* ── Supervisor Responsive ──────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .sales-grid    { grid-template-columns: repeat(2, 1fr); }
+  .worker-cards  { grid-template-columns: repeat(2, 1fr); }
+}
+
 @media (max-width: 768px) {
-  .sup-sidebar { display: none; }
-  .sup-page { padding: 1rem; }
-  .sup-shifts-grid { grid-template-columns: 1fr; }
+  /* Layout — sidebar drawn as drawer via shared CSS */
+  .supervisor-main { flex: 1; min-width: 0; }
+  .sup-page        { padding: 1.25rem 1rem 5rem; max-width: 100%; }
+
+  /* Page header */
+  .sup-page-header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .sup-page-title { font-size: 1.25rem !important; }
+
+  /* Content grids — single column */
+  .taskboard-columns    { grid-template-columns: 1fr; }
+  .sales-grid           { grid-template-columns: 1fr; }
+  .worker-cards         { grid-template-columns: 1fr; }
+  .sup-shifts-grid      { grid-template-columns: 1fr; }
+  .quick-actions-grid   { flex-direction: column; gap: 0.5rem; }
+
+  /* Fix minmax grids so they don't overflow on narrow screens */
+  .worker-cards,
+  .sales-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Tables — reduce padding, allow wrapping */
+  .sup-table    { font-size: 0.78rem; }
+  .sup-table th,
+  .sup-table td { padding: 0.55rem 0.6rem; white-space: normal; word-break: break-word; }
+  /* Hide lower-priority columns */
+  .sup-table thead th:nth-child(n+4),
+  .sup-table tbody td:nth-child(n+4) { display: none; }
+
+  /* Rankings table */
+  .rankings-table        { font-size: 0.78rem; }
+  .rankings-table th,
+  .rankings-table td     { padding: 0.5rem 0.5rem; white-space: normal; }
+  .rankings-table thead th:nth-child(n+4),
+  .rankings-table tbody td:nth-child(n+4) { display: none; }
+
+  /* Filter inputs */
+  .sup-filter-tabs { overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+  .sup-filter-tabs::-webkit-scrollbar { display: none; }
+  .sup-filter-tab { flex-shrink: 0; }
+
+  /* Approval items */
+  .approval-item    { flex-direction: column; align-items: flex-start; }
+  .approval-actions { width: 100%; justify-content: flex-end; margin-top: 0.75rem; }
+
+  /* Summary stats */
+  .summary-stats { flex-direction: column; }
+
+  /* Shift rows */
+  .shift-row, .sup-shift-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  /* Worker panel drawer full-width on mobile */
+  .worker-panel-drawer { width: 100%; }
+
+  /* Supervisor-specific table wrap */
+  .sup-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+@media (max-width: 480px) {
+  .sup-page       { padding: 1rem 0.75rem 5rem; }
+  .sup-page-title { font-size: 1.1rem !important; }
+  .sup-table      { font-size: 0.72rem; }
+  .sup-table th,
+  .sup-table td   { padding: 0.4rem 0.45rem; }
 }
