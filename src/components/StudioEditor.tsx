@@ -246,31 +246,40 @@ export default function StudioEditor() {
     return r.ok ? r.json() : {};
   };
 
-  const patchSettings = async (patch: Record<string,string>) => {
+  const [saveError, setSaveError] = useState('');
+
+  const patchSettings = async (patch: Record<string,string>): Promise<boolean> => {
     const existing = await getExistingSettings();
-    await fetch('/api/admin/theme', {
+    const res = await fetch('/api/admin/theme', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...existing, ...patch }),
     });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setSaveError(body.error ?? `Error ${res.status} al guardar`);
+      setTimeout(() => setSaveError(''), 3500);
+      return false;
+    }
+    return true;
   };
 
   const saveBrand = async () => {
     setSaveState('global', 'saving');
-    await patchSettings(colors);
-    setSaveState('global', 'saved');
+    const ok = await patchSettings(colors);
+    setSaveState('global', ok ? 'saved' : 'idle');
   };
 
   const saveScroll = async () => {
     setSaveState('scroll', 'saving');
-    await patchSettings({ '--scroll-colors': JSON.stringify(scrollColors) });
-    setSaveState('scroll', 'saved');
+    const ok = await patchSettings({ '--scroll-colors': JSON.stringify(scrollColors) });
+    setSaveState('scroll', ok ? 'saved' : 'idle');
   };
 
   const saveCard = async () => {
     setSaveState('card', 'saving');
-    await patchSettings({ card_layout: JSON.stringify(cardLayout), card_colors: JSON.stringify(cardColors) });
-    setSaveState('card', 'saved');
+    const ok = await patchSettings({ card_layout: JSON.stringify(cardLayout), card_colors: JSON.stringify(cardColors) });
+    setSaveState('card', ok ? 'saved' : 'idle');
   };
 
   const saveCurrentPage = async () => {
@@ -285,8 +294,8 @@ export default function StudioEditor() {
     patch[`page:${activePage}:typography:bodySize`]              = ps.typography.bodySize;
     patch[`page:${activePage}:typography:letterSpacing`]         = ps.typography.letterSpacing;
     Object.entries(ps.content).forEach(([k,v]) => { if (v) patch[`page:${activePage}:content:${k}`] = v; });
-    await patchSettings(patch);
-    setSaveState(key, 'saved');
+    const ok = await patchSettings(patch);
+    setSaveState(key, ok ? 'saved' : 'idle');
   };
 
   const publishAll = async () => {
@@ -303,11 +312,18 @@ export default function StudioEditor() {
       Object.entries(ps.content).forEach(([k,v]) => { if (v) patch[`page:${pid}:content:${k}`] = v; });
     });
     const existing = await getExistingSettings();
-    await fetch('/api/admin/theme', {
+    const res = await fetch('/api/admin/theme', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...existing, ...patch }),
     });
-    setSaveState('all', 'saved');
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      setSaveError(body.error ?? `Error ${res.status} al publicar`);
+      setTimeout(() => setSaveError(''), 3500);
+      setSaveState('all', 'idle');
+    } else {
+      setSaveState('all', 'saved');
+    }
   };
 
   const SaveBtn = ({ id, onClick }: { id: string; onClick: () => void }) => {
@@ -340,6 +356,7 @@ export default function StudioEditor() {
   return (
     <div className="studio-root">
       {tutorialUI}
+      {saveError && <div className="admin-toast" style={{ background: '#ef4444', position: 'fixed', top: '1rem', right: '1rem', zIndex: 9999 }}>{saveError}</div>}
 
       {/* ── Top bar ─────────────────────────────────────────────────── */}
       <div className="studio-topbar">

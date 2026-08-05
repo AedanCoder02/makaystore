@@ -122,18 +122,39 @@ interface Props {
 export interface CardCanvasProps {
   layout: CardLayout;
   colors: CardColors;
-  activeEl: keyof CardLayout | null;
-  onLayoutChange: (l: CardLayout) => void;
-  onActiveElChange: (key: keyof CardLayout) => void;
+  activeEl?: keyof CardLayout | null;
+  onLayoutChange?: (l: CardLayout) => void;
+  onActiveElChange?: (key: keyof CardLayout) => void;
   cardRef: React.RefObject<HTMLDivElement | null>;
+  // Optional real-user data (used in profile view — hides placeholders)
+  readonly?: boolean;
+  userName?: string;
+  userImageUrl?: string;
+  tierLabel?: string;
+  memberSince?: number;
+  memberId?: string;
+  profileUrl?: string;
+  // Extra absolutely-positioned elements rendered inside the card
+  children?: React.ReactNode;
+  // Style overrides for the root card div (e.g. max-width, box-shadow)
+  style?: React.CSSProperties;
 }
 
-export function CardCanvas({ layout, colors, activeEl, onLayoutChange, onActiveElChange, cardRef }: CardCanvasProps) {
+export function CardCanvas({
+  layout, colors,
+  activeEl = null, onLayoutChange, onActiveElChange,
+  cardRef,
+  readonly = false,
+  userName, userImageUrl, tierLabel, memberSince, memberId, profileUrl,
+  children,
+  style,
+}: CardCanvasProps) {
   const [dragging, setDragging] = useState<keyof CardLayout | null>(null);
   const cardBg = `linear-gradient(${colors.bg_angle}deg, ${colors.bg_from}, ${colors.bg_to})`;
   const isDark = colors.bg_from.toLowerCase() < '#888888';
 
   const startDrag = useCallback((e: React.MouseEvent, key: keyof CardLayout) => {
+    if (readonly || !onLayoutChange || !onActiveElChange) return;
     e.preventDefault();
     if (!layout[key].visible) return;
     setDragging(key);
@@ -149,19 +170,20 @@ export function CardCanvas({ layout, colors, activeEl, onLayoutChange, onActiveE
     const onUp = () => { setDragging(null); document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
-  }, [layout, onLayoutChange, onActiveElChange, cardRef]);
+  }, [layout, onLayoutChange, onActiveElChange, cardRef, readonly]);
 
   const El = ({ id, children }: { id: keyof CardLayout; children: React.ReactNode }) => {
     const pos = layout[id];
     if (!pos) return null;
-    const isActive = activeEl === id;
+    if (!pos.visible) return null;
+    const isActive = !readonly && activeEl === id;
     const scale = pos.scale ?? 1;
     return (
       <div
         style={{
           position: 'absolute', left: `${pos.x}%`, top: `${pos.y}%`,
-          cursor: pos.visible ? (dragging === id ? 'grabbing' : 'grab') : 'not-allowed',
-          opacity: pos.visible ? 1 : 0.15,
+          cursor: readonly ? 'default' : (dragging === id ? 'grabbing' : 'grab'),
+          opacity: 1,
           outline: isActive ? `2px dashed ${colors.accent}CC` : 'none',
           outlineOffset: 4, userSelect: 'none', zIndex: isActive ? 10 : 1,
           transform: scale !== 1 ? `scale(${scale})` : undefined,
@@ -169,8 +191,8 @@ export function CardCanvas({ layout, colors, activeEl, onLayoutChange, onActiveE
           transition: 'outline 0.1s',
         }}
         onMouseDown={e => startDrag(e, id)}
-        onClick={() => onActiveElChange(id)}
-        title={`Arrastra para mover: ${ELEMENT_LABELS[id]}`}
+        onClick={() => !readonly && onActiveElChange?.(id)}
+        title={readonly ? undefined : `Arrastra para mover: ${ELEMENT_LABELS[id]}`}
       >
         {children}
       </div>
@@ -178,7 +200,7 @@ export function CardCanvas({ layout, colors, activeEl, onLayoutChange, onActiveE
   };
 
   return (
-    <div className="cd-card" ref={cardRef} style={{ background: cardBg, cursor: dragging ? 'grabbing' : 'default' }}>
+    <div className="cd-card" ref={cardRef} style={{ background: cardBg, cursor: dragging ? 'grabbing' : 'default', ...style }}>
       <div className="cd-card-glow" />
 
       <El id="logo">
@@ -192,20 +214,29 @@ export function CardCanvas({ layout, colors, activeEl, onLayoutChange, onActiveE
 
       <El id="tier">
         <span className="cd-tier-badge" style={{ borderColor: `${colors.accent}70`, color: colors.accent }}>
-          Beach Club Member
+          {tierLabel ?? 'Beach Club Member'}
         </span>
       </El>
 
       <El id="avatar">
-        <div className="cd-avatar" style={{ borderColor: `${colors.accent}80`, background: `${colors.accent}18` }}>
-          <svg width="22" height="26" viewBox="0 0 24 28" fill="none" stroke={colors.accent} strokeWidth="1.5">
-            <circle cx="12" cy="8" r="5"/><path d="M2 26c0-5.5 4.5-10 10-10s10 4.5 10 10"/>
-          </svg>
-        </div>
+        {userImageUrl ? (
+          <img
+            src={userImageUrl}
+            alt={userName ?? ''}
+            className="cd-avatar"
+            style={{ borderColor: `${colors.accent}80`, objectFit: 'cover' }}
+          />
+        ) : (
+          <div className="cd-avatar" style={{ borderColor: `${colors.accent}80`, background: `${colors.accent}18` }}>
+            <svg width="22" height="26" viewBox="0 0 24 28" fill="none" stroke={colors.accent} strokeWidth="1.5">
+              <circle cx="12" cy="8" r="5"/><path d="M2 26c0-5.5 4.5-10 10-10s10 4.5 10 10"/>
+            </svg>
+          </div>
+        )}
       </El>
 
       <El id="name">
-        <p className="cd-name" style={{ color: colors.text }}>Lorem Ipsum</p>
+        <p className="cd-name" style={{ color: colors.text }}>{userName ?? 'Lorem Ipsum'}</p>
       </El>
 
       <El id="tagline">
@@ -218,17 +249,17 @@ export function CardCanvas({ layout, colors, activeEl, onLayoutChange, onActiveE
 
       <El id="id">
         <p className="cd-id-text" style={{ color: `${colors.text}80` }}>
-          ID: 00000000000
+          ID: {memberId ?? '00000000000'}
         </p>
       </El>
 
       <El id="since">
-        <p className="cd-since-text" style={{ color: `${colors.text}55` }}>Since 2026</p>
+        <p className="cd-since-text" style={{ color: `${colors.text}55` }}>Since {memberSince ?? 2026}</p>
       </El>
 
       <El id="qr">
         <div className="cd-qr-wrap">
-          <QRCode value="https://makaystore-sandy.vercel.app" size={56} bgColor="transparent" fgColor={colors.text} />
+          <QRCode value={profileUrl ?? 'https://makaystore-sandy.vercel.app'} size={56} bgColor="transparent" fgColor={colors.text} />
         </div>
       </El>
 
@@ -239,6 +270,8 @@ export function CardCanvas({ layout, colors, activeEl, onLayoutChange, onActiveE
           )}
         </El>
       ))}
+
+      {children}
     </div>
   );
 }

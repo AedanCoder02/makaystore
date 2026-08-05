@@ -254,14 +254,14 @@ export default function AdminMembershipsPage() {
   const fieldLabel: React.CSSProperties = { fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--makay-mauve)', display: 'block', marginBottom: '0.35rem' };
   const fieldInput: React.CSSProperties = { width: '100%', padding: '0.5rem 0.75rem', borderRadius: 8, border: '1px solid var(--makay-sand-cream)', fontFamily: 'var(--font-montserrat)', fontSize: '0.88rem', color: 'var(--makay-dark-navy)', boxSizing: 'border-box' };
   const fieldHint: React.CSSProperties = { fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', color: 'var(--makay-mauve)', marginTop: '0.3rem', marginBottom: 0 };
-  const TAB_LABELS: Record<Tab, string> = { overview: 'Overview', discounts: 'Discounts', members: 'Members', config: 'Wallet Config' };
+  const TAB_LABELS: Record<Tab, string> = { overview: 'Resumen', discounts: 'Descuentos', members: 'Miembros', config: 'Config. Wallet' };
 
   return (
     <div className="admin-layout">
       <AdminSidebar />
       <main className="admin-main">
         <div className="dashboard-header">
-          <h1 style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700 }}>Memberships</h1>
+          <h1 style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700 }}>Membresías</h1>
         </div>
 
         {toast && <div className="admin-toast">{toast}</div>}
@@ -286,13 +286,13 @@ export default function AdminMembershipsPage() {
         {tab === 'overview' && (
           loadingStats ? <p className="admin-loading">Loading…</p> : <>
             <div className="admin-stats-strip" style={{ marginBottom: '2rem' }}>
-              <div className="admin-stat-chip"><Users size={14} /> {totalMembers} total profiles</div>
-              <div className="admin-stat-chip"><Crown size={14} /> {paidMembers} paid members</div>
-              <div className="admin-stat-chip"><TrendingUp size={14} /> ${totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })} membership revenue</div>
+              <div className="admin-stat-chip"><Users size={14} /> {totalMembers} perfiles totales</div>
+              <div className="admin-stat-chip"><Crown size={14} /> {paidMembers} miembros activos</div>
+              <div className="admin-stat-chip"><TrendingUp size={14} /> ${totalRevenue.toLocaleString(undefined, { maximumFractionDigits: 0 })} ingresos por membresías</div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
               <div style={sectionCard}>
-                <h3 style={heading}>Tier Distribution</h3>
+                <h3 style={heading}>Distribución por Nivel</h3>
                 {pieData.length > 0 ? (
                   <ResponsiveContainer width="100%" height={220}>
                     <PieChart>
@@ -304,11 +304,11 @@ export default function AdminMembershipsPage() {
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <p style={{ textAlign: 'center', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', padding: '2rem 0' }}>No member profiles yet.</p>
+                  <p style={{ textAlign: 'center', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', padding: '2rem 0' }}>Sin perfiles de miembros aún.</p>
                 )}
               </div>
               <div style={sectionCard}>
-                <h3 style={heading}>Revenue by Tier</h3>
+                <h3 style={heading}>Ingresos por Nivel</h3>
                 {(stats?.revenue ?? []).length > 0 ? (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                     {(stats?.revenue ?? []).map(r => (
@@ -321,17 +321,17 @@ export default function AdminMembershipsPage() {
                     ))}
                   </div>
                 ) : (
-                  <p style={{ textAlign: 'center', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', padding: '2rem 0' }}>No membership sales yet.</p>
+                  <p style={{ textAlign: 'center', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', padding: '2rem 0' }}>Sin ventas de membresía aún.</p>
                 )}
               </div>
             </div>
             {(stats?.recent ?? []).length > 0 && (
               <div style={{ ...sectionCard, padding: 0, overflow: 'hidden' }}>
                 <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--makay-sand-cream)' }}>
-                  <h3 style={{ ...heading, marginBottom: 0 }}>Recent Membership Sales</h3>
+                  <h3 style={{ ...heading, marginBottom: 0 }}>Ventas Recientes de Membresía</h3>
                 </div>
                 <table className="admin-table">
-                  <thead><tr><th>Client</th><th>Tier</th><th>Payment</th><th>Amount</th><th>Date</th></tr></thead>
+                  <thead><tr><th>Cliente</th><th>Nivel</th><th>Pago</th><th>Monto</th><th>Fecha</th></tr></thead>
                   <tbody>
                     {(stats?.recent ?? []).map(s => (
                       <tr key={s.id}>
@@ -354,13 +354,13 @@ export default function AdminMembershipsPage() {
           loadingConfig ? <p className="admin-loading">Loading…</p> : (
             <div style={sectionCard}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-                <h3 style={{ ...heading, marginBottom: 0 }}><Percent size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} />Global Discount Rates</h3>
+                <h3 style={{ ...heading, marginBottom: 0 }}><Percent size={14} style={{ verticalAlign: 'middle', marginRight: 6 }} />Descuentos Globales por Nivel</h3>
                 <button onClick={saveConfig} disabled={savingConfig} style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, padding: '0.45rem 1.1rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--makay-dark-navy)', color: '#fff' }}>
-                  {savingConfig ? 'Saving…' : 'Save Changes'}
+                  {savingConfig ? 'Guardando…' : 'Guardar Cambios'}
                 </button>
               </div>
               <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)', marginBottom: '1.5rem' }}>
-                These percentages apply automatically at checkout for all members of each tier, unless overridden individually in the Members tab.
+                Estos porcentajes se aplican automáticamente al pagar para todos los miembros de cada nivel, salvo override individual en la pestaña Miembros.
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {tierConfig.map(c => (
@@ -371,7 +371,7 @@ export default function AdminMembershipsPage() {
                       <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', color: 'var(--makay-mauve)', margin: 0 }}>{c.description}</p>
                     </div>
                     {c.tier === 'vip' ? (
-                      <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)', fontStyle: 'italic' }}>Per-user override only</span>
+                      <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)', fontStyle: 'italic' }}>Solo override por usuario</span>
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
                         <input type="number" min={0} max={100} value={configDraft[c.tier] ?? c.discount_percent}
@@ -392,7 +392,7 @@ export default function AdminMembershipsPage() {
           loadingMembers ? <p className="admin-loading">Loading…</p> : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
               {members.length === 0 && (
-                <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', color: 'var(--makay-mauve)', padding: '2rem', textAlign: 'center' }}>No members yet.</p>
+                <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', color: 'var(--makay-mauve)', padding: '2rem', textAlign: 'center' }}>Sin miembros aún.</p>
               )}
               {members.map(m => {
                 const isEditing = editingOverride === m.id;
@@ -432,7 +432,7 @@ export default function AdminMembershipsPage() {
                         </div>
                       ) : (
                         <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)', minWidth: 80 }}>
-                          {m.discount_override !== null ? `${m.discount_override}% override` : 'tier default'}
+                          {m.discount_override !== null ? `${m.discount_override}% override` : 'descuento del nivel'}
                         </span>
                       )}
 
@@ -450,11 +450,11 @@ export default function AdminMembershipsPage() {
                         ) : (
                           <>
                             <button onClick={() => setEditingOverride(m.id)} style={{ padding: '0.3rem 0.6rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: 'var(--makay-mauve)' }}>
-                              <Edit2 size={11} /> Edit
+                              <Edit2 size={11} /> Editar
                             </button>
                             <button onClick={() => { setCreditTarget(m.id); setCreditMode('points'); }}
                               style={{ padding: '0.3rem 0.6rem', borderRadius: 6, border: '1px solid #D4AF37', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: '#D4AF37' }}>
-                              <Coins size={11} /> Credit
+                              <Coins size={11} /> Crédito
                             </button>
                           </>
                         )}
@@ -472,7 +472,7 @@ export default function AdminMembershipsPage() {
                               color: creditMode === mode ? '#fff' : 'var(--makay-mauve)',
                               display: 'flex', alignItems: 'center', gap: 4,
                             }}>
-                              {mode === 'points' ? <><Star size={10} /> Points</> : <><DollarSign size={10} /> $ Credit Line</>}
+                              {mode === 'points' ? <><Star size={10} /> Puntos</> : <><DollarSign size={10} /> Línea de Crédito</>}
                             </button>
                           ))}
                           <button onClick={resetCredit} style={{ marginLeft: 'auto', padding: '0.3rem 0.5rem', borderRadius: 6, border: '1px solid #e5e0d8', background: 'transparent', cursor: 'pointer' }}>
@@ -482,35 +482,35 @@ export default function AdminMembershipsPage() {
 
                         {creditMode === 'points' ? (
                           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                            <input type="number" min={1} placeholder="Points" value={creditPoints} onChange={e => setCreditPoints(e.target.value)}
+                            <input type="number" min={1} placeholder="Puntos" value={creditPoints} onChange={e => setCreditPoints(e.target.value)}
                               style={{ width: 90, padding: '0.3rem 0.5rem', borderRadius: 6, border: '1px solid #e5e0d8', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem' }} />
-                            <input type="text" placeholder="Description (optional)" value={creditDesc} onChange={e => setCreditDesc(e.target.value)}
+                            <input type="text" placeholder="Descripción (opcional)" value={creditDesc} onChange={e => setCreditDesc(e.target.value)}
                               style={{ flex: 1, minWidth: 140, padding: '0.3rem 0.5rem', borderRadius: 6, border: '1px solid #e5e0d8', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem' }} />
                             <button onClick={() => issuePoints(m.id)} disabled={creditSaving} style={{ padding: '0.3rem 0.75rem', borderRadius: 6, border: 'none', background: '#D4AF37', color: '#fff', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
-                              {creditSaving ? '…' : 'Credit'}
+                              {creditSaving ? '…' : 'Acreditar'}
                             </button>
                           </div>
                         ) : (
                           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem' }}>
                             <div>
-                              <label style={fieldLabel}>Amount ($)</label>
-                              <input type="number" min={1} step={0.01} placeholder="e.g. 200.00" value={dollarAmount} onChange={e => setDollarAmount(e.target.value)} style={fieldInput} />
+                              <label style={fieldLabel}>Monto ($)</label>
+                              <input type="number" min={1} step={0.01} placeholder="Ej. 200.00" value={dollarAmount} onChange={e => setDollarAmount(e.target.value)} style={fieldInput} />
                             </div>
                             <div>
-                              <label style={fieldLabel}>Interest Rate (% / year)</label>
-                              <input type="number" min={0} max={100} step={0.1} placeholder="e.g. 5" value={dollarInterest} onChange={e => setDollarInterest(e.target.value)} style={fieldInput} />
+                              <label style={fieldLabel}>Tasa de interés (% / año)</label>
+                              <input type="number" min={0} max={100} step={0.1} placeholder="Ej. 5" value={dollarInterest} onChange={e => setDollarInterest(e.target.value)} style={fieldInput} />
                             </div>
                             <div>
-                              <label style={fieldLabel}>Payment Due Date</label>
+                              <label style={fieldLabel}>Fecha de vencimiento</label>
                               <input type="date" value={dollarDueDate} onChange={e => setDollarDueDate(e.target.value)} style={fieldInput} />
                             </div>
                             <div>
-                              <label style={fieldLabel}>Notes (optional)</label>
-                              <input type="text" placeholder="Internal note" value={dollarNotes} onChange={e => setDollarNotes(e.target.value)} style={fieldInput} />
+                              <label style={fieldLabel}>Notas (opcional)</label>
+                              <input type="text" placeholder="Nota interna" value={dollarNotes} onChange={e => setDollarNotes(e.target.value)} style={fieldInput} />
                             </div>
                             <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end' }}>
                               <button onClick={() => issueDollarCredit(m.id)} disabled={creditSaving} style={{ padding: '0.4rem 1rem', borderRadius: 8, border: 'none', background: 'var(--makay-dark-navy)', color: '#fff', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
-                                <DollarSign size={13} /> {creditSaving ? 'Issuing…' : 'Issue Credit Line'}
+                                <DollarSign size={13} /> {creditSaving ? 'Emitiendo…' : 'Emitir Línea de Crédito'}
                               </button>
                             </div>
                           </div>
@@ -530,13 +530,13 @@ export default function AdminMembershipsPage() {
             <div style={sectionCard}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <div>
-                  <h3 style={{ ...heading, marginBottom: '0.2rem' }}>Wallet Configuration</h3>
+                  <h3 style={{ ...heading, marginBottom: '0.2rem' }}>Configuración de Wallet</h3>
                   <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)', margin: 0 }}>
-                    Controls how customers earn points and how credit lines are structured.
+                    Controla cómo los clientes acumulan puntos y cómo se estructuran las líneas de crédito.
                   </p>
                 </div>
                 <button onClick={saveWalletConfig} disabled={savingWallet} style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, padding: '0.5rem 1.25rem', borderRadius: 8, border: 'none', cursor: 'pointer', background: 'var(--makay-dark-navy)', color: '#fff' }}>
-                  {savingWallet ? 'Saving…' : 'Save'}
+                  {savingWallet ? 'Guardando…' : 'Guardar'}
                 </button>
               </div>
 
@@ -547,17 +547,17 @@ export default function AdminMembershipsPage() {
                       <Star size={18} color="#D4AF37" />
                     </div>
                     <div>
-                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--makay-mauve)', margin: '0 0 0.15rem' }}>Points Rate</p>
+                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--makay-mauve)', margin: '0 0 0.15rem' }}>Tasa de Puntos</p>
                       <p style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: 0, lineHeight: 1.1 }}>
                         $1 = {walletDraft.pts_per_dollar} pts
                       </p>
                     </div>
                   </div>
-                  <label style={fieldLabel}>Points per $1 spent</label>
+                  <label style={fieldLabel}>Puntos por cada $1 gastado</label>
                   <input type="number" min={1} max={1000} value={walletDraft.pts_per_dollar}
                     onChange={e => setWalletDraft(p => ({ ...p, pts_per_dollar: parseInt(e.target.value, 10) || 1 }))}
                     style={fieldInput} />
-                  <p style={fieldHint}>Customers earn this many points for every dollar spent. Applied automatically on order completion.</p>
+                  <p style={fieldHint}>Los clientes acumulan esta cantidad de puntos por cada dólar gastado. Se aplica automáticamente al completar un pedido.</p>
                 </div>
 
                 <div>
@@ -566,25 +566,25 @@ export default function AdminMembershipsPage() {
                       <Calendar size={18} color="var(--makay-dark-navy)" />
                     </div>
                     <div>
-                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--makay-mauve)', margin: '0 0 0.15rem' }}>Default APR</p>
+                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', textTransform: 'uppercase', letterSpacing: '0.07em', color: 'var(--makay-mauve)', margin: '0 0 0.15rem' }}>APR Predeterminado</p>
                       <p style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: 0, lineHeight: 1.1 }}>
                         {walletDraft.default_credit_interest}%
                       </p>
                     </div>
                   </div>
-                  <label style={fieldLabel}>Default credit interest (% per year)</label>
+                  <label style={fieldLabel}>Interés de crédito predeterminado (% anual)</label>
                   <input type="number" min={0} max={100} step={0.1} value={walletDraft.default_credit_interest}
                     onChange={e => setWalletDraft(p => ({ ...p, default_credit_interest: parseFloat(e.target.value) || 0 }))}
                     style={fieldInput} />
-                  <p style={fieldHint}>Pre-filled when issuing credit lines in the Members tab. Each line can have a custom rate.</p>
+                  <p style={fieldHint}>Pre-rellenado al emitir líneas de crédito en la pestaña Miembros. Cada línea puede tener una tasa personalizada.</p>
                 </div>
               </div>
             </div>
 
             <div style={{ ...sectionCard, background: '#f8f6f3', border: '1px solid #ece8e1' }}>
-              <h3 style={{ ...heading, display: 'flex', alignItems: 'center', gap: 6 }}><DollarSign size={14} />How to Issue Credit Lines</h3>
+              <h3 style={{ ...heading, display: 'flex', alignItems: 'center', gap: 6 }}><DollarSign size={14} />Cómo Emitir Líneas de Crédito</h3>
               <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-mauve)', margin: 0, lineHeight: 1.75 }}>
-                To issue a credit line to a specific customer, go to the <strong style={{ color: 'var(--makay-dark-navy)' }}>Members</strong> tab, click <strong style={{ color: 'var(--makay-dark-navy)' }}>Credit</strong> on any member row, then switch to <strong style={{ color: 'var(--makay-dark-navy)' }}>$ Credit Line</strong> mode. Enter the principal amount, interest rate, and due date. The dollar balance is added to the customer&apos;s wallet and shown on their profile with interest accumulating daily.
+                Para emitir una línea de crédito a un cliente específico, ve a la pestaña <strong style={{ color: 'var(--makay-dark-navy)' }}>Miembros</strong>, haz clic en <strong style={{ color: 'var(--makay-dark-navy)' }}>Crédito</strong> en la fila del miembro, y cambia al modo <strong style={{ color: 'var(--makay-dark-navy)' }}>Línea de Crédito</strong>. Ingresa el monto principal, la tasa de interés y la fecha de vencimiento. El saldo en dólares se agrega a la wallet del cliente y se muestra en su perfil con interés acumulándose diariamente.
               </p>
             </div>
           </div>

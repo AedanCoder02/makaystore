@@ -3,15 +3,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useUser, UserButton } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
-import QRCode from 'react-qr-code';
 import { Share2, Download, Edit3, Check, X, HelpCircle, Crown, TrendingUp, Lock, Percent, Umbrella, Trophy, AlertTriangle, Star, Tag } from 'lucide-react';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import { animate } from 'animejs';
 import {
   CardLayout, CardColors,
-  DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS, mergeLayout,
+  DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS, mergeLayout, CardCanvas,
 } from '@/components/CardDesigner';
 import '@/styles/profile.css';
 
@@ -310,21 +308,6 @@ export default function ClientProfile() {
     ],
   };
 
-  const CardEl = ({ id, children }: { id: keyof typeof cardLayout; children: React.ReactNode }) => {
-    const pos = cardLayout[id];
-    if (!pos.visible) return null;
-    const scale = pos.scale ?? 1;
-    return (
-      <div style={{
-        position: 'absolute', left: `${pos.x}%`, top: `${pos.y}%`, zIndex: 1,
-        transform: scale !== 1 ? `scale(${scale})` : undefined,
-        transformOrigin: 'top left',
-      }}>
-        {children}
-      </div>
-    );
-  };
-
   return (
     <main className="profile-page">
       <div className="profile-container" ref={heroRef}>
@@ -399,105 +382,26 @@ export default function ClientProfile() {
             </div>
           </div>
 
-          <div
-            className="makay-client-card"
-            ref={cardRef}
-            style={{ position: 'relative' }}
+          <CardCanvas
+            layout={cardLayout}
+            colors={cardColors}
+            cardRef={cardRef}
+            readonly
+            userName={`${user.firstName ?? ''} ${user.lastName ?? ''}`.trim()}
+            userImageUrl={user.imageUrl || undefined}
+            tierLabel={tier.label}
+            memberSince={new Date(user.createdAt!).getFullYear()}
+            memberId={user.id?.slice(-8).toUpperCase()}
+            profileUrl={profileUrl || undefined}
+            style={{
+              maxWidth: '460px',
+              margin: '0 auto',
+              borderRadius: '24px',
+              boxShadow: '0 20px 60px rgba(44,44,44,0.25), 0 4px 16px rgba(0,0,0,0.15)',
+              opacity: 0,
+            }}
           >
-            {/* Background */}
-            <div className="makay-card-bg" style={{
-              background: `linear-gradient(${cardColors.bg_angle}deg, ${cardColors.bg_from}, ${cardColors.bg_to})`,
-            }} />
-            <div className="makay-card-bg-glow" />
-
-            {/* Logo */}
-            <CardEl id="logo">
-              <Image
-                src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1-removebg-preview.png"
-                alt="Makay" width={70} height={24}
-                style={{ objectFit: 'contain', filter: 'brightness(0) invert(1)', display: 'block' }}
-              />
-            </CardEl>
-
-            {/* Tier badge */}
-            <CardEl id="tier">
-              <span className="makay-card-tier" style={{ color: cardColors.accent, borderColor: `${cardColors.accent}55` }}>
-                {tier.label}
-              </span>
-            </CardEl>
-
-            {/* Avatar */}
-            {user.imageUrl && (
-              <CardEl id="avatar">
-                <img src={user.imageUrl} alt={user.firstName ?? ''} className="makay-card-avatar"
-                  style={{ borderColor: `${cardColors.accent}80` }} />
-              </CardEl>
-            )}
-
-            {/* Name */}
-            <CardEl id="name">
-              <p className="makay-card-name" style={{ color: cardColors.text }}>
-                {user.firstName} {user.lastName}
-              </p>
-            </CardEl>
-
-            {/* Tagline */}
-            <CardEl id="tagline">
-              <p className="makay-card-tagline" style={{ color: `${cardColors.accent}B0` }}>Beach Club Member</p>
-            </CardEl>
-
-            {/* Divider */}
-            {cardLayout.divider.visible && (
-              <div style={{ position: 'absolute', left: 0, right: 0, top: `${cardLayout.divider.y}%`, zIndex: 1 }}>
-                <div className="makay-card-divider" />
-              </div>
-            )}
-
-            {/* ID */}
-            <CardEl id="id">
-              <p className="makay-card-id" style={{ color: `${cardColors.text}88` }}>
-                ID: {user.id?.slice(-8).toUpperCase()}
-              </p>
-            </CardEl>
-
-            {/* Since */}
-            <CardEl id="since">
-              <p className="makay-card-since" style={{ color: `${cardColors.text}44` }}>
-                Since {new Date(user.createdAt!).getFullYear()}
-              </p>
-            </CardEl>
-
-            {/* QR */}
-            {profileUrl && (
-              <CardEl id="qr">
-                <div className="makay-card-qr">
-                  <QRCode value={profileUrl} size={68} bgColor="transparent" fgColor={cardColors.text} />
-                </div>
-              </CardEl>
-            )}
-
-            {/* Custom text elements */}
-            {(['custom1', 'custom2', 'custom3'] as const).map(key => {
-              const el = cardLayout[key];
-              if (!el?.visible || !el?.text) return null;
-              return (
-                <CardEl key={key} id={key}>
-                  <p style={{
-                    fontFamily: 'var(--font-montserrat)',
-                    fontSize: '0.6rem',
-                    fontWeight: 600,
-                    letterSpacing: '0.06em',
-                    color: cardColors.text,
-                    margin: 0,
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {el.text}
-                  </p>
-                </CardEl>
-              );
-            })}
-
-            {/* ── Wallet overlay (inside card, middle-bottom) ── */}
+            {/* Wallet overlay — absolutely positioned inside card */}
             <div style={{
               position: 'absolute', left: '34%', top: '72%', zIndex: 2,
               display: 'flex', flexDirection: 'column', gap: '0.15rem',
@@ -522,7 +426,7 @@ export default function ClientProfile() {
                 {walletPoints.toLocaleString()} pts
               </p>
             </div>
-          </div>
+          </CardCanvas>
 
           {/* Wallet lock overlay for non-members */}
           {!isPaidMember && (

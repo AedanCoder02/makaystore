@@ -47,7 +47,7 @@ export default function HomepageMembership() {
     const label = content('label') || t(`${key}Label` as any);
     const imageUrl = content('image') || DEFAULT_IMAGES[key];
     const perksRaw = content('perks') || t(`${key}Perks` as any);
-    const perks = perksRaw.split('|').map((s: string) => s.trim()).filter(Boolean);
+    const perks = perksRaw.split(/\n|\|/).map((s: string) => s.trim()).filter(Boolean);
     return { label, image: imageUrl, perks, productHref: `/products/membership-${key}` };
   }
 
