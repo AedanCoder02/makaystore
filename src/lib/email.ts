@@ -137,7 +137,7 @@ export async function sendMembershipWelcomeEmail(data: MembershipEmailData) {
             <p style="font-family:Arial,sans-serif;font-size:14px;color:#6B5C4E;margin:0 0 4px;">Nos vemos muy pronto,</p>
             <p style="font-family:Georgia,serif;font-size:16px;font-weight:700;color:#2C2C2C;margin:0 0 28px;">El equipo de Makay</p>
 
-            <a href="https://wa.me/XXXXXXXXXX" style="display:inline-block;padding:14px 32px;background:#D4A574;color:#fff;text-decoration:none;border-radius:100px;font-family:Arial,sans-serif;font-weight:700;font-size:14px;">
+            <a href="https://wa.me/584142966058" style="display:inline-block;padding:14px 32px;background:#D4A574;color:#fff;text-decoration:none;border-radius:100px;font-family:Arial,sans-serif;font-weight:700;font-size:14px;">
               💬 Reservar en WhatsApp VIP
             </a>
           </div>

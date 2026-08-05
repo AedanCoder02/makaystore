@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import { X, ArrowRight, MessageCircle, Percent, Umbrella, Trophy, Star, Lock, Award } from 'lucide-react';
 
-// Update this when client provides WhatsApp number
-const WA_LINK = 'https://wa.me/XXXXXXXXXX';
+const WA_LINK = 'https://wa.me/584142966058';
 
 interface LeadData {
   name: string;
