@@ -5,7 +5,7 @@ import { useUser, UserButton } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import QRCode from 'react-qr-code';
-import { Share2, Download, Edit3, Check, X, HelpCircle, Crown, TrendingUp, Lock, Percent, Umbrella, Trophy, AlertTriangle } from 'lucide-react';
+import { Share2, Download, Edit3, Check, X, HelpCircle, Crown, TrendingUp, Lock, Percent, Umbrella, Trophy, AlertTriangle, Star, Tag } from 'lucide-react';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 import { animate } from 'animejs';
@@ -62,12 +62,40 @@ const TIER_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 const TIER_PERKS: Record<string, string[]> = {
-  free:   ['Access to the Makay catalog', 'Member QR card'],
-  bronze: ['Early access to new drops', 'Member QR card', '5% loyalty credit'],
-  silver: ['Priority event tickets', 'Bronze perks', '10% loyalty credit'],
-  gold:   ['VIP event access', 'Silver perks', '15% loyalty credit', 'Personal stylist'],
-  vip:    ['All perks', 'Exclusive collections', '20% loyalty credit', 'Complimentary alterations'],
-  member: ['Access to the Makay catalog', 'Member QR card'],
+  free:   ['Acceso al catálogo Makay', 'Tarjeta QR de miembro'],
+  member: ['Acceso al catálogo Makay', 'Tarjeta QR de miembro'],
+  bronze: [
+    '10% de descuento en productos y servicios',
+    'Priority Access: Reservas prioritarias en fechas especiales',
+    'Acceso Exclusivo: Catas y eventos cerrados',
+    'Asesoría personalizada con tu Vacation Planner',
+    'Membresía Transferible (hasta 3 personas autorizadas)',
+  ],
+  silver: [
+    'Toldo GRATIS en temporada baja',
+    '10% de descuento en productos y servicios',
+    'Priority Access: Reservas prioritarias en fechas especiales',
+    'Acceso Exclusivo: Catas y eventos cerrados',
+    'Asesoría personalizada con tu Vacation Planner',
+    'Membresía Transferible (hasta 3 personas autorizadas)',
+  ],
+  gold: [
+    'Toldo GRATIS en temporada baja',
+    '10% de descuento en productos y servicios',
+    'Priority Access: Reservas prioritarias en fechas especiales',
+    'Acceso Exclusivo: Catas y eventos cerrados',
+    'Acceso Deportivo GRATIS: Beach Tennis y Voleibol de playa',
+    'Descuentos Exclusivos en marcas aliadas',
+    'Asesoría personalizada con tu Vacation Planner',
+    'Membresía Transferible (hasta 3 personas autorizadas)',
+  ],
+  vip: [
+    'Todos los beneficios Gold',
+    'Acceso Deportivo GRATIS: Beach Tennis y Voleibol de playa',
+    'Descuentos Exclusivos en marcas aliadas',
+    'Asesoría personalizada con tu Vacation Planner',
+    'Membresía Transferible (hasta 3 personas autorizadas)',
+  ],
 };
 
 const TIER_THRESHOLDS: Record<string, number> = {
@@ -256,21 +284,29 @@ export default function ClientProfile() {
 
   const PAID_TIER_BENEFITS: Record<string, Array<{ icon: typeof Percent; label: string; detail: string }>> = {
     bronze: [
-      { icon: Percent,  label: '10% de descuento', detail: 'Para todos los productos y servicios del club' },
+      { icon: Percent,  label: '10% de descuento', detail: 'En todos nuestros productos y servicios' },
+      { icon: Star,     label: 'Priority Access', detail: 'Reservas prioritarias en fechas especiales y eventos' },
+      { icon: Lock,     label: 'Acceso Exclusivo', detail: 'Invitación a catas y eventos cerrados' },
     ],
     silver: [
-      { icon: Percent,  label: '10% de descuento', detail: 'Para todos los productos y servicios del club' },
-      { icon: Umbrella, label: 'Toldo gratis', detail: 'En temporada baja' },
+      { icon: Umbrella, label: 'Toldo GRATIS', detail: 'Durante la temporada baja' },
+      { icon: Percent,  label: '10% de descuento', detail: 'En todos nuestros productos y servicios' },
+      { icon: Star,     label: 'Priority Access', detail: 'Reservas prioritarias en fechas especiales y eventos' },
+      { icon: Lock,     label: 'Acceso Exclusivo', detail: 'Invitación a catas y eventos cerrados' },
     ],
     gold: [
-      { icon: Percent,  label: '10% de descuento', detail: 'Para todos los productos y servicios del club' },
-      { icon: Umbrella, label: 'Toldo gratis', detail: 'En temporada baja' },
-      { icon: Trophy,   label: 'Cancha Beach Tennis gratis', detail: 'En Makay La Marina' },
+      { icon: Umbrella, label: 'Toldo GRATIS', detail: 'Durante la temporada baja' },
+      { icon: Percent,  label: '10% de descuento', detail: 'En todos nuestros productos y servicios' },
+      { icon: Star,     label: 'Priority Access', detail: 'Reservas prioritarias en fechas especiales y eventos' },
+      { icon: Lock,     label: 'Acceso Exclusivo', detail: 'Invitación a catas y eventos cerrados' },
+      { icon: Trophy,   label: 'Acceso Deportivo GRATIS', detail: 'Beach Tennis y Voleibol de playa' },
+      { icon: Tag,          label: 'Marcas Aliadas', detail: 'Descuentos exclusivos en nuestras marcas aliadas' },
     ],
     vip: [
-      { icon: Percent,  label: '10% de descuento', detail: 'Para todos los productos y servicios del club' },
-      { icon: Umbrella, label: 'Toldo gratis', detail: 'En temporada baja' },
-      { icon: Trophy,   label: 'Cancha Beach Tennis gratis', detail: 'En Makay La Marina' },
+      { icon: Umbrella, label: 'Toldo GRATIS', detail: 'Durante la temporada baja' },
+      { icon: Percent,  label: '10% de descuento', detail: 'En todos nuestros productos y servicios' },
+      { icon: Trophy,   label: 'Acceso Deportivo GRATIS', detail: 'Beach Tennis y Voleibol de playa' },
+      { icon: Tag,          label: 'Marcas Aliadas', detail: 'Descuentos exclusivos en nuestras marcas aliadas' },
     ],
   };
 

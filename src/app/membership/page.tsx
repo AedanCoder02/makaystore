@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
-import { Calendar, MapPin, Users, Ticket, Star, Crown, Award, Shield, Lock, Copy, Check, Percent, Umbrella, Trophy, ChevronRight } from 'lucide-react';
+import { Calendar, MapPin, Users, Ticket, Star, Award, Lock, Copy, Check, Percent, Umbrella, Trophy, ChevronRight } from 'lucide-react';
 import MembershipLeadForm from '@/components/membership/MembershipLeadForm';
 
 export const dynamic = 'force-dynamic';
@@ -35,37 +35,48 @@ const BENEFIT_TIERS: Array<{
   key: BenefitTier;
   label: string;
   color: string;
-  price: string;
+  priceMonthly: string;
+  priceQuarterly: string;
   benefits: Array<{ icon: typeof Percent; text: string }>;
 }> = [
   {
     key: 'bronze',
     label: 'Bronce',
     color: '#CD7F32',
-    price: 'Desde $100',
+    priceMonthly: '$50/mes',
+    priceQuarterly: '$150 trimestral',
     benefits: [
-      { icon: Percent, text: '10% de descuento en todos los productos' },
+      { icon: Percent,  text: '10% de descuento en todos nuestros productos y servicios' },
+      { icon: Star,     text: 'Priority Access: Reservas prioritarias en fechas especiales y eventos' },
+      { icon: Lock,     text: 'Acceso Exclusivo: Invitación a nuestras catas y eventos cerrados' },
     ],
   },
   {
     key: 'silver',
     label: 'Plata',
     color: '#A8A9AD',
-    price: 'Desde $300',
+    priceMonthly: '$100/mes',
+    priceQuarterly: '$300 trimestral',
     benefits: [
-      { icon: Percent,  text: '10% de descuento en todos los productos' },
-      { icon: Umbrella, text: 'Toldo gratis en temporada baja' },
+      { icon: Umbrella, text: 'Toldo GRATIS durante la temporada baja' },
+      { icon: Percent,  text: '10% de descuento en todos nuestros productos y servicios' },
+      { icon: Star,     text: 'Priority Access: Reservas prioritarias en fechas especiales y eventos' },
+      { icon: Lock,     text: 'Acceso Exclusivo: Invitación a nuestras catas y eventos cerrados' },
     ],
   },
   {
     key: 'gold',
     label: 'Oro',
     color: '#D4AF37',
-    price: 'Desde $700',
+    priceMonthly: '$150/mes',
+    priceQuarterly: '$450 trimestral',
     benefits: [
-      { icon: Percent,  text: '10% de descuento en todos los productos' },
-      { icon: Umbrella, text: 'Toldo gratis en temporada baja' },
-      { icon: Trophy,   text: 'Cancha de Beach Tennis gratis en Makay La Marina' },
+      { icon: Umbrella, text: 'Toldo GRATIS durante la temporada baja' },
+      { icon: Percent,  text: '10% de descuento en todos nuestros productos y servicios' },
+      { icon: Star,     text: 'Priority Access: Reservas prioritarias en fechas especiales y eventos' },
+      { icon: Lock,     text: 'Acceso Exclusivo: Invitación a nuestras catas y eventos cerrados' },
+      { icon: Trophy,   text: 'Acceso Deportivo GRATIS: Canchas de Beach Tennis y Voleibol de playa' },
+      { icon: Award,    text: 'Descuentos Exclusivos en todas nuestras marcas aliadas' },
     ],
   },
 ];
@@ -234,7 +245,10 @@ export default function MembershipPage() {
                     <h3 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: 0 }}>{tier.label}</h3>
                   </div>
                   <div style={{ background: `${tier.color}15`, borderRadius: 10, padding: '0.4rem 0.75rem', textAlign: 'center' }}>
-                    <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, color: tier.color, margin: 0, whiteSpace: 'nowrap' }}>{tier.price}</p>
+                    <div style={{ textAlign: 'right' }}>
+                      <p style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1rem', fontWeight: 700, color: tier.color, margin: 0, lineHeight: 1.1 }}>{tier.priceMonthly}</p>
+                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.62rem', fontWeight: 600, color: `${tier.color}99`, margin: 0 }}>{tier.priceQuarterly}</p>
+                    </div>
                   </div>
                 </div>
 

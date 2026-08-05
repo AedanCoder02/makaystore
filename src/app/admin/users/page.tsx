@@ -1,10 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown, ChevronUp, Users, Trash2, Plus, UserPlus } from 'lucide-react';
 import AdminSidebar from '@/components/AdminSidebar';
+
+interface AuthorizedUser {
+  id: number;
+  member_clerk_id: string;
+  name: string;
+  email: string | null;
+  phone: string | null;
+  notes: string | null;
+}
 
 interface UserRow {
   id: string;
@@ -53,6 +62,44 @@ export default function AdminUsersPage() {
   const [permDrafts, setPermDrafts] = useState<Record<string, string[]>>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [toast, setToast] = useState('');
+
+  // Authorized users per member
+  const [authPanel, setAuthPanel] = useState<string | null>(null); // active userId
+  const [authUsers, setAuthUsers] = useState<Record<string, AuthorizedUser[]>>({});
+  const [authForm, setAuthForm] = useState({ name: '', email: '', phone: '', notes: '' });
+  const [authSaving, setAuthSaving] = useState(false);
+
+  const loadAuthUsers = useCallback(async (userId: string) => {
+    const res = await fetch('/api/admin/authorized-users?member_clerk_id=' + userId);
+    if (res.ok) {
+      const data: AuthorizedUser[] = await res.json();
+      setAuthUsers(prev => ({ ...prev, [userId]: data }));
+    }
+  }, []);
+
+  const addAuthUser = async (userId: string) => {
+    if (!authForm.name.trim()) return;
+    setAuthSaving(true);
+    const res = await fetch('/api/admin/authorized-users', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ member_clerk_id: userId, ...authForm }),
+    });
+    if (res.ok) {
+      await loadAuthUsers(userId);
+      setAuthForm({ name: '', email: '', phone: '', notes: '' });
+    } else {
+      const err = await res.json();
+      setToast(err.error ?? 'Error al agregar usuario autorizado');
+      setTimeout(() => setToast(''), 3000);
+    }
+    setAuthSaving(false);
+  };
+
+  const removeAuthUser = async (userId: string, authId: number) => {
+    await fetch('/api/admin/authorized-users?id=' + authId, { method: 'DELETE' });
+    await loadAuthUsers(userId);
+  };
 
   useEffect(() => {
     fetch('/api/admin/users')
@@ -175,9 +222,21 @@ export default function AdminUsersPage() {
 
                     {sections.length > 0 && (
                       <button className="perm-expand-btn" onClick={() => setExpanded(isExpanded ? null : user.id)}>
-                        Permissions {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                        Permisos {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
                       </button>
                     )}
+
+                    <button
+                      className="perm-expand-btn"
+                      style={{ borderColor: '#D4AF37', color: '#92700e' }}
+                      onClick={() => {
+                        const next = authPanel === user.id ? null : user.id;
+                        setAuthPanel(next);
+                        if (next) loadAuthUsers(next);
+                      }}
+                    >
+                      <Users size={13} /> Autorizados ({(authUsers[user.id] ?? []).length}/3)
+                    </button>
 
                     <button className="admin-save-btn" onClick={() => saveUser(user.id)} disabled={isSaving}>
                       {isSaving ? 'Saving…' : t('saveRole')}
@@ -189,11 +248,11 @@ export default function AdminUsersPage() {
                     <div className="perm-sections">
                       <div className="perm-sections-header">
                         <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--makay-mauve)' }}>
-                          Section Access for {currentRole}
+                          Acceso por sección — {currentRole}
                         </span>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button className="perm-toggle-all" onClick={() => toggleAll(user.id, currentRole, true)}>All</button>
-                          <button className="perm-toggle-all" onClick={() => toggleAll(user.id, currentRole, false)}>None</button>
+                          <button className="perm-toggle-all" onClick={() => toggleAll(user.id, currentRole, true)}>Todos</button>
+                          <button className="perm-toggle-all" onClick={() => toggleAll(user.id, currentRole, false)}>Ninguno</button>
                         </div>
                       </div>
                       <div className="perm-grid">
@@ -208,6 +267,81 @@ export default function AdminUsersPage() {
                           );
                         })}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Authorized users panel */}
+                  {authPanel === user.id && (
+                    <div style={{ borderTop: '1.5px solid #fef3c7', background: '#fffdf5', padding: '1.25rem 1.5rem' }}>
+                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: '#92700e', margin: '0 0 1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <UserPlus size={13} /> Usuarios Autorizados (máx. 3) — Membresía Transferible
+                      </p>
+
+                      {/* Existing authorized users */}
+                      {(authUsers[user.id] ?? []).length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+                          {(authUsers[user.id] ?? []).map(au => (
+                            <div key={au.id} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.625rem 0.875rem', background: '#fff', border: '1px solid #e8e0ce', borderRadius: 10 }}>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <p style={{ fontFamily: 'var(--font-montserrat)', fontWeight: 600, fontSize: '0.85rem', color: 'var(--makay-dark-navy)', margin: 0 }}>{au.name}</p>
+                                <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', color: 'var(--makay-mauve)', margin: 0 }}>
+                                  {[au.email, au.phone].filter(Boolean).join(' · ') || 'Sin contacto'}
+                                </p>
+                                {au.notes && <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', color: '#a0a0a0', margin: 0 }}>{au.notes}</p>}
+                              </div>
+                              <button
+                                onClick={() => removeAuthUser(user.id, au.id)}
+                                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ef4444', padding: '0.25rem', borderRadius: 6, display: 'flex' }}
+                                title="Eliminar"
+                              >
+                                <Trash2 size={14} />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-mauve)', margin: '0 0 1rem' }}>
+                          Sin usuarios autorizados aún.
+                        </p>
+                      )}
+
+                      {/* Add form — only if under 3 */}
+                      {(authUsers[user.id] ?? []).length < 3 && (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                          {[
+                            { key: 'name',  label: 'Nombre *',   placeholder: 'Nombre completo' },
+                            { key: 'email', label: 'Email',       placeholder: 'correo@ejemplo.com' },
+                            { key: 'phone', label: 'Teléfono',    placeholder: '+58 000 000 0000' },
+                            { key: 'notes', label: 'Notas',       placeholder: 'Parentesco, etc.' },
+                          ].map(f => (
+                            <div key={f.key}>
+                              <label style={{ display: 'block', fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', marginBottom: '0.25rem' }}>{f.label}</label>
+                              <input
+                                className="admin-search-input"
+                                style={{ width: '100%', boxSizing: 'border-box', margin: 0, minWidth: 0, fontSize: '0.82rem' }}
+                                placeholder={f.placeholder}
+                                value={(authForm as Record<string, string>)[f.key]}
+                                onChange={e => setAuthForm(prev => ({ ...prev, [f.key]: e.target.value }))}
+                              />
+                            </div>
+                          ))}
+                          <div style={{ gridColumn: 'span 2', display: 'flex', justifyContent: 'flex-end' }}>
+                            <button
+                              onClick={() => addAuthUser(user.id)}
+                              disabled={authSaving || !authForm.name.trim()}
+                              style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.55rem 1.25rem', background: '#D4AF37', color: '#fff', border: 'none', borderRadius: 8, cursor: 'pointer', fontFamily: 'var(--font-montserrat)', fontWeight: 700, fontSize: '0.82rem', opacity: authSaving ? 0.7 : 1 }}
+                            >
+                              <Plus size={14} /> {authSaving ? 'Guardando…' : 'Agregar'}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      {(authUsers[user.id] ?? []).length >= 3 && (
+                        <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: '#92700e', fontWeight: 600 }}>
+                          Límite alcanzado (3 de 3). Elimina uno para agregar otro.
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>

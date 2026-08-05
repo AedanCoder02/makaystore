@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, ArrowRight, MessageCircle, Percent, Umbrella, Trophy } from 'lucide-react';
+import { X, ArrowRight, MessageCircle, Percent, Umbrella, Trophy, Star, Lock, Award } from 'lucide-react';
 
 // Update this when client provides WhatsApp number
 const WA_LINK = 'https://wa.me/XXXXXXXXXX';
@@ -29,16 +29,23 @@ const TIER_LABEL: Record<Tier, string> = {
 
 const TIER_BENEFITS: Record<Tier, Array<{ icon: React.ComponentType<{ size?: number; color?: string }>; text: string }>> = {
   bronze: [
-    { icon: Percent,  text: '10% de descuento en todos los productos' },
+    { icon: Percent,  text: '10% de descuento en todos nuestros productos y servicios' },
+    { icon: Star,     text: 'Priority Access: Reservas prioritarias en fechas especiales y eventos' },
+    { icon: Lock,     text: 'Acceso Exclusivo: Invitación a nuestras catas y eventos cerrados' },
   ],
   silver: [
-    { icon: Percent,  text: '10% de descuento en todos los productos' },
-    { icon: Umbrella, text: 'Toldo gratis en temporada baja' },
+    { icon: Umbrella, text: 'Toldo GRATIS durante la temporada baja' },
+    { icon: Percent,  text: '10% de descuento en todos nuestros productos y servicios' },
+    { icon: Star,     text: 'Priority Access: Reservas prioritarias en fechas especiales y eventos' },
+    { icon: Lock,     text: 'Acceso Exclusivo: Invitación a nuestras catas y eventos cerrados' },
   ],
   gold: [
-    { icon: Percent,  text: '10% de descuento en todos los productos' },
-    { icon: Umbrella, text: 'Toldo gratis en temporada baja' },
-    { icon: Trophy,   text: 'Cancha de Beach Tennis gratis en Makay La Marina' },
+    { icon: Umbrella, text: 'Toldo GRATIS durante la temporada baja' },
+    { icon: Percent,  text: '10% de descuento en todos nuestros productos y servicios' },
+    { icon: Star,     text: 'Priority Access: Reservas prioritarias en fechas especiales y eventos' },
+    { icon: Lock,     text: 'Acceso Exclusivo: Invitación a nuestras catas y eventos cerrados' },
+    { icon: Trophy,   text: 'Acceso Deportivo GRATIS: Canchas de Beach Tennis y Voleibol de playa' },
+    { icon: Award,    text: 'Descuentos Exclusivos en todas nuestras marcas aliadas' },
   ],
 };
 
