@@ -69,7 +69,13 @@ export default function SellerSidebar() {
 
       {/* Overlay backdrop */}
       {mobileOpen && (
-        <div className="sidebar-mobile-overlay" onClick={() => setMobileOpen(false)} />
+        <div
+          className="sidebar-mobile-overlay"
+          onClick={() => setMobileOpen(false)}
+          onTouchStart={() => setMobileOpen(false)}
+          role="button"
+          aria-label="Cerrar menú"
+        />
       )}
 
       <aside className={`seller-sidebar${collapsed ? ' sidebar-collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>

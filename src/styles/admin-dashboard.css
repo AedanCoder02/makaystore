@@ -704,7 +704,8 @@
   position: fixed;
   top: 72px;
   left: 0;
-  z-index: 250;
+  /* High enough to stay above the open sidebar */
+  z-index: 1200;
   border: none;
   border-radius: 0 8px 8px 0;
   padding: 0.6rem 0.7rem;
@@ -713,6 +714,7 @@
   justify-content: center;
   box-shadow: 2px 0 10px rgba(0,0,0,0.18);
   transition: opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
 }
 .sidebar-ham-btn--seller { background: #2c2825; color: rgba(255,255,255,0.85); }
 .sidebar-ham-btn--admin  { background: #1e1e2e; color: rgba(255,255,255,0.85); }
@@ -723,10 +725,13 @@
   position: fixed;
   inset: 0;
   background: rgba(0,0,0,0.55);
-  z-index: 280;
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
+  /* Must be below sidebar (1100) but above page content */
+  z-index: 1000;
+  /* backdrop-filter intentionally omitted — breaks pointer-events on iOS Safari */
   animation: mobileOverlayIn 0.2s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 @keyframes mobileOverlayIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -742,9 +747,11 @@
   padding: 0.3rem;
   border-radius: 6px;
   transition: color 0.15s, background 0.15s;
-  z-index: 10;
+  /* Relative to sidebar — sidebar is stacking context root so this is fine */
+  z-index: 2;
   align-items: center;
   justify-content: center;
+  -webkit-tap-highlight-color: transparent;
 }
 .sidebar-close-mobile:hover { color: #fff; background: rgba(255,255,255,0.1); }
 
@@ -778,7 +785,8 @@
     display: flex !important;
     transform: translateX(-110%);
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 300;
+    /* Above overlay (1000), below hamburger (1200) */
+    z-index: 1100;
     position: fixed;
     top: 64px;
     bottom: 0;
@@ -786,10 +794,13 @@
     width: 220px !important;
     border-radius: 0 !important;
     overflow-y: auto;
+    /* Prevent off-screen sidebar from silently intercepting taps */
+    pointer-events: none;
   }
   .seller-sidebar.mobile-open {
     transform: translateX(0);
     box-shadow: 4px 0 40px rgba(0,0,0,0.35);
+    pointer-events: auto;
   }
 
   /* ── Admin sidebar → off-screen drawer ── */
@@ -798,17 +809,19 @@
     flex-direction: column;
     transform: translateX(-110%);
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 300;
+    z-index: 1100;
     position: fixed;
     top: 64px;
     bottom: 0;
     left: 0;
     width: 240px !important;
     overflow-y: auto;
+    pointer-events: none;
   }
   .admin-sidebar.mobile-open {
     transform: translateX(0);
     box-shadow: 4px 0 40px rgba(0,0,0,0.35);
+    pointer-events: auto;
   }
 
   /* ── Supervisor sidebar → off-screen drawer ── */
@@ -816,17 +829,19 @@
     display: flex !important;
     transform: translateX(-110%);
     transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 300;
+    z-index: 1100;
     position: fixed;
     top: 64px;
     bottom: 0;
     left: 0;
     width: 210px !important;
     overflow-y: auto;
+    pointer-events: none;
   }
   .sup-sidebar.mobile-open {
     transform: translateX(0);
     box-shadow: 4px 0 40px rgba(0,0,0,0.35);
+    pointer-events: auto;
   }
 
   /* Prevent sidebar-collapsed margin from activating on mobile */

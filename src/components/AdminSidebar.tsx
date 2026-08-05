@@ -53,7 +53,13 @@ export default function AdminSidebar() {
       </button>
 
       {mobileOpen && (
-        <div className="sidebar-mobile-overlay" onClick={() => setMobileOpen(false)} />
+        <div
+          className="sidebar-mobile-overlay"
+          onClick={() => setMobileOpen(false)}
+          onTouchStart={() => setMobileOpen(false)}
+          role="button"
+          aria-label="Cerrar menú"
+        />
       )}
 
       <aside className={`admin-sidebar${collapsed ? ' sidebar-collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
