@@ -1639,6 +1639,7 @@
 @media (max-width: 1024px) {
   .sales-grid    { grid-template-columns: repeat(2, 1fr); }
   .worker-cards  { grid-template-columns: repeat(2, 1fr); }
+  .sup-page      { padding: 1.5rem 1.25rem 5rem; }
 }
 
 @media (max-width: 768px) {
@@ -1646,71 +1647,132 @@
   .supervisor-main { flex: 1; min-width: 0; }
   .sup-page        { padding: 1.25rem 1rem 5rem; max-width: 100%; }
 
-  /* Page header */
+  /* Old dashboard container */
+  .supervisor-dashboard-container { padding: 1rem 1rem 5rem; }
+  .dashboard-header h1 { font-size: 1.5rem; }
+
+  /* Page header — stack title + actions */
   .sup-page-header {
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.6rem;
   }
-  .sup-page-title { font-size: 1.25rem !important; }
+  .sup-page-title   { font-size: 1.25rem !important; flex-basis: 100%; }
+  .sup-page-count   { align-self: flex-start; }
+  /* Action buttons in header fill width */
+  .sup-page-header > button,
+  .sup-page-header > a {
+    flex: 1;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  /* Section cards */
+  .sup-section { padding: 1.125rem 1rem; }
 
   /* Content grids — single column */
-  .taskboard-columns    { grid-template-columns: 1fr; }
-  .sales-grid           { grid-template-columns: 1fr; }
-  .worker-cards         { grid-template-columns: 1fr; }
-  .sup-shifts-grid      { grid-template-columns: 1fr; }
-  .quick-actions-grid   { flex-direction: column; gap: 0.5rem; }
+  .taskboard-columns  { grid-template-columns: 1fr; }
+  .sales-grid         { grid-template-columns: minmax(0, 1fr); }
+  .worker-cards       { grid-template-columns: minmax(0, 1fr); }
+  .sup-shifts-grid    { grid-template-columns: 1fr; }
+  .quick-actions-grid { flex-direction: column; gap: 0.5rem; }
+  .quick-action-btn   { width: 100%; min-height: 48px; }
 
-  /* Fix minmax grids so they don't overflow on narrow screens */
-  .worker-cards,
-  .sales-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  /* Taskboard — each column scrollable */
+  .taskboard-col-items { min-height: 60px; }
 
-  /* Tables — reduce padding, allow wrapping */
-  .sup-table    { font-size: 0.78rem; }
+  /* Tables — horizontal scroll, keep data accessible */
+  .sup-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .sup-table      { font-size: 0.78rem; min-width: 460px; }
   .sup-table th,
-  .sup-table td { padding: 0.55rem 0.6rem; white-space: normal; word-break: break-word; }
+  .sup-table td   { padding: 0.55rem 0.6rem; white-space: nowrap; }
   /* Hide lower-priority columns */
   .sup-table thead th:nth-child(n+4),
   .sup-table tbody td:nth-child(n+4) { display: none; }
 
   /* Rankings table */
-  .rankings-table        { font-size: 0.78rem; }
+  .rankings-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .rankings-table         { font-size: 0.78rem; min-width: 360px; }
   .rankings-table th,
-  .rankings-table td     { padding: 0.5rem 0.5rem; white-space: normal; }
+  .rankings-table td      { padding: 0.5rem 0.5rem; white-space: nowrap; }
   .rankings-table thead th:nth-child(n+4),
   .rankings-table tbody td:nth-child(n+4) { display: none; }
 
-  /* Filter inputs */
+  /* Filter tabs */
   .sup-filter-tabs { overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
   .sup-filter-tabs::-webkit-scrollbar { display: none; }
-  .sup-filter-tab { flex-shrink: 0; }
+  .sup-filter-tab  { flex-shrink: 0; min-height: 36px; }
 
   /* Approval items */
   .approval-item    { flex-direction: column; align-items: flex-start; }
   .approval-actions { width: 100%; justify-content: flex-end; margin-top: 0.75rem; }
+  .btn-approve,
+  .btn-reject       { flex: 1; min-height: 48px; font-size: 1rem; }
 
   /* Summary stats */
-  .summary-stats { flex-direction: column; }
+  .summary-stats { flex-direction: column; gap: 1rem; }
 
   /* Shift rows */
-  .shift-row, .sup-shift-row {
+  .shift-row {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.5rem;
+    gap: 0.4rem;
   }
+  .shift-row-times { flex-wrap: wrap; }
 
-  /* Worker panel drawer full-width on mobile */
+  /* Alert items */
+  .alert-item { flex-wrap: wrap; gap: 0.5rem; }
+  .alert-actions { width: 100%; justify-content: flex-end; }
+
+  /* Activity feed */
+  .activity-feed-list { max-height: 260px; }
+  .activity-content   { font-size: 0.82rem; }
+
+  /* Worker panel — full width drawer */
   .worker-panel-drawer { width: 100%; }
+  .worker-panel-body   { padding: 1.125rem; gap: 1.125rem; }
+  .worker-panel-header { padding: 1rem 1.125rem; }
 
-  /* Supervisor-specific table wrap */
-  .sup-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* Worker profiles */
+  .worker-profile-list { gap: 0.5rem; }
+  .worker-profile-chip { flex: 1; min-width: 0; }
+
+  /* Sales worker cards */
+  .sales-worker-card  { padding: 0.875rem; }
+  .sales-stats-row    { flex-wrap: wrap; gap: 0.5rem; }
 }
 
 @media (max-width: 480px) {
-  .sup-page       { padding: 1rem 0.75rem 5rem; }
-  .sup-page-title { font-size: 1.1rem !important; }
-  .sup-table      { font-size: 0.72rem; }
+  .sup-page         { padding: 1rem 0.75rem 5rem; }
+  .sup-page-title   { font-size: 1.1rem !important; }
+  .sup-section      { padding: 0.875rem 0.75rem; }
+
+  /* Tables tighter */
+  .sup-table        { font-size: 0.72rem; min-width: 380px; }
   .sup-table th,
-  .sup-table td   { padding: 0.4rem 0.45rem; }
+  .sup-table td     { padding: 0.4rem 0.45rem; }
+  .rankings-table   { min-width: 300px; }
+
+  /* Worker panel body */
+  .worker-panel-body   { padding: 0.875rem; gap: 1rem; }
+  .worker-panel-header { padding: 0.875rem 1rem; }
+  .worker-notes-textarea { font-size: 0.85rem; }
+
+  /* Worker cards */
+  .worker-card { padding: 0.875rem; }
+
+  /* Shift cards */
+  .sup-shift-card { padding: 0.75rem; gap: 0.5rem; }
+
+  /* Quick action buttons touch friendly */
+  .quick-action-btn { min-height: 52px; font-size: 0.875rem; }
+
+  /* Approval buttons */
+  .btn-approve,
+  .btn-reject { width: 52px; height: 52px; font-size: 1.1rem; }
+
+  /* Filter tab min-height */
+  .sup-filter-tab { min-height: 40px; font-size: 0.78rem; }
+
+  /* Modal */
+  .modal-box { padding: 1.125rem; }
 }

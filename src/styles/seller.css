@@ -832,14 +832,15 @@
   .seller-stats-grid      { grid-template-columns: repeat(2, 1fr); }
   .seller-action-grid     { grid-template-columns: 1fr 1fr; }
   .seller-sell-layout     { grid-template-columns: 1fr; }
-  .seller-cart-panel      { position: static; max-height: none; }
+  /* Cart appears first above product list on tablet/mobile */
+  .seller-cart-panel      { order: -1; position: static; max-height: none; }
   .seller-checkout-layout { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 768px) {
   /* Layout — sidebar handled via shared drawer CSS in admin-dashboard.css */
   .seller-main  { margin-left: 0 !important; padding-top: 4px; }
-  .seller-page  { padding: 1.25rem 1rem 5rem; }
+  .seller-page  { padding: 1.25rem 1rem 5rem; max-width: 100%; }
 
   /* Page header — stack title + action buttons */
   .seller-page-header {
@@ -853,24 +854,40 @@
     gap: 0.5rem;
     flex-wrap: wrap;
   }
+  .seller-page-header .seller-btn-primary,
+  .seller-page-header .seller-btn-ghost {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+    min-height: 44px;
+  }
 
   /* Stats & grids */
   .seller-stats-grid  { grid-template-columns: 1fr 1fr; }
   .seller-action-grid { grid-template-columns: 1fr; }
   .seller-form-grid   { grid-template-columns: 1fr; }
+  .seller-action-card { min-height: 80px; }
 
-  /* Product table — hide non-essential columns */
-  .sp-table { font-size: 0.78rem; }
+  /* Recent orders */
+  .seller-order-row   { flex-direction: column; gap: 0.4rem; }
+  .seller-order-date  { text-align: left; }
+
+  /* ── Product table ── */
+  /* Wrap in horizontal scroll, keep all data accessible */
+  .sp-table-wrap  { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .sp-table       { font-size: 0.78rem; min-width: 520px; }
   .sp-table th,
-  .sp-table td { padding: 0.55rem 0.6rem; }
-  .sp-table thead th:nth-child(4),
+  .sp-table td    { padding: 0.55rem 0.6rem; }
+  /* Hide columns 5+ (keep: thumb, title, price, status, actions) */
   .sp-table thead th:nth-child(5),
   .sp-table thead th:nth-child(6),
-  .sp-table tbody td:nth-child(4),
   .sp-table tbody td:nth-child(5),
   .sp-table tbody td:nth-child(6) { display: none; }
-  .sp-title { white-space: normal; word-break: break-word; }
+  .sp-title { white-space: normal; word-break: break-word; max-width: 140px; }
   .sp-sku   { white-space: normal; }
+
+  /* Inline edit panel */
+  .sp-edit-panel { padding: 1rem; gap: 0.625rem; }
 
   /* Tabs — horizontal scroll */
   .sp-tabs {
@@ -884,18 +901,19 @@
   .sp-tab { flex-shrink: 0; font-size: 0.78rem; padding: 0.5rem 0.75rem; }
 
   /* Toolbar */
-  .sp-toolbar    { flex-direction: column; align-items: stretch; }
-  .seller-search { width: 100% !important; margin: 0; }
+  .sp-toolbar    { flex-direction: column; align-items: stretch; gap: 0.5rem; }
+  .seller-search { width: 100% !important; margin: 0; box-sizing: border-box; }
   .sp-bulk       { overflow-x: auto; padding-bottom: 4px; flex-wrap: nowrap; }
-  .sp-bulk-btn   { flex-shrink: 0; }
+  .sp-bulk-btn   { flex-shrink: 0; min-height: 36px; }
 
-  /* Stock rows */
+  /* ── Stock rows ── */
   .seller-stock-row {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.6rem;
   }
   .seller-stock-controls { width: 100%; justify-content: flex-end; }
+  .seller-stock-save { flex: 1; justify-content: center; }
 
   /* Inputs — full width, no fixed min-width */
   .seller-input,
@@ -907,11 +925,36 @@
     box-sizing: border-box;
   }
 
-  /* Sell / checkout */
-  .seller-sell-layout     { grid-template-columns: 1fr; }
-  .seller-cart-panel      { position: static; max-height: none; }
-  .seller-checkout-layout { grid-template-columns: 1fr; }
-  .seller-done            { padding: 2rem 1rem; }
+  /* ── Sell flow ── */
+  .seller-sell-layout  { grid-template-columns: 1fr; gap: 1rem; }
+  /* Cart already moves to top via order:-1 at 1024px */
+  .seller-cart-panel   { position: static; max-height: none; border-radius: 14px; }
+  /* Cart items: tighten on mobile */
+  .seller-cart-item    { flex-wrap: wrap; gap: 0.35rem; }
+
+  /* Step strip — horizontal scroll if too many steps */
+  .seller-steps        { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .seller-steps::-webkit-scrollbar { display: none; }
+  .seller-step         { flex-shrink: 0; font-size: 0.75rem; padding: 0.625rem 0.5rem; min-width: 72px; }
+
+  /* Client grid — single column */
+  .seller-clients-grid { grid-template-columns: minmax(0, 1fr); max-height: 320px; }
+
+  /* Checkout */
+  .seller-checkout-layout  { grid-template-columns: 1fr; gap: 1rem; }
+  .seller-checkout-actions {
+    flex-direction: column-reverse;
+    gap: 0.5rem;
+  }
+  .seller-checkout-actions > * { width: 100%; justify-content: center; }
+  .seller-payment-options { gap: 0.4rem; }
+  .seller-payment-btn     { flex: 1; min-height: 44px; font-size: 0.85rem; }
+
+  /* Done screen */
+  .seller-done { padding: 2rem 1rem; }
+
+  /* Step footer */
+  .seller-step-footer .seller-btn-primary { width: 100%; justify-content: center; min-height: 48px; }
 
   /* Sidebar-collapsed class should not add margin on mobile */
   .seller-layout.sidebar-collapsed .seller-main { margin-left: 0; }
@@ -922,11 +965,23 @@
   .seller-page-title { font-size: 1.2rem !important; }
   .seller-stats-grid { grid-template-columns: 1fr; }
   .seller-stat-card  { padding: 1rem; }
-  .sp-table          { font-size: 0.72rem; }
+  .sp-table          { font-size: 0.72rem; min-width: 440px; }
   .sp-table th,
-  .sp-table td { padding: 0.45rem 0.5rem; }
+  .sp-table td       { padding: 0.4rem 0.5rem; }
   .seller-btn-primary,
-  .seller-btn-ghost  { font-size: 0.8rem; padding: 0.5rem 0.875rem; }
+  .seller-btn-ghost  { font-size: 0.82rem; padding: 0.55rem 0.875rem; min-height: 44px; }
+  /* Stock controls tighter */
+  .seller-qty-btn    { min-width: 36px; height: 36px; }
+  .seller-qty-input  { width: 48px; font-size: 0.85rem; }
+  /* Edit panel tight */
+  .sp-edit-panel     { padding: 0.75rem; }
+  /* Sell step labels tiny */
+  .seller-step       { font-size: 0.68rem; padding: 0.5rem 0.35rem; min-width: 60px; }
+  /* Cart panel */
+  .seller-cart-title { font-size: 0.9rem; }
+  /* Checkout summary */
+  .seller-checkout-summary,
+  .seller-checkout-form { padding: 1.125rem; }
 }
 
 /* ── Admin Events (ae-*) ── */

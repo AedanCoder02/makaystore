@@ -329,13 +329,15 @@
   .admin-search-input {
     min-width: 0;
     width: 100%;
+    box-sizing: border-box;
   }
   .admin-count { margin-left: 0; }
 
-  /* Admin tables */
-  .admin-table { font-size: 0.78rem; }
+  /* Admin tables — horizontal scroll so nothing gets cut */
+  .admin-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-table { font-size: 0.78rem; min-width: 480px; }
   .admin-table th,
-  .admin-table td { padding: 0.55rem 0.6rem; white-space: normal; }
+  .admin-table td { padding: 0.55rem 0.6rem; white-space: nowrap; }
   /* Hide lower-priority columns in orders/users tables */
   .admin-table thead th:nth-child(n+5),
   .admin-table tbody td:nth-child(n+5) { display: none; }
@@ -346,15 +348,91 @@
 
   /* Sidebar-collapsed: no margin on mobile */
   .admin-layout.sidebar-collapsed .admin-main { grid-column: 1; }
+
+  /* ── Cost / Goals settings row ── */
+  .cost-settings-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .cost-percent-input { width: 100%; box-sizing: border-box; }
+  .cost-save-btn { width: 100%; }
+
+  /* ── Permission user card — restructure for mobile ── */
+  .perm-user-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem 0.75rem;
+    align-items: center;
+    padding: 0.75rem 1rem;
+  }
+  /* Avatar cell spans full row */
+  .perm-user-row .admin-user-cell {
+    grid-column: 1 / -1;
+    flex: unset;
+  }
+  /* Role select full width on its own row */
+  .admin-role-select {
+    grid-column: 1 / -1;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+    min-height: 44px;
+  }
+  /* Expand + authorized buttons side-by-side */
+  .perm-expand-btn {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
+    min-height: 40px;
+    font-size: 0.75rem;
+  }
+  /* Save button full width at bottom */
+  .admin-save-btn {
+    grid-column: 1 / -1;
+    width: 100%;
+    min-height: 44px;
+    font-size: 0.9rem;
+  }
+  /* Permission chip grid — wrap naturally */
+  .perm-grid { gap: 0.4rem; }
+  .perm-chip { font-size: 0.75rem; padding: 0.4rem 0.75rem; min-height: 36px; }
+
+  /* ── Admin events — inline edit panel ── */
+  .ae-edit-panel { padding: 1rem; }
+  .ae-form-grid  { grid-template-columns: 1fr; gap: 0.75rem; }
+
+  /* ── Toast — full width on mobile ── */
+  .admin-toast {
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 1rem;
+    text-align: center;
+    border-radius: 10px;
+  }
+
+  /* ── Reports two-column grids → single ── */
+  .report-grid-2col { grid-template-columns: 1fr !important; }
+
+  /* ── Memberships tab — overview cards ── */
+  .memberships-overview-grid { grid-template-columns: 1fr !important; }
 }
 
 @media (max-width: 480px) {
   .admin-main         { padding: 1rem 0.75rem 5rem; }
   .dashboard-header h1 { font-size: 1.25rem; }
-  .admin-nav-card     { min-height: 60px; padding: 0.875rem; }
+  .admin-nav-card     { min-height: 56px; padding: 0.75rem; }
+  .card-icon          { font-size: 1.5rem; min-width: 28px; }
+  .card-content h3    { font-size: 1rem; }
   .admin-table        { font-size: 0.72rem; }
   .admin-table th,
   .admin-table td     { padding: 0.4rem 0.5rem; }
+  /* Keep role select touch-friendly */
+  .admin-role-select  { min-height: 44px; font-size: 0.85rem; }
+  .admin-save-btn     { min-height: 44px; font-size: 0.85rem; }
+  /* Permission sections */
+  .perm-sections      { padding: 0.75rem; }
+  .perm-sections-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
 }
 
 /* Live stats strip */
