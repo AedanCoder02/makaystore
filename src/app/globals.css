@@ -33,13 +33,6 @@
   --font-mono: monospace;
 }
 
-/* Prevent any element from forcing the document wider than the viewport.
-   Without this, tables or fixed-width components trigger browser auto-scale
-   which makes the whole page appear zoomed in on mobile. */
-html {
-  overflow-x: hidden;
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
@@ -47,8 +40,6 @@ body {
   font-size: var(--mkt-body-size, 1rem);
   line-height: 1.6;
   letter-spacing: var(--mkt-letter-spacing, 0.02em);
-  overflow-x: hidden;
-  max-width: 100vw;
 }
 
 h1, h2, h3, h4, h5 {

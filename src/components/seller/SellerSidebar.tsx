@@ -71,7 +71,7 @@ export default function SellerSidebar() {
       {mobileOpen && (
         <div
           className="sidebar-mobile-overlay"
-          style={{ left: 220 }}
+          style={{ left: 180 }}
           onClick={() => setMobileOpen(false)}
           role="button"
           aria-label="Cerrar menú"
