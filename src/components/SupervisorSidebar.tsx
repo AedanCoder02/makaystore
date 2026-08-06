@@ -47,8 +47,8 @@ export default function SupervisorSidebar() {
       {mobileOpen && (
         <div
           className="sidebar-mobile-overlay"
+          style={{ left: 210 }}
           onClick={() => setMobileOpen(false)}
-          onTouchStart={() => setMobileOpen(false)}
           role="button"
           aria-label="Cerrar menú"
         />

@@ -67,12 +67,12 @@ export default function SellerSidebar() {
         <Menu size={20} />
       </button>
 
-      {/* Overlay backdrop */}
+      {/* Overlay backdrop — starts at sidebar edge so it never covers nav items */}
       {mobileOpen && (
         <div
           className="sidebar-mobile-overlay"
+          style={{ left: 220 }}
           onClick={() => setMobileOpen(false)}
-          onTouchStart={() => setMobileOpen(false)}
           role="button"
           aria-label="Cerrar menú"
         />

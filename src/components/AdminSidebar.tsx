@@ -55,8 +55,8 @@ export default function AdminSidebar() {
       {mobileOpen && (
         <div
           className="sidebar-mobile-overlay"
+          style={{ left: 240 }}
           onClick={() => setMobileOpen(false)}
-          onTouchStart={() => setMobileOpen(false)}
           role="button"
           aria-label="Cerrar menú"
         />
