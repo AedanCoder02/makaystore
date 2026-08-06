@@ -25,6 +25,8 @@ export default function TutorialOverlay({
   const [position, setPosition] = useState<CSSProperties>({});
   const [highlightRect, setHighlightRect] = useState<DOMRect | null>(null);
 
+  const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
+
   useEffect(() => {
     const updatePositions = () => {
       const target = document.querySelector(step.target);
@@ -33,11 +35,16 @@ export default function TutorialOverlay({
         return;
       }
 
+      // On mobile: scroll the target into view so the highlight is visible above the bottom card
+      if (isMobile()) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
       const rect = target.getBoundingClientRect();
       setHighlightRect(rect);
 
-      const overlay = document.querySelector('.tutorial-overlay-card') as HTMLElement;
-      if (!overlay) return;
+      // On mobile the card is always bottom-anchored via CSS — no JS positioning needed
+      if (isMobile()) return;
 
       const overlayHeight = 160;
       const overlayWidth = 280;
@@ -83,11 +90,13 @@ export default function TutorialOverlay({
       setPosition({ top, left });
     };
 
-    updatePositions();
+    // Small delay so the DOM has settled before measuring (especially after route changes)
+    const timer = setTimeout(updatePositions, 80);
     window.addEventListener('resize', updatePositions);
-    window.addEventListener('scroll', updatePositions);
+    window.addEventListener('scroll', updatePositions, { passive: true });
 
     return () => {
+      clearTimeout(timer);
       window.removeEventListener('resize', updatePositions);
       window.removeEventListener('scroll', updatePositions);
     };
