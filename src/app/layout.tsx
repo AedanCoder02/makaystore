@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Montserrat } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { NextIntlClientProvider } from "next-intl";
@@ -47,6 +47,11 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: "Makay Store",
   description: "Makay - Tu refugio de conexión",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
 };
 
 // Only allow CSS custom property names (--makay-*) and safe value chars

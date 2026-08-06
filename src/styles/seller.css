@@ -116,6 +116,8 @@
   background: var(--makay-premium-cream);
   min-height: calc(100vh - 64px);
   transition: margin-left 0.22s ease;
+  overflow-x: hidden;
+  min-width: 0;
 }
 .seller-layout.sidebar-collapsed .seller-main { margin-left: 52px; }
 
@@ -875,7 +877,7 @@
   /* ── Product table ── */
   /* Wrap in horizontal scroll, keep all data accessible */
   .sp-table-wrap  { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .sp-table       { font-size: 0.78rem; min-width: 520px; }
+  .sp-table       { font-size: 0.78rem; }
   .sp-table th,
   .sp-table td    { padding: 0.55rem 0.6rem; }
   /* Hide columns 5+ (keep: thumb, title, price, status, actions) */
