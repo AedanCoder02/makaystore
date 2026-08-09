@@ -2,6 +2,13 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
 
+interface PaymentEntry {
+  method: string;
+  amount: number;
+  transactionId?: string;
+  description?: string;
+}
+
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -16,16 +23,62 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const { client_id, client_name, client_email, items, subtotal, payment_method, notes } = await req.json();
+  const { client_id, client_name, client_email, items, subtotal, payment_methods, notes } = await req.json();
 
   if (!client_id || !items || !subtotal) {
     return NextResponse.json({ error: 'client_id, items, subtotal required' }, { status: 400 });
   }
 
+  const payments: PaymentEntry[] = Array.isArray(payment_methods) ? payment_methods : [];
+  const totalPaid = payments.reduce((s, p) => s + Number(p.amount), 0);
+
+  if (payments.length === 0) {
+    return NextResponse.json({ error: 'Al menos un método de pago es requerido' }, { status: 400 });
+  }
+  if (Math.abs(totalPaid - Number(subtotal)) > 0.02) {
+    return NextResponse.json(
+      { error: `El total pagado ($${totalPaid.toFixed(2)}) no coincide con el subtotal ($${Number(subtotal).toFixed(2)})` },
+      { status: 400 }
+    );
+  }
+
+  // Credit payments: verify and deduct from client's dollar_balance
+  const creditTotal = payments
+    .filter(p => p.method === 'credit')
+    .reduce((s, p) => s + Number(p.amount), 0);
+
+  if (creditTotal > 0) {
+    const profiles = await sql`
+      SELECT dollar_balance FROM user_profiles WHERE clerk_id = ${client_id}
+    `;
+    const balance = Number(profiles[0]?.dollar_balance ?? 0);
+    if (balance < creditTotal - 0.001) {
+      return NextResponse.json(
+        { error: `Saldo Makay insuficiente. Disponible: $${balance.toFixed(2)}, Requerido: $${creditTotal.toFixed(2)}` },
+        { status: 400 }
+      );
+    }
+    await sql`
+      UPDATE user_profiles
+      SET dollar_balance = dollar_balance - ${creditTotal}
+      WHERE clerk_id = ${client_id}
+    `;
+  }
+
   const row = await sql`
     INSERT INTO seller_orders (seller_id, client_id, client_name, client_email, items, subtotal, payment_method, notes)
-    VALUES (${userId}, ${client_id}, ${client_name ?? ''}, ${client_email ?? ''}, ${JSON.stringify(items)}, ${subtotal}, ${payment_method ?? 'cash'}, ${notes ?? ''})
+    VALUES (
+      ${userId},
+      ${client_id},
+      ${client_name ?? ''},
+      ${client_email ?? ''},
+      ${JSON.stringify(items)},
+      ${subtotal},
+      ${JSON.stringify(payments)},
+      ${notes ?? ''}
+    )
     RETURNING *
   `;
+
   return NextResponse.json(row[0]);
 }
