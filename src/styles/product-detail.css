@@ -417,3 +417,43 @@
     transform: none;
   }
 }
+
+/* ── Membership duration selector (storefront + seller) ── */
+.membership-duration-selector {
+  display: flex;
+  gap: 0.625rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.duration-btn {
+  flex: 1;
+  min-width: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.75rem 0.5rem;
+  border: 1.5px solid var(--makay-sand-cream, #e8d5b7);
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  gap: 0.25rem;
+  transition: border-color 0.15s, background 0.15s;
+  font-family: var(--font-montserrat, sans-serif);
+  font-size: 0.82rem;
+  color: var(--makay-mauve, #8b7355);
+}
+
+.duration-btn.active,
+.duration-btn:hover {
+  border-color: var(--makay-peachy-rose, #e8b4a6);
+  color: var(--makay-dark-navy, #1a1a2e);
+  background: rgba(212, 165, 116, 0.06);
+}
+
+.duration-price {
+  font-family: var(--font-playfair-display, Georgia, serif);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--makay-peachy-rose, #e8b4a6);
+}

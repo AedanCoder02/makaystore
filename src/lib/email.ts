@@ -1,13 +1,22 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import fs from 'fs';
 import path from 'path';
 import { htmlToPdf } from './pdf';
 
-// Temporary sender until makay.club domain is verified in Resend
-// Replace with 'Makay Beach Club <noreply@makay.club>' once domain DNS is confirmed
-const FROM = 'Makay Beach Club <onboarding@resend.dev>';
-function getResend() {
-  return new Resend(process.env.RESEND_API_KEY ?? 'placeholder');
+function getTransport() {
+  return nodemailer.createTransport({
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
+    },
+  });
+}
+
+function fromAddress() {
+  return `Makay Beach Club <${process.env.GMAIL_USER}>`;
 }
 
 interface MembershipEmailData {
@@ -29,7 +38,7 @@ const DURATION_LABEL: Record<string, string> = {
 };
 
 export async function sendMembershipWelcomeEmail(data: MembershipEmailData) {
-  if (!process.env.RESEND_API_KEY) return;
+  if (!process.env.GMAIL_USER) return;
 
   const tierLabel = TIER_LABEL[data.tier] ?? data.tier;
   const durationLabel = DURATION_LABEL[data.duration] ?? data.duration;
@@ -48,8 +57,8 @@ export async function sendMembershipWelcomeEmail(data: MembershipEmailData) {
     </tr>
   `).join('');
 
-  await getResend().emails.send({
-    from: FROM,
+  await getTransport().sendMail({
+    from: fromAddress(),
     to: data.to,
     subject: `🔒 Bienvenido a Makay: Ya estás en nuestro Close Friends`,
     html: `
@@ -245,7 +254,7 @@ function renderTemplate(template: string, vars: Record<string, string>): string 
 }
 
 export async function sendMembershipContractEmail(data: MembershipEmailData) {
-  if (!process.env.RESEND_API_KEY) return;
+  if (!process.env.GMAIL_USER) return;
 
   const locale = data.locale ?? 'es';
   const isEs = locale !== 'en';
@@ -368,16 +377,14 @@ export async function sendMembershipContractEmail(data: MembershipEmailData) {
     </body></html>
   `;
 
-  await getResend().emails.send({
-    from: FROM,
+  await getTransport().sendMail({
+    from: fromAddress(),
     to: data.to,
     subject,
     html: bodyHtml,
-    ...(pdfBuffer ? {
-      attachments: [{
-        filename: `makay-contrato-${data.tier}-${data.orderId}.pdf`,
-        content: pdfBuffer.toString('base64'),
-      }],
-    } : {}),
+    attachments: pdfBuffer ? [{
+      filename: `makay-contrato-${data.tier}-${data.orderId}.pdf`,
+      content: pdfBuffer,
+    }] : [],
   });
 }

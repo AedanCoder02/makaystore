@@ -15,12 +15,22 @@ interface Props {
   product: Product;
 }
 
+const MEMBERSHIP_MONTHLY: Record<string, number> = {
+  'membership-bronze': 50,
+  'membership-silver': 100,
+  'membership-gold':   150,
+};
+const DURATION_MONTHS: Record<string, number> = { trimestral: 3, semestral: 6, anual: 12 };
+const DURATION_LABELS: Record<string, string> = { trimestral: '3 meses', semestral: '6 meses', anual: '1 año' };
+
 export default function ProductDetail({ product }: Props) {
   const [selectedVariant, setSelectedVariant] = useState(0);
   const [selectedQuantity, setSelectedQuantity] = useState(1);
   const [addedToCart, setAddedToCart] = useState(false);
   const [viewMode, setViewMode] = useState<'photo' | '3d'>('photo');
+  const [membershipDuration, setMembershipDuration] = useState<string>('trimestral');
   const t = useTranslations('storefront');
+  const isMembership = product.id.startsWith('membership-');
 
   const [addToCartLabel, setAddToCartLabel]   = useState('');
   const [reviewsTitle, setReviewsTitle]       = useState('');
@@ -38,8 +48,11 @@ export default function ProductDetail({ product }: Props) {
   }, []);
 
   const currentVariant = product.variants[selectedVariant];
-  const displayPrice   = currentVariant?.price ?? product.price;
-  const stock          = product.stock;
+  const basePrice = currentVariant?.price ?? product.price;
+  const displayPrice = isMembership
+    ? (MEMBERSHIP_MONTHLY[product.id] ?? basePrice / 3) * DURATION_MONTHS[membershipDuration]
+    : basePrice;
+  const stock = product.stock;
 
   const { addToCart } = useCart();
 
@@ -51,6 +64,7 @@ export default function ProductDetail({ product }: Props) {
       price: displayPrice,
       title: product.title,
       category: product.category,
+      ...(isMembership ? { duration: membershipDuration } : {}),
     });
     setAddedToCart(true);
     setTimeout(() => setAddedToCart(false), 2000);
@@ -110,6 +124,22 @@ export default function ProductDetail({ product }: Props) {
             selectedQuantity={selectedQuantity}
             onChange={setSelectedQuantity}
           />
+
+          {isMembership && (
+            <div className="membership-duration-selector">
+              {(['trimestral', 'semestral', 'anual'] as const).map(d => (
+                <button
+                  key={d}
+                  type="button"
+                  className={`duration-btn${membershipDuration === d ? ' active' : ''}`}
+                  onClick={() => setMembershipDuration(d)}
+                >
+                  {DURATION_LABELS[d]}
+                  <span className="duration-price">${((MEMBERSHIP_MONTHLY[product.id] ?? 0) * DURATION_MONTHS[d]).toFixed(0)}</span>
+                </button>
+              ))}
+            </div>
+          )}
 
           <button className="add-to-cart-btn" onClick={handleAddToCart} disabled={stock === 0}>
             {stock === 0 ? t('outOfStock') : (addToCartLabel || t('addToCart'))}

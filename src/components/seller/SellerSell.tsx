@@ -8,8 +8,16 @@ import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
 interface Client { id: string; name: string; email: string; imageUrl: string; }
 interface Product { id: string; title: string; price: number; image: string; category: string; productType: 'storefront' | 'dropshipping'; }
-interface CartItem extends Product { qty: number; }
+interface CartItem extends Product { qty: number; duration?: string; }
 interface PaymentEntry { method: string; amount: number; transactionId: string; description: string; }
+
+const MEMBERSHIP_MONTHLY: Record<string, number> = {
+  'membership-bronze': 50,
+  'membership-silver': 100,
+  'membership-gold':   150,
+};
+const DURATION_MONTHS: Record<string, number> = { trimestral: 3, semestral: 6, anual: 12 };
+const DURATION_LABELS_ES: Record<string, string> = { trimestral: '3 meses', semestral: '6 meses', anual: '1 año' };
 
 type Step = 'client' | 'products' | 'checkout' | 'done';
 
@@ -38,6 +46,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [orderId, setOrderId] = useState<number | null>(null);
+  const [durationPicker, setDurationPicker] = useState<Product | null>(null);
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('seller-sell-tour');
 
@@ -72,12 +81,23 @@ export default function SellerSell({ products }: { products: Product[] }) {
     p.title.toLowerCase().includes(productSearch.toLowerCase()) || p.category.toLowerCase().includes(productSearch.toLowerCase())
   );
 
-  const addToCart = (p: Product) => {
+  const addToCart = (p: Product, duration?: string) => {
+    const price = duration && MEMBERSHIP_MONTHLY[p.id]
+      ? MEMBERSHIP_MONTHLY[p.id] * (DURATION_MONTHS[duration] ?? 12)
+      : p.price;
     setCart(c => {
       const existing = c.find(i => i.id === p.id);
       if (existing) return c.map(i => i.id === p.id ? { ...i, qty: i.qty + 1 } : i);
-      return [...c, { ...p, qty: 1 }];
+      return [...c, { ...p, price, qty: 1, ...(duration ? { duration } : {}) }];
     });
+  };
+
+  const handleAddProduct = (p: Product) => {
+    if (p.id.startsWith('membership-')) {
+      setDurationPicker(p);
+    } else {
+      addToCart(p);
+    }
   };
 
   const updateQty = (id: string, delta: number) => {
@@ -135,7 +155,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
         client_id: selectedClient.id,
         client_name: selectedClient.name,
         client_email: selectedClient.email,
-        items: cart.map(i => ({ id: i.id, title: i.title, price: i.price, qty: i.qty, productType: i.productType })),
+        items: cart.map(i => ({ id: i.id, title: i.title, price: i.price, qty: i.qty, productType: i.productType, ...(i.duration ? { duration: i.duration } : {}) })),
         subtotal,
         payment_methods: payments,
         notes,
@@ -200,6 +220,33 @@ export default function SellerSell({ products }: { products: Product[] }) {
 
   return (
     <div className="seller-page">
+      {/* Duration picker modal for membership products */}
+      {durationPicker && (
+        <div className="seller-modal-overlay" onClick={() => setDurationPicker(null)}>
+          <div className="seller-modal" onClick={e => e.stopPropagation()}>
+            <h3 className="seller-modal-title">{durationPicker.title}</h3>
+            <p className="seller-modal-sub">Selecciona la duración de la membresía</p>
+            <div className="membership-duration-selector">
+              {(['trimestral', 'semestral', 'anual'] as const).map(d => (
+                <button
+                  key={d}
+                  type="button"
+                  className="duration-btn"
+                  onClick={() => { addToCart(durationPicker, d); setDurationPicker(null); }}
+                >
+                  {DURATION_LABELS_ES[d]}
+                  <span className="duration-price">
+                    ${((MEMBERSHIP_MONTHLY[durationPicker.id] ?? 0) * DURATION_MONTHS[d]).toFixed(0)}
+                  </span>
+                </button>
+              ))}
+            </div>
+            <button className="seller-btn-ghost" style={{ marginTop: '0.75rem', width: '100%' }} onClick={() => setDurationPicker(null)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      )}
       {tutorialUI}
       <div className="seller-page-header">
         <div>
@@ -280,7 +327,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
                           </span>
                         </div>
                       </div>
-                      <button className="seller-add-btn" onClick={() => addToCart(p)}>
+                      <button className="seller-add-btn" onClick={() => handleAddProduct(p)}>
                         <Plus size={16} />
                       </button>
                     </div>
@@ -298,7 +345,9 @@ export default function SellerSell({ products }: { products: Product[] }) {
                   <div className="seller-cart-items">
                     {cart.map(i => (
                       <div key={i.id} className="seller-cart-item">
-                        <span className="seller-cart-item-name">{i.title}</span>
+                        <span className="seller-cart-item-name">
+                          {i.title}{i.duration ? ` · ${DURATION_LABELS_ES[i.duration] ?? i.duration}` : ''}
+                        </span>
                         <div className="seller-cart-item-controls">
                           <button className="seller-qty-btn sm" onClick={() => updateQty(i.id, -1)}><Minus size={12} /></button>
                           <span className="seller-cart-qty">{i.qty}</span>
