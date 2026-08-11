@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Membership Agreement — Makay Beach Club</title>
+</head>
+<body style="margin:0;padding:0;background:#f5efe5;font-family:Arial,sans-serif;">
+<div style="max-width:620px;margin:32px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.10);">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#1e1611 0%,#2c1f14 100%);padding:40px 36px;text-align:center;">
+    <p style="font-family:Georgia,serif;font-size:28px;font-weight:700;color:#D4A574;margin:0 0 6px;letter-spacing:0.02em;">Makay Beach Club</p>
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.38);margin:0;">Membership Agreement · Payment Receipt</p>
+  </div>
+
+  <div style="padding:44px 40px 36px;">
+
+    <!-- ── RECEIPT ── -->
+    <table style="width:100%;margin-bottom:32px;border-collapse:collapse;">
+      <tr>
+        <td style="vertical-align:top;padding:0;">
+          <p style="font-family:Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#9c8070;margin:0 0 5px;">Order No.</p>
+          <p style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#2C2C2C;margin:0;">#{{ORDER_ID}}</p>
+        </td>
+        <td style="vertical-align:top;text-align:right;padding:0;">
+          <p style="font-family:Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#9c8070;margin:0 0 5px;">Issue date</p>
+          <p style="font-family:Arial,sans-serif;font-size:13px;color:#2C2C2C;margin:0;">{{ISSUED_DATE}}</p>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Member -->
+    <div style="background:#f9f4ef;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+      <p style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#9c8070;margin:0 0 10px;">Membership Holder</p>
+      <p style="font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#2C2C2C;margin:0 0 3px;">{{NAME}}</p>
+      <p style="font-family:Arial,sans-serif;font-size:13px;color:#9c8070;margin:0;">{{EMAIL}}</p>
+    </div>
+
+    <!-- Invoice table -->
+    <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
+      <thead>
+        <tr style="border-bottom:2px solid #ede5da;">
+          <th style="font-family:Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#9c8070;text-align:left;padding:0 0 10px;font-weight:700;">Description</th>
+          <th style="font-family:Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#9c8070;text-align:right;padding:0 0 10px;font-weight:700;">Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:16px 0 16px;border-bottom:1px solid #ede5da;vertical-align:top;">
+            <p style="font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#2C2C2C;margin:0 0 4px;">{{TIER_LABEL}} Membership — {{DURATION_LABEL}}</p>
+            <p style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;margin:0;">Active: {{ISSUED_DATE}} · Expires: {{EXPIRES_DATE}}</p>
+          </td>
+          <td style="padding:16px 0 16px;border-bottom:1px solid #ede5da;text-align:right;vertical-align:top;">
+            <p style="font-family:Georgia,serif;font-size:18px;font-weight:700;color:#D4A574;margin:0;">${{AMOUNT}}</p>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td style="padding:14px 0 0;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#2C2C2C;">Total paid</td>
+          <td style="padding:14px 0 0;text-align:right;">
+            <p style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#D4A574;margin:0;">${{AMOUNT}}</p>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0 0 40px;">
+      Payment confirmed. This document serves as an official receipt of the transaction.
+    </p>
+
+    <!-- ── DIVIDER ── -->
+    <div style="border-top:2px solid #ede5da;margin:0 0 36px;"></div>
+
+    <!-- Agreement heading -->
+    <p style="font-family:Georgia,serif;font-size:20px;font-weight:700;color:#2C2C2C;margin:0 0 4px;">Membership Agreement</p>
+    <p style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;margin:0 0 32px;">
+      Makay Beach Club — Legally binding document issued on {{ISSUED_DATE}}
+    </p>
+
+    <!-- 1 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 1 · Parties</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      This agreement is entered into between <strong>Makay Beach Club</strong> (hereinafter "the Club") and the holder identified in this document as <strong>{{NAME}}</strong> (hereinafter "the Member"). By completing the purchase of this membership, both parties agree to all terms and conditions set forth herein.
+    </p>
+
+    <!-- 2 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 2 · {{TIER_LABEL}} Membership Benefits</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 10px;">
+      For the duration of this membership, the Member is entitled to the following benefits:
+    </p>
+    <ul style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.9;margin:0 0 8px;padding-left:20px;">
+      {{BENEFITS_LIST}}
+    </ul>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      The Member also has access to personalized guidance from an assigned Vacation Planner and may register up to three (3) authorized users (see Article 5).
+    </p>
+
+    <!-- 3 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 3 · Term and Renewal</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      This membership is valid for <strong>{{DURATION_LABEL}}</strong>, from <strong>{{ISSUED_DATE}}</strong> through <strong>{{EXPIRES_DATE}}</strong>. The Club will notify the Member no less than fifteen (15) days prior to expiry. Membership renewal is not automatic; the Member must initiate a new purchase to continue benefits after expiry.
+    </p>
+
+    <!-- 4 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 4 · Payment and Non-Refund Policy</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      The payment of <strong>${{AMOUNT}}</strong> for the {{TIER_LABEL}} Membership ({{DURATION_LABEL}}) has been received and confirmed. All membership payments are <strong>non-refundable</strong> once the membership has been activated. The Club may, at its sole discretion, evaluate documented exceptional circumstances on a case-by-case basis and may offer account credit or membership transfer as an alternative to refund.
+    </p>
+
+    <!-- 5 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 5 · Transferable Membership</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      The Member may register up to <strong>three (3) authorized individuals</strong> to access membership benefits on their behalf. Authorized users must present valid government-issued identification at the establishment and are subject to the same code of conduct as the primary Member. The primary Member assumes full legal and financial responsibility for all conduct and actions of their authorized users, including any damages, sanctions, or losses arising therefrom. Membership access may not be sold, sublicensed, or transferred to unauthorized third parties under any circumstances.
+    </p>
+
+    <!-- 6 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 6 · Code of Conduct and Right of Admission</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      The Member and all authorized users must conduct themselves respectfully toward staff, other members, guests, and Club property at all times. The Club reserves the right to: (a) deny entry to any individual not meeting dress code or venue requirements; (b) remove any person whose behavior is disruptive, offensive, or poses a safety risk; (c) suspend or permanently cancel a membership due to serious or repeated violations, without entitlement to refund or compensation.
+    </p>
+
+    <!-- 7 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 7 · Limitation of Liability</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      The Member acknowledges and expressly accepts that <strong>Makay Beach Club shall not be liable</strong> for: (a) personal injury, illness, or death occurring on the premises, except in cases of gross negligence directly attributable to the Club; (b) loss, theft, or damage to personal property within or in the vicinity of the Club's facilities; (c) damages arising from participation in recreational or sporting activities, which the Member undertakes at their own risk; (d) disruptions caused by external factors including but not limited to adverse weather, utility outages, or third-party actions. The Member expressly waives any claim against the Club arising from the foregoing circumstances.
+    </p>
+
+    <!-- 8 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 8 · Force Majeure</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      The Club shall not be liable for any failure or temporary suspension of services caused by events beyond its reasonable control, including without limitation: natural disasters, severe weather events, pandemics, government-mandated restrictions, utility interruptions, or any other force majeure circumstances. In such events, the Club will make reasonable efforts to reschedule or compensate for affected services.
+    </p>
+
+    <!-- 9 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 9 · Modification of Benefits and Services</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      The Club reserves the right to modify, expand, or update membership benefits and services with a minimum of fifteen (15) days' prior written notice to the Member. In the event of a material reduction in benefits without equivalent replacement, the Member shall have the right to cancel and receive a prorated credit for the remaining membership period.
+    </p>
+
+    <!-- 10 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 10 · Photography and Media</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      The Member acknowledges that the Club and its facilities may be photographed or recorded by the Club for promotional and marketing purposes, and that the Member or their guests may incidentally appear in such materials. Members who do not wish to have their image used for promotional purposes must notify Club staff in writing during their visit. The Club will honor such requests on a reasonable best-efforts basis.
+    </p>
+
+    <!-- 11 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 11 · Personal Data Protection</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      The Member's personal data will be treated with strict confidentiality and used solely for membership administration, Club communications, and service improvement. The Club will not share personal information with third parties without the Member's express consent, except where required by applicable law. The Member may at any time request access, correction, or deletion of their personal data, subject to legally mandated retention requirements.
+    </p>
+
+    <!-- 12 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 12 · Suspension and Cancellation for Breach</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      The Club may suspend or cancel membership immediately and without refund in the event of: (a) serious or repeated violations of the code of conduct; (b) fraudulent, abusive, or bad-faith use of membership benefits; (c) conduct causing physical, moral, or financial harm to other members, guests, or staff; (d) any unlawful act committed on or in connection with the Club's premises or services. The Member will be formally notified of the grounds for cancellation.
+    </p>
+
+    <!-- 13 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Article 13 · Governing Law and Dispute Resolution</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 32px;">
+      This agreement is governed by the laws of the Bolivarian Republic of Venezuela. Any dispute arising from its interpretation or enforcement shall first be addressed through direct negotiation between the parties in good faith. Should no resolution be reached within thirty (30) days, the parties agree to submit to the jurisdiction of the competent courts in the locality where the Club operates.
+    </p>
+
+    <!-- Acceptance block -->
+    <div style="background:#1e1611;border-radius:14px;padding:28px 32px;margin-bottom:36px;">
+      <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:#D4A574;margin:0 0 12px;">Article 14 · Declaration of Acceptance</p>
+      <p style="font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.78);line-height:1.75;margin:0 0 14px;">
+        By completing the purchase of the {{TIER_LABEL}} Membership, <strong style="color:#D4A574;">{{NAME}}</strong> expressly declares having read, understood, and agreed in full to the terms and conditions set forth in this agreement, including all membership benefits specific to their tier and all limitation of liability clauses contained herein.
+      </p>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.38);margin:0;">
+        Electronically accepted · Order #{{ORDER_ID}} · {{ISSUED_DATE}}
+      </p>
+    </div>
+
+    <!-- CTA -->
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#6B5C4E;margin:0 0 12px;">
+      For questions about your agreement or membership, contact us directly:
+    </p>
+    <a href="https://wa.me/584142966058" style="display:inline-block;padding:13px 32px;background:#D4A574;color:#ffffff;text-decoration:none;border-radius:100px;font-family:Arial,sans-serif;font-weight:700;font-size:13px;letter-spacing:0.02em;">
+      WhatsApp · +58 414 296 6058
+    </a>
+
+  </div>
+
+  <!-- Footer -->
+  <div style="padding:20px 40px;border-top:1px solid #ede5da;text-align:center;background:#fdfaf7;">
+    <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0 0 4px;">
+      Makay Beach Club · {{TIER_LABEL}} Membership · Order #{{ORDER_ID}}
+    </p>
+    <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0;">
+      Valid {{ISSUED_DATE}} through {{EXPIRES_DATE}} · Electronically generated legal document
+    </p>
+  </div>
+
+</div>
+</body>
+</html>

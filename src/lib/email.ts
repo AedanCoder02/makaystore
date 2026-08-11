@@ -1,4 +1,6 @@
 import { Resend } from 'resend';
+import fs from 'fs';
+import path from 'path';
 
 const FROM = 'Makay Beach Club <noreply@makay.club>';
 function getResend() {
@@ -13,6 +15,7 @@ interface MembershipEmailData {
   amount: number;
   orderId: string;
   expiresAt?: string;
+  locale?: string;
 }
 
 const TIER_LABEL: Record<string, string> = {
@@ -155,97 +158,124 @@ export async function sendMembershipWelcomeEmail(data: MembershipEmailData) {
   });
 }
 
+const TIER_BENEFITS_ES: Record<string, string[]> = {
+  bronze: [
+    '10% de descuento en todos los productos y servicios.',
+    'Priority Access: reservas prioritarias en fechas especiales y eventos.',
+    'Acceso Exclusivo: invitación a catas y eventos cerrados.',
+  ],
+  silver: [
+    'Toldo GRATIS durante la temporada baja.',
+    '10% de descuento en todos los productos y servicios.',
+    'Priority Access: reservas prioritarias en fechas especiales y eventos.',
+    'Acceso Exclusivo: invitación a catas y eventos cerrados.',
+  ],
+  gold: [
+    'Toldo GRATIS durante la temporada baja.',
+    '10% de descuento en todos los productos y servicios.',
+    'Priority Access: reservas prioritarias en fechas especiales y eventos.',
+    'Acceso Exclusivo: invitación a catas y eventos cerrados.',
+    'Acceso Deportivo GRATIS: Beach Tennis y Voleibol de playa.',
+    'Descuentos Exclusivos en marcas aliadas.',
+  ],
+  vip: [
+    'Toldo GRATIS durante la temporada baja.',
+    '10% de descuento en todos los productos y servicios.',
+    'Priority Access: reservas prioritarias en fechas especiales y eventos.',
+    'Acceso Exclusivo: invitación a catas y eventos cerrados.',
+    'Acceso Deportivo GRATIS: Beach Tennis y Voleibol de playa.',
+    'Descuentos Exclusivos en marcas aliadas.',
+    'Atención VIP personalizada y acceso a eventos privados.',
+  ],
+};
+
+const TIER_BENEFITS_EN: Record<string, string[]> = {
+  bronze: [
+    '10% discount on all products and services.',
+    'Priority Access: priority reservations for special dates and events.',
+    'Exclusive Access: invitation to private tastings and closed-door events.',
+  ],
+  silver: [
+    'FREE beach umbrella during the low season.',
+    '10% discount on all products and services.',
+    'Priority Access: priority reservations for special dates and events.',
+    'Exclusive Access: invitation to private tastings and closed-door events.',
+  ],
+  gold: [
+    'FREE beach umbrella during the low season.',
+    '10% discount on all products and services.',
+    'Priority Access: priority reservations for special dates and events.',
+    'Exclusive Access: invitation to private tastings and closed-door events.',
+    'FREE Sports Access: Beach Tennis and Beach Volleyball courts.',
+    'Exclusive discounts at all partner brands.',
+  ],
+  vip: [
+    'FREE beach umbrella during the low season.',
+    '10% discount on all products and services.',
+    'Priority Access: priority reservations for special dates and events.',
+    'Exclusive Access: invitation to private tastings and closed-door events.',
+    'FREE Sports Access: Beach Tennis and Beach Volleyball courts.',
+    'Exclusive discounts at all partner brands.',
+    'Personalized VIP service and access to private events.',
+  ],
+};
+
+const DURATION_LABEL_EN: Record<string, string> = {
+  trimestral: '3 months', semestral: '6 months', anual: '12 months',
+};
+
+function loadTemplate(filename: string): string {
+  try {
+    return fs.readFileSync(path.join(process.cwd(), 'src', 'emails', filename), 'utf-8');
+  } catch {
+    return '';
+  }
+}
+
+function renderTemplate(template: string, vars: Record<string, string>): string {
+  return Object.entries(vars).reduce(
+    (html, [key, value]) => html.replaceAll(`{{${key}}}`, value),
+    template
+  );
+}
+
 export async function sendMembershipContractEmail(data: MembershipEmailData) {
   if (!process.env.RESEND_API_KEY) return;
 
+  const locale = data.locale ?? 'es';
+  const isEs = locale !== 'en';
+
   const tierLabel = TIER_LABEL[data.tier] ?? data.tier;
-  const durationLabel = DURATION_LABEL[data.duration] ?? data.duration;
-  const issuedDate = new Date().toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' });
+  const durationLabel = isEs
+    ? (DURATION_LABEL[data.duration] ?? data.duration)
+    : (DURATION_LABEL_EN[data.duration] ?? data.duration);
 
-  await getResend().emails.send({
-    from: FROM,
-    to: data.to,
-    subject: `Contrato y factura — Membresía Makay ${tierLabel}`,
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /></head>
-      <body style="margin:0;padding:0;background:#fff8f0;font-family:Georgia,serif;">
-        <div style="max-width:560px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;margin-top:32px;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
+  const dateLocale = isEs ? 'es' : 'en';
+  const issuedDate = new Date().toLocaleDateString(dateLocale, { day: 'numeric', month: 'long', year: 'numeric' });
+  const expiresDate = data.expiresAt
+    ? new Date(data.expiresAt).toLocaleDateString(dateLocale, { day: 'numeric', month: 'long', year: 'numeric' })
+    : '—';
 
-          <!-- Header -->
-          <div style="background:linear-gradient(135deg,#1e1611,#2c1f14);padding:32px;text-align:center;">
-            <p style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#D4A574;margin:0 0 4px;">Makay Beach Club</p>
-            <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin:0;">Contrato + Factura</p>
-          </div>
+  const benefitsMap = isEs ? TIER_BENEFITS_ES : TIER_BENEFITS_EN;
+  const benefitsList = (benefitsMap[data.tier] ?? benefitsMap.bronze)
+    .map(b => `<li>${b}</li>`).join('');
 
-          <div style="padding:40px 32px;">
-            <!-- Invoice header -->
-            <div style="display:flex;justify-content:space-between;margin-bottom:32px;">
-              <div>
-                <p style="font-family:Arial,sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#9c8070;margin:0 0 4px;">Factura</p>
-                <p style="font-family:Georgia,serif;font-size:18px;font-weight:700;color:#2C2C2C;margin:0;">#${data.orderId}</p>
-              </div>
-              <div style="text-align:right;">
-                <p style="font-family:Arial,sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#9c8070;margin:0 0 4px;">Fecha</p>
-                <p style="font-family:Arial,sans-serif;font-size:13px;color:#2C2C2C;margin:0;">${issuedDate}</p>
-              </div>
-            </div>
-
-            <!-- Parties -->
-            <div style="background:#f9f4ef;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
-              <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#9c8070;margin:0 0 8px;">Titular</p>
-              <p style="font-family:Arial,sans-serif;font-size:14px;color:#2C2C2C;margin:0;">${data.name}</p>
-              <p style="font-family:Arial,sans-serif;font-size:13px;color:#9c8070;margin:4px 0 0;">${data.to}</p>
-            </div>
-
-            <!-- Line item -->
-            <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
-              <thead>
-                <tr style="border-bottom:2px solid #f0e8de;">
-                  <th style="font-family:Arial,sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#9c8070;text-align:left;padding:0 0 8px;">Descripción</th>
-                  <th style="font-family:Arial,sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#9c8070;text-align:right;padding:0 0 8px;">Monto</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="font-family:Arial,sans-serif;font-size:14px;color:#2C2C2C;padding:12px 0;">
-                    Membresía ${tierLabel} — ${durationLabel}
-                    ${data.expiresAt ? `<br><span style="font-size:12px;color:#9c8070;">Válida hasta ${new Date(data.expiresAt).toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' })}</span>` : ''}
-                  </td>
-                  <td style="font-family:Georgia,serif;font-weight:700;font-size:16px;color:#D4A574;text-align:right;padding:12px 0;">$${data.amount.toFixed(2)}</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr style="border-top:2px solid #f0e8de;">
-                  <td style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#2C2C2C;padding:12px 0 0;">Total</td>
-                  <td style="font-family:Georgia,serif;font-weight:700;font-size:18px;color:#D4A574;text-align:right;padding:12px 0 0;">$${data.amount.toFixed(2)}</td>
-                </tr>
-              </tfoot>
-            </table>
-
-            <!-- Contract placeholder -->
-            <div style="background:#f9f4ef;border-left:3px solid #D4A574;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:32px;">
-              <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9c8070;margin:0 0 8px;">Términos y Condiciones</p>
-              <p style="font-family:Arial,sans-serif;font-size:13px;color:#6B5C4E;line-height:1.6;margin:0;">
-                <!-- CLIENT: Insert full membership contract / terms text here -->
-                Al adquirir esta membresía, el titular acepta los términos y condiciones de Makay Beach Club. El contrato completo será proporcionado por el equipo Makay.
-              </p>
-            </div>
-
-            <p style="font-family:Arial,sans-serif;font-size:13px;color:#6B5C4E;text-align:center;margin:0;">
-              Gracias por tu confianza, <strong>${data.name}</strong>. ¡Nos vemos en el club!
-            </p>
-          </div>
-
-          <div style="padding:20px 32px;border-top:1px solid #f0e8de;text-align:center;">
-            <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0;">
-              Makay Beach Club · Documento generado automáticamente.
-            </p>
-          </div>
-        </div>
-      </body>
-      </html>
-    `,
+  const template = loadTemplate(isEs ? 'contract-es.html' : 'contract-en.html');
+  const html = renderTemplate(template, {
+    ORDER_ID: data.orderId,
+    NAME: data.name,
+    EMAIL: data.to,
+    AMOUNT: data.amount.toFixed(2),
+    TIER_LABEL: tierLabel,
+    DURATION_LABEL: durationLabel,
+    ISSUED_DATE: issuedDate,
+    EXPIRES_DATE: expiresDate,
+    BENEFITS_LIST: benefitsList,
   });
+
+  const subject = isEs
+    ? `Contrato y Comprobante — Membresía Makay ${tierLabel} #${data.orderId}`
+    : `Membership Agreement & Receipt — Makay ${tierLabel} #${data.orderId}`;
+
+  await getResend().emails.send({ from: FROM, to: data.to, subject, html });
 }

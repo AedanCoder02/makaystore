@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth();
   await ensureTable();
 
+  const locale = req.cookies.get('NEXT_LOCALE')?.value ?? 'es';
   const body = await req.json();
   const { items, subtotal, shipping_cost, total, shipping_address, shipping_method, payment_id, customer_email, payment_methods } = body;
 
@@ -151,6 +152,7 @@ export async function POST(req: NextRequest) {
           amount: total,
           orderId: id,
           expiresAt: expiresAt.toISOString(),
+          locale,
         };
         Promise.all([
           sendMembershipWelcomeEmail(emailData).catch(() => {}),

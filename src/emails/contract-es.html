@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Contrato de Membresía — Makay Beach Club</title>
+</head>
+<body style="margin:0;padding:0;background:#f5efe5;font-family:Arial,sans-serif;">
+<div style="max-width:620px;margin:32px auto;background:#ffffff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.10);">
+
+  <!-- Header -->
+  <div style="background:linear-gradient(135deg,#1e1611 0%,#2c1f14 100%);padding:40px 36px;text-align:center;">
+    <p style="font-family:Georgia,serif;font-size:28px;font-weight:700;color:#D4A574;margin:0 0 6px;letter-spacing:0.02em;">Makay Beach Club</p>
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.25em;text-transform:uppercase;color:rgba(255,255,255,0.38);margin:0;">Contrato de Membresía · Comprobante de Pago</p>
+  </div>
+
+  <div style="padding:44px 40px 36px;">
+
+    <!-- ── COMPROBANTE ── -->
+    <table style="width:100%;margin-bottom:32px;border-collapse:collapse;">
+      <tr>
+        <td style="vertical-align:top;padding:0;">
+          <p style="font-family:Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#9c8070;margin:0 0 5px;">N.° de Orden</p>
+          <p style="font-family:Georgia,serif;font-size:22px;font-weight:700;color:#2C2C2C;margin:0;">#{{ORDER_ID}}</p>
+        </td>
+        <td style="vertical-align:top;text-align:right;padding:0;">
+          <p style="font-family:Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.12em;color:#9c8070;margin:0 0 5px;">Fecha de emisión</p>
+          <p style="font-family:Arial,sans-serif;font-size:13px;color:#2C2C2C;margin:0;">{{ISSUED_DATE}}</p>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Member -->
+    <div style="background:#f9f4ef;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+      <p style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#9c8070;margin:0 0 10px;">Titular de la Membresía</p>
+      <p style="font-family:Arial,sans-serif;font-size:15px;font-weight:700;color:#2C2C2C;margin:0 0 3px;">{{NAME}}</p>
+      <p style="font-family:Arial,sans-serif;font-size:13px;color:#9c8070;margin:0;">{{EMAIL}}</p>
+    </div>
+
+    <!-- Invoice table -->
+    <table style="width:100%;border-collapse:collapse;margin-bottom:8px;">
+      <thead>
+        <tr style="border-bottom:2px solid #ede5da;">
+          <th style="font-family:Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#9c8070;text-align:left;padding:0 0 10px;font-weight:700;">Descripción</th>
+          <th style="font-family:Arial,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:#9c8070;text-align:right;padding:0 0 10px;font-weight:700;">Monto</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:16px 0 16px;border-bottom:1px solid #ede5da;vertical-align:top;">
+            <p style="font-family:Arial,sans-serif;font-size:14px;font-weight:700;color:#2C2C2C;margin:0 0 4px;">Membresía {{TIER_LABEL}} — {{DURATION_LABEL}}</p>
+            <p style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;margin:0;">Activa: {{ISSUED_DATE}} · Vence: {{EXPIRES_DATE}}</p>
+          </td>
+          <td style="padding:16px 0 16px;border-bottom:1px solid #ede5da;text-align:right;vertical-align:top;">
+            <p style="font-family:Georgia,serif;font-size:18px;font-weight:700;color:#D4A574;margin:0;">${{AMOUNT}}</p>
+          </td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td style="padding:14px 0 0;font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#2C2C2C;">Total pagado</td>
+          <td style="padding:14px 0 0;text-align:right;">
+            <p style="font-family:Georgia,serif;font-size:24px;font-weight:700;color:#D4A574;margin:0;">${{AMOUNT}}</p>
+          </td>
+        </tr>
+      </tfoot>
+    </table>
+
+    <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0 0 40px;">
+      Pago confirmado. Este documento constituye comprobante oficial de la transacción.
+    </p>
+
+    <!-- ── DIVIDER ── -->
+    <div style="border-top:2px solid #ede5da;margin:0 0 36px;"></div>
+
+    <!-- Contract heading -->
+    <p style="font-family:Georgia,serif;font-size:20px;font-weight:700;color:#2C2C2C;margin:0 0 4px;">Contrato de Membresía</p>
+    <p style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;margin:0 0 32px;">
+      Makay Beach Club — Documento legal vinculante emitido el {{ISSUED_DATE}}
+    </p>
+
+    <!-- 1 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 1 · Partes del Contrato</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      El presente contrato se celebra entre <strong>Makay Beach Club</strong> (en adelante "el Club") y el titular identificado en este documento como <strong>{{NAME}}</strong> (en adelante "el Miembro"). Mediante la adquisición de la membresía, ambas partes aceptan los términos aquí establecidos.
+    </p>
+
+    <!-- 2 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 2 · Beneficios de la Membresía {{TIER_LABEL}}</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 10px;">
+      Durante el período de vigencia, el Miembro tendrá derecho a los siguientes beneficios:
+    </p>
+    <ul style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.9;margin:0 0 8px;padding-left:20px;">
+      {{BENEFITS_LIST}}
+    </ul>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      El Miembro también tendrá acceso a asesoría personalizada con un Vacation Planner asignado y podrá registrar hasta tres (3) personas autorizadas para hacer uso de los beneficios de la membresía (ver Artículo 5).
+    </p>
+
+    <!-- 3 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 3 · Vigencia y Renovación</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      La membresía tiene una vigencia de <strong>{{DURATION_LABEL}}</strong>, con fecha de inicio <strong>{{ISSUED_DATE}}</strong> y fecha de vencimiento <strong>{{EXPIRES_DATE}}</strong>. El Club notificará al Miembro con un mínimo de quince (15) días de anticipación al vencimiento. La renovación no es automática; el Miembro deberá adquirir una nueva membresía para continuar disfrutando de los beneficios.
+    </p>
+
+    <!-- 4 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 4 · Política de Pago y No Reembolso</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      El pago de <strong>${{AMOUNT}}</strong> correspondiente a la Membresía {{TIER_LABEL}} por {{DURATION_LABEL}} ha sido recibido y confirmado. Dicho pago es <strong>no reembolsable</strong> una vez activada la membresía. El Club evaluará circunstancias excepcionales documentadas de forma individual y a su exclusiva discreción, pudiendo ofrecer crédito en cuenta o traslado de la membresía como alternativa al reembolso.
+    </p>
+
+    <!-- 5 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 5 · Membresía Transferible</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      El Miembro podrá registrar hasta <strong>tres (3) personas autorizadas</strong> para hacer uso de los beneficios de la membresía en su nombre. Los usuarios autorizados deberán presentar identificación vigente en el establecimiento y quedan sujetos a las mismas normas de conducta aplicables al Miembro titular. El Miembro asume plena responsabilidad legal y económica por el uso que sus autorizados hagan de la membresía, incluyendo cualquier daño o sanción derivada de su conducta. La membresía no puede ser cedida, vendida ni comercializada a terceros no autorizados bajo ninguna circunstancia.
+    </p>
+
+    <!-- 6 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 6 · Normas de Conducta y Derecho de Admisión</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      El Miembro y sus autorizados deben mantener en todo momento un comportamiento respetuoso hacia el personal, otros miembros e instalaciones del Club. El Club se reserva el derecho de: (a) negar el ingreso a cualquier persona que incumpla el código de vestimenta o las normas del establecimiento; (b) retirar a cualquier persona cuya conducta sea perturbadora, ofensiva o ponga en riesgo la seguridad; (c) suspender o cancelar la membresía por infracciones graves o reiteradas, sin que ello genere derecho a reembolso.
+    </p>
+
+    <!-- 7 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 7 · Limitación de Responsabilidad</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      El Miembro reconoce y acepta que <strong>Makay Beach Club no será responsable</strong> por: (a) lesiones personales, enfermedades o accidentes ocurridos en las instalaciones, salvo en caso de negligencia grave imputable directamente al Club; (b) pérdida, robo o daño de objetos personales dentro o fuera de las instalaciones; (c) daños derivados de la práctica de actividades recreativas o deportivas, en las cuales el Miembro participa bajo su propia responsabilidad; (d) inconvenientes ocasionados por factores externos como clima, cortes de servicios públicos o situaciones de terceros. El Miembro exonera expresamente al Club de cualquier reclamación derivada de los supuestos anteriores.
+    </p>
+
+    <!-- 8 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 8 · Fuerza Mayor</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      El Club no incurrirá en responsabilidad alguna por incumplimiento o suspensión temporal de sus servicios cuando dicha situación sea causada por eventos de fuerza mayor o caso fortuito, incluyendo sin limitarse a: desastres naturales, fenómenos meteorológicos, pandemias, medidas gubernamentales, cortes de suministros esenciales o cualquier otra causa ajena al control razonable del Club. En tales supuestos, el Club realizará esfuerzos razonables para reprogramar o compensar los servicios afectados.
+    </p>
+
+    <!-- 9 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 9 · Modificación de Beneficios y Servicios</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      El Club se reserva el derecho de modificar, ampliar o actualizar los beneficios y servicios incluidos en la membresía, previa notificación al Miembro con un mínimo de quince (15) días de anticipación. En caso de reducción de beneficios sustanciales sin compensación equivalente, el Miembro tendrá derecho a cancelar la membresía y recibir un crédito proporcional al tiempo restante.
+    </p>
+
+    <!-- 10 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 10 · Fotografía y Medios</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      El Miembro reconoce que el Club y sus instalaciones pueden ser fotografiados o grabados por el propio Club con fines promocionales, y que ocasionalmente el Miembro podría aparecer en dichos materiales. Si el Miembro desea que no se utilice su imagen con fines promocionales, deberá notificarlo expresamente al personal del Club durante su visita.
+    </p>
+
+    <!-- 11 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 11 · Protección de Datos Personales</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      Los datos personales del Miembro serán tratados con estricta confidencialidad y utilizados únicamente para la gestión de la membresía, comunicaciones del Club y mejora del servicio. El Club no compartirá información personal con terceros sin el consentimiento expreso del Miembro, salvo en cumplimiento de obligaciones legales. El Miembro podrá solicitar en cualquier momento el acceso, rectificación o eliminación de sus datos, sujeto a las retenciones legalmente requeridas.
+    </p>
+
+    <!-- 12 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 12 · Suspensión y Cancelación por Incumplimiento</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 26px;">
+      El Club podrá suspender o cancelar la membresía de forma inmediata y sin reembolso en caso de: (a) infracción grave o reiterada de las normas de conducta; (b) uso fraudulento, abusivo o contrario a la buena fe de los beneficios de la membresía; (c) comportamiento que cause daño físico, moral o económico a otros miembros, invitados o personal; (d) cualquier acto ilícito cometido dentro de las instalaciones. El Miembro será notificado formalmente de las causas de la cancelación.
+    </p>
+
+    <!-- 13 -->
+    <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 8px;">Artículo 13 · Ley Aplicable y Resolución de Controversias</p>
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#4a3e35;line-height:1.75;margin:0 0 32px;">
+      El presente contrato se rige por la legislación vigente de la República Bolivariana de Venezuela. Cualquier controversia derivada de su interpretación o ejecución se resolverá en primera instancia mediante negociación directa entre las partes. De no llegarse a un acuerdo, las partes se someterán a la jurisdicción de los tribunales competentes en la localidad donde opera el Club.
+    </p>
+
+    <!-- Acceptance block -->
+    <div style="background:#1e1611;border-radius:14px;padding:28px 32px;margin-bottom:36px;">
+      <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.14em;color:#D4A574;margin:0 0 12px;">Artículo 14 · Declaración de Aceptación</p>
+      <p style="font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.78);line-height:1.75;margin:0 0 14px;">
+        Al completar la adquisición de la Membresía {{TIER_LABEL}}, <strong style="color:#D4A574;">{{NAME}}</strong> declara expresamente haber leído, comprendido y aceptado en su totalidad los términos y condiciones establecidos en el presente contrato, incluyendo los beneficios específicos de su nivel de membresía y todas las cláusulas de limitación de responsabilidad aquí contenidas.
+      </p>
+      <p style="font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.38);margin:0;">
+        Aceptación registrada electrónicamente · Orden #{{ORDER_ID}} · {{ISSUED_DATE}}
+      </p>
+    </div>
+
+    <!-- CTA -->
+    <p style="font-family:Arial,sans-serif;font-size:13px;color:#6B5C4E;margin:0 0 12px;">
+      Para consultas sobre tu contrato o membresía, comunícate directamente con nosotros:
+    </p>
+    <a href="https://wa.me/584142966058" style="display:inline-block;padding:13px 32px;background:#D4A574;color:#ffffff;text-decoration:none;border-radius:100px;font-family:Arial,sans-serif;font-weight:700;font-size:13px;letter-spacing:0.02em;">
+      WhatsApp · +58 414 296 6058
+    </a>
+
+  </div>
+
+  <!-- Footer -->
+  <div style="padding:20px 40px;border-top:1px solid #ede5da;text-align:center;background:#fdfaf7;">
+    <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0 0 4px;">
+      Makay Beach Club · Membresía {{TIER_LABEL}} · Orden #{{ORDER_ID}}
+    </p>
+    <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0;">
+      Válida del {{ISSUED_DATE}} al {{EXPIRES_DATE}} · Documento generado automáticamente con valor legal
+    </p>
+  </div>
+
+</div>
+</body>
+</html>
