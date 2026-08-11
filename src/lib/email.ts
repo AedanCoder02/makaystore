@@ -60,7 +60,7 @@ export async function sendMembershipWelcomeEmail(data: MembershipEmailData) {
   await getTransport().sendMail({
     from: fromAddress(),
     to: data.to,
-    subject: `🔒 Bienvenido a Makay: Ya estás en nuestro Close Friends`,
+    subject: `Bienvenido a Makay — Ya eres parte de nuestro Close Friends`,
     html: `
       <!DOCTYPE html>
       <html>
@@ -91,10 +91,10 @@ export async function sendMembershipWelcomeEmail(data: MembershipEmailData) {
               <p style="font-family:Arial,sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.12em;color:#D4A574;margin:0 0 16px;">¿Qué significa ser un Miembro Makay?</p>
               <p style="font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.75);margin:0 0 12px;line-height:1.6;">A partir de hoy, tienes acceso prioritario a todo lo que pase tras bambalinas:</p>
               ${[
-                ['🎯 Reservas con Prioridad', 'Acceso antes que nadie a mesas en fechas especiales y eventos exclusivos.'],
-                ['🤫 Beneficios Secretos', 'Cortesías especiales, degustaciones a puerta cerrada y promociones que nunca publicaremos de forma abierta.'],
-                ['✨ Primicias & Vibe', 'Entérate antes que el resto sobre nuestros nuevos menús, DJs invitados y fiestas temáticas.'],
-                ['💬 Trato Directo', 'Un canal abierto y directo para tus peticiones especiales cuando nos visites.'],
+                ['Reservas con Prioridad', 'Acceso antes que nadie a mesas en fechas especiales y eventos exclusivos.'],
+                ['Beneficios Exclusivos', 'Cortesías especiales, degustaciones a puerta cerrada y promociones que nunca publicaremos de forma abierta.'],
+                ['Primicias & Vibe', 'Entérate antes que el resto sobre nuestros nuevos menús, DJs invitados y fiestas temáticas.'],
+                ['Trato Directo', 'Un canal abierto y directo para tus peticiones especiales cuando nos visites.'],
               ].map(([title, desc]) => `
                 <div style="display:flex;gap:10px;margin-bottom:10px;">
                   <div style="flex:1;">
@@ -155,17 +155,18 @@ export async function sendMembershipWelcomeEmail(data: MembershipEmailData) {
             <p style="font-family:Georgia,serif;font-size:16px;font-weight:700;color:#2C2C2C;margin:0 0 28px;">El equipo de Makay</p>
 
             <a href="https://wa.me/584142966058" style="display:inline-block;padding:14px 32px;background:#D4A574;color:#fff;text-decoration:none;border-radius:100px;font-family:Arial,sans-serif;font-weight:700;font-size:14px;">
-              💬 Reservar en WhatsApp VIP
+              Reservar en WhatsApp VIP
             </a>
           </div>
 
           <!-- Footer -->
           <div style="padding:24px 32px;border-top:1px solid #f0e8de;text-align:center;">
             <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0;">
-              Makay Beach Club · Membresía ${tierLabel} activada · Validez 3 meses
+              Makay Beach Club · Membresía ${tierLabel} activada · Vigencia: ${DURATION_LABEL[data.duration] ?? data.duration}
             </p>
           </div>
         </div>
+        ${legalFooterHtml('es')}
       </body>
       </html>
     `,
@@ -237,6 +238,56 @@ const TIER_BENEFITS_EN: Record<string, string[]> = {
 const DURATION_LABEL_EN: Record<string, string> = {
   trimestral: '3 months', semestral: '6 months', anual: '12 months',
 };
+
+function legalFooterHtml(locale: string = 'es'): string {
+  const isEs = locale !== 'en';
+  return isEs ? `
+    <div style="margin-top:32px;padding:24px 32px;border-top:1px solid #ede5da;background:#fdfaf7;font-family:Arial,sans-serif;font-size:11px;color:#a09080;line-height:1.7;text-align:center;">
+      <p style="margin:0 0 12px;">
+        Nunca le pediremos información personal, como contraseñas, datos bancarios o números de identificación por correo electrónico.
+        Si recibe un mensaje sospechoso que dice ser de Makay Beach Club y no es el destinatario de este correo,
+        no haga clic en ningún enlace. En su lugar, repórtelo a
+        <a href="mailto:ap.bymakay@gmail.com" style="color:#D4A574;text-decoration:none;">ap.bymakay@gmail.com</a> y luego elimínelo.
+      </p>
+      <p style="margin:0 0 12px;">
+        Por favor, no responda directamente a este mensaje — es un correo generado de forma automática.
+        Para comunicarse con nosotros, escríbanos a
+        <a href="mailto:ap.bymakay@gmail.com" style="color:#D4A574;text-decoration:none;">ap.bymakay@gmail.com</a>
+        o contáctenos por WhatsApp al <strong>+58 414 296 6058</strong>.
+      </p>
+      <p style="margin:0 0 4px;color:#c0b0a0;">
+        <strong>Aviso de privacidad:</strong> La información contenida en este correo es confidencial y está dirigida exclusivamente al destinatario indicado.
+        Su uso, divulgación o reproducción no autorizada está prohibida.
+      </p>
+      <p style="margin:8px 0 0;color:#b0a090;">
+        Makay Playa Cuacuco &nbsp;&middot;&nbsp; <a href="https://makaystore-sandy.vercel.app" style="color:#D4A574;text-decoration:none;">makaystore.com</a>
+        &nbsp;&middot;&nbsp; &copy; ${new Date().getFullYear()} Makay Beach Club. Todos los derechos reservados.
+      </p>
+    </div>
+  ` : `
+    <div style="margin-top:32px;padding:24px 32px;border-top:1px solid #ede5da;background:#fdfaf7;font-family:Arial,sans-serif;font-size:11px;color:#a09080;line-height:1.7;text-align:center;">
+      <p style="margin:0 0 12px;">
+        We will never ask for personal information such as passwords, banking details, or identification numbers by email.
+        If you receive a suspicious message claiming to be from Makay Beach Club and you are not the intended recipient,
+        do not click any links. Instead, report it to
+        <a href="mailto:ap.bymakay@gmail.com" style="color:#D4A574;text-decoration:none;">ap.bymakay@gmail.com</a> and delete it.
+      </p>
+      <p style="margin:0 0 12px;">
+        Please do not reply directly to this message — it was generated automatically.
+        To contact us, email <a href="mailto:ap.bymakay@gmail.com" style="color:#D4A574;text-decoration:none;">ap.bymakay@gmail.com</a>
+        or reach us on WhatsApp at <strong>+58 414 296 6058</strong>.
+      </p>
+      <p style="margin:0 0 4px;color:#c0b0a0;">
+        <strong>Privacy notice:</strong> The information in this email is confidential and intended solely for the named recipient.
+        Unauthorized use, disclosure, or reproduction is prohibited.
+      </p>
+      <p style="margin:8px 0 0;color:#b0a090;">
+        Makay Playa Cuacuco &nbsp;&middot;&nbsp; <a href="https://makaystore-sandy.vercel.app" style="color:#D4A574;text-decoration:none;">makaystore.com</a>
+        &nbsp;&middot;&nbsp; &copy; ${new Date().getFullYear()} Makay Beach Club. All rights reserved.
+      </p>
+    </div>
+  `;
+}
 
 function loadTemplate(filename: string): string {
   try {
@@ -337,6 +388,7 @@ export async function sendMembershipContractEmail(data: MembershipEmailData) {
         <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0;">Makay Playa Cuacuco · Orden #${data.orderId} · ${issuedDate}</p>
       </div>
     </div>
+    ${legalFooterHtml('es')}
     </body></html>
   ` : `
     <!DOCTYPE html>
@@ -374,6 +426,7 @@ export async function sendMembershipContractEmail(data: MembershipEmailData) {
         <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0;">Makay Playa Cuacuco · Order #${data.orderId} · ${issuedDate}</p>
       </div>
     </div>
+    ${legalFooterHtml('en')}
     </body></html>
   `;
 
