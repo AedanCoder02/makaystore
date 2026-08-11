@@ -3,7 +3,9 @@ import fs from 'fs';
 import path from 'path';
 import { htmlToPdf } from './pdf';
 
-const FROM = 'Makay Beach Club <noreply@makay.club>';
+// Temporary sender until makay.club domain is verified in Resend
+// Replace with 'Makay Beach Club <noreply@makay.club>' once domain DNS is confirmed
+const FROM = 'Makay Beach Club <onboarding@resend.dev>';
 function getResend() {
   return new Resend(process.env.RESEND_API_KEY ?? 'placeholder');
 }

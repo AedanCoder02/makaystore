@@ -1,3 +1,4 @@
+import { existsSync } from 'fs';
 import puppeteer from 'puppeteer-core';
 
 const CHROMIUM_URL =
@@ -11,17 +12,18 @@ const CHROMIUM_ARGS = [
   '--single-process',
 ];
 
+const LOCAL_CHROME_PATHS: Record<string, string> = {
+  win32:  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+  darwin: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+  linux:  '/usr/bin/google-chrome',
+};
+
 async function getExecutablePath(): Promise<string> {
-  if (process.env.NODE_ENV === 'development') {
-    if (process.platform === 'win32') {
-      return 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
-    }
-    if (process.platform === 'darwin') {
-      return '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-    }
-    return '/usr/bin/google-chrome';
+  const localPath = LOCAL_CHROME_PATHS[process.platform] ?? LOCAL_CHROME_PATHS.linux;
+  if (existsSync(localPath)) {
+    return localPath;
   }
-  // Serverless: inflate chromium-min from remote tar
+  // Serverless: download and inflate chromium-min
   const { inflate } = await import('@sparticuz/chromium-min');
   return inflate(CHROMIUM_URL);
 }
