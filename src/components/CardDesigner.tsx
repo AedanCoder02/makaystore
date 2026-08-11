@@ -39,10 +39,10 @@ export interface CardColors {
 // ── Light Executive (matches Illustrator design) ───────────────────────────
 export const DEFAULT_CARD_LAYOUT: CardLayout = {
   logo:    { x: 5,  y: 5,  visible: true,  scale: 1   },
-  tier:    { x: 47, y: 7,  visible: true,  scale: 1   },
-  avatar:  { x: 5,  y: 28, visible: true,  scale: 1.8 },
-  name:    { x: 43, y: 23, visible: true,  scale: 2.4 },
-  tagline: { x: 43, y: 12, visible: true,  scale: 1   },
+  tier:    { x: 63, y: 5,  visible: true,  scale: 1   },
+  avatar:  { x: 5,  y: 30, visible: true,  scale: 1.8 },
+  name:    { x: 40, y: 26, visible: true,  scale: 2.4 },
+  tagline: { x: 5,  y: 17, visible: true,  scale: 1   },
   divider: { x: 0,  y: 72, visible: true,  scale: 1   },
   id:      { x: 5,  y: 79, visible: true,  scale: 1   },
   since:   { x: 60, y: 79, visible: true,  scale: 1   },
@@ -205,7 +205,7 @@ export function CardCanvas({
 
       <El id="logo">
         <Image
-          src="/images/2422e513-d2a3-47ad-9574-1b141cd4de8f-1-removebg-preview.png"
+          src="/images/makay-logo.png"
           alt="Makay" width={70} height={24}
           style={{ objectFit: 'contain', filter: isDark ? 'brightness(0) invert(1)' : 'none', display: 'block' }}
           draggable={false}
