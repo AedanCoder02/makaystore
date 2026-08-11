@@ -1,6 +1,7 @@
 import { Resend } from 'resend';
 import fs from 'fs';
 import path from 'path';
+import { htmlToPdf } from './pdf';
 
 const FROM = 'Makay Beach Club <noreply@makay.club>';
 function getResend() {
@@ -57,8 +58,10 @@ export async function sendMembershipWelcomeEmail(data: MembershipEmailData) {
         <div style="max-width:580px;margin:0 auto;background:#fff;border-radius:16px;overflow:hidden;margin-top:32px;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
 
           <!-- Header -->
-          <div style="background:linear-gradient(135deg,#1e1611,#2c1f14);padding:40px 32px;text-align:center;">
-            <p style="font-family:Georgia,serif;font-size:28px;font-weight:700;color:#D4A574;margin:0 0 6px;">Makay Beach Club</p>
+          <div style="background:linear-gradient(135deg,#1e1611,#2c1f14);padding:32px;text-align:center;">
+            <div style="display:inline-block;background:#ffffff;border-radius:10px;padding:12px 24px;margin-bottom:16px;">
+              <img src="https://makaystore-sandy.vercel.app/images/makay-logo.png" alt="Makay Playa Cuacuco" width="180" style="display:block;height:auto;max-width:180px;" />
+            </div>
             <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.45);margin:0;">Membresía ${tierLabel} · Close Friends</p>
           </div>
 
@@ -260,8 +263,9 @@ export async function sendMembershipContractEmail(data: MembershipEmailData) {
   const benefitsList = (benefitsMap[data.tier] ?? benefitsMap.bronze)
     .map(b => `<li>${b}</li>`).join('');
 
-  const template = loadTemplate(isEs ? 'contract-es.html' : 'contract-en.html');
-  const html = renderTemplate(template, {
+  // Build full contract HTML for PDF
+  const contractTemplate = loadTemplate(isEs ? 'contract-es.html' : 'contract-en.html');
+  const contractHtml = renderTemplate(contractTemplate, {
     ORDER_ID: data.orderId,
     NAME: data.name,
     EMAIL: data.to,
@@ -273,9 +277,105 @@ export async function sendMembershipContractEmail(data: MembershipEmailData) {
     BENEFITS_LIST: benefitsList,
   });
 
+  // Generate PDF
+  let pdfBuffer: Buffer | null = null;
+  try {
+    pdfBuffer = await htmlToPdf(contractHtml);
+  } catch {
+    // PDF generation non-fatal — still send the email without attachment
+  }
+
+  // Short legal notice body
   const subject = isEs
     ? `Contrato y Comprobante — Membresía Makay ${tierLabel} #${data.orderId}`
     : `Membership Agreement & Receipt — Makay ${tierLabel} #${data.orderId}`;
 
-  await getResend().emails.send({ from: FROM, to: data.to, subject, html });
+  const bodyHtml = isEs ? `
+    <!DOCTYPE html>
+    <html><head><meta charset="utf-8"/></head>
+    <body style="margin:0;padding:0;background:#f5efe5;font-family:Arial,sans-serif;">
+    <div style="max-width:580px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.09);">
+      <div style="background:linear-gradient(135deg,#1e1611,#2c1f14);padding:32px;text-align:center;">
+        <div style="display:inline-block;background:#fff;border-radius:10px;padding:12px 24px;margin-bottom:14px;">
+          <img src="https://makaystore-sandy.vercel.app/images/makay-logo.png" alt="Makay" width="170" style="display:block;height:auto;" />
+        </div>
+        <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin:0;">Contrato de Membresía</p>
+      </div>
+      <div style="padding:36px 36px 32px;">
+        <p style="font-family:Georgia,serif;font-size:20px;font-weight:700;color:#2C2C2C;margin:0 0 16px;">Hola, ${data.name}.</p>
+        <p style="font-family:Arial,sans-serif;font-size:14px;color:#6B5C4E;line-height:1.7;margin:0 0 24px;">
+          Adjunto a este correo encontrarás tu <strong>contrato de membresía</strong> y comprobante de pago en formato PDF. Te recomendamos guardarlo para tu referencia.
+        </p>
+        <div style="background:#f9f4ef;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;padding:5px 0;">Membresía</td><td style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#2C2C2C;text-align:right;padding:5px 0;">${tierLabel} · ${durationLabel}</td></tr>
+            <tr><td style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;padding:5px 0;">Orden</td><td style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#2C2C2C;text-align:right;padding:5px 0;">#${data.orderId}</td></tr>
+            <tr><td style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;padding:5px 0;">Monto pagado</td><td style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:#D4A574;text-align:right;padding:5px 0;">$${data.amount.toFixed(2)}</td></tr>
+            <tr><td style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;padding:5px 0;">Vigencia</td><td style="font-family:Arial,sans-serif;font-size:13px;color:#2C2C2C;text-align:right;padding:5px 0;">${issuedDate} – ${expiresDate}</td></tr>
+          </table>
+        </div>
+        <p style="font-family:Arial,sans-serif;font-size:13px;color:#6B5C4E;line-height:1.7;margin:0 0 8px;">
+          Al adquirir esta membresía, <strong>${data.name}</strong> declaró haber leído y aceptado los términos y condiciones establecidos en el contrato adjunto, incluyendo la política de no reembolso y las cláusulas de limitación de responsabilidad.
+        </p>
+        <p style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;margin:0 0 28px;">
+          Aceptación registrada electrónicamente · ${issuedDate}
+        </p>
+        <a href="https://wa.me/584142966058" style="display:inline-block;padding:12px 28px;background:#D4A574;color:#fff;text-decoration:none;border-radius:100px;font-family:Arial,sans-serif;font-weight:700;font-size:13px;">WhatsApp · +58 414 296 6058</a>
+      </div>
+      <div style="padding:18px 36px;border-top:1px solid #f0e8de;text-align:center;background:#fdfaf7;">
+        <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0;">Makay Playa Cuacuco · Orden #${data.orderId} · ${issuedDate}</p>
+      </div>
+    </div>
+    </body></html>
+  ` : `
+    <!DOCTYPE html>
+    <html><head><meta charset="utf-8"/></head>
+    <body style="margin:0;padding:0;background:#f5efe5;font-family:Arial,sans-serif;">
+    <div style="max-width:580px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.09);">
+      <div style="background:linear-gradient(135deg,#1e1611,#2c1f14);padding:32px;text-align:center;">
+        <div style="display:inline-block;background:#fff;border-radius:10px;padding:12px 24px;margin-bottom:14px;">
+          <img src="https://makaystore-sandy.vercel.app/images/makay-logo.png" alt="Makay" width="170" style="display:block;height:auto;" />
+        </div>
+        <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin:0;">Membership Agreement</p>
+      </div>
+      <div style="padding:36px 36px 32px;">
+        <p style="font-family:Georgia,serif;font-size:20px;font-weight:700;color:#2C2C2C;margin:0 0 16px;">Hello, ${data.name}.</p>
+        <p style="font-family:Arial,sans-serif;font-size:14px;color:#6B5C4E;line-height:1.7;margin:0 0 24px;">
+          Please find your <strong>membership agreement</strong> and payment receipt attached as a PDF. We recommend keeping it for your records.
+        </p>
+        <div style="background:#f9f4ef;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
+          <table style="width:100%;border-collapse:collapse;">
+            <tr><td style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;padding:5px 0;">Membership</td><td style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#2C2C2C;text-align:right;padding:5px 0;">${tierLabel} · ${durationLabel}</td></tr>
+            <tr><td style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;padding:5px 0;">Order</td><td style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#2C2C2C;text-align:right;padding:5px 0;">#${data.orderId}</td></tr>
+            <tr><td style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;padding:5px 0;">Amount paid</td><td style="font-family:Georgia,serif;font-size:15px;font-weight:700;color:#D4A574;text-align:right;padding:5px 0;">$${data.amount.toFixed(2)}</td></tr>
+            <tr><td style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;padding:5px 0;">Valid</td><td style="font-family:Arial,sans-serif;font-size:13px;color:#2C2C2C;text-align:right;padding:5px 0;">${issuedDate} – ${expiresDate}</td></tr>
+          </table>
+        </div>
+        <p style="font-family:Arial,sans-serif;font-size:13px;color:#6B5C4E;line-height:1.7;margin:0 0 8px;">
+          By purchasing this membership, <strong>${data.name}</strong> confirmed having read and accepted all terms and conditions in the attached agreement, including the non-refund policy and limitation of liability clauses.
+        </p>
+        <p style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;margin:0 0 28px;">
+          Electronically accepted · ${issuedDate}
+        </p>
+        <a href="https://wa.me/584142966058" style="display:inline-block;padding:12px 28px;background:#D4A574;color:#fff;text-decoration:none;border-radius:100px;font-family:Arial,sans-serif;font-weight:700;font-size:13px;">WhatsApp · +58 414 296 6058</a>
+      </div>
+      <div style="padding:18px 36px;border-top:1px solid #f0e8de;text-align:center;background:#fdfaf7;">
+        <p style="font-family:Arial,sans-serif;font-size:11px;color:#b0a090;margin:0;">Makay Playa Cuacuco · Order #${data.orderId} · ${issuedDate}</p>
+      </div>
+    </div>
+    </body></html>
+  `;
+
+  await getResend().emails.send({
+    from: FROM,
+    to: data.to,
+    subject,
+    html: bodyHtml,
+    ...(pdfBuffer ? {
+      attachments: [{
+        filename: `makay-contrato-${data.tier}-${data.orderId}.pdf`,
+        content: pdfBuffer.toString('base64'),
+      }],
+    } : {}),
+  });
 }
