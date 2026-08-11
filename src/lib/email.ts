@@ -42,10 +42,10 @@ export async function sendMembershipWelcomeEmail(data: MembershipEmailData) {
   ];
   if (data.expiresAt) detailRows.push(['Vence', new Date(data.expiresAt).toLocaleDateString('es', { day: 'numeric', month: 'long', year: 'numeric' })]);
   const detailRowsHtml = detailRows.map(([k, v]) => `
-    <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #ede5da;">
-      <span style="font-family:Arial,sans-serif;font-size:13px;color:#9c8070;">${k}</span>
-      <span style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#2C2C2C;">${v}</span>
-    </div>
+    <tr>
+      <td style="font-family:Arial,sans-serif;font-size:13px;color:#9c8070;padding:7px 0;border-bottom:1px solid #ede5da;width:40%;">${k}</td>
+      <td style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#2C2C2C;padding:7px 0;border-bottom:1px solid #ede5da;text-align:right;">${v}</td>
+    </tr>
   `).join('');
 
   await getResend().emails.send({
@@ -99,7 +99,7 @@ export async function sendMembershipWelcomeEmail(data: MembershipEmailData) {
             <!-- Membership includes -->
             <div style="background:#f9f4ef;border-radius:12px;padding:20px 24px;margin-bottom:24px;">
               <p style="font-family:Arial,sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;color:#9c8070;margin:0 0 12px;">Lo que incluye tu Membresía ${tierLabel}</p>
-              ${detailRowsHtml}
+              <table style="width:100%;border-collapse:collapse;">${detailRowsHtml}</table>
               <div style="padding:8px 0;border-bottom:1px solid #ede5da;">
                 <p style="font-family:Arial,sans-serif;font-size:13px;font-weight:700;color:#2C2C2C;margin:0 0 2px;">Asesoría personalizada con tu Vacation Planner</p>
                 <p style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;margin:0;line-height:1.5;">Un asesor asignado te ayudará a planificar tu temporada, coordinar tus fechas especiales y maximizar todos tus beneficios.</p>
