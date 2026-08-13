@@ -52,40 +52,34 @@ const LETTER_SPACING_VALUES: Record<string, string> = {
 export default function MarketingApplier() {
   const pathname = usePathname();
 
-  // Apply global brand colors once on mount — fixes palette changes not reflecting on site
+  // On every navigation: re-apply global brand colors + page-specific overrides from one fetch
   useEffect(() => {
+    const pageId = resolvePageId(pathname);
+
+    // Remove stale page overrides
+    const existingPage = document.getElementById('mkt-page-vars');
+    if (existingPage) existingPage.remove();
+
     fetch('/api/theme')
       .then(r => r.json())
       .then((settings: Record<string, string>) => {
+        // ── Global CSS vars (preset colors) ──
         const globalParts: string[] = [];
         Object.entries(settings).forEach(([k, v]) => {
           if (k.startsWith('--makay-') && !k.includes(':')) globalParts.push(`${k}:${v}`);
         });
-        if (!globalParts.length) return;
-        let el = document.getElementById('mkt-global-vars') as HTMLStyleElement | null;
-        if (!el) { el = document.createElement('style'); el.id = 'mkt-global-vars'; document.head.appendChild(el); }
-        el.textContent = `:root{${globalParts.join(';')}}`;
-      })
-      .catch(() => {});
-  }, []);
+        if (globalParts.length) {
+          let el = document.getElementById('mkt-global-vars') as HTMLStyleElement | null;
+          if (!el) { el = document.createElement('style'); el.id = 'mkt-global-vars'; document.head.appendChild(el); }
+          el.textContent = `:root{${globalParts.join(';')}}`;
+        }
 
-  useEffect(() => {
-    const pageId = resolvePageId(pathname);
-
-    // Remove any previously applied page overrides
-    const existing = document.getElementById('mkt-page-vars');
-    if (existing) existing.remove();
-
-    if (!pageId) return;
-
-    fetch('/api/theme')
-      .then(r => r.json())
-      .then((settings: Record<string, string>) => {
+        // ── Page-specific color + typography overrides ──
+        if (!pageId) return;
         const colorVars: string[] = [];
         const typoVars:  string[] = [];
 
         Object.entries(settings).forEach(([key, value]) => {
-          // Color override
           const colorMatch = key.match(new RegExp(`^page:${pageId}:colors:(.+)$`));
           if (colorMatch) {
             const cssVar = COLOR_VAR_MAP[colorMatch[1]];
@@ -93,7 +87,6 @@ export default function MarketingApplier() {
             return;
           }
 
-          // Typography override
           const typoMatch = key.match(new RegExp(`^page:${pageId}:typography:(.+)$`));
           if (typoMatch) {
             const tKey = typoMatch[1];
@@ -102,7 +95,6 @@ export default function MarketingApplier() {
             let cssValue = value;
             if (tKey === 'headingFont') {
               if (value === 'custom') {
-                // Custom Google Font — look for the font name in settings
                 const customName = settings[key.replace('headingFont', 'headingFontCustomName')];
                 if (customName) {
                   const linkId = `gf-${customName.replace(/\s+/g, '-')}`;
@@ -126,11 +118,9 @@ export default function MarketingApplier() {
         });
 
         if (colorVars.length === 0 && typoVars.length === 0) return;
-
-        const allVars = [...colorVars, ...typoVars].join(';');
         const style = document.createElement('style');
         style.id = 'mkt-page-vars';
-        style.textContent = `:root{${allVars}}`;
+        style.textContent = `:root{${[...colorVars, ...typoVars].join(';')}}`;
         document.head.appendChild(style);
       })
       .catch(() => {});
