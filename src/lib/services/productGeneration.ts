@@ -42,7 +42,9 @@ class FalTrellisProvider implements GenerationProvider {
       body: JSON.stringify({
         image_url: imageUrl,
         ss_sampling_steps: 12,
-        slat_sampling_steps: 12,
+        shape_slat_sampling_steps: 12,
+        tex_slat_sampling_steps: 12,
+        decimation_target: 500000,
         texture_size: 1024,
       }),
     });
@@ -70,19 +72,25 @@ class FalTrellisProvider implements GenerationProvider {
     const falStatus: string = statusData.status;
 
     if (falStatus === 'COMPLETED') {
-      const resultRes = await fetch(`${this.base}/requests/${requestId}`, {
-        headers: this.headers,
-      });
-      if (!resultRes.ok) throw new Error(`FAL result fetch error ${resultRes.status}`);
-      const result = await resultRes.json();
-      // FAL queue result: { output: { model_glb: { url } } } — also check legacy paths
+      // Try /response suffix (documented response_url format) then bare /{requestId}
+      const urls = [
+        `${this.base}/requests/${requestId}/response`,
+        `${this.base}/requests/${requestId}`,
+      ];
+      let result: Record<string, unknown> = {};
+      for (const url of urls) {
+        const r = await fetch(url, { headers: this.headers });
+        if (r.ok) { result = await r.json(); break; }
+      }
+      // Output is returned directly at the top level: { model_glb: { url } }
       const glbUrl =
-        result.output?.model_glb?.url ??
-        result.data?.model_glb?.url ??
-        result.model_glb?.url;
+        (result.model_glb as { url?: string } | undefined)?.url ??
+        (result.output as { model_glb?: { url?: string } } | undefined)?.model_glb?.url;
       if (!glbUrl) {
-        console.error('[FAL result]', JSON.stringify(result).slice(0, 500));
-        throw new Error('FAL returned no GLB URL in result');
+        const dump = JSON.stringify(result).slice(0, 400);
+        console.error('[FAL] COMPLETED but no GLB URL. Result keys:', Object.keys(result), dump);
+        // Return failed so client stops polling and shows the error
+        return { status: 'failed' as const, errorMessage: `No GLB in result. Keys: ${Object.keys(result).join(', ')}` };
       }
       return { status: 'completed' as const, progress: 100, outputUrl: glbUrl };
     }
