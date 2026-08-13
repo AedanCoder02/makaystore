@@ -41,12 +41,9 @@ class FalTrellisProvider implements GenerationProvider {
       headers: this.headers,
       body: JSON.stringify({
         image_url: imageUrl,
-        resolution: '512',
-        texture_size: '2048',
-        decimation_target: 500000,
         ss_sampling_steps: 12,
-        shape_slat_sampling_steps: 12,
-        tex_slat_sampling_steps: 12,
+        slat_sampling_steps: 12,
+        texture_size: 1024,
       }),
     });
 
@@ -78,9 +75,15 @@ class FalTrellisProvider implements GenerationProvider {
       });
       if (!resultRes.ok) throw new Error(`FAL result fetch error ${resultRes.status}`);
       const result = await resultRes.json();
-      // trellis-2-lora output: { model_glb: { url: "..." } }
-      const glbUrl = result.data?.model_glb?.url ?? result.model_glb?.url;
-      if (!glbUrl) throw new Error('FAL returned no GLB URL in result');
+      // FAL queue result: { output: { model_glb: { url } } } — also check legacy paths
+      const glbUrl =
+        result.output?.model_glb?.url ??
+        result.data?.model_glb?.url ??
+        result.model_glb?.url;
+      if (!glbUrl) {
+        console.error('[FAL result]', JSON.stringify(result).slice(0, 500));
+        throw new Error('FAL returned no GLB URL in result');
+      }
       return { status: 'completed' as const, progress: 100, outputUrl: glbUrl };
     }
 
