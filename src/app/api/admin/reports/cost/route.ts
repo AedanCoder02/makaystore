@@ -27,17 +27,19 @@ export async function GET(req: NextRequest) {
       )
     `;
 
+    const iv = sql.unsafe(interval);
+
     const [sellerRev, storefrontRev, costRows, trend] = await Promise.all([
       sql`
         SELECT COALESCE(SUM(subtotal::numeric), 0) AS revenue
         FROM seller_orders
-        WHERE created_at >= NOW() - INTERVAL ${interval}
+        WHERE created_at >= NOW() - ${iv}::interval
       `.catch(() => [{ revenue: 0 }]),
 
       sql`
         SELECT COALESCE(SUM(total::numeric), 0) AS revenue
         FROM orders
-        WHERE created_at >= NOW() - INTERVAL ${interval}
+        WHERE created_at >= NOW() - ${iv}::interval
       `.catch(() => [{ revenue: 0 }]),
 
       sql`SELECT value FROM theme_settings WHERE key = 'cost_percentage'`.catch(() => []),
@@ -47,7 +49,7 @@ export async function GET(req: NextRequest) {
           DATE_TRUNC('day', created_at) AS bucket,
           SUM(subtotal::numeric) AS revenue
         FROM seller_orders
-        WHERE created_at >= NOW() - INTERVAL ${interval}
+        WHERE created_at >= NOW() - ${iv}::interval
         GROUP BY DATE_TRUNC('day', created_at)
         ORDER BY bucket ASC
       `.catch(() => []),

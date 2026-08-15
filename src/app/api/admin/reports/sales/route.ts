@@ -25,28 +25,31 @@ export async function GET(req: NextRequest) {
   const bucket = groupBy(range);
   const truncFn = bucket === 'week' ? 'week' : 'day';
 
+  const iv = sql.unsafe(interval);
+  const trunc = sql.unsafe(truncFn);
+
   const [sellerDaily, storefrontDaily, totals, membershipRevenue, topProducts] = await Promise.all([
     // Seller in-person orders
     sql`
       SELECT
-        DATE_TRUNC(${truncFn}, created_at) AS bucket,
+        DATE_TRUNC(${trunc}, created_at) AS bucket,
         SUM(subtotal::numeric) AS revenue,
         COUNT(*) AS orders
       FROM seller_orders
-      WHERE created_at >= NOW() - INTERVAL ${interval}
-      GROUP BY DATE_TRUNC(${truncFn}, created_at)
+      WHERE created_at >= NOW() - ${iv}::interval
+      GROUP BY DATE_TRUNC(${trunc}, created_at)
       ORDER BY bucket ASC
     `.catch(() => []),
 
     // Storefront orders
     sql`
       SELECT
-        DATE_TRUNC(${truncFn}, created_at) AS bucket,
+        DATE_TRUNC(${trunc}, created_at) AS bucket,
         SUM(total::numeric) AS revenue,
         COUNT(*) AS orders
       FROM orders
-      WHERE created_at >= NOW() - INTERVAL ${interval}
-      GROUP BY DATE_TRUNC(${truncFn}, created_at)
+      WHERE created_at >= NOW() - ${iv}::interval
+      GROUP BY DATE_TRUNC(${trunc}, created_at)
       ORDER BY bucket ASC
     `.catch(() => []),
 
@@ -59,16 +62,16 @@ export async function GET(req: NextRequest) {
         COALESCE(o.avg_v, 0)                     AS avg_storefront
       FROM
         (SELECT SUM(subtotal::numeric) AS rev, COUNT(*) AS cnt, AVG(subtotal::numeric) AS avg_v
-         FROM seller_orders WHERE created_at >= NOW() - INTERVAL ${interval}) s,
+         FROM seller_orders WHERE created_at >= NOW() - ${iv}::interval) s,
         (SELECT SUM(total::numeric) AS rev, COUNT(*) AS cnt, AVG(total::numeric) AS avg_v
-         FROM orders WHERE created_at >= NOW() - INTERVAL ${interval}) o
+         FROM orders WHERE created_at >= NOW() - ${iv}::interval) o
     `.catch(() => [{ total_revenue: 0, total_orders: 0, avg_seller: 0, avg_storefront: 0 }]),
 
     // Membership revenue from event tickets
     sql`
       SELECT COALESCE(SUM(total_paid::numeric), 0) AS membership_rev
       FROM event_tickets
-      WHERE purchased_at >= NOW() - INTERVAL ${interval}
+      WHERE purchased_at >= NOW() - ${iv}::interval
     `.catch(() => [{ membership_rev: 0 }]),
 
     // Top products by revenue
@@ -81,7 +84,7 @@ export async function GET(req: NextRequest) {
         jsonb_array_elements(
           CASE WHEN jsonb_typeof(items::jsonb) = 'array' THEN items::jsonb ELSE '[]'::jsonb END
         ) AS p_items
-      WHERE created_at >= NOW() - INTERVAL ${interval}
+      WHERE created_at >= NOW() - ${iv}::interval
       GROUP BY p_items->>'title'
       ORDER BY revenue DESC
       LIMIT 5
