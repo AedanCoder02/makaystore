@@ -1,1 +1,1 @@
-﻿{"outputDirectory":".next","crons":[{"path":"/api/cron/report","schedule":"0 13 * * *"}]}
+{"outputDirectory":".next","crons":[{"path":"/api/cron/report","schedule":"0 13 * * *"}]}
