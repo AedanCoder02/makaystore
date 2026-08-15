@@ -2,13 +2,13 @@ import { auth, clerkClient } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
 
-function cutoffFromRange(range: string): Date {
-  const now = Date.now();
+function rangeExpr(range: string) {
+  // Returns a sql.unsafe fragment for the WHERE cutoff — pure SQL, no user input reaches here
   switch (range) {
-    case '7d':  return new Date(now - 7  * 86_400_000);
-    case '3m':  return new Date(now - 90 * 86_400_000);
-    case 'all': return new Date(0);
-    default:    return new Date(now - 30 * 86_400_000);
+    case '7d':  return sql.unsafe("NOW() - INTERVAL '7 days'");
+    case '3m':  return sql.unsafe("NOW() - INTERVAL '90 days'");
+    case 'all': return sql.unsafe("'1970-01-01'::timestamptz");
+    default:    return sql.unsafe("NOW() - INTERVAL '30 days'");
   }
 }
 
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const range  = req.nextUrl.searchParams.get('range') ?? '30d';
-  const cutoff = cutoffFromRange(range);
+  const cutoff = rangeExpr(range);
 
   const [orders, goalRows, costRows] = await Promise.all([
     sql`
@@ -27,14 +27,14 @@ export async function GET(req: NextRequest) {
         client_name,
         client_email,
         items,
-        subtotal::numeric AS subtotal,
+        subtotal,
         payment_method AS payment_methods,
         created_at
       FROM seller_orders
       WHERE created_at >= ${cutoff}
       ORDER BY created_at DESC
       LIMIT 500
-    `.catch(() => []),
+    `.catch((e) => { console.error('[report/orders]', e?.message); return []; }),
 
     sql`
       SELECT value FROM theme_settings WHERE key = 'monthly_target'
@@ -60,21 +60,14 @@ export async function GET(req: NextRequest) {
     }));
   }
 
-  const monthCutoff = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-  const monthlyActual = (orders as { subtotal: number; created_at: string }[])
-    .filter(o => new Date(o.created_at) >= monthCutoff)
-    .reduce((s, o) => s + Number(o.subtotal), 0);
-
   const monthlySums = await sql`
     SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual
     FROM seller_orders
-    WHERE created_at >= ${monthCutoff}
+    WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)
   `.catch(() => [{ actual: 0 }]);
 
-  const rows = (orders as {
-    id: string; seller_id: string; client_name: string; client_email: string;
-    items: unknown; subtotal: unknown; payment_methods: unknown; created_at: string;
-  }[]).map(o => ({
+  type OrderRow = { id: string; seller_id: string; client_name: string; client_email: string; items: unknown; subtotal: unknown; payment_methods: unknown; created_at: string; };
+  const rows = (orders as OrderRow[]).map(o => ({
     id: o.id,
     sellerName: nameMap[o.seller_id] ?? 'Seller',
     clientName: o.client_name || o.client_email || '—',

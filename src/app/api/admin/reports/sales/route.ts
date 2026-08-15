@@ -2,13 +2,12 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
 
-function cutoffFromRange(range: string): Date {
-  const now = Date.now();
+function rangeExpr(range: string) {
   switch (range) {
-    case '7d':  return new Date(now - 7  * 86_400_000);
-    case '3m':  return new Date(now - 90 * 86_400_000);
-    case 'all': return new Date(0);
-    default:    return new Date(now - 30 * 86_400_000);
+    case '7d':  return sql.unsafe("NOW() - INTERVAL '7 days'");
+    case '3m':  return sql.unsafe("NOW() - INTERVAL '90 days'");
+    case 'all': return sql.unsafe("'1970-01-01'::timestamptz");
+    default:    return sql.unsafe("NOW() - INTERVAL '30 days'");
   }
 }
 
@@ -21,10 +20,10 @@ export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const range = req.nextUrl.searchParams.get('range') ?? '30d';
-  const cutoff = cutoffFromRange(range);
+  const range  = req.nextUrl.searchParams.get('range') ?? '30d';
+  const cutoff = rangeExpr(range);
   const bucket = groupBy(range);
-  const trunc = sql.unsafe(bucket === 'week' ? 'week' : 'day');
+  const trunc  = sql.unsafe(bucket === 'week' ? 'week' : 'day');
 
   const [sellerDaily, storefrontDaily, totals, membershipRevenue, topProducts] = await Promise.all([
     sql`
