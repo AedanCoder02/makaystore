@@ -2,19 +2,21 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import { ShoppingBag, Package, Boxes, TrendingUp, HelpCircle, Clock } from 'lucide-react';
+import { ShoppingBag, Package, Boxes, TrendingUp, HelpCircle, Clock, BadgeDollarSign } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
 interface Order { id: number; client_name: string; subtotal: string; created_at: string; status: string; items: any[] }
 
-export default function SellerDashboard({ recentOrders, stockSummary }: {
+export default function SellerDashboard({ recentOrders, stockSummary, commissionPct }: {
   recentOrders: Order[];
   stockSummary: { total: number; units: number };
+  commissionPct: number;
 }) {
   const t = useTranslations('seller');
   const totalRevenue = recentOrders.reduce((s, o) => s + Number(o.subtotal), 0);
+  const commissionEarned = totalRevenue * (commissionPct / 100);
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('seller-dashboard-tour');
 
@@ -43,6 +45,14 @@ export default function SellerDashboard({ recentOrders, stockSummary }: {
           <TrendingUp size={22} className="seller-stat-icon" />
           <span className="seller-stat-value">${totalRevenue.toFixed(2)}</span>
           <span className="seller-stat-label">{t('revenue')}</span>
+        </div>
+        <div className="seller-stat-card">
+          <BadgeDollarSign size={22} className="seller-stat-icon" />
+          <span className="seller-stat-value">${commissionEarned.toFixed(2)}</span>
+          <span className="seller-stat-label">Comisión de Venta</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--makay-mauve)', marginTop: '2px', opacity: 0.75 }}>
+            {commissionPct > 0 ? `${commissionPct}% de comisión` : 'Sin comisión configurada'}
+          </span>
         </div>
         <div className="seller-stat-card">
           <ShoppingBag size={22} className="seller-stat-icon" />
