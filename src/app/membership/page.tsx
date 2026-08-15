@@ -1,15 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import nextDynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useUser } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
-import { Calendar, MapPin, Users, Ticket, Star, Award, Lock, Copy, Check, Percent, Umbrella, Trophy, ChevronRight } from 'lucide-react';
+import {
+  Calendar, MapPin, Users, Ticket,
+  Star, Award, Lock, Copy, Check,
+  Percent, Umbrella, Trophy, ChevronRight,
+} from 'lucide-react';
+import { animate, stagger, createTimeline } from 'animejs';
 import MembershipLeadForm from '@/components/membership/MembershipLeadForm';
+import '@/styles/membership.css';
 
 export const dynamic = 'force-dynamic';
 
-/* ── Types ───────────────────────────────────────────────────── */
+const MembershipHeroGradient = nextDynamic(
+  () => import('@/components/membership/MembershipHeroGradient'),
+  { ssr: false }
+);
+
+/* ── Types ─────────────────────────────────────── */
 interface Event {
   id: number; title: string; description: string; event_date: string;
   location: string; image_url: string; price: number;
@@ -22,7 +34,7 @@ interface Ally {
 }
 type BenefitTier = 'bronze' | 'silver' | 'gold';
 
-/* ── Constants ───────────────────────────────────────────────── */
+/* ── Constants ──────────────────────────────────── */
 const TIER_COLOR: Record<string, string> = {
   bronze: '#CD7F32', silver: '#A8A9AD', gold: '#D4AF37', vip: '#D4A574',
 };
@@ -81,7 +93,7 @@ const BENEFIT_TIERS: Array<{
   },
 ];
 
-/* ── Ally card ───────────────────────────────────────────────── */
+/* ── Ally Card ──────────────────────────────────── */
 function AllyCard({ ally, t, ta }: {
   ally: Ally;
   t: ReturnType<typeof useTranslations<'membership'>>;
@@ -102,14 +114,36 @@ function AllyCard({ ally, t, ta }: {
   let description = ally.description;
   try { const d = t(descKey); if (d && d !== descKey) description = d; } catch {}
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    e.currentTarget.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+    e.currentTarget.style.setProperty('--my', `${e.clientY - rect.top}px`);
+  };
+  const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.setProperty('--mx', '-9999px');
+    e.currentTarget.style.setProperty('--my', '-9999px');
+    e.currentTarget.style.boxShadow = 'none';
+    e.currentTarget.style.transform = 'none';
+  };
+  const handleMouseEnter = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.10)';
+    e.currentTarget.style.transform = 'translateY(-3px)';
+  };
+
   return (
-    <div style={{
-      background: '#fff', border: '1px solid #f0ebe4', borderRadius: 16,
-      overflow: 'hidden', display: 'flex', flexDirection: 'column',
-      transition: 'box-shadow 0.2s, transform 0.2s',
-    }}
-      onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 8px 32px rgba(0,0,0,0.10)'; (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-2px)'; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'none'; (e.currentTarget as HTMLDivElement).style.transform = 'none'; }}
+    <div
+      className="mem-ally-card"
+      style={{
+        background: '#fff',
+        border: '1px solid #f0ebe4',
+        borderRadius: 16,
+        display: 'flex',
+        flexDirection: 'column',
+        transition: 'box-shadow 0.25s, transform 0.25s',
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div style={{ padding: '1.75rem 1.5rem 1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {ally.logo_url ? (
@@ -135,7 +169,7 @@ function AllyCard({ ally, t, ta }: {
         {description}
       </p>
 
-      <div style={{ marginTop: 'auto', padding: '1rem 1.5rem 1.5rem' }}>
+      <div style={{ marginTop: 'auto', padding: '1rem 1.5rem 1.5rem', position: 'relative', zIndex: 3 }}>
         {ally.has_access && ally.discount_code ? (
           <button onClick={copy} style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.7rem 1rem', borderRadius: 10, cursor: 'pointer', border: `1.5px dashed ${tierColor}60`, background: `${tierColor}08` }}>
             <span style={{ fontFamily: 'var(--font-montserrat)', fontWeight: 700, fontSize: '0.88rem', color: tierColor, letterSpacing: '0.08em' }}>{ally.discount_code}</span>
@@ -155,7 +189,7 @@ function AllyCard({ ally, t, ta }: {
   );
 }
 
-/* ── Main page ───────────────────────────────────────────────── */
+/* ── Main Page ──────────────────────────────────── */
 export default function MembershipPage() {
   const { isLoaded } = useUser();
   const t = useTranslations('membership');
@@ -181,88 +215,303 @@ export default function MembershipPage() {
       .catch(() => setLoadingAllies(false));
   }, [isLoaded]);
 
+  /* ── Animations ── */
+  useEffect(() => {
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced) return;
+
+    /* 1 — Hero: tag → title chars → sub → cta */
+    const heroTag = document.querySelector('.mem-hero-tag') as HTMLElement | null;
+    const heroTitle = document.querySelector('.mem-hero-title') as HTMLElement | null;
+    const heroSub = document.querySelector('.mem-hero-sub') as HTMLElement | null;
+    const heroCta = document.querySelector('.mem-hero-cta') as HTMLElement | null;
+
+    if (heroTag) animate(heroTag, { opacity: [0, 1], translateY: [10, 0], duration: 500, delay: 150, ease: 'outExpo' });
+
+    if (heroTitle) {
+      // Split title text into char spans (matches existing project pattern)
+      const text = heroTitle.innerText;
+      heroTitle.innerHTML = text
+        .split('')
+        .map(c => c === ' ' ? '<span class="word-space"> </span>' : `<span class="char">${c === '\n' ? '<br>' : c}</span>`)
+        .join('');
+      heroTitle.style.opacity = '1';
+
+      const tl = createTimeline({ defaults: { ease: 'outExpo' } });
+      tl.add(heroTitle.querySelectorAll('.char'), {
+        opacity: [0, 1],
+        translateY: [32, 0],
+        duration: 750,
+        delay: stagger(22),
+      }, 300);
+
+      if (heroSub) {
+        tl.add(heroSub, { opacity: [0, 1], translateY: [18, 0], duration: 600 }, '-=400');
+      }
+      if (heroCta) {
+        tl.add(heroCta, { opacity: [0, 1], scale: [0.88, 1], duration: 550, ease: 'outBack' }, '-=350');
+      }
+    }
+
+    /* 2 — Hero CTA magnetic */
+    if (heroCta) {
+      const handleMag = (e: MouseEvent) => {
+        const rect = heroCta.getBoundingClientRect();
+        const mx = e.clientX - rect.left - rect.width / 2;
+        const my = e.clientY - rect.top - rect.height / 2;
+        const dist = Math.sqrt(mx * mx + my * my);
+        if (dist < 90) {
+          const force = (1 - dist / 90) * 12;
+          const angle = Math.atan2(my, mx);
+          animate(heroCta, {
+            translateX: Math.cos(angle) * force,
+            translateY: Math.sin(angle) * force,
+            duration: 100,
+            ease: 'linear',
+          });
+        }
+      };
+      const handleMagLeave = () => {
+        animate(heroCta, { translateX: 0, translateY: 0, duration: 400, ease: 'outElastic(1, 0.5)' });
+      };
+      document.addEventListener('mousemove', handleMag);
+      heroCta.addEventListener('mouseleave', handleMagLeave);
+    }
+
+    /* 3 — Scroll fade-out on hero */
+    const heroEl = document.querySelector('.mem-hero') as HTMLElement | null;
+    if (heroEl) {
+      const onScroll = () => {
+        const pct = Math.max(0, 1 - window.scrollY / (heroEl.offsetHeight * 0.5));
+        heroEl.style.opacity = String(pct);
+      };
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
+
+    /* 4 — Section heading reveals */
+    const headObs = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        animate(entry.target as HTMLElement, {
+          opacity: [0, 1],
+          translateY: [24, 0],
+          duration: 700,
+          ease: 'outExpo',
+        });
+        headObs.unobserve(entry.target);
+      });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.mem-head-reveal').forEach(el => headObs.observe(el));
+
+    /* 5 — Tier cards: stagger on scroll + 3D tilt + spotlight */
+    const tierGrid = document.querySelector('.mem-tier-grid');
+    if (tierGrid) {
+      const tierObs = new IntersectionObserver((entries) => {
+        if (!entries.some(e => e.isIntersecting)) return;
+        tierObs.disconnect();
+
+        const cards = document.querySelectorAll<HTMLElement>('.mem-tier-card');
+        animate(cards, {
+          opacity: [0, 1],
+          translateY: [50, 0],
+          scale: [0.95, 1],
+          delay: stagger(130),
+          duration: 750,
+          ease: 'outExpo',
+          onComplete: () => {
+            // Start gold pulse ring after card is visible
+            const goldCard = document.querySelector('.mem-tier-card--gold');
+            if (goldCard) goldCard.classList.add('is-revealed');
+
+            // Stagger benefit items within each card
+            cards.forEach(card => {
+              const items = card.querySelectorAll<HTMLElement>('.mem-benefit-item');
+              animate(items, {
+                opacity: [0, 1],
+                translateX: [-8, 0],
+                delay: stagger(70, { start: 200 }),
+                duration: 500,
+                ease: 'outExpo',
+              });
+            });
+          },
+        });
+      }, { threshold: 0.1 });
+      tierObs.observe(tierGrid);
+    }
+
+    /* 6 — Tier card: 3D tilt + spotlight */
+    const setupTierCard = (card: HTMLElement) => {
+      card.addEventListener('mousemove', (e: MouseEvent) => {
+        const rect = card.getBoundingClientRect();
+        const cx = rect.width / 2;
+        const cy = rect.height / 2;
+        const dx = (e.clientX - rect.left - cx) / cx;
+        const dy = (e.clientY - rect.top - cy) / cy;
+
+        card.style.transform = `perspective(800px) rotateY(${dx * 6}deg) rotateX(${-dy * 4}deg) scale(1.01)`;
+        card.style.setProperty('--mx', `${e.clientX - rect.left}px`);
+        card.style.setProperty('--my', `${e.clientY - rect.top}px`);
+      });
+
+      card.addEventListener('mouseleave', () => {
+        card.style.transition = 'transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
+        card.style.transform = 'perspective(800px) rotateY(0deg) rotateX(0deg) scale(1)';
+        card.style.setProperty('--mx', '-9999px');
+        card.style.setProperty('--my', '-9999px');
+        setTimeout(() => { card.style.transition = ''; }, 500);
+      });
+    };
+
+    document.querySelectorAll<HTMLElement>('.mem-tier-card').forEach(setupTierCard);
+
+    /* 7 — Event cards: stagger on scroll */
+    const eventGrid = document.querySelector('.mem-event-grid');
+    if (eventGrid) {
+      const eventObs = new IntersectionObserver((entries) => {
+        if (!entries.some(e => e.isIntersecting)) return;
+        eventObs.disconnect();
+        const cards = document.querySelectorAll<HTMLElement>('.mem-event-card');
+        animate(cards, {
+          opacity: [0, 1],
+          translateY: [35, 0],
+          delay: stagger(90),
+          duration: 650,
+          ease: 'outExpo',
+        });
+      }, { threshold: 0.1 });
+      eventObs.observe(eventGrid);
+    }
+
+    /* 8 — Ally cards: stagger on scroll */
+    const allyGrid = document.querySelector('.mem-ally-grid');
+    if (allyGrid) {
+      const allyObs = new IntersectionObserver((entries) => {
+        if (!entries.some(e => e.isIntersecting)) return;
+        allyObs.disconnect();
+        const cards = document.querySelectorAll<HTMLElement>('.mem-ally-card');
+        animate(cards, {
+          opacity: [0, 1],
+          translateY: [30, 0],
+          delay: stagger(65),
+          duration: 600,
+          ease: 'outExpo',
+        });
+      }, { threshold: 0.1 });
+      allyObs.observe(allyGrid);
+    }
+  }, []);
+
+  /* ── Render ── */
   return (
     <main>
-      {/* ── 1. Hero — Membresías y Experiencias ── */}
-      <section style={{
-        position: 'relative',
-        background: 'linear-gradient(160deg, #1e1611 0%, #2c1f14 50%, #1a1208 100%)',
-        color: '#fff',
-        padding: 'clamp(6rem, 12vw, 9rem) 1.25rem clamp(3rem, 8vw, 6rem)',
-        textAlign: 'center', overflow: 'hidden',
-      }}>
-        <div style={{ position: 'absolute', top: '-20%', left: '-10%', width: '50vw', height: '50vw', borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,165,116,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'absolute', bottom: '-20%', right: '-10%', width: '40vw', height: '40vw', borderRadius: '50%', background: 'radial-gradient(circle, rgba(212,132,87,0.08) 0%, transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ position: 'relative', maxWidth: 680, margin: '0 auto' }}>
-          <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--makay-peachy-rose)', marginBottom: '1rem' }}>
-            {t('heroTag')}
-          </p>
-          <h1 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 700, lineHeight: 1.1, marginBottom: '1.25rem' }}>
-            {t('heroTitle')}
-          </h1>
-          <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: 'clamp(0.9rem, 2vw, 1.1rem)', color: 'rgba(255,255,255,0.65)', lineHeight: 1.7, marginBottom: '2rem' }}>
-            {t('heroParagraph')}
-          </p>
+      {/* ── 1. Hero ─────────────────────────────── */}
+      <section className="mem-hero">
+        {/* ShaderGradient background — dynamic, no SSR */}
+        <div className="absolute inset-0" style={{ zIndex: 0 }}>
+          <MembershipHeroGradient />
+        </div>
+
+        {/* Grain overlay */}
+        <div className="mem-hero-grain" />
+
+        {/* Floating glow orbs */}
+        <div className="mem-orb mem-orb-1" />
+        <div className="mem-orb mem-orb-2" />
+        <div className="mem-orb mem-orb-3" />
+
+        {/* Content */}
+        <div className="mem-hero-content">
+          <p className="mem-hero-tag">{t('heroTag')}</p>
+
+          <h1 className="mem-hero-title">{t('heroTitle')}</h1>
+
+          <p className="mem-hero-sub">{t('heroParagraph')}</p>
+
           <button
-            onClick={() => { document.getElementById('benefits')?.scrollIntoView({ behavior: 'smooth' }); }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.875rem 2rem', background: 'var(--makay-peachy-rose)', color: '#fff', borderRadius: '100px', fontFamily: 'var(--font-montserrat)', fontWeight: 600, fontSize: '0.9rem', border: 'none', cursor: 'pointer' }}
+            className="mem-hero-cta"
+            onClick={() => document.getElementById('benefits')?.scrollIntoView({ behavior: 'smooth' })}
           >
             Ver membresías <ChevronRight size={16} />
           </button>
         </div>
+
+        {/* SVG wave → cream section below */}
+        <div className="mem-wave-divider">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 1440 72"
+            preserveAspectRatio="none"
+            style={{ display: 'block', width: '100%', height: 72 }}
+          >
+            <path
+              d="M0,72 C240,20 480,60 720,36 C960,12 1200,56 1440,28 L1440,72 Z"
+              fill="var(--makay-premium-cream, #f9f4ef)"
+            />
+          </svg>
+        </div>
       </section>
 
-      {/* ── 2. Desbloquea tus Beneficios ── */}
-      <section id="benefits" style={{ background: 'var(--makay-premium-cream)', padding: 'clamp(4rem, 8vw, 6rem) 1.25rem' }}>
+      {/* ── 2. Desbloquea tus Beneficios ─────────── */}
+      <section
+        id="benefits"
+        style={{
+          background: 'var(--makay-premium-cream)',
+          padding: 'clamp(5rem, 10vw, 8rem) 1.25rem',
+          position: 'relative',
+        }}
+      >
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--makay-peachy-rose)', marginBottom: '0.75rem' }}>
-              Membresías
-            </p>
-            <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: '0 0 0.75rem' }}>
-              Desbloquea tus Beneficios
-            </h2>
-            <p style={{ fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)', fontSize: '0.95rem', maxWidth: 540, margin: '0 auto' }}>
-              Elige el nivel que mejor se adapta a ti y empieza a disfrutar del club.
-            </p>
+          <div className="mem-section-head mem-head-reveal">
+            <p className="mem-section-eyebrow" style={{ color: 'var(--makay-peachy-rose)' }}>Membresías</p>
+            <h2 className="mem-section-title">Desbloquea tus Beneficios</h2>
+            <p className="mem-section-sub">Elige el nivel que mejor se adapta a ti y empieza a disfrutar del club.</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem', justifyContent: 'center' }}>
+          <div className="mem-tier-grid">
             {BENEFIT_TIERS.map(tier => (
               <button
                 key={tier.key}
+                className={`mem-tier-card${tier.key === 'gold' ? ' mem-tier-card--gold' : ''}`}
                 onClick={() => setLeadTier(tier.key)}
-                style={{ background: '#fff', border: `2px solid ${tier.color}30`, borderRadius: 20, padding: '2rem', textAlign: 'left', cursor: 'pointer', transition: 'box-shadow 0.2s, transform 0.2s, border-color 0.2s', position: 'relative', overflow: 'hidden' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = `0 12px 40px ${tier.color}25`; (e.currentTarget as HTMLButtonElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLButtonElement).style.borderColor = `${tier.color}60`; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = 'none'; (e.currentTarget as HTMLButtonElement).style.transform = 'none'; (e.currentTarget as HTMLButtonElement).style.borderColor = `${tier.color}30`; }}
               >
-                {/* Tier glow blob */}
-                <div style={{ position: 'absolute', top: '-30%', right: '-15%', width: '60%', height: '60%', borderRadius: '50%', background: `radial-gradient(circle, ${tier.color}18 0%, transparent 70%)`, pointerEvents: 'none' }} />
+                {tier.key === 'gold' && (
+                  <div className="mem-popular-badge">Más Popular</div>
+                )}
 
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', position: 'relative' }}>
+                {/* Corner glow blob */}
+                <div style={{
+                  position: 'absolute', top: '-30%', right: '-15%',
+                  width: '60%', height: '60%', borderRadius: '50%',
+                  background: `radial-gradient(circle, ${tier.color}18 0%, transparent 70%)`,
+                  pointerEvents: 'none',
+                }} />
+
+                {/* Header row */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem', position: 'relative', zIndex: 2 }}>
                   <div>
                     <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', color: tier.color, margin: '0 0 0.2rem' }}>Membresía</p>
-                    <h3 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: 0 }}>{tier.label}</h3>
+                    <h3 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.6rem', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: 0 }}>{tier.label}</h3>
                   </div>
-                  <div style={{ background: `${tier.color}15`, borderRadius: 10, padding: '0.4rem 0.75rem', textAlign: 'center' }}>
-                    <div style={{ textAlign: 'right' }}>
-                      <p style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1rem', fontWeight: 700, color: tier.color, margin: 0, lineHeight: 1.1 }}>{tier.priceMonthly}</p>
-                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.62rem', fontWeight: 600, color: `${tier.color}99`, margin: 0 }}>{tier.priceQuarterly}</p>
-                    </div>
+                  <div style={{ background: `${tier.color}15`, borderRadius: 12, padding: '0.5rem 0.85rem', textAlign: 'right' }}>
+                    <p style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1rem', fontWeight: 700, color: tier.color, margin: 0, lineHeight: 1.1 }}>{tier.priceMonthly}</p>
+                    <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.62rem', fontWeight: 600, color: `${tier.color}99`, margin: 0 }}>{tier.priceQuarterly}</p>
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', marginBottom: '1.5rem', position: 'relative' }}>
+                {/* Benefits list */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem', marginBottom: '1.75rem', position: 'relative', zIndex: 2 }}>
                   {tier.benefits.map(({ icon: Icon, text }) => (
-                    <div key={text} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem' }}>
+                    <div key={text} className="mem-benefit-item">
                       <Icon size={14} color={tier.color} style={{ flexShrink: 0, marginTop: 2 }} />
-                      <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.83rem', color: 'var(--makay-dark-navy)', lineHeight: 1.4 }}>{text}</span>
+                      <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.83rem', color: 'var(--makay-dark-navy)', lineHeight: 1.45 }}>{text}</span>
                     </div>
                   ))}
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', position: 'relative' }}>
-                  <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', fontWeight: 700, color: tier.color }}>Ver opciones</span>
+                {/* CTA link */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', position: 'relative', zIndex: 2 }}>
+                  <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', fontWeight: 700, color: tier.color }}>Ver opciones</span>
                   <ChevronRight size={14} color={tier.color} />
                 </div>
               </button>
@@ -271,34 +520,37 @@ export default function MembershipPage() {
         </div>
       </section>
 
-      {/* ── 3. Próximos Eventos ── */}
-      <section id="events" style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(3rem, 6vw, 5rem) 1.25rem' }}>
-        <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-          <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: '0 0 0.75rem' }}>
-            {t('eventsTitle')}
-          </h2>
-          <p style={{ fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)', fontSize: '0.95rem' }}>
-            {t('eventsSubtitle')}
-          </p>
+      {/* ── 3. Próximos Eventos ──────────────────── */}
+      <section id="events" style={{ maxWidth: 1100, margin: '0 auto', padding: 'clamp(4rem, 8vw, 6rem) 1.25rem' }}>
+        <div className="mem-section-head mem-head-reveal" style={{ marginBottom: '3rem' }}>
+          <h2 className="mem-section-title">{t('eventsTitle')}</h2>
+          <p className="mem-section-sub">{t('eventsSubtitle')}</p>
         </div>
 
         {loadingEvents ? (
           <p style={{ textAlign: 'center', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', padding: '3rem' }}>{t('loadingEvents')}</p>
         ) : events.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem 0' }}>
-            <Calendar size={52} style={{ color: 'var(--makay-sand-cream)', display: 'block', margin: '0 auto 1.25rem' }} />
-            <p style={{ fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)', fontSize: '1rem', marginBottom: '0.5rem' }}>{t('noEvents')}</p>
-            <p style={{ fontFamily: 'var(--font-montserrat)', color: '#c4b4a0', fontSize: '0.85rem' }}>{t('noEventsHint')}</p>
+          <div className="mem-events-empty">
+            <Calendar
+              size={64}
+              className="mem-events-empty-icon"
+              style={{ color: 'var(--makay-sand-cream)' }}
+            />
+            <p className="mem-events-empty-title">{t('noEvents')}</p>
+            <p className="mem-events-empty-hint">{t('noEventsHint')}</p>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+          <div
+            className="mem-event-grid"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}
+          >
             {events.map(ev => {
               const remaining = ev.capacity - ev.tickets_sold;
               const soldOut = remaining <= 0;
               const soldPct = Math.round((ev.tickets_sold / ev.capacity) * 100);
               const tags = ev.tags ? ev.tags.split(',').map(s => s.trim()).filter(Boolean) : [];
               return (
-                <article key={ev.id} style={{ background: '#fff', border: '1px solid var(--makay-sand-cream)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column', transition: 'box-shadow 0.2s, transform 0.2s' }}>
+                <article key={ev.id} className="mem-event-card" style={{ background: '#fff', border: '1px solid var(--makay-sand-cream)', borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ position: 'relative', height: 200, background: 'linear-gradient(135deg, var(--makay-sand-cream), var(--makay-peachy-rose))' }}>
                     {ev.image_url && <img src={ev.image_url} alt={ev.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
                     {!ev.image_url && <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Calendar size={48} color="rgba(255,255,255,0.6)" /></div>}
@@ -339,13 +591,16 @@ export default function MembershipPage() {
         )}
       </section>
 
-      {/* ── 4. Nuestros Aliados ── */}
-      <section id="partners" style={{ background: 'var(--makay-warm-white, #fff8f0)', padding: 'clamp(3rem, 6vw, 5rem) 1.25rem' }}>
-        <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#D4AF37', marginBottom: '0.75rem' }}>{ta('tag')}</p>
-            <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: '0 0 0.75rem' }}>{ta('title')}</h2>
-            <p style={{ fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)', fontSize: '0.95rem', maxWidth: 520, margin: '0 auto' }}>{ta('subtitle')}</p>
+      {/* ── 4. Nuestros Aliados ──────────────────── */}
+      <section id="partners" style={{ background: 'var(--makay-warm-white, #fff8f0)', padding: 'clamp(4rem, 8vw, 6rem) 1.25rem', position: 'relative', overflow: 'hidden' }}>
+        {/* Decorative bg glow */}
+        <div className="mem-allies-bg-orb" />
+
+        <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative' }}>
+          <div className="mem-section-head mem-head-reveal">
+            <p className="mem-section-eyebrow" style={{ color: '#D4AF37' }}>{ta('tag')}</p>
+            <h2 className="mem-section-title">{ta('title')}</h2>
+            <p className="mem-section-sub">{ta('subtitle')}</p>
           </div>
 
           {loadingAllies ? (
@@ -353,7 +608,10 @@ export default function MembershipPage() {
           ) : allies.length === 0 ? (
             <p style={{ textAlign: 'center', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', padding: '2rem' }}>{ta('noAllies')}</p>
           ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}>
+            <div
+              className="mem-ally-grid"
+              style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1.25rem' }}
+            >
               {allies.map(ally => <AllyCard key={ally.id} ally={ally} t={t} ta={ta} />)}
             </div>
           )}
