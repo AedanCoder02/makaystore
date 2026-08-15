@@ -172,29 +172,25 @@ async function collectData(range: ReportRange, period: ReportPeriod): Promise<Re
     LIMIT 8
   `.catch(() => []);
 
-  // Stock snapshot (current, not date-ranged)
+  // Stock snapshot (current, not date-ranged) — mirrors admin stock route logic
   const stockRows = await sql`
     SELECT
-      COUNT(*) AS total,
-      COUNT(*) FILTER (WHERE COALESCE((metadata->>'stock')::int, 0) > 5) AS in_stock,
-      COUNT(*) FILTER (WHERE COALESCE((metadata->>'stock')::int, 0) BETWEEN 1 AND 5) AS low,
-      COUNT(*) FILTER (WHERE COALESCE((metadata->>'stock')::int, 0) = 0) AS out_of_stock
-    FROM products
+      COUNT(*)::int AS total,
+      COUNT(*) FILTER (WHERE COALESCE(ps_qty, p.stock, 0) >= 10)::int AS in_stock,
+      COUNT(*) FILTER (WHERE COALESCE(ps_qty, p.stock, 0) > 0 AND COALESCE(ps_qty, p.stock, 0) < 10)::int AS low,
+      COUNT(*) FILTER (WHERE COALESCE(ps_qty, p.stock, 0) = 0)::int AS out_of_stock
+    FROM products p
+    LEFT JOIN (
+      SELECT product_id, SUM(quantity)::int AS ps_qty
+      FROM product_stock
+      GROUP BY product_id
+    ) ps ON ps.product_id = p.id
+    WHERE p.status = 'active'
   `.catch(() => [{ total: 0, in_stock: 0, low: 0, out_of_stock: 0 }]);
 
-  // Cost data from products (avg cost vs price ratio)
-  const costRow = await sql`
-    SELECT
-      AVG(
-        CASE WHEN price > 0 AND cost > 0
-          THEN (cost / price) * 100
-          ELSE NULL END
-      ) AS avg_cost_pct
-    FROM products
-    WHERE price > 0
-  `.catch(() => [{ avg_cost_pct: null }]);
-
-  const costPct = Number(costRow[0]?.avg_cost_pct ?? 0);
+  // Cost % from theme_settings (admin-configurable), same as admin cost route
+  const costSettingRow = await sql`SELECT value FROM theme_settings WHERE key = 'cost_percentage'`.catch(() => []);
+  const costPct = costSettingRow.length > 0 ? Number(costSettingRow[0].value) : 40;
   const grossMargin = 100 - costPct;
 
   return {
