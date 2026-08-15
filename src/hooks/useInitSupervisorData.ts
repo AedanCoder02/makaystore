@@ -2,7 +2,6 @@
 
 import { useEffect } from 'react';
 import { useSupervisorStore } from '@/stores/supervisorStore';
-import type { WorkerRank } from '@/components/supervisor/PerformanceRankings';
 
 export function useInitSupervisorData() {
   const store = useSupervisorStore();
@@ -36,18 +35,9 @@ export function useInitSupervisorData() {
         useSupervisorStore.setState({ activityEvents: activity });
       }
 
-      // Map sales → WorkerSales[] + derive rankings
+      // Map sales → WorkerSales[]
       if (Array.isArray(sales)) {
         useSupervisorStore.setState({ salesData: sales });
-        const rankings: WorkerRank[] = sales.map((s: { workerId: string; name: string; revenue: number }) => ({
-          workerId: s.workerId,
-          name: s.name,
-          salesToday: s.revenue,
-          tasksCompleted: 0,
-          hoursWorked: 0,
-          score: Math.round(s.revenue),
-        }));
-        useSupervisorStore.setState({ rankings });
       }
 
       // Map tasks → BoardTask[]

@@ -16,24 +16,6 @@ export const useSupervisorDashboard = () => {
       return sum + elapsed;
     }, 0);
 
-  const approveActivity = async (approvalId: string) => {
-    await fetch('/api/supervisor/approve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ activityId: approvalId, action: 'approve' }),
-    }).catch(() => {});
-    store.approveActivity(approvalId);
-  };
-
-  const rejectActivity = async (approvalId: string) => {
-    await fetch('/api/supervisor/approve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ activityId: approvalId, action: 'reject' }),
-    }).catch(() => {});
-    store.rejectActivity(approvalId);
-  };
-
   return {
     supervisorId: store.supervisorId || user?.id || '',
     workersStatus: store.workersStatus,
@@ -41,7 +23,7 @@ export const useSupervisorDashboard = () => {
     totalWorkers: store.workersStatus.length,
     workersClockIn,
     totalHours: totalHours.toFixed(1),
-    approveActivity,
-    rejectActivity,
+    approveActivity: store.approveActivity,
+    rejectActivity: store.rejectActivity,
   };
 };

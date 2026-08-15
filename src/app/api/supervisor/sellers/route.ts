@@ -24,25 +24,12 @@ export async function GET() {
     return role === 'seller' || role === 'worker';
   });
 
-  const [todayActivities, monthlySalesRows] = await Promise.all([
-    sql`
-      SELECT seller_id, type, created_at
-      FROM activities
-      WHERE created_at::date = CURRENT_DATE
-      ORDER BY created_at ASC
-    `,
-    sql`
-      SELECT seller_id, SUM(subtotal::numeric) AS monthly_revenue
-      FROM seller_orders
-      WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)
-      GROUP BY seller_id
-    `.catch(() => [] as { seller_id: string; monthly_revenue: string }[]),
-  ]);
-
-  const monthlySalesMap: Record<string, number> = {};
-  for (const row of monthlySalesRows) {
-    monthlySalesMap[row.seller_id as string] = Number(row.monthly_revenue) || 0;
-  }
+  const todayActivities = await sql`
+    SELECT seller_id, type, created_at
+    FROM activities
+    WHERE created_at::date = CURRENT_DATE
+    ORDER BY created_at ASC
+  `;
 
   const sellerData = sellers.map((u) => {
     const events = todayActivities.filter((a) => a.seller_id === u.id);
@@ -60,7 +47,6 @@ export async function GET() {
       clockedInToday: clockedIn,
       startTime: lastClockIn?.created_at ?? null,
       taskCount: 0,
-      salesThisMonth: monthlySalesMap[u.id] ?? 0,
     };
   });
 

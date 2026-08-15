@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Clock, Check, X as XIcon } from 'lucide-react';
+import { Clock } from 'lucide-react';
 
 interface ActivityEntry {
   id: string;
@@ -17,25 +17,6 @@ export default function SupervisorShiftsPage() {
   const t = useTranslations('supervisor');
   const [entries, setEntries] = useState<ActivityEntry[]>([]);
   const [loading, setLoading] = useState(true);
-  const [processing, setProcessing] = useState<string | null>(null);
-
-  const handleApproval = async (id: string, action: 'approve' | 'reject') => {
-    setProcessing(id);
-    try {
-      await fetch('/api/supervisor/approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ activityId: id, action }),
-      });
-      setEntries((prev) =>
-        prev.map((e) =>
-          e.id === id ? { ...e, status: action === 'approve' ? 'approved' : 'rejected' } : e
-        )
-      );
-    } finally {
-      setProcessing(null);
-    }
-  };
 
   useEffect(() => {
     fetch('/api/supervisor/activity')
@@ -98,7 +79,7 @@ export default function SupervisorShiftsPage() {
           <h2 className="sup-section-title" style={{ marginBottom: '0.75rem', fontSize: '1rem' }}>Full Log</h2>
           <table className="sup-table">
             <thead>
-              <tr><th>{t('date')}</th><th>{t('worker')}</th><th>Acción</th><th>{t('status')}</th><th>Aprobar</th></tr>
+              <tr><th>{t('date')}</th><th>{t('worker')}</th><th>{t('status')}</th><th>{t('status')}</th></tr>
             </thead>
             <tbody>
               {[...entries].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).map((e) => (
@@ -107,28 +88,6 @@ export default function SupervisorShiftsPage() {
                   <td>{e.workerName}</td>
                   <td>{e.action}</td>
                   <td><span className={`sup-order-status sup-order-status--${e.status}`}>{e.status}</span></td>
-                  <td>
-                    {e.status === 'pending' ? (
-                      <div style={{ display: 'flex', gap: '0.4rem' }}>
-                        <button
-                          onClick={() => handleApproval(e.id, 'approve')}
-                          disabled={processing === e.id}
-                          style={{ background: 'var(--makay-sage, #7a9e7e)', color: '#fff', border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}
-                        >
-                          <Check size={13} /> Aprobar
-                        </button>
-                        <button
-                          onClick={() => handleApproval(e.id, 'reject')}
-                          disabled={processing === e.id}
-                          style={{ background: 'var(--makay-coral, #c0655a)', color: '#fff', border: 'none', borderRadius: '6px', padding: '4px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem' }}
-                        >
-                          <XIcon size={13} /> Rechazar
-                        </button>
-                      </div>
-                    ) : (
-                      <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>—</span>
-                    )}
-                  </td>
                 </tr>
               ))}
             </tbody>
