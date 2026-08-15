@@ -48,7 +48,7 @@ export default function PerformanceRankings({ rankings }: PerformanceRankingsPro
                   {idx === 0 && <Award size={14} className="top-performer-icon" />}
                   {worker.name}
                 </td>
-                <td>${worker.salesToday}</td>
+                <td>${Number(worker.salesToday).toFixed(2)}</td>
                 <td>{worker.tasksCompleted}</td>
                 <td>{worker.hoursWorked}h</td>
                 <td>
