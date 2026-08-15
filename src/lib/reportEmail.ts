@@ -75,6 +75,9 @@ interface ReportData {
 async function collectData(range: ReportRange, period: ReportPeriod): Promise<ReportData> {
   const { start, end } = range;
 
+  // Ensure is_gift column exists (created lazily by seller order route)
+  await sql`ALTER TABLE seller_orders ADD COLUMN IF NOT EXISTS is_gift BOOLEAN DEFAULT FALSE`.catch(() => {});
+
   const [salesRow] = await sql`
     SELECT
       COALESCE(SUM(subtotal::numeric), 0) AS revenue,
