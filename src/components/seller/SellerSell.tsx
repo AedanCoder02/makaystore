@@ -1,13 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Search, Plus, Minus, Trash2, ShoppingBag, Check, Tag, Truck, User, HelpCircle } from 'lucide-react';
+import { Search, Plus, Minus, Trash2, ShoppingBag, Check, Tag, Truck, User, HelpCircle, Gift, UserPlus, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
-interface Client { id: string; name: string; email: string; imageUrl: string; }
-interface Product { id: string; title: string; price: number; image: string; category: string; productType: 'storefront' | 'dropshipping'; }
+interface Client {
+  id: string;
+  name: string;
+  email: string;
+  imageUrl: string;
+  isWalkIn?: boolean;
+}
+interface Product {
+  id: string;
+  title: string;
+  price: number;
+  image: string;
+  category: string;
+  productType: 'storefront' | 'dropshipping';
+}
 interface CartItem extends Product { qty: number; duration?: string; }
 interface PaymentEntry { method: string; amount: number; transactionId: string; description: string; }
 
@@ -29,6 +42,7 @@ const PAYMENT_LABELS: Record<string, string> = {
 const NEEDS_TRANSACTION_ID = new Set(['card', 'transfer', 'pago_movil']);
 
 const EMPTY_PAYMENT: PaymentEntry = { method: 'cash', amount: 0, transactionId: '', description: '' };
+const EMPTY_NEW_CLIENT = { name: '', email: '', phone: '', date_of_birth: '', address: '' };
 
 export default function SellerSell({ products }: { products: Product[] }) {
   const t = useTranslations('seller');
@@ -47,6 +61,18 @@ export default function SellerSell({ products }: { products: Product[] }) {
   const [submitError, setSubmitError] = useState('');
   const [orderId, setOrderId] = useState<number | null>(null);
   const [durationPicker, setDurationPicker] = useState<Product | null>(null);
+  const [isGiftOrder, setIsGiftOrder] = useState(false);
+
+  // Create client state
+  const [showCreateClient, setShowCreateClient] = useState(false);
+  const [newClient, setNewClient] = useState({ ...EMPTY_NEW_CLIENT });
+  const [creatingClient, setCreatingClient] = useState(false);
+  const [createClientError, setCreateClientError] = useState('');
+
+  // Gift confirmation state
+  const [giftTarget, setGiftTarget] = useState<Product | null>(null);
+  const [submittingGift, setSubmittingGift] = useState(false);
+
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('seller-sell-tour');
 
@@ -63,7 +89,6 @@ export default function SellerSell({ products }: { products: Product[] }) {
     }
   }, [step, clients.length]);
 
-  // Fetch client wallet balance when entering checkout
   useEffect(() => {
     if (step === 'checkout' && selectedClient) {
       fetch('/api/seller/client-balance?client_id=' + selectedClient.id)
@@ -108,7 +133,6 @@ export default function SellerSell({ products }: { products: Product[] }) {
 
   const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
 
-  // Payment helpers
   const totalPaid = payments.reduce((s, p) => s + p.amount, 0);
   const remaining = Math.max(0, subtotal - totalPaid);
   const needsId = NEEDS_TRANSACTION_ID.has(draft.method);
@@ -121,7 +145,6 @@ export default function SellerSell({ products }: { products: Product[] }) {
   const addPayment = () => {
     if (!canAddDraft) return;
     setPayments(p => [...p, { ...draft }]);
-    // Reset draft, pre-fill remaining amount
     const newRemaining = remaining - draft.amount;
     setDraft({ ...EMPTY_PAYMENT, amount: Math.max(0, newRemaining) });
   };
@@ -135,14 +158,11 @@ export default function SellerSell({ products }: { products: Product[] }) {
     });
   };
 
-  // Auto-fill draft amount with remaining when method changes
   const setDraftMethod = (method: string) => {
     setDraft(d => ({ ...d, method, amount: d.amount === 0 ? remaining : d.amount }));
   };
 
-  const canSubmit =
-    payments.length > 0 &&
-    Math.abs(totalPaid - subtotal) < 0.01;
+  const canSubmit = payments.length > 0 && Math.abs(totalPaid - subtotal) < 0.01;
 
   const submitOrder = async () => {
     if (!selectedClient || cart.length === 0 || !canSubmit) return;
@@ -159,6 +179,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
         subtotal,
         payment_methods: payments,
         notes,
+        is_gift: false,
       }),
     });
     const data = await res.json();
@@ -170,6 +191,53 @@ export default function SellerSell({ products }: { products: Product[] }) {
     setOrderId(data.id);
     setSubmitting(false);
     setStep('done');
+  };
+
+  const submitGift = async (product: Product) => {
+    if (!selectedClient) return;
+    setSubmittingGift(true);
+    const res = await fetch('/api/seller/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: selectedClient.id,
+        client_name: selectedClient.name,
+        client_email: selectedClient.email,
+        items: [{ id: product.id, title: product.title, price: product.price, qty: 1, productType: product.productType }],
+        subtotal: 0,
+        is_gift: true,
+        notes: '',
+      }),
+    });
+    const data = await res.json();
+    setSubmittingGift(false);
+    if (!res.ok) return;
+    setOrderId(data.id);
+    setIsGiftOrder(true);
+    setGiftTarget(null);
+    setStep('done');
+  };
+
+  const createClient = async () => {
+    if (!newClient.name.trim()) return;
+    setCreatingClient(true);
+    setCreateClientError('');
+    const res = await fetch('/api/seller/clients', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newClient),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setCreateClientError(data.error ?? 'Error al crear el cliente');
+      setCreatingClient(false);
+      return;
+    }
+    setClients(prev => [data, ...prev]);
+    setSelectedClient(data);
+    setShowCreateClient(false);
+    setNewClient({ ...EMPTY_NEW_CLIENT });
+    setCreatingClient(false);
   };
 
   const reset = () => {
@@ -184,9 +252,12 @@ export default function SellerSell({ products }: { products: Product[] }) {
     setProductSearch('');
     setClientBalance(null);
     setSubmitError('');
+    setIsGiftOrder(false);
+    setGiftTarget(null);
+    setShowCreateClient(false);
+    setNewClient({ ...EMPTY_NEW_CLIENT });
   };
 
-  // Step indicators
   const STEPS = [
     { key: 'client',   label: ts('step1') },
     { key: 'products', label: ts('step2') },
@@ -197,18 +268,26 @@ export default function SellerSell({ products }: { products: Product[] }) {
     return (
       <div className="seller-page">
         <div className="seller-done">
-          <div className="seller-done-icon"><Check size={32} /></div>
-          <h2 className="seller-done-title">{ts('saleComplete')}</h2>
-          <p className="seller-done-sub">{ts('orderFor', { id: String(orderId ?? ''), name: selectedClient?.name ?? '' })}</p>
-          <p className="seller-done-amount">${subtotal.toFixed(2)}</p>
-          <div className="seller-done-items" style={{ flexDirection: 'column', gap: '0.3rem', alignItems: 'center' }}>
-            {payments.map((p, i) => (
-              <span key={i} className="seller-done-item">
-                {PAYMENT_LABELS[p.method] ?? p.method} · ${p.amount.toFixed(2)}
-                {p.transactionId && ` · ID: ${p.transactionId}`}
-              </span>
-            ))}
+          <div className="seller-done-icon" style={{ background: isGiftOrder ? '#f0fdf4' : undefined }}>
+            {isGiftOrder ? <Gift size={32} color="#10b981" /> : <Check size={32} />}
           </div>
+          <h2 className="seller-done-title">{isGiftOrder ? 'Regalo Registrado' : ts('saleComplete')}</h2>
+          <p className="seller-done-sub">
+            {isGiftOrder
+              ? `Obsequio entregado a ${selectedClient?.name ?? ''}`
+              : ts('orderFor', { id: String(orderId ?? ''), name: selectedClient?.name ?? '' })}
+          </p>
+          {!isGiftOrder && <p className="seller-done-amount">${subtotal.toFixed(2)}</p>}
+          {!isGiftOrder && (
+            <div className="seller-done-items" style={{ flexDirection: 'column', gap: '0.3rem', alignItems: 'center' }}>
+              {payments.map((p, i) => (
+                <span key={i} className="seller-done-item">
+                  {PAYMENT_LABELS[p.method] ?? p.method} · ${p.amount.toFixed(2)}
+                  {p.transactionId && ` · ID: ${p.transactionId}`}
+                </span>
+              ))}
+            </div>
+          )}
           <div className="seller-done-items">
             {cart.map(i => <span key={i.id} className="seller-done-item">{i.title} × {i.qty}</span>)}
           </div>
@@ -220,7 +299,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
 
   return (
     <div className="seller-page">
-      {/* Duration picker modal for membership products */}
+      {/* Duration picker modal */}
       {durationPicker && (
         <div className="seller-modal-overlay" onClick={() => setDurationPicker(null)}>
           <div className="seller-modal" onClick={e => e.stopPropagation()}>
@@ -247,6 +326,45 @@ export default function SellerSell({ products }: { products: Product[] }) {
           </div>
         </div>
       )}
+
+      {/* Gift confirmation modal */}
+      {giftTarget && (
+        <div className="seller-modal-overlay" onClick={() => !submittingGift && setGiftTarget(null)}>
+          <div className="seller-modal" onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Gift size={20} color="#10b981" />
+              </div>
+              <div>
+                <h3 className="seller-modal-title" style={{ margin: 0 }}>Registrar como regalo</h3>
+                <p className="seller-modal-sub" style={{ margin: 0 }}>Sin cargo — se registra en supervisión</p>
+              </div>
+            </div>
+            <div style={{ padding: '0.75rem', background: '#f9f5f0', borderRadius: 10, marginBottom: '1rem' }}>
+              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-dark-navy)', margin: 0 }}>
+                <strong>{giftTarget.title}</strong>
+                <span style={{ color: 'var(--makay-mauve)', display: 'block', fontSize: '0.75rem', marginTop: '0.2rem' }}>
+                  Para: {selectedClient?.name}
+                </span>
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button
+                className="seller-btn-primary"
+                style={{ flex: 1, background: '#10b981' }}
+                disabled={submittingGift}
+                onClick={() => submitGift(giftTarget)}
+              >
+                {submittingGift ? 'Registrando…' : 'Confirmar regalo'}
+              </button>
+              <button className="seller-btn-ghost" onClick={() => setGiftTarget(null)} disabled={submittingGift}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {tutorialUI}
       <div className="seller-page-header">
         <div>
@@ -277,14 +395,107 @@ export default function SellerSell({ products }: { products: Product[] }) {
             <Search size={16} className="seller-search-icon" />
             <input className="seller-search with-icon" placeholder={ts('searchClients')} value={clientSearch} onChange={e => setClientSearch(e.target.value)} />
           </div>
+
+          {/* Create client toggle */}
+          <div style={{ marginBottom: '0.75rem' }}>
+            <button
+              className={showCreateClient ? 'seller-btn-ghost' : 'seller-btn-ghost'}
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.82rem' }}
+              onClick={() => { setShowCreateClient(v => !v); setCreateClientError(''); }}
+            >
+              {showCreateClient ? <X size={15} /> : <UserPlus size={15} />}
+              {showCreateClient ? 'Cancelar' : 'Crear nuevo cliente'}
+            </button>
+          </div>
+
+          {/* Create client form */}
+          {showCreateClient && (
+            <div style={{ background: '#f9f5f0', border: '1px solid #e8ddd3', borderRadius: 14, padding: '1.25rem', marginBottom: '1rem' }}>
+              <h4 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1rem', fontWeight: 700, margin: '0 0 1rem', color: 'var(--makay-dark-navy)' }}>
+                Nuevo cliente
+              </h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.625rem' }}>
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label className="seller-label">Nombre <span style={{ color: '#ef4444' }}>*</span></label>
+                  <input
+                    className="seller-input"
+                    placeholder="Nombre completo"
+                    value={newClient.name}
+                    onChange={e => setNewClient(c => ({ ...c, name: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="seller-label">Correo electrónico</label>
+                  <input
+                    className="seller-input"
+                    type="email"
+                    placeholder="correo@ejemplo.com"
+                    value={newClient.email}
+                    onChange={e => setNewClient(c => ({ ...c, email: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="seller-label">Teléfono</label>
+                  <input
+                    className="seller-input"
+                    type="tel"
+                    placeholder="+58 412 000 0000"
+                    value={newClient.phone}
+                    onChange={e => setNewClient(c => ({ ...c, phone: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="seller-label">Fecha de nacimiento</label>
+                  <input
+                    className="seller-input"
+                    type="date"
+                    value={newClient.date_of_birth}
+                    onChange={e => setNewClient(c => ({ ...c, date_of_birth: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <label className="seller-label">Dirección</label>
+                  <input
+                    className="seller-input"
+                    placeholder="Dirección del cliente"
+                    value={newClient.address}
+                    onChange={e => setNewClient(c => ({ ...c, address: e.target.value }))}
+                  />
+                </div>
+              </div>
+              {createClientError && (
+                <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: '#ef4444', margin: '0.5rem 0 0' }}>
+                  {createClientError}
+                </p>
+              )}
+              <button
+                className="seller-btn-primary"
+                style={{ marginTop: '1rem', width: '100%' }}
+                disabled={!newClient.name.trim() || creatingClient}
+                onClick={createClient}
+              >
+                {creatingClient ? 'Creando…' : 'Crear cliente'}
+              </button>
+            </div>
+          )}
+
           <div className="seller-clients-grid">
             {filteredClients.length === 0 && <p className="seller-empty">{ts('noClients')}</p>}
             {filteredClients.map(c => (
               <button key={c.id} className={`seller-client-card${selectedClient?.id === c.id ? ' selected' : ''}`} onClick={() => setSelectedClient(c)}>
-                {c.imageUrl ? <img src={c.imageUrl} alt={c.name} className="seller-client-avatar" /> : <div className="seller-client-avatar-placeholder"><User size={20} /></div>}
+                {c.imageUrl
+                  ? <img src={c.imageUrl} alt={c.name} className="seller-client-avatar" />
+                  : <div className="seller-client-avatar-placeholder"><User size={20} /></div>}
                 <div className="seller-client-info">
                   <span className="seller-client-name">{c.name}</span>
-                  <span className="seller-client-email">{c.email}</span>
+                  <span className="seller-client-email">
+                    {c.email || (c.isWalkIn ? 'Cliente walk-in' : '—')}
+                  </span>
+                  {c.isWalkIn && (
+                    <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.62rem', fontWeight: 700, color: 'var(--makay-mauve)', background: '#f0ebe4', padding: '0.1rem 0.4rem', borderRadius: 99 }}>
+                      Walk-in
+                    </span>
+                  )}
                 </div>
                 {selectedClient?.id === c.id && <Check size={16} className="seller-client-check" />}
               </button>
@@ -327,9 +538,19 @@ export default function SellerSell({ products }: { products: Product[] }) {
                           </span>
                         </div>
                       </div>
-                      <button className="seller-add-btn" onClick={() => handleAddProduct(p)}>
-                        <Plus size={16} />
-                      </button>
+                      <div style={{ display: 'flex', gap: '0.35rem' }}>
+                        <button
+                          className="seller-add-btn gift"
+                          title="Registrar como regalo"
+                          onClick={() => setGiftTarget(p)}
+                          style={{ background: '#f0fdf4', color: '#10b981', border: '1px solid #bbf7d0' }}
+                        >
+                          <Gift size={14} />
+                        </button>
+                        <button className="seller-add-btn" onClick={() => handleAddProduct(p)}>
+                          <Plus size={16} />
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
@@ -403,7 +624,6 @@ export default function SellerSell({ products }: { products: Product[] }) {
                 <strong>${subtotal.toFixed(2)}</strong>
               </div>
 
-              {/* Payments already added */}
               {payments.length > 0 && (
                 <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   {payments.map((p, i) => (
@@ -435,7 +655,6 @@ export default function SellerSell({ products }: { products: Product[] }) {
             <div className="seller-checkout-form">
               <h3 className="seller-section-title">Agregar Pago</h3>
 
-              {/* Method selector */}
               <label className="seller-label" style={{ marginBottom: '0.5rem' }}>Método</label>
               <div className="seller-payment-options" style={{ marginBottom: '0.875rem' }}>
                 {Object.entries(PAYMENT_LABELS).map(([m, label]) => (
@@ -449,7 +668,6 @@ export default function SellerSell({ products }: { products: Product[] }) {
                 ))}
               </div>
 
-              {/* Amount */}
               <label className="seller-label">Monto ($)</label>
               <input
                 type="number"
@@ -463,7 +681,6 @@ export default function SellerSell({ products }: { products: Product[] }) {
                 onChange={e => setDraft(d => ({ ...d, amount: parseFloat(e.target.value) || 0 }))}
               />
 
-              {/* Transaction ID — required for non-cash */}
               {needsId && (
                 <>
                   <label className="seller-label">
@@ -481,7 +698,6 @@ export default function SellerSell({ products }: { products: Product[] }) {
                 </>
               )}
 
-              {/* Credit warning */}
               {draft.method === 'credit' && clientBalance !== null && (
                 <div style={{ padding: '0.5rem 0.75rem', background: draft.amount > clientBalance ? '#fef2f2' : '#f0fdf4', border: `1px solid ${draft.amount > clientBalance ? '#fecaca' : '#bbf7d0'}`, borderRadius: 8, marginBottom: '0.75rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: draft.amount > clientBalance ? '#dc2626' : '#059669' }}>
                   {draft.amount > clientBalance
@@ -490,7 +706,6 @@ export default function SellerSell({ products }: { products: Product[] }) {
                 </div>
               )}
 
-              {/* Description */}
               <label className="seller-label">Descripción (opcional)</label>
               <textarea
                 className="seller-textarea sm"
@@ -510,7 +725,6 @@ export default function SellerSell({ products }: { products: Product[] }) {
                 + Agregar Pago
               </button>
 
-              {/* Global notes */}
               <label className="seller-label">{ts('notesLabel')}</label>
               <textarea
                 className="seller-textarea"

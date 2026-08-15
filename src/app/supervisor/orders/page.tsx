@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { ShoppingBag, CreditCard, Smartphone, PocketKnife, Banknote, ExternalLink, ChevronDown, ChevronUp } from 'lucide-react';
+import { ShoppingBag, CreditCard, Smartphone, PocketKnife, Banknote, ExternalLink, ChevronDown, ChevronUp, Gift } from 'lucide-react';
 
 interface PaymentEntry {
   method: string;
@@ -19,6 +19,7 @@ interface Order {
   id: string;
   customer_id: string;
   customer_email: string;
+  customer_name?: string;
   total: number;
   subtotal: number;
   shipping_cost: number;
@@ -29,6 +30,7 @@ interface Order {
   payment_methods: PaymentEntry[];
   created_at: string;
   source: 'storefront' | 'in-person';
+  is_gift: boolean;
 }
 
 const METHOD_LABEL: Record<string, string> = {
@@ -49,6 +51,7 @@ export default function SupervisorOrdersPage() {
   const [filterMethod, setFilterMethod] = useState('');
   const [filterFrom, setFilterFrom]     = useState('');
   const [filterTo, setFilterTo]         = useState('');
+  const [filterGift, setFilterGift]     = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -56,11 +59,12 @@ export default function SupervisorOrdersPage() {
     if (filterMethod) params.set('method', filterMethod);
     if (filterFrom)   params.set('from', filterFrom);
     if (filterTo)     params.set('to', filterTo);
+    if (filterGift)   params.set('gift', 'true');
     const res = await fetch(`/api/supervisor/orders?${params}`).catch(() => null);
     const data = res?.ok ? await res.json() : [];
     setOrders(Array.isArray(data) ? data : []);
     setLoading(false);
-  }, [filterMethod, filterFrom, filterTo]);
+  }, [filterMethod, filterFrom, filterTo, filterGift]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -94,6 +98,12 @@ export default function SupervisorOrdersPage() {
           </select>
           <input type="date" className="seller-input" style={{ maxWidth: 145, margin: 0 }} value={filterFrom} onChange={e => setFilterFrom(e.target.value)} placeholder="Desde" />
           <input type="date" className="seller-input" style={{ maxWidth: 145, margin: 0 }} value={filterTo} onChange={e => setFilterTo(e.target.value)} placeholder="Hasta" />
+          <button
+            onClick={() => setFilterGift(v => !v)}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.875rem', borderRadius: 8, border: `1px solid ${filterGift ? '#10b981' : '#e5e7eb'}`, background: filterGift ? '#f0fdf4' : '#fff', color: filterGift ? '#10b981' : 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+          >
+            <Gift size={14} /> Regalos {filterGift ? '✓' : ''}
+          </button>
         </div>
       </div>
 
@@ -124,9 +134,14 @@ export default function SupervisorOrdersPage() {
                       <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', color: 'var(--makay-mauve)', background: '#f5f0ea', padding: '0.1rem 0.5rem', borderRadius: 100 }}>
                         {o.source === 'in-person' ? 'Presencial' : 'Online'}
                       </span>
+                      {o.is_gift && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', fontWeight: 700, padding: '0.1rem 0.5rem', borderRadius: 100, background: '#f0fdf4', color: '#10b981', border: '1px solid #bbf7d0' }}>
+                          <Gift size={10} /> Regalo
+                        </span>
+                      )}
                     </div>
                     <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: 'var(--makay-mauve)', margin: 0 }}>
-                      {o.customer_email || '—'} · {new Date(o.created_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}
+                      {o.customer_name || o.customer_email || '—'} · {new Date(o.created_at).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' })}
                     </p>
                   </div>
 

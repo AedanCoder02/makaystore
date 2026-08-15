@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Minus, Check, HelpCircle } from 'lucide-react';
+import { Plus, Minus, Check, HelpCircle, Search } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
@@ -16,6 +16,7 @@ export default function SellerStock({ products }: { products: StockRow[] }) {
   );
   const [saving, setSaving] = useState<string | null>(null);
   const [saved, setSaved] = useState<Record<string, boolean>>({});
+  const [search, setSearch] = useState('');
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('seller-stock-tour');
 
@@ -42,6 +43,10 @@ export default function SellerStock({ products }: { products: StockRow[] }) {
     setTimeout(() => setSaved(s => ({ ...s, [id]: false })), 2000);
   };
 
+  const filtered = products.filter(p => {
+    const q = search.toLowerCase();
+    return !q || p.title.toLowerCase().includes(q) || (p.sku ?? '').toLowerCase().includes(q) || (p.category ?? '').toLowerCase().includes(q);
+  });
   const lowStock = products.filter(p => (quantities[p.id] ?? p.currentStock) < 10);
 
   return (
@@ -55,6 +60,16 @@ export default function SellerStock({ products }: { products: StockRow[] }) {
         <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-stock-tour')} aria-label={ts('showTutorial')}><HelpCircle size={16} /></button>
       </div>
 
+      <div className="seller-search-wrap" style={{ marginBottom: '1rem' }}>
+        <Search size={16} className="seller-search-icon" />
+        <input
+          className="seller-search with-icon"
+          placeholder="Buscar por nombre, SKU o categoría…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
+      </div>
+
       {lowStock.length > 0 && (
         <div className="seller-alert">
           <strong>{t('lowStockAlert', { count: lowStock.length })}</strong>
@@ -63,7 +78,8 @@ export default function SellerStock({ products }: { products: StockRow[] }) {
       )}
 
       <div className="seller-stock-list">
-        {products.map(p => {
+        {filtered.length === 0 && <p className="seller-empty">No se encontraron productos.</p>}
+        {filtered.map(p => {
           const qty = quantities[p.id] ?? p.currentStock;
           const isLow = qty < 10;
           const isCritical = qty < 5;
