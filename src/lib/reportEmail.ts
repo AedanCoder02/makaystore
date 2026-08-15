@@ -68,6 +68,8 @@ interface ReportData {
   topClients: { name: string; orders: number; spent: number }[];
   topCategories: { category: string; units: number; revenue: number }[];
   stock: { total: number; inStock: number; low: number; outOfStock: number };
+  outOfStockProducts: { title: string; sku: string | null; qty: number }[];
+  lowStockProducts: { title: string; sku: string | null; qty: number }[];
   costPct: number;
   grossMargin: number;
 }
@@ -173,12 +175,11 @@ async function collectData(range: ReportRange, period: ReportPeriod): Promise<Re
   `.catch(() => []);
 
   // Stock snapshot (current, not date-ranged) — mirrors admin stock route logic
-  const stockRows = await sql`
+  const stockDetailRows = await sql`
     SELECT
-      COUNT(*)::int AS total,
-      COUNT(*) FILTER (WHERE COALESCE(ps_qty, p.stock, 0) >= 10)::int AS in_stock,
-      COUNT(*) FILTER (WHERE COALESCE(ps_qty, p.stock, 0) > 0 AND COALESCE(ps_qty, p.stock, 0) < 10)::int AS low,
-      COUNT(*) FILTER (WHERE COALESCE(ps_qty, p.stock, 0) = 0)::int AS out_of_stock
+      p.title,
+      p.sku,
+      COALESCE(ps.ps_qty, p.stock, 0)::int AS qty
     FROM products p
     LEFT JOIN (
       SELECT product_id, SUM(quantity)::int AS ps_qty
@@ -186,7 +187,18 @@ async function collectData(range: ReportRange, period: ReportPeriod): Promise<Re
       GROUP BY product_id
     ) ps ON ps.product_id = p.id
     WHERE p.status = 'active'
-  `.catch(() => [{ total: 0, in_stock: 0, low: 0, out_of_stock: 0 }]);
+    ORDER BY qty ASC
+  `.catch(() => []);
+
+  const allActive = stockDetailRows as { title: string; sku: string | null; qty: number }[];
+  const outOfStockProducts = allActive.filter(r => r.qty === 0);
+  const lowStockProducts   = allActive.filter(r => r.qty > 0 && r.qty < 10).sort((a, b) => a.qty - b.qty);
+  const stock = {
+    total:      allActive.length,
+    inStock:    allActive.filter(r => r.qty >= 10).length,
+    low:        lowStockProducts.length,
+    outOfStock: outOfStockProducts.length,
+  };
 
   // Cost % from theme_settings (admin-configurable), same as admin cost route
   const costSettingRow = await sql`SELECT value FROM theme_settings WHERE key = 'cost_percentage'`.catch(() => []);
@@ -206,12 +218,9 @@ async function collectData(range: ReportRange, period: ReportPeriod): Promise<Re
     topSellers,
     topClients: topClientsRaw.map((r: any) => ({ name: r.name, orders: Number(r.orders), spent: Number(r.spent) })),
     topCategories: topCategoriesRaw.map((r: any) => ({ category: r.category, units: Number(r.units), revenue: Number(r.revenue) })),
-    stock: {
-      total: Number(stockRows[0]?.total ?? 0),
-      inStock: Number(stockRows[0]?.in_stock ?? 0),
-      low: Number(stockRows[0]?.low ?? 0),
-      outOfStock: Number(stockRows[0]?.out_of_stock ?? 0),
-    },
+    stock,
+    outOfStockProducts,
+    lowStockProducts,
     costPct,
     grossMargin,
   };
@@ -346,6 +355,39 @@ function buildHtml(d: ReportData): string {
     { label: 'Agotados', value: String(d.stock.outOfStock) },
   ]));
 
+  const s9 = d.outOfStockProducts.length === 0 ? '' : section('PRODUCTOS AGOTADOS', '🔴', `
+    <tr style="background:#F5EDE4;">
+      <th style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9c8070;padding:6px 10px;text-align:left;">Producto</th>
+      <th style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9c8070;padding:6px 10px;text-align:left;">SKU</th>
+      <th style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9c8070;padding:6px 10px;text-align:right;">Stock</th>
+    </tr>
+    ${d.outOfStockProducts.map((p, i) => {
+      const bg = i % 2 === 0 ? '#FFFFFF' : '#FBF6F1';
+      return `<tr style="background:${bg};">
+        <td style="font-family:Arial,sans-serif;font-size:12px;color:#3D2B1F;padding:7px 10px;border-bottom:1px solid #EDE5DA;">${p.title}</td>
+        <td style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;padding:7px 10px;border-bottom:1px solid #EDE5DA;">${p.sku ?? '—'}</td>
+        <td style="font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:#ef4444;padding:7px 10px;border-bottom:1px solid #EDE5DA;text-align:right;">0</td>
+      </tr>`;
+    }).join('')}
+  `);
+
+  const s10 = d.lowStockProducts.length === 0 ? '' : section('STOCK BAJO (MENOS DE 10 UNIDADES)', '🟡', `
+    <tr style="background:#F5EDE4;">
+      <th style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9c8070;padding:6px 10px;text-align:left;">Producto</th>
+      <th style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9c8070;padding:6px 10px;text-align:left;">SKU</th>
+      <th style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#9c8070;padding:6px 10px;text-align:right;">Unidades</th>
+    </tr>
+    ${d.lowStockProducts.map((p, i) => {
+      const bg = i % 2 === 0 ? '#FFFFFF' : '#FBF6F1';
+      const urgency = p.qty <= 3 ? '#ef4444' : '#f59e0b';
+      return `<tr style="background:${bg};">
+        <td style="font-family:Arial,sans-serif;font-size:12px;color:#3D2B1F;padding:7px 10px;border-bottom:1px solid #EDE5DA;">${p.title}</td>
+        <td style="font-family:Arial,sans-serif;font-size:12px;color:#9c8070;padding:7px 10px;border-bottom:1px solid #EDE5DA;">${p.sku ?? '—'}</td>
+        <td style="font-family:Arial,sans-serif;font-size:12px;font-weight:700;color:${urgency};padding:7px 10px;border-bottom:1px solid #EDE5DA;text-align:right;">${p.qty}</td>
+      </tr>`;
+    }).join('')}
+  `);
+
   return `<!DOCTYPE html>
 <html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
 <body style="margin:0;padding:0;background:#f5efe5;font-family:Arial,sans-serif;">
@@ -369,6 +411,8 @@ function buildHtml(d: ReportData): string {
     ${s6}
     ${s7}
     ${s8}
+    ${s9}
+    ${s10}
   </div>
 
   <!-- Footer -->
