@@ -61,8 +61,22 @@ export default function SupervisorDashboardPage() {
         <WorkerStatusOverview workersStatus={dashboard.workersStatus} />
         <ActivityApprovalList
           pendingApprovals={dashboard.pendingApprovals}
-          onApprove={dashboard.approveActivity}
-          onReject={dashboard.rejectActivity}
+          onApprove={async (id) => {
+            await fetch('/api/supervisor/approve', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ activityId: id, action: 'approve' }),
+            }).catch(() => null);
+            dashboard.approveActivity(id);
+          }}
+          onReject={async (id) => {
+            await fetch('/api/supervisor/approve', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ activityId: id, action: 'reject' }),
+            }).catch(() => null);
+            dashboard.rejectActivity(id);
+          }}
         />
         <DailySummaryCard
           totalWorkers={dashboard.totalWorkers}

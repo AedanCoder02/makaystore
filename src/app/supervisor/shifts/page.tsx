@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Clock } from 'lucide-react';
 
@@ -18,12 +18,23 @@ export default function SupervisorShiftsPage() {
   const [entries, setEntries] = useState<ActivityEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     fetch('/api/supervisor/activity')
       .then((r) => r.ok ? r.json() : [])
       .then((data: ActivityEntry[]) => { setEntries(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleApproval = async (id: string, action: 'approve' | 'reject') => {
+    await fetch('/api/supervisor/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ activityId: id, action }),
+    }).catch(() => null);
+    load();
+  };
 
   const byWorker: Record<string, { name: string; events: ActivityEntry[] }> = {};
   for (const e of entries) {
@@ -79,7 +90,7 @@ export default function SupervisorShiftsPage() {
           <h2 className="sup-section-title" style={{ marginBottom: '0.75rem', fontSize: '1rem' }}>Full Log</h2>
           <table className="sup-table">
             <thead>
-              <tr><th>{t('date')}</th><th>{t('worker')}</th><th>{t('status')}</th><th>{t('status')}</th></tr>
+              <tr><th>{t('date')}</th><th>{t('worker')}</th><th>Acción</th><th>{t('status')}</th><th>Aprobar</th></tr>
             </thead>
             <tbody>
               {[...entries].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).map((e) => (
@@ -88,6 +99,20 @@ export default function SupervisorShiftsPage() {
                   <td>{e.workerName}</td>
                   <td>{e.action}</td>
                   <td><span className={`sup-order-status sup-order-status--${e.status}`}>{e.status}</span></td>
+                  <td>
+                    {e.status === 'pending' ? (
+                      <div style={{ display: 'flex', gap: '0.4rem' }}>
+                        <button
+                          onClick={() => handleApproval(e.id, 'approve')}
+                          style={{ padding: '0.2rem 0.6rem', borderRadius: 6, border: '1px solid #10b981', background: '#f0fdf4', color: '#10b981', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer' }}
+                        >✓</button>
+                        <button
+                          onClick={() => handleApproval(e.id, 'reject')}
+                          style={{ padding: '0.2rem 0.6rem', borderRadius: 6, border: '1px solid #ef4444', background: '#fff5f5', color: '#ef4444', fontWeight: 700, fontSize: '0.75rem', cursor: 'pointer' }}
+                        >✗</button>
+                      </div>
+                    ) : '—'}
+                  </td>
                 </tr>
               ))}
             </tbody>

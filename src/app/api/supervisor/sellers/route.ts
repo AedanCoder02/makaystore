@@ -31,6 +31,17 @@ export async function GET() {
     ORDER BY created_at ASC
   `;
 
+  const monthlySales = await sql`
+    SELECT seller_id, COUNT(*)::int AS order_count, COALESCE(SUM(subtotal), 0)::float AS total
+    FROM seller_orders
+    WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)
+    GROUP BY seller_id
+  `.catch(() => [] as { seller_id: string; order_count: number; total: number }[]);
+
+  const salesMap = new Map(
+    (monthlySales as { seller_id: string; order_count: number; total: number }[]).map((r) => [r.seller_id, r])
+  );
+
   const sellerData = sellers.map((u) => {
     const events = todayActivities.filter((a) => a.seller_id === u.id);
     const lastClockIn = [...events].reverse().find((e) => e.type === 'clock-in');
@@ -39,6 +50,7 @@ export async function GET() {
       !!lastClockIn &&
       (!lastClockOut ||
         new Date(lastClockOut.created_at as string) < new Date(lastClockIn.created_at as string));
+    const sales = salesMap.get(u.id);
     return {
       workerId: u.id,
       name: u.fullName ?? u.firstName ?? u.emailAddresses[0]?.emailAddress ?? 'Seller',
@@ -47,6 +59,8 @@ export async function GET() {
       clockedInToday: clockedIn,
       startTime: lastClockIn?.created_at ?? null,
       taskCount: 0,
+      salesThisMonth: sales?.total ?? 0,
+      ordersThisMonth: sales?.order_count ?? 0,
     };
   });
 
