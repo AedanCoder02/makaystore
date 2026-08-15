@@ -2,12 +2,13 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
 
-function intervalFromRange(range: string) {
+function cutoffFromRange(range: string): Date {
+  const now = Date.now();
   switch (range) {
-    case '7d': return '7 days';
-    case '3m': return '90 days';
-    case 'all': return '3650 days';
-    default:   return '30 days';
+    case '7d':  return new Date(now - 7  * 86_400_000);
+    case '3m':  return new Date(now - 90 * 86_400_000);
+    case 'all': return new Date(0);
+    default:    return new Date(now - 30 * 86_400_000);
   }
 }
 
@@ -21,39 +22,33 @@ export async function GET(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const range = req.nextUrl.searchParams.get('range') ?? '30d';
-  const interval = intervalFromRange(range);
+  const cutoff = cutoffFromRange(range);
   const bucket = groupBy(range);
-  const truncFn = bucket === 'week' ? 'week' : 'day';
-
-  const iv = sql.unsafe(interval);
-  const trunc = sql.unsafe(truncFn);
+  const trunc = sql.unsafe(bucket === 'week' ? 'week' : 'day');
 
   const [sellerDaily, storefrontDaily, totals, membershipRevenue, topProducts] = await Promise.all([
-    // Seller in-person orders
     sql`
       SELECT
         DATE_TRUNC(${trunc}, created_at) AS bucket,
         SUM(subtotal::numeric) AS revenue,
         COUNT(*) AS orders
       FROM seller_orders
-      WHERE created_at >= NOW() - ${iv}::interval
+      WHERE created_at >= ${cutoff}
       GROUP BY DATE_TRUNC(${trunc}, created_at)
       ORDER BY bucket ASC
     `.catch(() => []),
 
-    // Storefront orders
     sql`
       SELECT
         DATE_TRUNC(${trunc}, created_at) AS bucket,
         SUM(total::numeric) AS revenue,
         COUNT(*) AS orders
       FROM orders
-      WHERE created_at >= NOW() - ${iv}::interval
+      WHERE created_at >= ${cutoff}
       GROUP BY DATE_TRUNC(${trunc}, created_at)
       ORDER BY bucket ASC
     `.catch(() => []),
 
-    // Combined totals
     sql`
       SELECT
         COALESCE(s.rev, 0) + COALESCE(o.rev, 0) AS total_revenue,
@@ -62,19 +57,17 @@ export async function GET(req: NextRequest) {
         COALESCE(o.avg_v, 0)                     AS avg_storefront
       FROM
         (SELECT SUM(subtotal::numeric) AS rev, COUNT(*) AS cnt, AVG(subtotal::numeric) AS avg_v
-         FROM seller_orders WHERE created_at >= NOW() - ${iv}::interval) s,
+         FROM seller_orders WHERE created_at >= ${cutoff}) s,
         (SELECT SUM(total::numeric) AS rev, COUNT(*) AS cnt, AVG(total::numeric) AS avg_v
-         FROM orders WHERE created_at >= NOW() - ${iv}::interval) o
+         FROM orders WHERE created_at >= ${cutoff}) o
     `.catch(() => [{ total_revenue: 0, total_orders: 0, avg_seller: 0, avg_storefront: 0 }]),
 
-    // Membership revenue from event tickets
     sql`
       SELECT COALESCE(SUM(total_paid::numeric), 0) AS membership_rev
       FROM event_tickets
-      WHERE purchased_at >= NOW() - ${iv}::interval
+      WHERE purchased_at >= ${cutoff}
     `.catch(() => [{ membership_rev: 0 }]),
 
-    // Top products by revenue
     sql`
       SELECT
         p_items->>'title' AS title,
@@ -84,7 +77,7 @@ export async function GET(req: NextRequest) {
         jsonb_array_elements(
           CASE WHEN jsonb_typeof(items::jsonb) = 'array' THEN items::jsonb ELSE '[]'::jsonb END
         ) AS p_items
-      WHERE created_at >= NOW() - ${iv}::interval
+      WHERE created_at >= ${cutoff}
       GROUP BY p_items->>'title'
       ORDER BY revenue DESC
       LIMIT 5

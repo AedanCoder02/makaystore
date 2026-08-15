@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import sql from '@/lib/db';
 
-function intervalFromRange(range: string) {
+function cutoffFromRange(range: string): Date {
+  const now = Date.now();
   switch (range) {
-    case '7d':  return '7 days';
-    case '3m':  return '90 days';
-    case 'all': return '3650 days';
-    default:    return '30 days';
+    case '7d':  return new Date(now - 7  * 86_400_000);
+    case '3m':  return new Date(now - 90 * 86_400_000);
+    case 'all': return new Date(0);
+    default:    return new Date(now - 30 * 86_400_000);
   }
 }
 
@@ -15,8 +16,8 @@ export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  const range    = req.nextUrl.searchParams.get('range') ?? '30d';
-  const interval = intervalFromRange(range);
+  const range  = req.nextUrl.searchParams.get('range') ?? '30d';
+  const cutoff = cutoffFromRange(range);
 
   try {
     await sql`
@@ -27,19 +28,17 @@ export async function GET(req: NextRequest) {
       )
     `;
 
-    const iv = sql.unsafe(interval);
-
     const [sellerRev, storefrontRev, costRows, trend] = await Promise.all([
       sql`
         SELECT COALESCE(SUM(subtotal::numeric), 0) AS revenue
         FROM seller_orders
-        WHERE created_at >= NOW() - ${iv}::interval
+        WHERE created_at >= ${cutoff}
       `.catch(() => [{ revenue: 0 }]),
 
       sql`
         SELECT COALESCE(SUM(total::numeric), 0) AS revenue
         FROM orders
-        WHERE created_at >= NOW() - ${iv}::interval
+        WHERE created_at >= ${cutoff}
       `.catch(() => [{ revenue: 0 }]),
 
       sql`SELECT value FROM theme_settings WHERE key = 'cost_percentage'`.catch(() => []),
@@ -49,7 +48,7 @@ export async function GET(req: NextRequest) {
           DATE_TRUNC('day', created_at) AS bucket,
           SUM(subtotal::numeric) AS revenue
         FROM seller_orders
-        WHERE created_at >= NOW() - ${iv}::interval
+        WHERE created_at >= ${cutoff}
         GROUP BY DATE_TRUNC('day', created_at)
         ORDER BY bucket ASC
       `.catch(() => []),
