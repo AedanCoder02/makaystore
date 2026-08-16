@@ -204,265 +204,247 @@ export default function MembershipPage() {
   }, [isLoaded]);
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let rafId = 0;
+    let goldAnim: ReturnType<typeof animate> | null = null;
+    let io: IntersectionObserver | null = null;
+    let cleanupScroll: (() => void) | null = null;
+    let cleanupResize: (() => void) | null = null;
 
-    /* ══ 1. CANVAS PARTICLE SYSTEM via requestAnimationFrame ══ */
-    const canvas = canvasRef.current;
-    if (canvas) {
-      const resize = () => {
-        canvas.width  = canvas.parentElement?.offsetWidth  ?? window.innerWidth;
-        canvas.height = canvas.parentElement?.offsetHeight ?? window.innerHeight;
-      };
-      resize();
-      window.addEventListener('resize', resize);
-      const ctx = canvas.getContext('2d')!;
+    // Double-rAF: guarantees all layout is painted and dimensions are real
+    requestAnimationFrame(() => requestAnimationFrame(() => {
 
-      type P = { x: number; y: number; r: number; op: number; spd: number; drift: number; hue: number };
-      const pts: P[] = Array.from({ length: 100 }, () => ({
-        x:     Math.random() * canvas.width,
-        y:     Math.random() * canvas.height,
-        r:     Math.random() * 2.4 + 0.5,
-        op:    Math.random() * 0.55 + 0.08,
-        spd:   Math.random() * 0.55 + 0.15,
-        drift: (Math.random() - 0.5) * 0.3,
-        hue:   32 + Math.random() * 22,
-      }));
+      /* ══ 1. CANVAS PARTICLES ══ */
+      const canvas = canvasRef.current;
+      if (canvas) {
+        const W = () => window.innerWidth;
+        const H = () => Math.max(window.innerHeight, canvas.parentElement?.offsetHeight ?? window.innerHeight);
 
-      type S = { x: number; y: number; sz: number; life: number; max: number };
-      const stars: S[] = Array.from({ length: 14 }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        sz: Math.random() * 5 + 2,
-        life: Math.random() * 200,
-        max: 120 + Math.random() * 200,
-      }));
+        canvas.width  = W();
+        canvas.height = H();
 
-      const draw = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const ctx = canvas.getContext('2d')!;
 
-        // Floating particles
-        pts.forEach(p => {
-          p.y -= p.spd; p.x += p.drift;
-          if (p.y < -8) { p.y = canvas.height + 8; p.x = Math.random() * canvas.width; }
-          if (p.x < -8) p.x = canvas.width + 8;
-          if (p.x > canvas.width + 8) p.x = -8;
+        type P = { x: number; y: number; r: number; op: number; spd: number; drift: number; hue: number };
+        const pts: P[] = Array.from({ length: 90 }, () => ({
+          x:     Math.random() * canvas.width,
+          y:     Math.random() * canvas.height,
+          r:     Math.random() * 3 + 1,
+          op:    Math.random() * 0.6 + 0.15,
+          spd:   Math.random() * 0.6 + 0.2,
+          drift: (Math.random() - 0.5) * 0.35,
+          hue:   28 + Math.random() * 28,
+        }));
 
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-          ctx.fillStyle = `hsla(${p.hue},80%,65%,${p.op})`;
-          ctx.fill();
+        type S = { x: number; y: number; sz: number; life: number; max: number };
+        const stars: S[] = Array.from({ length: 14 }, () => ({
+          x:    Math.random() * canvas.width,
+          y:    Math.random() * canvas.height,
+          sz:   Math.random() * 6 + 2,
+          life: Math.random() * 200,
+          max:  100 + Math.random() * 200,
+        }));
 
-          if (p.r > 1.5) {
+        const resizeFn = () => { canvas.width = W(); canvas.height = H(); };
+        window.addEventListener('resize', resizeFn);
+        cleanupResize = () => window.removeEventListener('resize', resizeFn);
+
+        const draw = () => {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          pts.forEach(p => {
+            p.y -= p.spd; p.x += p.drift;
+            if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+            if (p.x < -10) p.x = canvas.width + 10;
+            if (p.x > canvas.width + 10) p.x = -10;
+
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r * 3.5, 0, Math.PI * 2);
-            ctx.fillStyle = `hsla(${p.hue},80%,65%,${p.op * 0.15})`;
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fillStyle = `hsla(${p.hue},85%,68%,${p.op})`;
             ctx.fill();
-          }
-        });
 
-        // Twinkling 4-line stars
-        stars.forEach(s => {
-          s.life++;
-          const phase = s.life / s.max;
-          const alpha = (phase < 0.5 ? phase * 2 : 1 - (phase - 0.5) * 2) * 0.65;
-          if (s.life >= s.max) {
-            s.life = 0;
-            s.x = Math.random() * canvas.width;
-            s.y = Math.random() * canvas.height;
-            s.sz = Math.random() * 5 + 2;
-          }
-          ctx.save();
-          ctx.globalAlpha = alpha;
-          ctx.strokeStyle = '#D4AF37';
-          ctx.lineWidth = 0.8;
-          ctx.translate(s.x, s.y);
-          for (let a = 0; a < 4; a++) {
-            ctx.beginPath(); ctx.moveTo(0, -s.sz); ctx.lineTo(0, s.sz); ctx.stroke();
-            ctx.rotate(Math.PI / 4);
-          }
-          ctx.restore();
-        });
+            // glow halo
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
+            ctx.fillStyle = `hsla(${p.hue},85%,68%,${p.op * 0.12})`;
+            ctx.fill();
+          });
 
-        rafRef.current = requestAnimationFrame(draw);
+          stars.forEach(s => {
+            s.life++;
+            const phase = s.life / s.max;
+            const alpha = (phase < 0.5 ? phase * 2 : 1 - (phase - 0.5) * 2) * 0.7;
+            if (s.life >= s.max) {
+              s.life = 0;
+              s.x = Math.random() * canvas.width;
+              s.y = Math.random() * canvas.height;
+              s.sz = Math.random() * 6 + 2;
+            }
+            ctx.save();
+            ctx.globalAlpha = alpha;
+            ctx.strokeStyle = '#D4AF37';
+            ctx.lineWidth = 1.2;
+            ctx.translate(s.x, s.y);
+            for (let a = 0; a < 4; a++) {
+              ctx.beginPath(); ctx.moveTo(0, -s.sz); ctx.lineTo(0, s.sz); ctx.stroke();
+              ctx.rotate(Math.PI / 4);
+            }
+            ctx.restore();
+          });
+
+          rafId = requestAnimationFrame(draw);
+        };
+        rafId = requestAnimationFrame(draw);
+      }
+
+      /* ══ 2. SVG PATH DRAW-IN (CSS class toggle — no anime.js needed) ══ */
+      document.querySelectorAll<SVGPathElement>('.mem-hero-path').forEach((path, i) => {
+        try {
+          const len = path.getTotalLength();
+          path.style.strokeDasharray  = `${len}`;
+          path.style.strokeDashoffset = `${len}`;
+          path.style.transition = `stroke-dashoffset ${2 + i * 0.25}s cubic-bezier(0.25,1,0.5,1) ${0.3 + i * 0.15}s`;
+          // next tick so transition is active
+          requestAnimationFrame(() => { path.style.strokeDashoffset = '0'; });
+        } catch {}
+      });
+
+      /* ══ 3. MAGNETIC CTA ══ */
+      const cta = document.querySelector<HTMLElement>('.mem-hero-cta');
+      if (cta) {
+        const onMag = (e: MouseEvent) => {
+          const r = cta.getBoundingClientRect();
+          const mx = e.clientX - r.left - r.width / 2;
+          const my = e.clientY - r.top - r.height / 2;
+          const dist = Math.hypot(mx, my);
+          if (dist < 130) {
+            const force = (1 - dist / 130) * 20;
+            const ang = Math.atan2(my, mx);
+            try {
+              animate(cta, { translateX: Math.cos(ang) * force, translateY: Math.sin(ang) * force, duration: 90, ease: 'linear' });
+            } catch {}
+          }
+        };
+        document.addEventListener('mousemove', onMag);
+        cta.addEventListener('mouseleave', () => {
+          try { animate(cta, { translateX: 0, translateY: 0, duration: 750, ease: 'outElastic' }); } catch {}
+        });
+      }
+
+      /* ══ 4. HERO SCROLL FADE ══ */
+      const hero = document.querySelector<HTMLElement>('.mem-hero');
+      const scrollFn = () => {
+        if (hero) hero.style.opacity = String(Math.max(0, 1 - window.scrollY / ((hero.offsetHeight || window.innerHeight) * 0.55)));
       };
-      rafRef.current = requestAnimationFrame(draw);
-    }
+      window.addEventListener('scroll', scrollFn, { passive: true });
+      cleanupScroll = () => window.removeEventListener('scroll', scrollFn);
 
-    /* ══ 2. SVG PATH DRAW-IN ══ */
-    const paths = document.querySelectorAll<SVGPathElement>('.mem-hero-path');
-    paths.forEach((path, i) => {
+      /* ══ 5. GOLD BORDER ROTATION ══ */
       try {
-        const len = path.getTotalLength();
-        path.style.strokeDasharray = `${len}`;
-        path.style.strokeDashoffset = `${len}`;
-        setTimeout(() => {
-          animate(path, {
-            strokeDashoffset: [len, 0],
-            duration: 2000,
-            delay: i * 200,
-            ease: 'outQuart',
-          });
-        }, 100);
-      } catch {}
-    });
-
-    /* ══ 3. MAGNETIC CTA ══ */
-    const cta = document.querySelector<HTMLElement>('.mem-hero-cta');
-    if (cta) {
-      const onMag = (e: MouseEvent) => {
-        const r = cta.getBoundingClientRect();
-        const mx = e.clientX - r.left - r.width / 2;
-        const my = e.clientY - r.top - r.height / 2;
-        const dist = Math.hypot(mx, my);
-        if (dist < 120) {
-          const force = (1 - dist / 120) * 18;
-          const ang = Math.atan2(my, mx);
-          animate(cta, { translateX: Math.cos(ang) * force, translateY: Math.sin(ang) * force, duration: 100, ease: 'linear' });
-        }
-      };
-      document.addEventListener('mousemove', onMag);
-      cta.addEventListener('mouseleave', () =>
-        animate(cta, { translateX: 0, translateY: 0, duration: 700, ease: 'elasticOut' })
-      );
-    }
-
-    /* ══ 4. HERO SCROLL FADE ══ */
-    const hero = document.querySelector<HTMLElement>('.mem-hero');
-    const onScroll = () => {
-      if (hero) hero.style.opacity = String(Math.max(0, 1 - window.scrollY / (hero.offsetHeight * 0.55)));
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-
-    /* ══ 5. GOLD BORDER ROTATION (anime.js — guaranteed to work) ══ */
-    const borderObj = { angle: 0 };
-    const goldAnim = animate(borderObj, {
-      angle: 360,
-      duration: 3200,
-      loop: true,
-      ease: 'linear',
-      onUpdate: () => {
-        document.querySelectorAll<HTMLElement>('.mem-tier-card--gold').forEach(el => {
-          el.style.setProperty('--border-angle', `${borderObj.angle}deg`);
-        });
-      },
-    });
-
-    /* ══ 6. GOLD CARD GLOW PULSE ══ */
-    document.querySelectorAll<HTMLElement>('.mem-tier-card--gold').forEach(card => {
-      animate(card, {
-        boxShadow: [
-          '0 0 30px rgba(212,175,55,0.15), 0 0 60px rgba(212,175,55,0.06)',
-          '0 0 60px rgba(212,175,55,0.55), 0 0 120px rgba(212,175,55,0.22)',
-          '0 0 30px rgba(212,175,55,0.15), 0 0 60px rgba(212,175,55,0.06)',
-        ],
-        duration: 2500,
-        loop: true,
-        ease: 'inOutSine',
-      });
-    });
-
-    /* ══ 7. IntersectionObserver for ALL scroll reveals ══ */
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        const el = entry.target as HTMLElement;
-        io.unobserve(el);
-
-        // Stats counters
-        if (el.classList.contains('mem-stat-item')) {
-          animate(el, { opacity: [0, 1], translateY: [28, 0], duration: 800, ease: 'outExpo' });
-          const numEl = el.querySelector<HTMLElement>('[data-count]');
-          if (numEl) {
-            const to  = Number(numEl.dataset.count);
-            const sfx = numEl.dataset.suffix ?? '';
-            const obj = { v: 0 };
-            animate(obj, {
-              v: to, duration: 2400, ease: 'outExpo',
-              onUpdate: () => { numEl.textContent = Math.round(obj.v) + sfx; },
-              onComplete: () => animate(numEl, { scale: [1, 1.12, 1], duration: 380, ease: 'outBack' }),
+        const borderObj = { angle: 0 };
+        goldAnim = animate(borderObj, {
+          angle: 360,
+          duration: 3200,
+          loop: true,
+          ease: 'linear',
+          onUpdate: () => {
+            document.querySelectorAll<HTMLElement>('.mem-tier-card--gold').forEach(el => {
+              el.style.setProperty('--border-angle', `${borderObj.angle}deg`);
             });
+          },
+        });
+      } catch {}
+
+      /* ══ 6. GOLD CARD GLOW — CSS keyframe class, no anime.js ══ */
+      document.querySelectorAll<HTMLElement>('.mem-tier-card--gold').forEach(card => {
+        card.classList.add('mem-gold-pulse');
+      });
+
+      /* ══ 7. IntersectionObserver reveals ══ */
+      io = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          const el = entry.target as HTMLElement;
+          io!.unobserve(el);
+
+          if (el.classList.contains('mem-stat-item')) {
+            try { animate(el, { opacity: [0, 1], translateY: [28, 0], duration: 750, ease: 'outExpo' }); } catch {}
+            const numEl = el.querySelector<HTMLElement>('[data-count]');
+            if (numEl) {
+              const to  = Number(numEl.dataset.count);
+              const sfx = numEl.dataset.suffix ?? '';
+              const obj = { v: 0 };
+              try {
+                animate(obj, {
+                  v: to, duration: 2200, ease: 'outExpo',
+                  onUpdate: () => { numEl.textContent = Math.round(obj.v) + sfx; },
+                });
+              } catch {}
+            }
+            return;
           }
-          return;
-        }
 
-        // Section headings
-        if (el.classList.contains('mem-head-reveal')) {
-          animate(el, { opacity: [0, 1], translateY: [32, 0], duration: 900, ease: 'outExpo' });
-          return;
-        }
+          if (el.classList.contains('mem-head-reveal')) {
+            try { animate(el, { opacity: [0, 1], translateY: [30, 0], duration: 850, ease: 'outExpo' }); } catch {}
+            return;
+          }
 
-        // Tier cards
-        if (el.classList.contains('mem-tier-card')) {
-          const cards = document.querySelectorAll<HTMLElement>('.mem-tier-card');
-          const idx = Array.from(cards).indexOf(el);
-          animate(el, {
-            opacity: [0, 1], translateY: [80, 0], scale: [0.88, 1],
-            duration: 1000, delay: idx * 160, ease: 'outExpo',
-            onComplete: () => {
-              const items = el.querySelectorAll<HTMLElement>('.mem-benefit-item');
-              animate(items, {
-                opacity: [0, 1], translateX: [-16, 0],
-                delay: stagger(55), duration: 500, ease: 'outExpo',
+          if (el.classList.contains('mem-tier-card')) {
+            const cards = document.querySelectorAll<HTMLElement>('.mem-tier-card');
+            const idx = Array.from(cards).indexOf(el);
+            try {
+              animate(el, {
+                opacity: [0, 1], translateY: [70, 0], scale: [0.9, 1],
+                duration: 900, delay: idx * 140, ease: 'outExpo',
+                onComplete: () => {
+                  const items = el.querySelectorAll<HTMLElement>('.mem-benefit-item');
+                  try { animate(items, { opacity: [0, 1], translateX: [-14, 0], delay: stagger(50), duration: 450, ease: 'outExpo' }); } catch {}
+                },
               });
-            },
-          });
-          return;
-        }
+            } catch {}
+            return;
+          }
 
-        // Event cards
-        if (el.classList.contains('mem-event-card')) {
-          const evCards = document.querySelectorAll<HTMLElement>('.mem-event-card');
-          const idx = Array.from(evCards).indexOf(el);
-          animate(el, { opacity: [0, 1], translateY: [40, 0], duration: 700, delay: idx * 80, ease: 'outExpo' });
-          return;
-        }
+          try {
+            animate(el, { opacity: [0, 1], translateY: [35, 0], duration: 650, ease: 'outExpo' });
+          } catch {}
+        });
+      }, { threshold: 0.1 });
 
-        // Ally cards
-        if (el.classList.contains('mem-ally-card')) {
-          const allCards = document.querySelectorAll<HTMLElement>('.mem-ally-card');
-          const idx = Array.from(allCards).indexOf(el);
-          animate(el, { opacity: [0, 1], translateY: [36, 0], duration: 660, delay: idx * 60, ease: 'outExpo' });
-          return;
-        }
+      document.querySelectorAll<HTMLElement>(
+        '.mem-stat-item, .mem-head-reveal, .mem-tier-card, .mem-event-card, .mem-ally-card'
+      ).forEach(el => io!.observe(el));
+
+      /* ══ 8. CARD 3D TILT ══ */
+      document.querySelectorAll<HTMLElement>('.mem-tier-card').forEach(card => {
+        card.addEventListener('mousemove', (e: MouseEvent) => {
+          const r = card.getBoundingClientRect();
+          const dx = (e.clientX - r.left - r.width / 2) / (r.width / 2);
+          const dy = (e.clientY - r.top - r.height / 2) / (r.height / 2);
+          card.style.transform = `perspective(900px) rotateY(${dx * 9}deg) rotateX(${-dy * 5.5}deg) scale(1.025)`;
+        });
+        card.addEventListener('mouseleave', () => {
+          card.style.transition = 'transform 0.6s cubic-bezier(0.34,1.56,0.64,1)';
+          card.style.transform  = '';
+          setTimeout(() => { card.style.transition = ''; }, 620);
+        });
       });
-    }, { threshold: 0.12 });
 
-    document.querySelectorAll<HTMLElement>(
-      '.mem-stat-item, .mem-head-reveal, .mem-tier-card, .mem-event-card, .mem-ally-card'
-    ).forEach(el => io.observe(el));
-
-    /* ══ 8. CARD 3D TILT + SPOTLIGHT ══ */
-    document.querySelectorAll<HTMLElement>('.mem-tier-card').forEach(card => {
-      card.addEventListener('mousemove', (e: MouseEvent) => {
-        const r = card.getBoundingClientRect();
-        const dx = (e.clientX - r.left - r.width / 2) / (r.width / 2);
-        const dy = (e.clientY - r.top - r.height / 2) / (r.height / 2);
-        card.style.transform = `perspective(900px) rotateY(${dx * 9}deg) rotateX(${-dy * 5.5}deg) scale(1.025)`;
-        card.style.setProperty('--mx', `${e.clientX - r.left}px`);
-        card.style.setProperty('--my', `${e.clientY - r.top}px`);
+      /* ══ 9. PARTICLE BURST ON CARD CLICK ══ */
+      const burstColors = ['#CD7F32', '#A8A9AD', '#D4AF37'];
+      document.querySelectorAll<HTMLElement>('.mem-tier-card').forEach((card, ci) => {
+        const burst = card.querySelector<HTMLElement>('.mem-particle-burst');
+        if (!burst) return;
+        card.addEventListener('click', () => spawnBurst(burst, burstColors[ci] ?? '#D4AF37'));
       });
-      card.addEventListener('mouseleave', () => {
-        card.style.transition = 'transform 0.6s cubic-bezier(0.34,1.56,0.64,1)';
-        card.style.transform  = 'perspective(900px) rotateY(0) rotateX(0) scale(1)';
-        card.style.setProperty('--mx', '-9999px'); card.style.setProperty('--my', '-9999px');
-        setTimeout(() => { card.style.transition = ''; }, 620);
-      });
-    });
 
-    /* ══ 9. PARTICLE BURST ON CARD CLICK ══ */
-    const burstColors = ['#CD7F32', '#A8A9AD', '#D4AF37'];
-    document.querySelectorAll<HTMLElement>('.mem-tier-card').forEach((card, ci) => {
-      const burst = card.querySelector<HTMLElement>('.mem-particle-burst');
-      if (!burst) return;
-      card.addEventListener('click', () => spawnBurst(burst, burstColors[ci] ?? '#D4AF37'));
-    });
+    })); // end double-rAF
 
     return () => {
-      cancelAnimationFrame(rafRef.current);
-      window.removeEventListener('resize', () => {});
-      window.removeEventListener('scroll', onScroll);
-      goldAnim.pause();
-      io.disconnect();
+      cancelAnimationFrame(rafId);
+      cleanupResize?.();
+      cleanupScroll?.();
+      try { goldAnim?.pause(); } catch {}
+      io?.disconnect();
     };
   }, []);
 
