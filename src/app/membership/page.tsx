@@ -153,8 +153,8 @@ function AllyCard({ ally, t, ta }: {
           <p style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--makay-dark-navy)', margin: '0 0 0.25rem' }}>{ally.name}</p>
           <span style={{ display: 'inline-block', fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: tierColor, background: `${tierColor}18`, borderRadius: 4, padding: '0.15rem 0.5rem' }}>{tierLabel}</span>
         </div>
-        <div style={{ flexShrink: 0, background: `${tierColor}15`, borderRadius: 12, padding: '0.45rem 0.75rem', textAlign: 'center' }}>
-          <p style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: '1.5rem', color: tierColor, margin: 0, lineHeight: 1 }}>{ally.discount_percent}%</p>
+        <div className="mem-discount-badge" style={{ flexShrink: 0, background: `${tierColor}15`, borderRadius: 12, padding: '0.45rem 0.75rem', textAlign: 'center' }}>
+          <p className="mem-discount-num" style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: '1.5rem', color: tierColor, margin: 0, lineHeight: 1 }}>{ally.discount_percent}%</p>
           <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.6rem', color: tierColor, margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{ta('off')}</p>
         </div>
       </div>
@@ -190,6 +190,7 @@ export default function MembershipPage() {
   const [stats, setStats]                 = useState({ members: 500, allies: 50, events: 12 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef    = useRef<number>(0);
+  const ioRef     = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
     fetch('/api/events').then(r => r.ok ? r.json() : [])
@@ -409,11 +410,28 @@ export default function MembershipPage() {
             return;
           }
 
+          if (el.classList.contains('mem-ally-card')) {
+            try {
+              animate(el, {
+                opacity: [0, 1], translateY: [32, 0], duration: 650, ease: 'outExpo',
+                onComplete: () => {
+                  const badge = el.querySelector<HTMLElement>('.mem-discount-badge');
+                  if (badge) {
+                    try { animate(badge, { scale: [0, 1.2, 1], duration: 500, ease: 'outBack' }); } catch {}
+                  }
+                },
+              });
+            } catch {}
+            return;
+          }
+
           try {
             animate(el, { opacity: [0, 1], translateY: [35, 0], duration: 650, ease: 'outExpo' });
           } catch {}
         });
       }, { threshold: 0.1 });
+
+      ioRef.current = io;
 
       document.querySelectorAll<HTMLElement>(
         '.mem-stat-item, .mem-head-reveal, .mem-tier-card, .mem-event-card, .mem-ally-card'
@@ -450,8 +468,19 @@ export default function MembershipPage() {
       cleanupScroll?.();
       try { goldAnim?.pause(); } catch {}
       io?.disconnect();
+      ioRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (!ioRef.current || loadingEvents) return;
+    document.querySelectorAll<HTMLElement>('.mem-event-card').forEach(el => ioRef.current!.observe(el));
+  }, [events, loadingEvents]);
+
+  useEffect(() => {
+    if (!ioRef.current || loadingAllies) return;
+    document.querySelectorAll<HTMLElement>('.mem-ally-card').forEach(el => ioRef.current!.observe(el));
+  }, [allies, loadingAllies]);
 
   /* ── Render ─────────────────────────────────────── */
   return (
@@ -579,14 +608,16 @@ export default function MembershipPage() {
       </section>
 
       {/* ─── 5. Events ───────────────────────────────── */}
-      <section id="events" style={{ background: 'var(--makay-premium-cream)', padding: 'clamp(5rem,10vw,7rem) 1.25rem', position: 'relative' }}>
+      <section id="events" className="mem-events-section" style={{ background: 'var(--makay-premium-cream)', padding: 'clamp(5rem,10vw,7rem) 1.25rem', position: 'relative' }}>
+        <div className="mem-dot-grid" />
         <div className="mem-light-section-wave">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 60" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 60 }}>
             <path d="M0,0 C480,55 960,5 1440,40 L1440,0 Z" fill="#0d0703" />
           </svg>
         </div>
-        <div style={{ maxWidth: 1100, margin: '0 auto', paddingTop: '2rem' }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', paddingTop: '2rem', position: 'relative', zIndex: 2 }}>
           <div className="mem-section-head mem-head-reveal" style={{ marginBottom: '3rem' }}>
+            <p className="mem-section-eyebrow" style={{ color: '#D4A574' }}>Próximos Eventos</p>
             <h2 className="mem-section-title" style={{ color: 'var(--makay-dark-navy)' }}>{t('eventsTitle')}</h2>
             <p className="mem-section-sub" style={{ color: 'var(--makay-mauve)' }}>{t('eventsSubtitle')}</p>
           </div>
@@ -594,7 +625,11 @@ export default function MembershipPage() {
             <p style={{ textAlign: 'center', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', padding: '3rem' }}>{t('loadingEvents')}</p>
           ) : events.length === 0 ? (
             <div className="mem-events-empty">
-              <Calendar size={72} className="mem-events-empty-icon" style={{ color: '#D4A574' }} />
+              <div className="mem-ring-pulse-wrap">
+                <span className="mem-ring-pulse mem-ring-pulse-1" />
+                <span className="mem-ring-pulse mem-ring-pulse-2" />
+                <Calendar size={72} className="mem-events-empty-icon" style={{ color: '#D4A574' }} />
+              </div>
               <p className="mem-events-empty-title">{t('noEvents')}</p>
               <p className="mem-events-empty-hint">{t('noEventsHint')}</p>
             </div>
@@ -607,8 +642,8 @@ export default function MembershipPage() {
                 const tags      = ev.tags ? ev.tags.split(',').map(s => s.trim()).filter(Boolean) : [];
                 return (
                   <article key={ev.id} className="mem-event-card" style={{ background: '#fff', border: '1px solid var(--makay-sand-cream)', borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                    <div style={{ position: 'relative', height: 200, background: 'linear-gradient(135deg,var(--makay-sand-cream),var(--makay-peachy-rose))' }}>
-                      {ev.image_url && <img src={ev.image_url} alt={ev.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
+                    <div className="mem-event-image-wrap" style={{ position: 'relative', height: 200, background: 'linear-gradient(135deg,var(--makay-sand-cream),var(--makay-peachy-rose))' }}>
+                      {ev.image_url && <img className="mem-event-image" src={ev.image_url} alt={ev.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
                       {!ev.image_url && <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Calendar size={48} color="rgba(255,255,255,0.6)" /></div>}
                       <div style={{ position: 'absolute', top: '0.875rem', right: '0.875rem', background: 'rgba(28,22,17,0.85)', backdropFilter: 'blur(8px)', color: '#fff', padding: '0.3rem 0.75rem', borderRadius: '100px', fontFamily: 'var(--font-playfair-display)', fontSize: '0.95rem', fontWeight: 700 }}>
                         {Number(ev.price) === 0 ? t('free') : `$${Number(ev.price).toFixed(2)}`}
@@ -616,7 +651,7 @@ export default function MembershipPage() {
                       {soldOut && <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'var(--font-montserrat)', fontWeight: 700, color: '#fff', fontSize: '1rem', letterSpacing: '0.1em' }}>{t('soldOut')}</div>}
                     </div>
                     <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', flex: 1, gap: '0.75rem' }}>
-                      {tags.length > 0 && <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>{tags.map(tag => <span key={tag} style={{ padding: '0.15rem 0.55rem', background: 'rgba(212,165,116,0.12)', borderRadius: 100, fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', fontWeight: 600, color: 'var(--makay-peachy-rose)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{tag}</span>)}</div>}
+                      {tags.length > 0 && <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>{tags.map(tag => <span key={tag} className="mem-event-tag" style={{ padding: '0.15rem 0.55rem', background: 'rgba(212,165,116,0.12)', borderRadius: 100, fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', fontWeight: 600, color: 'var(--makay-peachy-rose)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{tag}</span>)}</div>}
                       <h3 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: 0, lineHeight: 1.2 }}>{ev.title}</h3>
                       <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-mauve)', margin: 0, lineHeight: 1.6, flex: 1 }}>{ev.description?.slice(0, 120)}{(ev.description?.length ?? 0) > 120 ? '…' : ''}</p>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
@@ -625,14 +660,14 @@ export default function MembershipPage() {
                       </div>
                       <div>
                         <div style={{ height: 4, background: 'var(--makay-sand-cream)', borderRadius: 2, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${Math.min(soldPct,100)}%`, borderRadius: 2, background: soldPct >= 90 ? '#ef4444' : soldPct >= 60 ? '#f59e0b' : '#10b981' }} />
+                          <div className="mem-event-progress-fill" style={{ height: '100%', width: `${Math.min(soldPct,100)}%`, borderRadius: 2, background: soldPct >= 90 ? '#ef4444' : soldPct >= 60 ? '#f59e0b' : '#10b981' }} />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.3rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', color: 'var(--makay-mauve)' }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Users size={10} />{ev.tickets_sold} {t('going')}</span>
                           <span>{soldOut ? t('soldOutBtn') : `${remaining} ${t('left')}`}</span>
                         </div>
                       </div>
-                      <Link href={`/events/${ev.id}`} style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', padding: '0.75rem', borderRadius: 12, background: soldOut ? 'var(--makay-sand-cream)' : 'var(--makay-dark-navy)', color: soldOut ? 'var(--makay-mauve)' : '#fff', fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', pointerEvents: soldOut ? 'none' : 'auto' }}>
+                      <Link href={`/events/${ev.id}`} className="mem-event-cta" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', padding: '0.75rem', borderRadius: 12, background: soldOut ? 'var(--makay-sand-cream)' : 'var(--makay-dark-navy)', color: soldOut ? 'var(--makay-mauve)' : '#fff', fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', pointerEvents: soldOut ? 'none' : 'auto' }}>
                         <Ticket size={14} /> {soldOut ? t('soldOutBtn') : t('getTickets')}
                       </Link>
                     </div>
@@ -647,7 +682,9 @@ export default function MembershipPage() {
       {/* ─── 6. Allies ───────────────────────────────── */}
       <section id="partners" style={{ background: 'var(--makay-warm-white,#fff8f0)', padding: 'clamp(4rem,8vw,6rem) 1.25rem', position: 'relative', overflow: 'hidden' }}>
         <div className="mem-allies-bg-orb" />
-        <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative' }}>
+        <div className="mem-allies-bg-orb mem-allies-bg-orb-2" />
+        <div className="mem-dot-grid mem-dot-grid-faint" />
+        <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <div className="mem-section-head mem-head-reveal">
             <p className="mem-section-eyebrow" style={{ color: '#D4AF37' }}>{ta('tag')}</p>
             <h2 className="mem-section-title" style={{ color: 'var(--makay-dark-navy)' }}>{ta('title')}</h2>
@@ -662,11 +699,11 @@ export default function MembershipPage() {
               {allies.map(ally => <AllyCard key={ally.id} ally={ally} t={t} ta={ta} />)}
             </div>
           )}
-          <div style={{ marginTop: '3rem', padding: '1.5rem', background: '#fff', border: '1px solid #f0ebe4', borderRadius: 14, display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div className="mem-head-reveal" style={{ marginTop: '3rem', padding: '1.5rem', background: '#fff', border: '1px solid #f0ebe4', borderRadius: 14, display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', margin: '0 auto 0 0', alignSelf: 'center' }}>{ta('accessByTier')}</p>
             {Object.entries(TIER_KEY).map(([tier, key]) => (
-              <div key={tier} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: TIER_COLOR[tier] ?? '#ccc', flexShrink: 0 }} />
+              <div key={tier} className="mem-tier-legend-dot" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <span className="mem-tier-legend-swatch" style={{ width: 10, height: 10, borderRadius: '50%', background: TIER_COLOR[tier] ?? '#ccc', flexShrink: 0, '--tier-glow': `${TIER_COLOR[tier] ?? '#ccc'}59` } as React.CSSProperties} />
                 <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-dark-navy)' }}>{ta(key as Parameters<typeof ta>[0])}</span>
               </div>
             ))}
