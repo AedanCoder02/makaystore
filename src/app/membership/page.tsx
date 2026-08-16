@@ -182,11 +182,12 @@ export default function MembershipPage() {
   const { isLoaded } = useUser();
   const t = useTranslations('membership');
   const ta = useTranslations('allies');
-  const [events, setEvents]           = useState<Event[]>([]);
-  const [allies, setAllies]           = useState<Ally[]>([]);
+  const [events, setEvents]               = useState<Event[]>([]);
+  const [allies, setAllies]               = useState<Ally[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [loadingAllies, setLoadingAllies] = useState(true);
-  const [leadTier, setLeadTier]       = useState<BenefitTier | null>(null);
+  const [leadTier, setLeadTier]           = useState<BenefitTier | null>(null);
+  const [stats, setStats]                 = useState({ members: 500, allies: 50, events: 12 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef    = useRef<number>(0);
 
@@ -194,6 +195,10 @@ export default function MembershipPage() {
     fetch('/api/events').then(r => r.ok ? r.json() : [])
       .then(d => { setEvents(Array.isArray(d) ? d : []); setLoadingEvents(false); })
       .catch(() => setLoadingEvents(false));
+
+    fetch('/api/membership/public-stats').then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setStats({ members: d.members || 500, allies: d.allies || 50, events: d.events || 12 }); })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -513,9 +518,9 @@ export default function MembershipPage() {
       <section className="mem-stats">
         <div className="mem-stats-inner">
           {[
-            { cls: 'stat-members',  label: 'Miembros activos',  count: 500, suffix: '+' },
-            { cls: 'stat-partners', label: 'Aliados exclusivos', count: 50,  suffix: '+' },
-            { cls: 'stat-events',   label: 'Eventos al año',     count: 12,  suffix: '/año' },
+            { cls: 'stat-members',  label: 'Miembros activos',   count: Math.max(stats.members, 1),  suffix: '+' },
+            { cls: 'stat-partners', label: 'Aliados exclusivos', count: Math.max(stats.allies, 1),   suffix: '+' },
+            { cls: 'stat-events',   label: 'Eventos al año',     count: Math.max(stats.events, 12),  suffix: '/año' },
           ].map(s => (
             <div key={s.cls} className="mem-stat-item">
               <span className={`mem-stat-number ${s.cls}`} data-count={s.count} data-suffix={s.suffix}>0{s.suffix}</span>
