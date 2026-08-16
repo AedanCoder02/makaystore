@@ -9,10 +9,7 @@ import {
   Star, Award, Lock, Copy, Check,
   Percent, Umbrella, Trophy, ChevronRight,
 } from 'lucide-react';
-import {
-  animate, stagger, createTimeline, createTimer,
-  onScroll, splitText, scrambleText,
-} from 'animejs';
+import { animate, stagger } from 'animejs';
 import MembershipLeadForm from '@/components/membership/MembershipLeadForm';
 import '@/styles/membership.css';
 
@@ -94,12 +91,12 @@ function spawnBurst(container: HTMLElement, color: string) {
     const size = Math.random() * 7 + 3;
     const angle = (i / 18) * 360 + Math.random() * 20;
     const dist  = 55 + Math.random() * 70;
-    dot.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:${color};top:-${size/2}px;left:-${size/2}px;pointer-events:none;opacity:0;`;
+    dot.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:${color};top:-${size/2}px;left:-${size/2}px;pointer-events:none;`;
     container.appendChild(dot);
     animate(dot, {
       translateX: Math.cos((angle * Math.PI) / 180) * dist,
       translateY: Math.sin((angle * Math.PI) / 180) * dist,
-      opacity: [0, 1, 0],
+      opacity: [1, 0],
       scale: [0, 1.6, 0],
       duration: 650 + Math.random() * 350,
       ease: 'outExpo',
@@ -148,11 +145,10 @@ function AllyCard({ ally, t, ta }: {
       }}
     >
       <div style={{ padding: '1.75rem 1.5rem 1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        {ally.logo_url ? (
-          <img src={ally.logo_url} alt={ally.name} style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }} />
-        ) : (
-          <div style={{ width: 56, height: 56, borderRadius: 12, background: avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#fff', fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: '1.1rem' }}>{initials}</div>
-        )}
+        {ally.logo_url
+          ? <img src={ally.logo_url} alt={ally.name} style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }} />
+          : <div style={{ width: 56, height: 56, borderRadius: 12, background: avatarColor, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: '#fff', fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: '1.1rem' }}>{initials}</div>
+        }
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--makay-dark-navy)', margin: '0 0 0.25rem' }}>{ally.name}</p>
           <span style={{ display: 'inline-block', fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: tierColor, background: `${tierColor}18`, borderRadius: 4, padding: '0.15rem 0.5rem' }}>{tierLabel}</span>
@@ -186,12 +182,13 @@ export default function MembershipPage() {
   const { isLoaded } = useUser();
   const t = useTranslations('membership');
   const ta = useTranslations('allies');
-  const [events, setEvents] = useState<Event[]>([]);
-  const [allies, setAllies] = useState<Ally[]>([]);
+  const [events, setEvents]           = useState<Event[]>([]);
+  const [allies, setAllies]           = useState<Ally[]>([]);
   const [loadingEvents, setLoadingEvents] = useState(true);
   const [loadingAllies, setLoadingAllies] = useState(true);
-  const [leadTier, setLeadTier] = useState<BenefitTier | null>(null);
+  const [leadTier, setLeadTier]       = useState<BenefitTier | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef    = useRef<number>(0);
 
   useEffect(() => {
     fetch('/api/events').then(r => r.ok ? r.json() : [])
@@ -206,31 +203,32 @@ export default function MembershipPage() {
       .catch(() => setLoadingAllies(false));
   }, [isLoaded]);
 
-  /* ── All animations ──────────────────────────────── */
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    /* ══ 1. CANVAS PARTICLE SYSTEM ══ */
+    /* ══ 1. CANVAS PARTICLE SYSTEM via requestAnimationFrame ══ */
     const canvas = canvasRef.current;
     if (canvas) {
-      const ctx = canvas.getContext('2d')!;
-      const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight; };
+      const resize = () => {
+        canvas.width  = canvas.parentElement?.offsetWidth  ?? window.innerWidth;
+        canvas.height = canvas.parentElement?.offsetHeight ?? window.innerHeight;
+      };
       resize();
       window.addEventListener('resize', resize);
+      const ctx = canvas.getContext('2d')!;
 
-      type P = { x: number; y: number; r: number; op: number; spd: number; drift: number; hue: number; };
-      const pts: P[] = Array.from({ length: 90 }, () => ({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 2.5 + 0.4,
-        op: Math.random() * 0.5 + 0.08,
-        spd: Math.random() * 0.55 + 0.12,
+      type P = { x: number; y: number; r: number; op: number; spd: number; drift: number; hue: number };
+      const pts: P[] = Array.from({ length: 100 }, () => ({
+        x:     Math.random() * canvas.width,
+        y:     Math.random() * canvas.height,
+        r:     Math.random() * 2.4 + 0.5,
+        op:    Math.random() * 0.55 + 0.08,
+        spd:   Math.random() * 0.55 + 0.15,
         drift: (Math.random() - 0.5) * 0.3,
-        hue: 32 + Math.random() * 22,
+        hue:   32 + Math.random() * 22,
       }));
 
-      // Twinkling stars
-      type S = { x: number; y: number; sz: number; life: number; max: number; };
+      type S = { x: number; y: number; sz: number; life: number; max: number };
       const stars: S[] = Array.from({ length: 14 }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
@@ -239,122 +237,77 @@ export default function MembershipPage() {
         max: 120 + Math.random() * 200,
       }));
 
-      createTimer({
-        loop: true,
-        onUpdate: () => {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          // Particles
-          pts.forEach(p => {
-            p.y -= p.spd; p.x += p.drift;
-            if (p.y < -8) { p.y = canvas.height + 8; p.x = Math.random() * canvas.width; }
-            if (p.x < -8) p.x = canvas.width + 8;
-            if (p.x > canvas.width + 8) p.x = -8;
+      const draw = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Floating particles
+        pts.forEach(p => {
+          p.y -= p.spd; p.x += p.drift;
+          if (p.y < -8) { p.y = canvas.height + 8; p.x = Math.random() * canvas.width; }
+          if (p.x < -8) p.x = canvas.width + 8;
+          if (p.x > canvas.width + 8) p.x = -8;
+
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${p.hue},80%,65%,${p.op})`;
+          ctx.fill();
+
+          if (p.r > 1.5) {
             ctx.beginPath();
-            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-            ctx.fillStyle = `hsla(${p.hue},80%,65%,${p.op})`;
+            ctx.arc(p.x, p.y, p.r * 3.5, 0, Math.PI * 2);
+            ctx.fillStyle = `hsla(${p.hue},80%,65%,${p.op * 0.15})`;
             ctx.fill();
-            if (p.r > 1.6) {
-              ctx.beginPath();
-              ctx.arc(p.x, p.y, p.r * 3.5, 0, Math.PI * 2);
-              ctx.fillStyle = `hsla(${p.hue},80%,65%,${p.op * 0.18})`;
-              ctx.fill();
-            }
-          });
-          // Stars: 4-line cross flicker
-          stars.forEach(s => {
-            s.life++;
-            const phase = s.life / s.max;
-            const alpha = phase < 0.5 ? phase * 2 * 0.65 : (1 - phase) * 2 * 0.65;
-            if (s.life >= s.max) {
-              s.life = 0;
-              s.x = Math.random() * canvas.width;
-              s.y = Math.random() * canvas.height;
-              s.sz = Math.random() * 5 + 2;
-            }
-            ctx.save();
-            ctx.globalAlpha = alpha;
-            ctx.strokeStyle = '#D4AF37';
-            ctx.lineWidth = 0.8;
-            ctx.translate(s.x, s.y);
-            for (let a = 0; a < 4; a++) {
-              ctx.beginPath(); ctx.moveTo(0, -s.sz); ctx.lineTo(0, s.sz); ctx.stroke();
-              ctx.rotate(Math.PI / 4);
-            }
-            ctx.restore();
-          });
-        },
-      });
+          }
+        });
+
+        // Twinkling 4-line stars
+        stars.forEach(s => {
+          s.life++;
+          const phase = s.life / s.max;
+          const alpha = (phase < 0.5 ? phase * 2 : 1 - (phase - 0.5) * 2) * 0.65;
+          if (s.life >= s.max) {
+            s.life = 0;
+            s.x = Math.random() * canvas.width;
+            s.y = Math.random() * canvas.height;
+            s.sz = Math.random() * 5 + 2;
+          }
+          ctx.save();
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = '#D4AF37';
+          ctx.lineWidth = 0.8;
+          ctx.translate(s.x, s.y);
+          for (let a = 0; a < 4; a++) {
+            ctx.beginPath(); ctx.moveTo(0, -s.sz); ctx.lineTo(0, s.sz); ctx.stroke();
+            ctx.rotate(Math.PI / 4);
+          }
+          ctx.restore();
+        });
+
+        rafRef.current = requestAnimationFrame(draw);
+      };
+      rafRef.current = requestAnimationFrame(draw);
     }
 
-    /* ══ 2. HERO ENTRANCE TIMELINE ══ */
-    const tag = document.querySelector<HTMLElement>('.mem-hero-tag');
-    const titleEl = document.querySelector<HTMLElement>('.mem-hero-title');
-    const sub = document.querySelector<HTMLElement>('.mem-hero-sub');
-    const cta = document.querySelector<HTMLElement>('.mem-hero-cta');
+    /* ══ 2. SVG PATH DRAW-IN ══ */
     const paths = document.querySelectorAll<SVGPathElement>('.mem-hero-path');
-    const gems = document.querySelectorAll<HTMLElement>('.mem-gem');
-
-    const tl = createTimeline({ defaults: { ease: 'outExpo' } });
-
-    // SVG lines draw in first
     paths.forEach((path, i) => {
       try {
         const len = path.getTotalLength();
-        path.style.strokeDasharray = String(len);
-        path.style.strokeDashoffset = String(len);
-        tl.add(path, { strokeDashoffset: [len, 0], duration: 1600, ease: 'outQuart' }, i * 150);
+        path.style.strokeDasharray = `${len}`;
+        path.style.strokeDashoffset = `${len}`;
+        setTimeout(() => {
+          animate(path, {
+            strokeDashoffset: [len, 0],
+            duration: 2000,
+            delay: i * 200,
+            ease: 'outQuart',
+          });
+        }, 100);
       } catch {}
     });
 
-    // Tag scramble
-    if (tag) {
-      tl.add(tag, { opacity: [0, 1], duration: 80 }, 200);
-      tl.call(() => {
-        animate(tag, {
-          ...scrambleText({ text: tag.textContent ?? '', duration: 950, revealRate: 0.38, chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ·∆◊' }),
-        });
-      }, 200);
-    }
-
-    // Title: split chars, stagger up with rotation
-    if (titleEl) {
-      titleEl.style.opacity = '1';
-      const { chars } = splitText(titleEl, { chars: true });
-      tl.add(chars, {
-        translateY: ['115%', '0%'],
-        opacity: [0, 1],
-        rotateZ: [10, 0],
-        duration: 1100,
-        delay: stagger(20, { ease: 'outExpo' }),
-      }, 300);
-    }
-
-    if (sub) tl.add(sub, { opacity: [0, 1], translateY: [24, 0], duration: 750 }, '-=700');
-    if (cta) tl.add(cta, { opacity: [0, 1], scale: [0.65, 1.08, 1], duration: 850, ease: 'outBack(2)' }, '-=600');
-
-    // Gems: spring pop
-    if (gems.length) {
-      animate(gems, {
-        opacity: [0, 1],
-        scale: [0, 1.2, 1],
-        delay: stagger(200, { start: 1100 }),
-        duration: 1000,
-        ease: 'outElastic(1, 0.55)',
-      });
-      // Perpetual float
-      gems.forEach((gem, i) => {
-        animate(gem, {
-          translateY: [0, -(8 + i * 5), 0],
-          rotate: [0, i % 2 === 0 ? 18 : -14],
-          loop: true,
-          duration: 3200 + i * 900,
-          ease: 'inOutSine',
-          alternate: true,
-        });
-      });
-    }
-
     /* ══ 3. MAGNETIC CTA ══ */
+    const cta = document.querySelector<HTMLElement>('.mem-hero-cta');
     if (cta) {
       const onMag = (e: MouseEvent) => {
         const r = cta.getBoundingClientRect();
@@ -368,81 +321,25 @@ export default function MembershipPage() {
         }
       };
       document.addEventListener('mousemove', onMag);
-      cta.addEventListener('mouseleave', () => {
-        animate(cta, { translateX: 0, translateY: 0, duration: 750, ease: 'outElastic(1, 0.5)' });
-      });
+      cta.addEventListener('mouseleave', () =>
+        animate(cta, { translateX: 0, translateY: 0, duration: 700, ease: 'elasticOut' })
+      );
     }
 
     /* ══ 4. HERO SCROLL FADE ══ */
     const hero = document.querySelector<HTMLElement>('.mem-hero');
-    if (hero) {
-      window.addEventListener('scroll', () => {
-        hero.style.opacity = String(Math.max(0, 1 - window.scrollY / (hero.offsetHeight * 0.55)));
-      }, { passive: true });
-    }
+    const onScroll = () => {
+      if (hero) hero.style.opacity = String(Math.max(0, 1 - window.scrollY / (hero.offsetHeight * 0.55)));
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
 
-    /* ══ 5. STATS — counter + pop ══ */
-    animate('.mem-stat-item', {
-      opacity: [0, 1], translateY: [28, 0], delay: stagger(130), duration: 800, ease: 'outExpo',
-      autoplay: onScroll({ enter: 'bottom-=5% center' }),
-    });
-    [
-      { sel: '.stat-members',  to: 500, suffix: '+' },
-      { sel: '.stat-partners', to: 50,  suffix: '+' },
-      { sel: '.stat-events',   to: 12,  suffix: '/año' },
-    ].forEach(({ sel, to, suffix }) => {
-      const el = document.querySelector<HTMLElement>(sel);
-      if (!el) return;
-      const obj = { val: 0 };
-      animate(obj, {
-        val: to, duration: 2600, ease: 'outExpo',
-        autoplay: onScroll({ enter: 'bottom-=5% center' }),
-        onUpdate: () => { el.textContent = Math.round(obj.val) + suffix; },
-        onComplete: () => { animate(el, { scale: [1, 1.14, 1], duration: 400, ease: 'outBack(2.5)' }); },
-      });
-    });
-
-    /* ══ 6. SECTION HEADS — scramble on enter ══ */
-    document.querySelectorAll<HTMLElement>('.mem-head-reveal').forEach(el => {
-      animate(el, {
-        opacity: [0, 1], translateY: [32, 0], duration: 900, ease: 'outExpo',
-        autoplay: onScroll({ enter: 'bottom-=8% center' }),
-        onComplete: () => {
-          const titleEl2 = el.querySelector<HTMLElement>('.mem-section-title');
-          if (titleEl2) {
-            animate(titleEl2, {
-              ...scrambleText({ text: titleEl2.textContent ?? '', duration: 1000, revealRate: 0.48, chars: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ·' }),
-            });
-          }
-        },
-      });
-    });
-
-    /* ══ 7. TIER CARDS — staggered spring entrance ══ */
-    animate('.mem-tier-card', {
-      opacity: [0, 1],
-      translateY: [90, 0],
-      scale: [0.85, 1],
-      delay: stagger(170),
-      duration: 1200,
-      ease: 'outExpo',
-      autoplay: onScroll({ enter: 'bottom-=5% center' }),
-      onComplete: () => {
-        document.querySelectorAll<HTMLElement>('.mem-tier-card').forEach((card, ci) => {
-          const items = card.querySelectorAll<HTMLElement>('.mem-benefit-item');
-          animate(items, {
-            opacity: [0, 1], translateX: [-18, 0],
-            delay: stagger(60, { start: ci * 80 }),
-            duration: 550, ease: 'outExpo',
-          });
-        });
-      },
-    });
-
-    /* ══ 8. GOLD CARD — rotating laser border ══ */
+    /* ══ 5. GOLD BORDER ROTATION (anime.js — guaranteed to work) ══ */
     const borderObj = { angle: 0 };
-    animate(borderObj, {
-      angle: 360, duration: 3200, loop: true, ease: 'linear',
+    const goldAnim = animate(borderObj, {
+      angle: 360,
+      duration: 3200,
+      loop: true,
+      ease: 'linear',
       onUpdate: () => {
         document.querySelectorAll<HTMLElement>('.mem-tier-card--gold').forEach(el => {
           el.style.setProperty('--border-angle', `${borderObj.angle}deg`);
@@ -450,19 +347,91 @@ export default function MembershipPage() {
       },
     });
 
-    // Pulsing glow
+    /* ══ 6. GOLD CARD GLOW PULSE ══ */
     document.querySelectorAll<HTMLElement>('.mem-tier-card--gold').forEach(card => {
       animate(card, {
         boxShadow: [
-          '0 0 35px rgba(212,175,55,0.18), 0 0 70px rgba(212,175,55,0.07)',
-          '0 0 65px rgba(212,175,55,0.60), 0 0 130px rgba(212,175,55,0.22)',
-          '0 0 35px rgba(212,175,55,0.18), 0 0 70px rgba(212,175,55,0.07)',
+          '0 0 30px rgba(212,175,55,0.15), 0 0 60px rgba(212,175,55,0.06)',
+          '0 0 60px rgba(212,175,55,0.55), 0 0 120px rgba(212,175,55,0.22)',
+          '0 0 30px rgba(212,175,55,0.15), 0 0 60px rgba(212,175,55,0.06)',
         ],
-        duration: 2600, loop: true, ease: 'inOutSine',
+        duration: 2500,
+        loop: true,
+        ease: 'inOutSine',
       });
     });
 
-    /* ══ 9. CARD 3D TILT + SPOTLIGHT ══ */
+    /* ══ 7. IntersectionObserver for ALL scroll reveals ══ */
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target as HTMLElement;
+        io.unobserve(el);
+
+        // Stats counters
+        if (el.classList.contains('mem-stat-item')) {
+          animate(el, { opacity: [0, 1], translateY: [28, 0], duration: 800, ease: 'outExpo' });
+          const numEl = el.querySelector<HTMLElement>('[data-count]');
+          if (numEl) {
+            const to  = Number(numEl.dataset.count);
+            const sfx = numEl.dataset.suffix ?? '';
+            const obj = { v: 0 };
+            animate(obj, {
+              v: to, duration: 2400, ease: 'outExpo',
+              onUpdate: () => { numEl.textContent = Math.round(obj.v) + sfx; },
+              onComplete: () => animate(numEl, { scale: [1, 1.12, 1], duration: 380, ease: 'outBack' }),
+            });
+          }
+          return;
+        }
+
+        // Section headings
+        if (el.classList.contains('mem-head-reveal')) {
+          animate(el, { opacity: [0, 1], translateY: [32, 0], duration: 900, ease: 'outExpo' });
+          return;
+        }
+
+        // Tier cards
+        if (el.classList.contains('mem-tier-card')) {
+          const cards = document.querySelectorAll<HTMLElement>('.mem-tier-card');
+          const idx = Array.from(cards).indexOf(el);
+          animate(el, {
+            opacity: [0, 1], translateY: [80, 0], scale: [0.88, 1],
+            duration: 1000, delay: idx * 160, ease: 'outExpo',
+            onComplete: () => {
+              const items = el.querySelectorAll<HTMLElement>('.mem-benefit-item');
+              animate(items, {
+                opacity: [0, 1], translateX: [-16, 0],
+                delay: stagger(55), duration: 500, ease: 'outExpo',
+              });
+            },
+          });
+          return;
+        }
+
+        // Event cards
+        if (el.classList.contains('mem-event-card')) {
+          const evCards = document.querySelectorAll<HTMLElement>('.mem-event-card');
+          const idx = Array.from(evCards).indexOf(el);
+          animate(el, { opacity: [0, 1], translateY: [40, 0], duration: 700, delay: idx * 80, ease: 'outExpo' });
+          return;
+        }
+
+        // Ally cards
+        if (el.classList.contains('mem-ally-card')) {
+          const allCards = document.querySelectorAll<HTMLElement>('.mem-ally-card');
+          const idx = Array.from(allCards).indexOf(el);
+          animate(el, { opacity: [0, 1], translateY: [36, 0], duration: 660, delay: idx * 60, ease: 'outExpo' });
+          return;
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll<HTMLElement>(
+      '.mem-stat-item, .mem-head-reveal, .mem-tier-card, .mem-event-card, .mem-ally-card'
+    ).forEach(el => io.observe(el));
+
+    /* ══ 8. CARD 3D TILT + SPOTLIGHT ══ */
     document.querySelectorAll<HTMLElement>('.mem-tier-card').forEach(card => {
       card.addEventListener('mousemove', (e: MouseEvent) => {
         const r = card.getBoundingClientRect();
@@ -473,14 +442,14 @@ export default function MembershipPage() {
         card.style.setProperty('--my', `${e.clientY - r.top}px`);
       });
       card.addEventListener('mouseleave', () => {
-        card.style.transition = 'transform 0.65s cubic-bezier(0.34,1.56,0.64,1)';
-        card.style.transform = 'perspective(900px) rotateY(0) rotateX(0) scale(1)';
+        card.style.transition = 'transform 0.6s cubic-bezier(0.34,1.56,0.64,1)';
+        card.style.transform  = 'perspective(900px) rotateY(0) rotateX(0) scale(1)';
         card.style.setProperty('--mx', '-9999px'); card.style.setProperty('--my', '-9999px');
-        setTimeout(() => { card.style.transition = ''; }, 660);
+        setTimeout(() => { card.style.transition = ''; }, 620);
       });
     });
 
-    /* ══ 10. PARTICLE BURST on card click ══ */
+    /* ══ 9. PARTICLE BURST ON CARD CLICK ══ */
     const burstColors = ['#CD7F32', '#A8A9AD', '#D4AF37'];
     document.querySelectorAll<HTMLElement>('.mem-tier-card').forEach((card, ci) => {
       const burst = card.querySelector<HTMLElement>('.mem-particle-burst');
@@ -488,15 +457,13 @@ export default function MembershipPage() {
       card.addEventListener('click', () => spawnBurst(burst, burstColors[ci] ?? '#D4AF37'));
     });
 
-    /* ══ 11. EVENTS + ALLIES reveals ══ */
-    animate('.mem-event-card', {
-      opacity: [0, 1], translateY: [42, 0], delay: stagger(80), duration: 720, ease: 'outExpo',
-      autoplay: onScroll({ enter: 'bottom-=10% center' }),
-    });
-    animate('.mem-ally-card', {
-      opacity: [0, 1], translateY: [36, 0], delay: stagger(60), duration: 660, ease: 'outExpo',
-      autoplay: onScroll({ enter: 'bottom-=10% center' }),
-    });
+    return () => {
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener('resize', () => {});
+      window.removeEventListener('scroll', onScroll);
+      goldAnim.pause();
+      io.disconnect();
+    };
   }, []);
 
   /* ── Render ─────────────────────────────────────── */
@@ -514,25 +481,23 @@ export default function MembershipPage() {
         <svg className="mem-hero-lines" viewBox="0 0 1440 900" preserveAspectRatio="none">
           <path className="mem-hero-path" d="M0 200 Q360 100 720 300 Q1080 500 1440 200" />
           <path className="mem-hero-path" d="M0 680 Q480 580 960 730 Q1200 800 1440 660" />
-          <path className="mem-hero-path" style={{ opacity: 0.5 }} d="M180 0 Q330 280 260 580 Q200 800 380 900" />
-          <path className="mem-hero-path" style={{ opacity: 0.5 }} d="M1260 0 Q1110 240 1170 540 Q1230 760 1060 900" />
+          <path className="mem-hero-path" style={{ opacity: 0.45 }} d="M180 0 Q330 280 260 580 Q200 800 380 900" />
+          <path className="mem-hero-path" style={{ opacity: 0.45 }} d="M1260 0 Q1110 240 1170 540 Q1230 760 1060 900" />
         </svg>
 
-        {/* Floating gem diamonds */}
-        {[
-          { top: '18%', left: '7%', size: 24, color: '#D4AF37', shape: 'hex' },
-          { top: '26%', right: '9%', size: 16, color: 'rgba(212,165,116,0.85)', shape: 'diamond' },
-          { bottom: '26%', left: '13%', size: 10, color: '#D4AF37', shape: 'diamond' },
-          { bottom: '32%', right: '15%', size: 18, color: 'rgba(212,165,116,0.7)', shape: 'hex' },
-        ].map((gem, i) => (
-          <div key={i} className="mem-gem" style={{ position: 'absolute', zIndex: 2, top: (gem as {top?:string}).top, bottom: (gem as {bottom?:string}).bottom, left: (gem as {left?:string}).left, right: (gem as {right?:string}).right }}>
-            <svg width={gem.size} height={gem.size} viewBox="0 0 24 24">
-              {gem.shape === 'hex'
-                ? <polygon points="12,2 22,8 22,16 12,22 2,16 2,8" fill={`${gem.color}18`} stroke={gem.color} strokeWidth="1.2" />
-                : <polygon points="12,2 22,12 12,22 2,12" fill={`${gem.color}18`} stroke={gem.color} strokeWidth="1.5" />}
-            </svg>
-          </div>
-        ))}
+        {/* Floating gems */}
+        <div className="mem-gem" style={{ top: '18%', left: '7%', '--gem-dur': '5.8s', '--gem-delay': '0s' } as React.CSSProperties}>
+          <svg width="24" height="24" viewBox="0 0 24 24"><polygon points="12,2 22,8 22,16 12,22 2,16 2,8" fill="rgba(212,175,55,0.12)" stroke="#D4AF37" strokeWidth="1.2"/></svg>
+        </div>
+        <div className="mem-gem" style={{ top: '26%', right: '9%', '--gem-dur': '7.2s', '--gem-delay': '-2.1s' } as React.CSSProperties}>
+          <svg width="16" height="16" viewBox="0 0 24 24"><polygon points="12,2 22,12 12,22 2,12" fill="rgba(212,165,116,0.12)" stroke="rgba(212,165,116,0.9)" strokeWidth="1.5"/></svg>
+        </div>
+        <div className="mem-gem" style={{ bottom: '26%', left: '13%', '--gem-dur': '4.5s', '--gem-delay': '-3.8s' } as React.CSSProperties}>
+          <svg width="10" height="10" viewBox="0 0 24 24"><polygon points="12,2 22,12 12,22 2,12" fill="rgba(212,175,55,0.15)" stroke="#D4AF37" strokeWidth="2"/></svg>
+        </div>
+        <div className="mem-gem" style={{ bottom: '32%', right: '15%', '--gem-dur': '6.5s', '--gem-delay': '-1.5s' } as React.CSSProperties}>
+          <svg width="18" height="18" viewBox="0 0 24 24"><polygon points="12,2 22,8 22,16 12,22 2,16 2,8" fill="none" stroke="rgba(212,165,116,0.7)" strokeWidth="1.2"/></svg>
+        </div>
 
         <div className="mem-hero-content">
           <p className="mem-hero-tag">{t('heroTag')}</p>
@@ -547,8 +512,7 @@ export default function MembershipPage() {
         </div>
 
         <div className="mem-wave-divider">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 70" preserveAspectRatio="none"
-            style={{ display: 'block', width: '100%', height: 70 }}>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 70" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 70 }}>
             <path d="M0,70 C360,15 1080,65 1440,25 L1440,70 Z" fill="#060300" />
           </svg>
         </div>
@@ -558,9 +522,7 @@ export default function MembershipPage() {
       <div className="mem-marquee" aria-hidden="true">
         <div className="mem-marquee-track">
           {[...MARQUEE_WORDS, ...MARQUEE_WORDS].map((word, i) => (
-            <span key={i} className="mem-marquee-item">
-              {word} <span className="mem-marquee-dot">◆</span>
-            </span>
+            <span key={i} className="mem-marquee-item">{word} <span className="mem-marquee-dot">◆</span></span>
           ))}
         </div>
       </div>
@@ -569,19 +531,19 @@ export default function MembershipPage() {
       <section className="mem-stats">
         <div className="mem-stats-inner">
           {[
-            { cls: 'stat-members',  label: 'Miembros activos',    init: '0+' },
-            { cls: 'stat-partners', label: 'Aliados exclusivos',   init: '0+' },
-            { cls: 'stat-events',   label: 'Eventos al año',       init: '0/año' },
+            { cls: 'stat-members',  label: 'Miembros activos',  count: 500, suffix: '+' },
+            { cls: 'stat-partners', label: 'Aliados exclusivos', count: 50,  suffix: '+' },
+            { cls: 'stat-events',   label: 'Eventos al año',     count: 12,  suffix: '/año' },
           ].map(s => (
             <div key={s.cls} className="mem-stat-item">
-              <span className={`mem-stat-number ${s.cls}`}>{s.init}</span>
+              <span className={`mem-stat-number ${s.cls}`} data-count={s.count} data-suffix={s.suffix}>0{s.suffix}</span>
               <span className="mem-stat-label">{s.label}</span>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ─── 4. Benefits (dark) ──────────────────────── */}
+      {/* ─── 4. Benefits ─────────────────────────────── */}
       <section id="benefits" className="mem-benefits">
         <div className="mem-benefits-glow" />
         <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 2 }}>
@@ -590,7 +552,6 @@ export default function MembershipPage() {
             <h2 className="mem-section-title">Desbloquea tus Beneficios</h2>
             <p className="mem-section-sub">Elige el nivel que mejor se adapta a ti y empieza a disfrutar del club.</p>
           </div>
-
           <div className="mem-tier-grid">
             {BENEFIT_TIERS.map(tier => (
               <button
@@ -600,9 +561,7 @@ export default function MembershipPage() {
               >
                 {tier.key === 'gold' && <div className="mem-popular-badge">Más Popular</div>}
                 <div className="mem-particle-burst" />
-                <div className="mem-tier-blob"
-                  style={{ background: `radial-gradient(circle, ${TIER_GLOW[tier.key]} 0%, transparent 70%)` }} />
-
+                <div className="mem-tier-blob" style={{ background: `radial-gradient(circle, ${TIER_GLOW[tier.key]} 0%, transparent 70%)` }} />
                 <div style={{ position: 'relative', zIndex: 2 }}>
                   <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.6rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', color: tier.color, margin: '0 0 0.4rem' }}>Membresía</p>
                   <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '1rem' }}>
@@ -613,9 +572,7 @@ export default function MembershipPage() {
                     </div>
                   </div>
                 </div>
-
                 <div className="mem-tier-divider" />
-
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.75rem', position: 'relative', zIndex: 2 }}>
                   {tier.benefits.map(({ icon: Icon, text }) => (
                     <div key={text} className="mem-benefit-item">
@@ -624,7 +581,6 @@ export default function MembershipPage() {
                     </div>
                   ))}
                 </div>
-
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', position: 'relative', zIndex: 2 }}>
                   <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', fontWeight: 700, color: tier.color }}>Ver opciones</span>
                   <ChevronRight size={14} color={tier.color} />
@@ -659,9 +615,9 @@ export default function MembershipPage() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(320px,1fr))', gap: '1.5rem' }}>
               {events.map(ev => {
                 const remaining = ev.capacity - ev.tickets_sold;
-                const soldOut = remaining <= 0;
-                const soldPct = Math.round((ev.tickets_sold / ev.capacity) * 100);
-                const tags = ev.tags ? ev.tags.split(',').map(s => s.trim()).filter(Boolean) : [];
+                const soldOut   = remaining <= 0;
+                const soldPct   = Math.round((ev.tickets_sold / ev.capacity) * 100);
+                const tags      = ev.tags ? ev.tags.split(',').map(s => s.trim()).filter(Boolean) : [];
                 return (
                   <article key={ev.id} className="mem-event-card" style={{ background: '#fff', border: '1px solid var(--makay-sand-cream)', borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ position: 'relative', height: 200, background: 'linear-gradient(135deg,var(--makay-sand-cream),var(--makay-peachy-rose))' }}>
@@ -682,7 +638,7 @@ export default function MembershipPage() {
                       </div>
                       <div>
                         <div style={{ height: 4, background: 'var(--makay-sand-cream)', borderRadius: 2, overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${Math.min(soldPct, 100)}%`, borderRadius: 2, background: soldPct >= 90 ? '#ef4444' : soldPct >= 60 ? '#f59e0b' : '#10b981' }} />
+                          <div style={{ height: '100%', width: `${Math.min(soldPct,100)}%`, borderRadius: 2, background: soldPct >= 90 ? '#ef4444' : soldPct >= 60 ? '#f59e0b' : '#10b981' }} />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.3rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', color: 'var(--makay-mauve)' }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Users size={10} />{ev.tickets_sold} {t('going')}</span>
