@@ -122,7 +122,19 @@ export async function POST(req: NextRequest) {
     items: allActive,
   };
 
+  const debugPaymentCounts = await sql`
+    SELECT
+      COUNT(*) AS total,
+      COUNT(*) FILTER (WHERE jsonb_typeof(payment_method::jsonb) = 'array') AS pm_array,
+      COUNT(*) FILTER (WHERE jsonb_typeof(payment_method::jsonb) = 'string') AS pm_string,
+      COUNT(*) FILTER (WHERE payment_method IS NULL) AS pm_null
+    FROM seller_orders
+    WHERE created_at BETWEEN ${date_start} AND ${date_end}
+      AND COALESCE(is_gift, FALSE) = FALSE
+  `.catch(e => [{ error: String(e) }]);
+
   return NextResponse.json({
+    debugPaymentCounts,
     revenue,
     estimatedExpenses,
     costPct,
