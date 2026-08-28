@@ -29,12 +29,15 @@ export async function POST(req: NextRequest) {
   const costPct = costSettingRow.length > 0 ? Number(costSettingRow[0].value) : 40;
   const estimatedExpenses = revenue * costPct / 100;
 
+  // items JSONB has a known field-name inconsistency across this codebase's
+  // writers — some rows use "qty", others "quantity" — accept both rather
+  // than picking one and silently returning zero rows for the other.
   const productsRaw = await sql`
     SELECT
       item->>'title' AS title,
       COALESCE(NULLIF(item->>'category', ''), 'Sin categoría') AS category,
-      SUM((item->>'qty')::numeric) AS units,
-      SUM((item->>'price')::numeric * (item->>'qty')::numeric) AS revenue
+      SUM(COALESCE((item->>'qty')::numeric, (item->>'quantity')::numeric, 0)) AS units,
+      SUM((item->>'price')::numeric * COALESCE((item->>'qty')::numeric, (item->>'quantity')::numeric, 0)) AS revenue
     FROM seller_orders, jsonb_array_elements(items::jsonb) AS item
     WHERE created_at BETWEEN ${date_start} AND ${date_end}
       AND COALESCE(is_gift, FALSE) = FALSE
