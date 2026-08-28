@@ -84,26 +84,37 @@ export async function POST(req: NextRequest) {
     })
   );
 
-  const paymentBreakdownRaw = await sql`
-    WITH parsed AS (
-      SELECT (
-        CASE WHEN jsonb_typeof(payment_method::jsonb) = 'string'
-          THEN (payment_method::jsonb #>> '{}')::jsonb
-          ELSE payment_method::jsonb
-        END
-      ) AS payment_method_parsed
-      FROM seller_orders
-      WHERE created_at BETWEEN ${date_start} AND ${date_end}
-        AND COALESCE(is_gift, FALSE) = FALSE
-    ),
-    valid AS (
-      SELECT payment_method_parsed FROM parsed WHERE jsonb_typeof(payment_method_parsed) = 'array'
-    )
-    SELECT pm->>'method' AS method, SUM((pm->>'amount')::numeric) AS amount, COUNT(*) AS count
-    FROM valid, jsonb_array_elements(valid.payment_method_parsed) AS pm
-    GROUP BY method
-    ORDER BY amount DESC
+  // payment_method has rows with genuinely malformed JSON text (the ::jsonb
+  // cast itself throws, not just a double-encoding issue like items had) —
+  // parsing in JS lets us skip individual bad rows instead of losing the
+  // whole result when one row is broken.
+  const rawPaymentRows = await sql`
+    SELECT payment_method
+    FROM seller_orders
+    WHERE created_at BETWEEN ${date_start} AND ${date_end}
+      AND COALESCE(is_gift, FALSE) = FALSE
+      AND payment_method IS NOT NULL
   `.catch(() => []);
+  const paymentTotals = new Map<string, { amount: number; count: number }>();
+  for (const row of rawPaymentRows as unknown as { payment_method: string }[]) {
+    try {
+      let parsed: unknown = JSON.parse(row.payment_method);
+      if (typeof parsed === 'string') parsed = JSON.parse(parsed); // unwrap double-encoding
+      if (!Array.isArray(parsed)) continue;
+      for (const pm of parsed as { method?: string; amount?: number }[]) {
+        const method = pm.method ?? 'otro';
+        const existing = paymentTotals.get(method) ?? { amount: 0, count: 0 };
+        existing.amount += Number(pm.amount ?? 0);
+        existing.count += 1;
+        paymentTotals.set(method, existing);
+      }
+    } catch {
+      continue; // skip malformed rows rather than aborting the whole aggregation
+    }
+  }
+  const paymentBreakdownRaw = Array.from(paymentTotals.entries())
+    .map(([method, { amount, count }]) => ({ method, amount, count }))
+    .sort((a, b) => b.amount - a.amount);
 
   const stockDetailRows = await sql`
     SELECT p.title, p.sku, COALESCE(ps.ps_qty, p.stock, 0)::int AS qty
@@ -122,19 +133,7 @@ export async function POST(req: NextRequest) {
     items: allActive,
   };
 
-  const debugPaymentCounts = await sql`
-    SELECT
-      COUNT(*) AS total,
-      COUNT(*) FILTER (WHERE jsonb_typeof(payment_method::jsonb) = 'array') AS pm_array,
-      COUNT(*) FILTER (WHERE jsonb_typeof(payment_method::jsonb) = 'string') AS pm_string,
-      COUNT(*) FILTER (WHERE payment_method IS NULL) AS pm_null
-    FROM seller_orders
-    WHERE created_at BETWEEN ${date_start} AND ${date_end}
-      AND COALESCE(is_gift, FALSE) = FALSE
-  `.catch(e => [{ error: String(e) }]);
-
   return NextResponse.json({
-    debugPaymentCounts,
     revenue,
     estimatedExpenses,
     costPct,
@@ -142,9 +141,7 @@ export async function POST(req: NextRequest) {
       title: r.title ?? '—', category: r.category, units: Number(r.units), revenue: Number(r.revenue),
     })),
     sellers,
-    paymentBreakdown: (paymentBreakdownRaw as unknown as { method: string; amount: number; count: number }[]).map(r => ({
-      method: r.method ?? 'otro', amount: Number(r.amount), count: Number(r.count),
-    })),
+    paymentBreakdown: paymentBreakdownRaw,
     stock,
   });
 }
