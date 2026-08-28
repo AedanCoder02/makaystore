@@ -53,7 +53,17 @@ export async function POST(req: NextRequest) {
     ) valid_orders, jsonb_array_elements(valid_orders.items::jsonb) AS item
     GROUP BY title, category
     ORDER BY revenue DESC
-  `.catch(() => []);
+  `.catch(e => { console.error('TEMP DEBUG productsRaw error:', e); return []; });
+
+  const debugCounts = await sql`
+    SELECT
+      COUNT(*) AS total,
+      COUNT(*) FILTER (WHERE jsonb_typeof(items::jsonb) = 'array') AS items_array,
+      COUNT(*) FILTER (WHERE items IS NULL) AS items_null
+    FROM seller_orders
+    WHERE created_at BETWEEN ${date_start} AND ${date_end}
+      AND COALESCE(is_gift, FALSE) = FALSE
+  `.catch(e => [{ error: String(e) }]);
 
   const sellersRaw = await sql`
     SELECT seller_id, SUM(subtotal::numeric) AS revenue
@@ -106,6 +116,7 @@ export async function POST(req: NextRequest) {
   };
 
   return NextResponse.json({
+    debugCounts,
     revenue,
     estimatedExpenses,
     costPct,
