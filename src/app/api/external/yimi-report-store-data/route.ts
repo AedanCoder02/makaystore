@@ -34,18 +34,23 @@ export async function POST(req: NextRequest) {
   // than picking one and silently returning zero rows for the other.
   // Some order types (memberships, reservations) store items as a JSON
   // scalar (e.g. literal null) rather than an array — jsonb_array_elements
-  // throws on those and aborts the whole query, so filter to only rows
-  // where items is actually a JSON array first.
+  // throws on those and aborts the whole query. A WHERE clause on the outer
+  // query can't protect the FROM-clause's jsonb_array_elements call (it
+  // still evaluates for every row before WHERE filters anything), so the
+  // array-type check has to happen in a subquery first.
   const productsRaw = await sql`
     SELECT
       item->>'title' AS title,
       COALESCE(NULLIF(item->>'category', ''), 'Sin categoría') AS category,
       SUM(COALESCE((item->>'qty')::numeric, (item->>'quantity')::numeric, 0)) AS units,
       SUM((item->>'price')::numeric * COALESCE((item->>'qty')::numeric, (item->>'quantity')::numeric, 0)) AS revenue
-    FROM seller_orders, jsonb_array_elements(items::jsonb) AS item
-    WHERE created_at BETWEEN ${date_start} AND ${date_end}
-      AND COALESCE(is_gift, FALSE) = FALSE
-      AND jsonb_typeof(items::jsonb) = 'array'
+    FROM (
+      SELECT items
+      FROM seller_orders
+      WHERE created_at BETWEEN ${date_start} AND ${date_end}
+        AND COALESCE(is_gift, FALSE) = FALSE
+        AND jsonb_typeof(items::jsonb) = 'array'
+    ) valid_orders, jsonb_array_elements(valid_orders.items::jsonb) AS item
     GROUP BY title, category
     ORDER BY revenue DESC
   `.catch(() => []);
@@ -72,10 +77,13 @@ export async function POST(req: NextRequest) {
 
   const paymentBreakdownRaw = await sql`
     SELECT pm->>'method' AS method, SUM((pm->>'amount')::numeric) AS amount, COUNT(*) AS count
-    FROM seller_orders, jsonb_array_elements(payment_method::jsonb) AS pm
-    WHERE created_at BETWEEN ${date_start} AND ${date_end}
-      AND COALESCE(is_gift, FALSE) = FALSE
-      AND jsonb_typeof(payment_method::jsonb) = 'array'
+    FROM (
+      SELECT payment_method
+      FROM seller_orders
+      WHERE created_at BETWEEN ${date_start} AND ${date_end}
+        AND COALESCE(is_gift, FALSE) = FALSE
+        AND jsonb_typeof(payment_method::jsonb) = 'array'
+    ) valid_orders, jsonb_array_elements(valid_orders.payment_method::jsonb) AS pm
     GROUP BY method
     ORDER BY amount DESC
   `.catch(() => []);
