@@ -91,10 +91,23 @@ export async function POST(req: NextRequest) {
     items: allActive,
   };
 
+  // TEMP diagnostic (2026-08-28): products/paymentBreakdown come back empty
+  // despite nonzero revenue — inspect raw items/payment_method to find out
+  // why. Remove once the real cause is confirmed and fixed.
+  const debugSample = await sql`
+    SELECT id, items, payment_method
+    FROM seller_orders
+    WHERE created_at BETWEEN ${date_start} AND ${date_end}
+      AND COALESCE(is_gift, FALSE) = FALSE
+    ORDER BY created_at DESC
+    LIMIT 5
+  `.catch(e => [{ error: String(e) }]);
+
   return NextResponse.json({
     revenue,
     estimatedExpenses,
     costPct,
+    debugSample,
     products: (productsRaw as unknown as { title: string; category: string; units: number; revenue: number }[]).map(r => ({
       title: r.title ?? '—', category: r.category, units: Number(r.units), revenue: Number(r.revenue),
     })),
