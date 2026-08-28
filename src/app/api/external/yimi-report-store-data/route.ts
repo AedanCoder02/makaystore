@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
   `;
   const revenue = Number(salesRow.revenue);
 
-  const costSettingRow = await sql`SELECT value FROM theme_settings WHERE key = 'cost_percentage'`.catch(() => []);
+  const costSettingRow = await sql`SELECT value FROM yimi_report_settings WHERE key = 'cost_percentage'`.catch(() => []);
   const costPct = costSettingRow.length > 0 ? Number(costSettingRow[0].value) : 40;
   const estimatedExpenses = revenue * costPct / 100;
 

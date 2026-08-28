@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
   }
 
   await sql`
-    CREATE TABLE IF NOT EXISTS theme_settings (
+    CREATE TABLE IF NOT EXISTS yimi_report_settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL,
       updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   `;
 
   const rows = await sql`
-    SELECT key, value FROM theme_settings
+    SELECT key, value FROM yimi_report_settings
     WHERE key IN ('yimi_vendedor_goal_daily', 'yimi_vendedor_goal_monthly', 'yimi_category_goals', 'yimi_monthly_prize')
   `;
 

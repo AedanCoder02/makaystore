@@ -4,7 +4,7 @@ import sql from '@/lib/db';
 
 async function ensureTable() {
   await sql`
-    CREATE TABLE IF NOT EXISTS theme_settings (
+    CREATE TABLE IF NOT EXISTS yimi_report_settings (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL,
       updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -18,7 +18,7 @@ export async function GET() {
 
   await ensureTable();
   const rows = await sql`
-    SELECT key, value FROM theme_settings
+    SELECT key, value FROM yimi_report_settings
     WHERE key IN ('yimi_vendedor_goal_daily', 'yimi_vendedor_goal_monthly', 'yimi_category_goals', 'yimi_monthly_prize')
   `;
   const map = new Map((rows as unknown as { key: string; value: string }[]).map(r => [r.key, r.value]));
@@ -68,7 +68,7 @@ export async function PATCH(req: Request) {
 
   for (const [key, value] of rows) {
     await sql`
-      INSERT INTO theme_settings (key, value, updated_at)
+      INSERT INTO yimi_report_settings (key, value, updated_at)
       VALUES (${key}, ${value}, NOW())
       ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
     `;
