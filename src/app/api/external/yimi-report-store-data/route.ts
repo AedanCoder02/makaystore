@@ -91,6 +91,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     revenue,
     estimatedExpenses,
+    costPct,
     products: (productsRaw as unknown as { title: string; category: string; units: number; revenue: number }[]).map(r => ({
       title: r.title ?? '—', category: r.category, units: Number(r.units), revenue: Number(r.revenue),
     })),
