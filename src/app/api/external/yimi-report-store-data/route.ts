@@ -29,41 +29,40 @@ export async function POST(req: NextRequest) {
   const costPct = costSettingRow.length > 0 ? Number(costSettingRow[0].value) : 40;
   const estimatedExpenses = revenue * costPct / 100;
 
-  // items JSONB has a known field-name inconsistency across this codebase's
-  // writers — some rows use "qty", others "quantity" — accept both rather
-  // than picking one and silently returning zero rows for the other.
-  // Some order types (memberships, reservations) store items as a JSON
-  // scalar (e.g. literal null) rather than an array — jsonb_array_elements
-  // throws on those and aborts the whole query. A WHERE clause on the outer
-  // query can't protect the FROM-clause's jsonb_array_elements call (it
-  // still evaluates for every row before WHERE filters anything), so the
-  // array-type check has to happen in a subquery first.
+  // items JSONB has two data-quality issues, confirmed 2026-08-28:
+  // (1) field-name inconsistency — some rows use "qty", others "quantity";
+  // (2) double-encoding — the column holds a JSON *string* containing the
+  // array as escaped text (jsonb_typeof = 'string'), not an actual jsonb
+  // array, for every row in this dataset. Unwrap once via #>>'{}' + a
+  // second ::jsonb cast when that's the case. A WHERE clause on the outer
+  // query can't protect a FROM-clause jsonb_array_elements call (it still
+  // evaluates for every row before WHERE filters anything), so bad/non-
+  // array rows must be discarded in an earlier CTE, not just filtered
+  // alongside the array expansion.
   const productsRaw = await sql`
+    WITH parsed AS (
+      SELECT (
+        CASE WHEN jsonb_typeof(items::jsonb) = 'string'
+          THEN (items::jsonb #>> '{}')::jsonb
+          ELSE items::jsonb
+        END
+      ) AS items_parsed
+      FROM seller_orders
+      WHERE created_at BETWEEN ${date_start} AND ${date_end}
+        AND COALESCE(is_gift, FALSE) = FALSE
+    ),
+    valid AS (
+      SELECT items_parsed FROM parsed WHERE jsonb_typeof(items_parsed) = 'array'
+    )
     SELECT
       item->>'title' AS title,
       COALESCE(NULLIF(item->>'category', ''), 'Sin categoría') AS category,
       SUM(COALESCE((item->>'qty')::numeric, (item->>'quantity')::numeric, 0)) AS units,
       SUM((item->>'price')::numeric * COALESCE((item->>'qty')::numeric, (item->>'quantity')::numeric, 0)) AS revenue
-    FROM (
-      SELECT items
-      FROM seller_orders
-      WHERE created_at BETWEEN ${date_start} AND ${date_end}
-        AND COALESCE(is_gift, FALSE) = FALSE
-        AND jsonb_typeof(items::jsonb) = 'array'
-    ) valid_orders, jsonb_array_elements(valid_orders.items::jsonb) AS item
+    FROM valid, jsonb_array_elements(valid.items_parsed) AS item
     GROUP BY title, category
     ORDER BY revenue DESC
-  `.catch(e => { console.error('TEMP DEBUG productsRaw error:', e); return []; });
-
-  const debugCounts = await sql`
-    SELECT
-      COUNT(*) AS total,
-      COUNT(*) FILTER (WHERE jsonb_typeof(items::jsonb) = 'array') AS items_array,
-      COUNT(*) FILTER (WHERE items IS NULL) AS items_null
-    FROM seller_orders
-    WHERE created_at BETWEEN ${date_start} AND ${date_end}
-      AND COALESCE(is_gift, FALSE) = FALSE
-  `.catch(e => [{ error: String(e) }]);
+  `.catch(() => []);
 
   const sellersRaw = await sql`
     SELECT seller_id, SUM(subtotal::numeric) AS revenue
@@ -86,14 +85,22 @@ export async function POST(req: NextRequest) {
   );
 
   const paymentBreakdownRaw = await sql`
-    SELECT pm->>'method' AS method, SUM((pm->>'amount')::numeric) AS amount, COUNT(*) AS count
-    FROM (
-      SELECT payment_method
+    WITH parsed AS (
+      SELECT (
+        CASE WHEN jsonb_typeof(payment_method::jsonb) = 'string'
+          THEN (payment_method::jsonb #>> '{}')::jsonb
+          ELSE payment_method::jsonb
+        END
+      ) AS payment_method_parsed
       FROM seller_orders
       WHERE created_at BETWEEN ${date_start} AND ${date_end}
         AND COALESCE(is_gift, FALSE) = FALSE
-        AND jsonb_typeof(payment_method::jsonb) = 'array'
-    ) valid_orders, jsonb_array_elements(valid_orders.payment_method::jsonb) AS pm
+    ),
+    valid AS (
+      SELECT payment_method_parsed FROM parsed WHERE jsonb_typeof(payment_method_parsed) = 'array'
+    )
+    SELECT pm->>'method' AS method, SUM((pm->>'amount')::numeric) AS amount, COUNT(*) AS count
+    FROM valid, jsonb_array_elements(valid.payment_method_parsed) AS pm
     GROUP BY method
     ORDER BY amount DESC
   `.catch(() => []);
@@ -116,7 +123,6 @@ export async function POST(req: NextRequest) {
   };
 
   return NextResponse.json({
-    debugCounts,
     revenue,
     estimatedExpenses,
     costPct,
