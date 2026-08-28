@@ -32,6 +32,7 @@ export async function POST(req: NextRequest) {
   // items JSONB has a known field-name inconsistency across this codebase's
   // writers — some rows use "qty", others "quantity" — accept both rather
   // than picking one and silently returning zero rows for the other.
+  let productsQueryError: string | null = null;
   const productsRaw = await sql`
     SELECT
       item->>'title' AS title,
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
       AND COALESCE(is_gift, FALSE) = FALSE
     GROUP BY title, category
     ORDER BY revenue DESC
-  `.catch(() => []);
+  `.catch(e => { productsQueryError = String(e); return []; });
 
   const sellersRaw = await sql`
     SELECT seller_id, SUM(subtotal::numeric) AS revenue
@@ -108,6 +109,7 @@ export async function POST(req: NextRequest) {
     estimatedExpenses,
     costPct,
     debugSample,
+    productsQueryError,
     products: (productsRaw as unknown as { title: string; category: string; units: number; revenue: number }[]).map(r => ({
       title: r.title ?? '—', category: r.category, units: Number(r.units), revenue: Number(r.revenue),
     })),
