@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, ShoppingBag, Users, BarChart2, Calendar, Crown, Handshake, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, BarChart2, Calendar, Crown, Handshake, Target, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
 
 const NAV = [
   { label: 'Panel',       href: '/admin/dashboard',  icon: LayoutDashboard },
   { label: 'Pedidos',     href: '/admin/orders',      icon: ShoppingBag },
   { label: 'Usuarios',    href: '/admin/users',       icon: Users },
   { label: 'Reportes',    href: '/admin/reports',     icon: BarChart2 },
+  { label: 'Metas Yimi',  href: '/admin/yimi-goals',  icon: Target },
   { label: 'Eventos',     href: '/admin/events',      icon: Calendar },
   { label: 'Membresías',  href: '/admin/memberships', icon: Crown },
   { label: 'Aliados',     href: '/admin/allies',      icon: Handshake },
