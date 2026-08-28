@@ -32,7 +32,10 @@ export async function POST(req: NextRequest) {
   // items JSONB has a known field-name inconsistency across this codebase's
   // writers — some rows use "qty", others "quantity" — accept both rather
   // than picking one and silently returning zero rows for the other.
-  let productsQueryError: string | null = null;
+  // Some order types (memberships, reservations) store items as a JSON
+  // scalar (e.g. literal null) rather than an array — jsonb_array_elements
+  // throws on those and aborts the whole query, so filter to only rows
+  // where items is actually a JSON array first.
   const productsRaw = await sql`
     SELECT
       item->>'title' AS title,
@@ -42,9 +45,10 @@ export async function POST(req: NextRequest) {
     FROM seller_orders, jsonb_array_elements(items::jsonb) AS item
     WHERE created_at BETWEEN ${date_start} AND ${date_end}
       AND COALESCE(is_gift, FALSE) = FALSE
+      AND jsonb_typeof(items::jsonb) = 'array'
     GROUP BY title, category
     ORDER BY revenue DESC
-  `.catch(e => { productsQueryError = String(e); return []; });
+  `.catch(() => []);
 
   const sellersRaw = await sql`
     SELECT seller_id, SUM(subtotal::numeric) AS revenue
@@ -71,6 +75,7 @@ export async function POST(req: NextRequest) {
     FROM seller_orders, jsonb_array_elements(payment_method::jsonb) AS pm
     WHERE created_at BETWEEN ${date_start} AND ${date_end}
       AND COALESCE(is_gift, FALSE) = FALSE
+      AND jsonb_typeof(payment_method::jsonb) = 'array'
     GROUP BY method
     ORDER BY amount DESC
   `.catch(() => []);
@@ -92,24 +97,10 @@ export async function POST(req: NextRequest) {
     items: allActive,
   };
 
-  // TEMP diagnostic (2026-08-28): products/paymentBreakdown come back empty
-  // despite nonzero revenue — inspect raw items/payment_method to find out
-  // why. Remove once the real cause is confirmed and fixed.
-  const debugSample = await sql`
-    SELECT id, items, payment_method
-    FROM seller_orders
-    WHERE created_at BETWEEN ${date_start} AND ${date_end}
-      AND COALESCE(is_gift, FALSE) = FALSE
-    ORDER BY created_at DESC
-    LIMIT 5
-  `.catch(e => [{ error: String(e) }]);
-
   return NextResponse.json({
     revenue,
     estimatedExpenses,
     costPct,
-    debugSample,
-    productsQueryError,
     products: (productsRaw as unknown as { title: string; category: string; units: number; revenue: number }[]).map(r => ({
       title: r.title ?? '—', category: r.category, units: Number(r.units), revenue: Number(r.revenue),
     })),
