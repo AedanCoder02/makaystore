@@ -158,14 +158,15 @@ export async function POST(req: NextRequest) {
   });
 
   const stockDetailRows = await sql`
-    SELECT p.title, p.sku, COALESCE(ps.ps_qty, p.stock, 0)::int AS qty
+    SELECT p.title, p.sku, COALESCE(ps.ps_qty, p.stock, 0)::int AS qty, p.price::numeric AS price
     FROM products p
     LEFT JOIN (SELECT product_id, SUM(quantity)::int AS ps_qty FROM product_stock GROUP BY product_id) ps
       ON ps.product_id = p.id
     WHERE p.status = 'active'
     ORDER BY qty ASC
   `.catch(() => []);
-  const allActive = stockDetailRows as unknown as { title: string; sku: string | null; qty: number }[];
+  const allActive = (stockDetailRows as unknown as { title: string; sku: string | null; qty: number; price: string }[])
+    .map(r => ({ title: r.title, sku: r.sku, qty: r.qty, price: Number(r.price) }));
   const stock = {
     total: allActive.length,
     inStock: allActive.filter(r => r.qty >= 10).length,
