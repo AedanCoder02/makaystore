@@ -73,6 +73,7 @@ export async function POST(req: NextRequest) {
     ORDER BY revenue DESC
   `.catch(() => []);
   const clerk = await clerkClient().catch(() => null);
+  const sellerNameById = new Map<string, string>();
   const sellers = await Promise.all(
     (sellersRaw as unknown as { seller_id: string; revenue: number }[]).map(async r => {
       let name = r.seller_id.slice(-8);
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest) {
         const user = clerk ? await clerk.users.getUser(r.seller_id) : null;
         if (user) name = `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.emailAddresses[0]?.emailAddress?.split('@')[0] || name;
       } catch { /* keep fallback name */ }
+      sellerNameById.set(r.seller_id, name);
       return { name, revenue: Number(r.revenue) };
     })
   );
@@ -116,6 +118,45 @@ export async function POST(req: NextRequest) {
     .map(([method, { amount, count }]) => ({ method, amount, count }))
     .sort((a, b) => b.amount - a.amount);
 
+  // Transaction-level detail (client, items, payment method, amount) for
+  // the new Detalle de Transacciones sheet. Reuses the same double-encoding
+  // + malformed-JSON tolerance as the aggregate queries above, parsed
+  // per-row in JS so one bad row doesn't drop the whole transaction.
+  const rawTransactionRows = await sql`
+    SELECT id, client_name, items, payment_method, subtotal, created_at, seller_id
+    FROM seller_orders
+    WHERE created_at BETWEEN ${date_start} AND ${date_end}
+      AND COALESCE(is_gift, FALSE) = FALSE
+    ORDER BY created_at DESC
+  `.catch(() => []);
+
+  function parseJsonArray(raw: string | null): Record<string, unknown>[] {
+    if (!raw) return [];
+    try {
+      let parsed: unknown = JSON.parse(raw);
+      if (typeof parsed === 'string') parsed = JSON.parse(parsed);
+      return Array.isArray(parsed) ? (parsed as Record<string, unknown>[]) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  const transactions = (rawTransactionRows as unknown as {
+    id: string; client_name: string | null; items: string | null; payment_method: string | null;
+    subtotal: string; created_at: string; seller_id: string;
+  }[]).map(r => {
+    const items = parseJsonArray(r.items);
+    const payments = parseJsonArray(r.payment_method);
+    return {
+      fecha: r.created_at,
+      cliente: r.client_name?.trim() || 'Cliente sin nombre',
+      empleado: sellerNameById.get(r.seller_id) ?? r.seller_id.slice(-8),
+      productos: items.map(i => `${i.title ?? '—'} x${i.qty ?? i.quantity ?? 1}`).join(', '),
+      metodoPago: payments.map(p => String(p.method ?? 'otro')).join(', '),
+      monto: Number(r.subtotal),
+    };
+  });
+
   const stockDetailRows = await sql`
     SELECT p.title, p.sku, COALESCE(ps.ps_qty, p.stock, 0)::int AS qty
     FROM products p
@@ -143,5 +184,6 @@ export async function POST(req: NextRequest) {
     sellers,
     paymentBreakdown: paymentBreakdownRaw,
     stock,
+    transactions,
   });
 }
