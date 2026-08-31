@@ -29,6 +29,18 @@ export async function POST(req: NextRequest) {
   const costPct = costSettingRow.length > 0 ? Number(costSettingRow[0].value) : 40;
   const estimatedExpenses = revenue * costPct / 100;
 
+  // Reservas revenue — booked separately from retail sales in its own
+  // `reservations` table (confirmed 2026-08-29), keyed on when the
+  // reservation was made (created_at), excluding cancellations.
+  const [reservationsRow] = await sql`
+    SELECT COALESCE(SUM(total_price::numeric), 0) AS revenue, COUNT(*) AS count
+    FROM reservations
+    WHERE created_at BETWEEN ${date_start} AND ${date_end}
+      AND status != 'cancelled'
+  `.catch(() => [{ revenue: 0, count: 0 }]);
+  const reservationsRevenue = Number(reservationsRow.revenue);
+  const reservationsCount = Number(reservationsRow.count);
+
   // items JSONB has two data-quality issues, confirmed 2026-08-28:
   // (1) field-name inconsistency — some rows use "qty", others "quantity";
   // (2) double-encoding — the column holds a JSON *string* containing the
@@ -179,6 +191,8 @@ export async function POST(req: NextRequest) {
     revenue,
     estimatedExpenses,
     costPct,
+    reservationsRevenue,
+    reservationsCount,
     products: (productsRaw as unknown as { title: string; category: string; units: number; revenue: number }[]).map(r => ({
       title: r.title ?? '—', category: r.category, units: Number(r.units), revenue: Number(r.revenue),
     })),
