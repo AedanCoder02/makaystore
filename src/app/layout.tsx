@@ -30,6 +30,7 @@ import "@/styles/footer.css";
 import "@/styles/profile.css";
 import "@/styles/member.css";
 import "@/styles/seller.css";
+import "@/styles/location-switcher.css";
 import "@/styles/theme-editor.css";
 
 const playfairDisplay = Playfair_Display({

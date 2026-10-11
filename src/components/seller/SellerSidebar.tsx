@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, Crown, CalendarCheck, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
+import LocationSwitcher from '../LocationSwitcher';
 
 export default function SellerSidebar() {
   const path = usePathname();
@@ -89,6 +90,7 @@ export default function SellerSidebar() {
           {!collapsed && <span className="seller-sidebar-role">{t('role')}</span>}
           {!collapsed && <span className="seller-sidebar-sub">{t('storeName')}</span>}
         </div>
+        <LocationSwitcher collapsed={collapsed} />
         <nav className="seller-sidebar-nav">
           {NAV.map(({ href, label, icon: Icon }) => (
             <Link

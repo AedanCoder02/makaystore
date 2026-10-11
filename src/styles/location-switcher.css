@@ -1,0 +1,33 @@
+.location-switcher {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  margin: 0 8px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.location-switcher-icon {
+  color: var(--makay-mauve, #a89080);
+  flex-shrink: 0;
+}
+
+.location-switcher-btn {
+  flex: 1;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: 5px 8px;
+  border-radius: 7px;
+  border: none;
+  background: transparent;
+  color: var(--makay-mauve, #a89080);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.location-switcher-btn.active {
+  background: var(--makay-warm-gold, #d4af37);
+  color: #2c2c2c;
+}

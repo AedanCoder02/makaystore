@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { LayoutDashboard, ShoppingBag, Users, BarChart2, Calendar, Crown, Handshake, Target, PanelLeftClose, PanelLeftOpen, Menu, X, Contact, Wallet } from 'lucide-react';
+import LocationSwitcher from './LocationSwitcher';
 
 const NAV = [
   { label: 'Panel',       href: '/admin/dashboard',  icon: LayoutDashboard },
@@ -73,6 +74,7 @@ export default function AdminSidebar() {
         <div className="sidebar-brand">
           {!collapsed && <span className="sidebar-brand-name">Makay Admin</span>}
         </div>
+        <LocationSwitcher collapsed={collapsed} />
         <nav className="sidebar-nav" aria-label="Admin navigation">
           {NAV.map(({ href, label, icon: Icon }) => (
             <Link

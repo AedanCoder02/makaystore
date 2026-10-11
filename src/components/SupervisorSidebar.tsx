@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { LayoutDashboard, Users, ShoppingBag, Clock, FileBarChart2, ChevronLeft, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
+import LocationSwitcher from './LocationSwitcher';
 
 const NAV = [
   { href: '/supervisor/dashboard', label: 'Overview',  icon: LayoutDashboard },
@@ -64,6 +65,7 @@ export default function SupervisorSidebar() {
           {!collapsed && <span className="sup-sidebar-role">Supervisor</span>}
           {!collapsed && <span className="sup-sidebar-sub">MAKAY STORE</span>}
         </div>
+        <LocationSwitcher collapsed={collapsed} />
         <nav className="sup-sidebar-nav">
           {NAV.map(({ href, label, icon: Icon }) => (
             <Link
