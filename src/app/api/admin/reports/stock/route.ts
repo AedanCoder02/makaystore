@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
-import { getPanelLocation } from '@/lib/location';
+import { getPanelLocation } from '@/lib/location.server';
 
 export async function GET() {
   const { userId } = await auth();

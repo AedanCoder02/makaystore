@@ -6,7 +6,7 @@
 jest.mock('@clerk/nextjs/server', () => ({ auth: jest.fn() }));
 const mockSql: any = jest.fn(() => ({ catch: () => Promise.resolve([]) }));
 jest.mock('@/lib/db', () => ({ __esModule: true, default: mockSql }));
-jest.mock('@/lib/location', () => ({
+jest.mock('@/lib/location.server', () => ({
   getPanelLocation: jest.fn(() => Promise.resolve('la_marina')),
 }));
 

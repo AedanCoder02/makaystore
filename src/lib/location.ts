@@ -1,5 +1,3 @@
-import { cookies } from 'next/headers';
-
 export type StoreLocation = 'guacuco' | 'la_marina';
 
 export const LOCATIONS: StoreLocation[] = ['guacuco', 'la_marina'];
@@ -19,10 +17,3 @@ export const STORE_LOCATION: StoreLocation = isStoreLocation(process.env.STORE_L
 
 /** Backoffice-only: cookie name staff use to switch which location's data they're viewing. */
 export const PANEL_LOCATION_COOKIE = 'panel_location';
-
-/** Backoffice-only: which location the current admin/seller/supervisor session is viewing. */
-export async function getPanelLocation(): Promise<StoreLocation> {
-  const store = await cookies();
-  const value = store.get(PANEL_LOCATION_COOKIE)?.value;
-  return isStoreLocation(value) ? value : 'guacuco';
-}

@@ -66,19 +66,19 @@ describe('getPanelLocation', () => {
 
   it('defaults to guacuco when no cookie is set', async () => {
     (cookies as jest.Mock).mockResolvedValue({ get: () => undefined });
-    const { getPanelLocation } = await import('@/lib/location');
+    const { getPanelLocation } = await import('@/lib/location.server');
     expect(await getPanelLocation()).toBe('guacuco');
   });
 
   it('returns la_marina when the cookie is set to la_marina', async () => {
     (cookies as jest.Mock).mockResolvedValue({ get: () => ({ value: 'la_marina' }) });
-    const { getPanelLocation } = await import('@/lib/location');
+    const { getPanelLocation } = await import('@/lib/location.server');
     expect(await getPanelLocation()).toBe('la_marina');
   });
 
   it('falls back to guacuco when the cookie value is invalid', async () => {
     (cookies as jest.Mock).mockResolvedValue({ get: () => ({ value: 'drop-table' }) });
-    const { getPanelLocation } = await import('@/lib/location');
+    const { getPanelLocation } = await import('@/lib/location.server');
     expect(await getPanelLocation()).toBe('guacuco');
   });
 });
