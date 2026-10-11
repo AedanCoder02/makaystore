@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location';
 
 const DEFAULT_TARGETS: Record<string, number> = { daily_target: 357.14, weekly_target: 2500, monthly_target: 10000 };
 
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const location = await getPanelLocation();
 
   try {
     await sql`
@@ -19,9 +22,9 @@ export async function GET() {
 
     const [targetRows, dailyActualRow, weeklyActualRow, monthlyActualRow] = await Promise.all([
       sql`SELECT key, value FROM theme_settings WHERE key IN ('daily_target', 'weekly_target', 'monthly_target')`,
-      sql`SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual FROM seller_orders WHERE created_at >= CURRENT_DATE`,
-      sql`SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual FROM seller_orders WHERE created_at >= date_trunc('week', NOW())`,
-      sql`SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual FROM seller_orders WHERE created_at >= date_trunc('month', NOW())`,
+      sql`SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual FROM seller_orders WHERE created_at >= CURRENT_DATE AND location = ${location}`,
+      sql`SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual FROM seller_orders WHERE created_at >= date_trunc('week', NOW()) AND location = ${location}`,
+      sql`SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual FROM seller_orders WHERE created_at >= date_trunc('month', NOW()) AND location = ${location}`,
     ]);
 
     const targetMap: Record<string, number> = { ...DEFAULT_TARGETS };
@@ -46,7 +49,7 @@ export async function GET() {
         CEIL(EXTRACT(DAY FROM created_at) / 7.0) AS week,
         SUM(subtotal::numeric) AS actual
       FROM seller_orders
-      WHERE created_at >= date_trunc('month', NOW())
+      WHERE created_at >= date_trunc('month', NOW()) AND location = ${location}
       GROUP BY week
       ORDER BY week ASC
     `;

@@ -1,10 +1,13 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location';
 
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const location = await getPanelLocation();
 
   const rows = await sql`
     SELECT
@@ -14,7 +17,7 @@ export async function GET() {
       COALESCE(SUM(ps.quantity), p.stock, 0)::int AS qty
     FROM products p
     LEFT JOIN product_stock ps ON ps.product_id = p.id
-    WHERE p.status = 'active'
+    WHERE p.status = 'active' AND p.location = ${location}
     GROUP BY p.id, p.title, p.sku, p.stock
     ORDER BY qty DESC
   `.catch(() => []);

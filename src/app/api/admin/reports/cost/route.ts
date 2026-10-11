@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location';
 
 function rangeExpr(range: string) {
   switch (range) {
@@ -15,6 +16,7 @@ export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const location = await getPanelLocation();
   const range  = req.nextUrl.searchParams.get('range') ?? '30d';
   const cutoff = rangeExpr(range);
 
@@ -31,13 +33,13 @@ export async function GET(req: NextRequest) {
       sql`
         SELECT COALESCE(SUM(subtotal::numeric), 0) AS revenue
         FROM seller_orders
-        WHERE created_at >= ${cutoff}
+        WHERE created_at >= ${cutoff} AND location = ${location}
       `.catch(() => [{ revenue: 0 }]),
 
       sql`
         SELECT COALESCE(SUM(total::numeric), 0) AS revenue
         FROM orders
-        WHERE created_at >= ${cutoff}
+        WHERE created_at >= ${cutoff} AND location = ${location}
       `.catch(() => [{ revenue: 0 }]),
 
       sql`SELECT value FROM theme_settings WHERE key = 'cost_percentage'`.catch(() => []),
@@ -47,7 +49,7 @@ export async function GET(req: NextRequest) {
           DATE_TRUNC('day', created_at) AS bucket,
           SUM(subtotal::numeric) AS revenue
         FROM seller_orders
-        WHERE created_at >= ${cutoff}
+        WHERE created_at >= ${cutoff} AND location = ${location}
         GROUP BY DATE_TRUNC('day', created_at)
         ORDER BY bucket ASC
       `.catch(() => []),

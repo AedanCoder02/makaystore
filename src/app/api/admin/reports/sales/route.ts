@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location';
 
 function rangeExpr(range: string) {
   switch (range) {
@@ -20,6 +21,7 @@ export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const location = await getPanelLocation();
   const range  = req.nextUrl.searchParams.get('range') ?? '30d';
   const cutoff = rangeExpr(range);
   const bucket = groupBy(range);
@@ -32,7 +34,7 @@ export async function GET(req: NextRequest) {
         SUM(subtotal::numeric) AS revenue,
         COUNT(*) AS orders
       FROM seller_orders
-      WHERE created_at >= ${cutoff}
+      WHERE created_at >= ${cutoff} AND location = ${location}
       GROUP BY DATE_TRUNC(${trunc}, created_at)
       ORDER BY bucket ASC
     `.catch(() => []),
@@ -43,7 +45,7 @@ export async function GET(req: NextRequest) {
         SUM(total::numeric) AS revenue,
         COUNT(*) AS orders
       FROM orders
-      WHERE created_at >= ${cutoff}
+      WHERE created_at >= ${cutoff} AND location = ${location}
       GROUP BY DATE_TRUNC(${trunc}, created_at)
       ORDER BY bucket ASC
     `.catch(() => []),
@@ -56,11 +58,12 @@ export async function GET(req: NextRequest) {
         COALESCE(o.avg_v, 0)                     AS avg_storefront
       FROM
         (SELECT SUM(subtotal::numeric) AS rev, COUNT(*) AS cnt, AVG(subtotal::numeric) AS avg_v
-         FROM seller_orders WHERE created_at >= ${cutoff}) s,
+         FROM seller_orders WHERE created_at >= ${cutoff} AND location = ${location}) s,
         (SELECT SUM(total::numeric) AS rev, COUNT(*) AS cnt, AVG(total::numeric) AS avg_v
-         FROM orders WHERE created_at >= ${cutoff}) o
+         FROM orders WHERE created_at >= ${cutoff} AND location = ${location}) o
     `.catch(() => [{ total_revenue: 0, total_orders: 0, avg_seller: 0, avg_storefront: 0 }]),
 
+    // Events/tickets are out of scope for location-splitting (see Global Constraints) — unfiltered.
     sql`
       SELECT COALESCE(SUM(total_paid::numeric), 0) AS membership_rev
       FROM event_tickets
@@ -76,7 +79,7 @@ export async function GET(req: NextRequest) {
         jsonb_array_elements(
           CASE WHEN jsonb_typeof(items::jsonb) = 'array' THEN items::jsonb ELSE '[]'::jsonb END
         ) AS p_items
-      WHERE created_at >= ${cutoff}
+      WHERE created_at >= ${cutoff} AND location = ${location}
       GROUP BY p_items->>'title'
       ORDER BY revenue DESC
       LIMIT 5
