@@ -1,11 +1,13 @@
 import sql from '@/lib/db';
 import SellerSell from '@/components/seller/SellerSell';
+import { getPanelLocation } from '@/lib/location.server';
 
 export const metadata = { title: 'Sell — Seller' };
 
 export default async function SellerSellPage() {
+  const location = await getPanelLocation();
   const [dbProducts, overrides] = await Promise.all([
-    sql`SELECT * FROM products WHERE status = 'active' ORDER BY id`,
+    sql`SELECT * FROM products WHERE status = 'active' AND location = ${location} ORDER BY id`,
     sql`SELECT * FROM product_overrides`,
   ]);
   const overrideMap = Object.fromEntries(overrides.map((o: any) => [o.product_id, o]));

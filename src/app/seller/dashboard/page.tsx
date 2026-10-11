@@ -1,11 +1,13 @@
 import { auth } from '@clerk/nextjs/server';
 import sql from '@/lib/db';
 import SellerDashboard from '@/components/seller/SellerDashboard';
+import { getPanelLocation } from '@/lib/location.server';
 
 export const metadata = { title: 'Seller Dashboard — Makay' };
 
 export default async function SellerDashboardPage() {
   const { userId } = await auth();
+  const location = await getPanelLocation();
 
   // Ensure per-user commission override table exists
   await sql`
@@ -17,14 +19,14 @@ export default async function SellerDashboardPage() {
   `.catch(() => {});
 
   const [ordersResult, globalPctRows, overrideRows, lowStockRows] = await Promise.all([
-    sql`SELECT * FROM seller_orders WHERE seller_id = ${userId!} ORDER BY created_at DESC LIMIT 10`,
+    sql`SELECT * FROM seller_orders WHERE seller_id = ${userId!} AND location = ${location} ORDER BY created_at DESC LIMIT 10`,
     sql`SELECT value FROM theme_settings WHERE key = 'seller_commission_pct'`.catch(() => []),
     sql`SELECT pct FROM seller_commission_overrides WHERE seller_id = ${userId!}`.catch(() => []),
     sql`
       SELECT p.id, p.title, COALESCE(ps.quantity, p.stock) AS quantity
       FROM products p
       LEFT JOIN product_stock ps ON ps.product_id = p.id
-      WHERE p.status = 'active' AND COALESCE(ps.quantity, p.stock) < 10
+      WHERE p.status = 'active' AND p.location = ${location} AND COALESCE(ps.quantity, p.stock) < 10
       ORDER BY COALESCE(ps.quantity, p.stock) ASC
       LIMIT 8
     `.catch(() => []),
