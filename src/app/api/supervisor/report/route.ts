@@ -1,6 +1,7 @@
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location.server';
 
 function getCutoff(range: string): Date {
   const d = new Date();
@@ -17,12 +18,13 @@ export async function GET(req: NextRequest) {
 
   const range  = req.nextUrl.searchParams.get('range') ?? '30d';
   const cutoff = getCutoff(range);
+  const location = await getPanelLocation();
 
   try {
     const [ordersRaw, goalRows, costRows, monthlySums, allProducts] = await Promise.all([
       sql`
         SELECT * FROM seller_orders
-        WHERE created_at >= ${cutoff}
+        WHERE created_at >= ${cutoff} AND location = ${location}
         ORDER BY created_at DESC
         LIMIT 500
       `,
@@ -31,12 +33,12 @@ export async function GET(req: NextRequest) {
       sql`
         SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual
         FROM seller_orders
-        WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE)
+        WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) AND location = ${location}
       `.catch(() => [{ actual: 0 }]),
       sql`
         SELECT id::text, title, sku, price::float
         FROM products
-        WHERE status != 'archived'
+        WHERE status != 'archived' AND location = ${location}
         ORDER BY title ASC
       `.catch(() => []),
     ]);

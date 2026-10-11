@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location.server';
 
 // Ensure last_rotated_at column exists
 async function ensureColumn() {
@@ -9,12 +10,13 @@ async function ensureColumn() {
 export async function GET() {
   try {
     await ensureColumn();
+    const location = await getPanelLocation();
     const [rows, salesRows] = await Promise.all([
-      sql`SELECT id, title, sku, status, last_rotated_at FROM products ORDER BY id ASC`,
+      sql`SELECT id, title, sku, status, last_rotated_at FROM products WHERE location = ${location} ORDER BY id ASC`,
       sql`
         SELECT (item->>'id') AS product_id, SUM((item->>'quantity')::int) AS units_sold
         FROM seller_orders, jsonb_array_elements(items::jsonb) AS item
-        WHERE created_at >= NOW() - INTERVAL '30 days'
+        WHERE created_at >= NOW() - INTERVAL '30 days' AND location = ${location}
         GROUP BY item->>'id'
       `.catch(() => []),
     ]);

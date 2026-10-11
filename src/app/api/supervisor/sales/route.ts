@@ -1,15 +1,18 @@
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location.server';
 
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const location = await getPanelLocation();
+
   const rows = await sql`
     SELECT seller_id, COUNT(*) AS order_count, SUM(subtotal::numeric) AS revenue
     FROM seller_orders
-    WHERE created_at::date = CURRENT_DATE
+    WHERE created_at::date = CURRENT_DATE AND location = ${location}
     GROUP BY seller_id
   `.catch(() => []);
 

@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location.server';
 
 function getCutoff(range: string): Date {
   const d = new Date();
@@ -17,6 +18,7 @@ export async function GET(req: NextRequest) {
 
   const range  = req.nextUrl.searchParams.get('range') ?? '30d';
   const cutoff = getCutoff(range);
+  const location = await getPanelLocation();
 
   try {
     const [stockRows, soldRows] = await Promise.all([
@@ -29,7 +31,7 @@ export async function GET(req: NextRequest) {
           p.status
         FROM products p
         LEFT JOIN product_stock ps ON ps.product_id = p.id
-        WHERE p.status != 'archived'
+        WHERE p.status != 'archived' AND p.location = ${location}
         GROUP BY p.id, p.title, p.sku, p.stock, p.status
         ORDER BY qty ASC
       `,
@@ -39,7 +41,7 @@ export async function GET(req: NextRequest) {
           SUM(COALESCE((item->>'quantity')::int, (item->>'qty')::int, 1))::int AS units_sold
         FROM seller_orders,
              jsonb_array_elements(items::jsonb) AS item
-        WHERE created_at >= ${cutoff}
+        WHERE created_at >= ${cutoff} AND location = ${location}
         GROUP BY item->>'title'
       `.catch(() => []),
     ]);

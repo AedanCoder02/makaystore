@@ -1,14 +1,17 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location.server';
 
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const location = await getPanelLocation();
+
   const [productCount, orderCount, activityCount] = await Promise.all([
-    sql`SELECT COUNT(*) AS count FROM products WHERE status = 'active'`.catch(() => [{ count: 0 }]),
-    sql`SELECT COUNT(*) AS count FROM seller_orders WHERE created_at >= date_trunc('month', NOW())`.catch(() => [{ count: 0 }]),
+    sql`SELECT COUNT(*) AS count FROM products WHERE status = 'active' AND location = ${location}`.catch(() => [{ count: 0 }]),
+    sql`SELECT COUNT(*) AS count FROM seller_orders WHERE created_at >= date_trunc('month', NOW()) AND location = ${location}`.catch(() => [{ count: 0 }]),
     sql`SELECT COUNT(DISTINCT seller_id) AS count FROM activities WHERE type = 'clock-in' AND created_at::date = CURRENT_DATE`.catch(() => [{ count: 0 }]),
   ]);
 
