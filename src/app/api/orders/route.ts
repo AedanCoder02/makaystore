@@ -2,6 +2,7 @@ import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
 import { sendMembershipWelcomeEmail, sendMembershipContractEmail } from '@/lib/email';
+import { STORE_LOCATION } from '@/lib/location';
 
 async function ensureTable() {
   await sql`
@@ -17,6 +18,7 @@ async function ensureTable() {
       shipping_method  TEXT DEFAULT 'standard',
       payment_id    TEXT,
       status        TEXT DEFAULT 'pending',
+      location      TEXT NOT NULL DEFAULT 'guacuco',
       created_at    TIMESTAMPTZ DEFAULT NOW(),
       updated_at    TIMESTAMPTZ DEFAULT NOW()
     )
@@ -32,7 +34,7 @@ export async function GET() {
 
   const rows = await sql`
     SELECT * FROM orders
-    WHERE customer_id = ${userId}
+    WHERE customer_id = ${userId} AND location = ${STORE_LOCATION}
     ORDER BY created_at DESC
   `;
   return NextResponse.json(rows);
@@ -82,12 +84,12 @@ export async function POST(req: NextRequest) {
   const row = await sql`
     INSERT INTO orders
       (id, customer_id, customer_email, items, subtotal, shipping_cost, total,
-       shipping_address, shipping_method, payment_id, payment_methods, status)
+       shipping_address, shipping_method, payment_id, payment_methods, status, location)
     VALUES
       (${id}, ${userId ?? null}, ${customer_email ?? null},
        ${JSON.stringify(items)}, ${subtotal ?? 0}, ${shipping_cost ?? 0}, ${total},
        ${JSON.stringify(shipping_address ?? {})}, ${shipping_method ?? 'standard'},
-       ${payment_id ?? null}, ${JSON.stringify(payment_methods ?? [])}, 'pending')
+       ${payment_id ?? null}, ${JSON.stringify(payment_methods ?? [])}, 'pending', ${STORE_LOCATION})
     RETURNING *
   `;
 

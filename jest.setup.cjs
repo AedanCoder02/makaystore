@@ -1,37 +1,40 @@
 require('@testing-library/jest-dom');
 
 // ─── Global mocks ───────────────────────────────────────────────────────────
+// Guarded: API route tests run under testEnvironment 'node' (no window/jsdom).
 
-// localStorage mock
-const localStorageMock = (() => {
-  let store = {};
-  return {
-    getItem: (key) => store[key] ?? null,
-    setItem: (key, value) => { store[key] = String(value); },
-    removeItem: (key) => { delete store[key]; },
-    clear: () => { store = {}; },
-  };
-})();
+if (typeof window !== 'undefined') {
+  // localStorage mock
+  const localStorageMock = (() => {
+    let store = {};
+    return {
+      getItem: (key) => store[key] ?? null,
+      setItem: (key, value) => { store[key] = String(value); },
+      removeItem: (key) => { delete store[key]; },
+      clear: () => { store = {}; },
+    };
+  })();
 
-Object.defineProperty(window, 'localStorage', { value: localStorageMock });
+  Object.defineProperty(window, 'localStorage', { value: localStorageMock });
 
-// matchMedia mock
-Object.defineProperty(window, 'matchMedia', {
-  writable: true,
-  value: jest.fn().mockImplementation((query) => ({
-    matches: false,
-    media: query,
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  })),
-});
+  // matchMedia mock
+  Object.defineProperty(window, 'matchMedia', {
+    writable: true,
+    value: jest.fn().mockImplementation((query) => ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    })),
+  });
 
-// scrollY mock
-Object.defineProperty(window, 'scrollY', { value: 0, writable: true });
+  // scrollY mock
+  Object.defineProperty(window, 'scrollY', { value: 0, writable: true });
+}
 
 // IntersectionObserver mock
 global.IntersectionObserver = class IntersectionObserver {
@@ -69,6 +72,6 @@ afterAll(() => {
 
 // Clear localStorage between tests
 beforeEach(() => {
-  localStorage.clear();
+  if (typeof localStorage !== 'undefined') localStorage.clear();
   jest.clearAllMocks();
 });
