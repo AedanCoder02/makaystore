@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location';
 
 async function ensureColumns() {
   await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS sizes TEXT[] DEFAULT '{}'`;
@@ -14,11 +15,13 @@ export async function GET() {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await ensureColumns();
+  const location = await getPanelLocation();
 
   const rows = await sql`
     SELECT id, title, description, price, image, sku, stock, category, status,
            sizes, colors, variants, provider, markup_percent, markup_amount, created_at, updated_at
     FROM products
+    WHERE location = ${location}
     ORDER BY provider ASC, title ASC
   `;
   return NextResponse.json(rows);
@@ -30,6 +33,7 @@ export async function POST(req: NextRequest) {
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await ensureColumns();
+  const location = await getPanelLocation();
 
   const body = await req.json();
   const { title, price, description, image, sku, stock, category, status, sizes, colors, provider, markup_percent, markup_amount } = body;
@@ -40,7 +44,7 @@ export async function POST(req: NextRequest) {
 
   const id = `custom-${Date.now()}`;
   const row = await sql`
-    INSERT INTO products (id, title, description, price, image, sku, stock, category, status, sizes, colors, variants, provider, markup_percent, markup_amount)
+    INSERT INTO products (id, title, description, price, image, sku, stock, category, status, sizes, colors, variants, provider, markup_percent, markup_amount, location)
     VALUES (
       ${id},
       ${title},
@@ -56,7 +60,8 @@ export async function POST(req: NextRequest) {
       '[]',
       ${provider ?? ''},
       ${markup_percent ?? false},
-      ${Number(markup_amount ?? 0)}
+      ${Number(markup_amount ?? 0)},
+      ${location}
     )
     RETURNING *
   `;

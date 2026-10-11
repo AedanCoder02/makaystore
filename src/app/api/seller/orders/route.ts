@@ -1,6 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location';
 
 interface PaymentEntry {
   method: string;
@@ -14,8 +15,9 @@ export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const location = await getPanelLocation();
   const rows = await sql`
-    SELECT * FROM seller_orders WHERE seller_id = ${userId} ORDER BY created_at DESC LIMIT 50
+    SELECT * FROM seller_orders WHERE seller_id = ${userId} AND location = ${location} ORDER BY created_at DESC LIMIT 50
   `;
   return NextResponse.json(rows);
 }
@@ -24,6 +26,7 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const location = await getPanelLocation();
   const { client_id, client_name, client_email, items, subtotal, payment_methods, notes, is_gift } = await req.json();
 
   if (!client_id || !items?.length) {
@@ -33,7 +36,7 @@ export async function POST(req: NextRequest) {
   // Gift orders: skip payment validation, record at $0
   if (is_gift) {
     const row = await sql`
-      INSERT INTO seller_orders (seller_id, client_id, client_name, client_email, items, subtotal, payment_method, notes, is_gift)
+      INSERT INTO seller_orders (seller_id, client_id, client_name, client_email, items, subtotal, payment_method, notes, is_gift, location)
       VALUES (
         ${userId},
         ${client_id},
@@ -43,7 +46,8 @@ export async function POST(req: NextRequest) {
         0,
         ${'[]'},
         ${notes ?? ''},
-        TRUE
+        TRUE,
+        ${location}
       )
       RETURNING *
     `;
@@ -94,7 +98,7 @@ export async function POST(req: NextRequest) {
   let row;
   try {
     row = await sql`
-      INSERT INTO seller_orders (seller_id, client_id, client_name, client_email, items, subtotal, payment_method, notes, is_gift)
+      INSERT INTO seller_orders (seller_id, client_id, client_name, client_email, items, subtotal, payment_method, notes, is_gift, location)
       VALUES (
         ${userId},
         ${client_id},
@@ -104,7 +108,8 @@ export async function POST(req: NextRequest) {
         ${subtotal},
         ${JSON.stringify(payments)},
         ${notes ?? ''},
-        FALSE
+        FALSE,
+        ${location}
       )
       RETURNING *
     `;

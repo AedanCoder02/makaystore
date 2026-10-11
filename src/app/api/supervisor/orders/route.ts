@@ -1,11 +1,13 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location';
 
 export async function GET(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const location = await getPanelLocation();
   const { searchParams } = new URL(req.url);
   const method   = searchParams.get('method');
   const from     = searchParams.get('from');
@@ -14,11 +16,12 @@ export async function GET(req: NextRequest) {
 
   try {
     const [sellerRaw, storefrontRaw] = await Promise.all([
-      sql`SELECT * FROM seller_orders ORDER BY created_at DESC LIMIT 500`,
+      sql`SELECT * FROM seller_orders WHERE location = ${location} ORDER BY created_at DESC LIMIT 500`,
       sql`
         SELECT id, customer_id, customer_email, total AS subtotal, shipping_cost,
                items, status, shipping_method, payment_methods, created_at
         FROM orders
+        WHERE location = ${location}
         ORDER BY created_at DESC LIMIT 500
       `.catch(() => []),
     ]);
