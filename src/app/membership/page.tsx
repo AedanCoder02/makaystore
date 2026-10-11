@@ -44,7 +44,7 @@ const TIER_KEY: Record<string, string> = {
 const BENEFIT_TIERS: Array<{
   key: BenefitTier; label: string; color: string;
   priceMonthly: string; priceQuarterly: string;
-  benefits: Array<{ icon: typeof Percent; text: string }>;
+  benefits: Array<{ icon: typeof Percent; text: string; included?: boolean }>;
 }> = [
   {
     key: 'bronze', label: 'Bronce', color: '#CD7F32',
@@ -59,29 +59,25 @@ const BENEFIT_TIERS: Array<{
     key: 'silver', label: 'Plata', color: '#A8A9AD',
     priceMonthly: '$100/mes', priceQuarterly: '$300 trimestral',
     benefits: [
+      { icon: Check,    text: 'Todo lo incluido en Bronce', included: true },
       { icon: Umbrella, text: 'Toldo GRATIS durante la temporada baja' },
-      { icon: Percent,  text: '10% de descuento en todos nuestros productos y servicios' },
-      { icon: Star,     text: 'Priority Access: Reservas prioritarias en fechas especiales y eventos' },
-      { icon: Lock,     text: 'Acceso Exclusivo: Invitación a nuestras catas y eventos cerrados' },
     ],
   },
   {
     key: 'gold', label: 'Oro', color: '#D4AF37',
     priceMonthly: '$150/mes', priceQuarterly: '$450 trimestral',
     benefits: [
-      { icon: Umbrella, text: 'Toldo GRATIS durante la temporada baja' },
-      { icon: Percent,  text: '10% de descuento en todos nuestros productos y servicios' },
-      { icon: Star,     text: 'Priority Access: Reservas prioritarias en fechas especiales y eventos' },
-      { icon: Lock,     text: 'Acceso Exclusivo: Invitación a nuestras catas y eventos cerrados' },
-      { icon: Trophy,   text: 'Acceso Deportivo GRATIS: Canchas de Beach Tennis y Voleibol de playa' },
-      { icon: Award,    text: 'Descuentos Exclusivos en todas nuestras marcas aliadas' },
+      { icon: Check,  text: 'Todo lo incluido en Plata', included: true },
+      { icon: Trophy, text: 'Acceso Deportivo GRATIS: Canchas de Beach Tennis y Voleibol de playa' },
+      { icon: Award,  text: 'Descuentos Exclusivos en todas nuestras marcas aliadas' },
     ],
   },
 ];
 
 const MARQUEE_WORDS = [
-  'MAKAY BEACH CLUB', 'MEMBRESÍAS', 'EXPERIENCIAS', 'ALIADOS',
-  'EXCLUSIVO', 'BRONCE', 'PLATA', 'ORO', 'ACCESO PREMIUM', 'BEACH TENNIS',
+  'MAKAY BEACH CLUB', '10% DESCUENTO', 'TOLDO GRATIS', 'RESERVA PRIORITARIA',
+  'ACCESO VIP', 'BEACH TENNIS GRATIS', 'DESCUENTOS ALIADOS', 'EVENTOS EXCLUSIVOS',
+  'CATAS PRIVADAS', 'MEMBRESÍA PREMIUM',
 ];
 
 /* ── Particle burst ──────────────────────────────── */
@@ -132,7 +128,7 @@ function AllyCard({ ally, t, ta }: {
   return (
     <div
       className="mem-ally-card"
-      style={{ background: '#fff', border: '1px solid #f0ebe4', borderRadius: 18, display: 'flex', flexDirection: 'column', transition: 'box-shadow 0.25s, transform 0.25s' }}
+      style={{ background: '#FFFBF3', border: `1px solid ${tierColor}3a`, borderRadius: 18, display: 'flex', flexDirection: 'column', transition: 'box-shadow 0.25s, transform 0.25s' }}
       onMouseMove={e => {
         const r = e.currentTarget.getBoundingClientRect();
         e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
@@ -144,6 +140,7 @@ function AllyCard({ ally, t, ta }: {
         e.currentTarget.style.setProperty('--mx', '-9999px'); e.currentTarget.style.setProperty('--my', '-9999px');
       }}
     >
+      <div className="mem-ally-card-accent" style={{ '--accent-color': tierColor } as React.CSSProperties} />
       <div style={{ padding: '1.75rem 1.5rem 1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
         {ally.logo_url
           ? <img src={ally.logo_url} alt={ally.name} style={{ width: 56, height: 56, borderRadius: 12, objectFit: 'cover', flexShrink: 0 }} />
@@ -189,6 +186,8 @@ export default function MembershipPage() {
   const [leadTier, setLeadTier]           = useState<BenefitTier | null>(null);
   const [stats, setStats]                 = useState({ members: 500, allies: 50, events: 12 });
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const eventsCanvasRef = useRef<HTMLCanvasElement>(null);
+  const alliesCanvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef    = useRef<number>(0);
   const ioRef     = useRef<IntersectionObserver | null>(null);
 
@@ -215,6 +214,8 @@ export default function MembershipPage() {
     let io: IntersectionObserver | null = null;
     let cleanupScroll: (() => void) | null = null;
     let cleanupResize: (() => void) | null = null;
+    const lightRafIds: Array<() => void> = [];
+    const lightResizeCleanups: Array<() => void> = [];
 
     // Double-rAF: guarantees all layout is painted and dimensions are real
     requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -301,6 +302,50 @@ export default function MembershipPage() {
         };
         rafId = requestAnimationFrame(draw);
       }
+
+      /* ══ 1b. SECTION PARTICLES (events = gold-on-dark, allies = warm-on-sand) ══ */
+      const lightCanvases = [
+        { el: eventsCanvasRef.current, color: '212,175,55', op: 0.5 },
+        { el: alliesCanvasRef.current, color: '184,120,50', op: 0.35 },
+      ].filter(c => c.el) as Array<{ el: HTMLCanvasElement; color: string; op: number }>;
+      lightCanvases.forEach(({ el: lc, color, op: opMax }) => {
+        const setSize = () => {
+          const rect = lc.parentElement!.getBoundingClientRect();
+          lc.width = window.innerWidth;
+          lc.height = rect.height;
+        };
+        setSize();
+        const lctx = lc.getContext('2d')!;
+        type LP = { x: number; y: number; r: number; op: number; spd: number; drift: number };
+        const lpts: LP[] = Array.from({ length: 36 }, () => ({
+          x:     Math.random() * lc.width,
+          y:     Math.random() * lc.height,
+          r:     Math.random() * 2.2 + 0.8,
+          op:    Math.random() * opMax + 0.1,
+          spd:   Math.random() * 0.35 + 0.12,
+          drift: (Math.random() - 0.5) * 0.25,
+        }));
+        const onLResize = () => setSize();
+        window.addEventListener('resize', onLResize);
+        lightResizeCleanups.push(() => window.removeEventListener('resize', onLResize));
+
+        const drawLight = () => {
+          lctx.clearRect(0, 0, lc.width, lc.height);
+          lpts.forEach(p => {
+            p.y -= p.spd; p.x += p.drift;
+            if (p.y < -8) { p.y = lc.height + 8; p.x = Math.random() * lc.width; }
+            if (p.x < -8) p.x = lc.width + 8;
+            if (p.x > lc.width + 8) p.x = -8;
+            lctx.beginPath();
+            lctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            lctx.fillStyle = `rgba(${color},${p.op})`;
+            lctx.fill();
+          });
+          lightRafId = requestAnimationFrame(drawLight);
+        };
+        let lightRafId = requestAnimationFrame(drawLight);
+        lightRafIds.push(() => cancelAnimationFrame(lightRafId));
+      });
 
       /* ══ 2. SVG PATH DRAW-IN (CSS class toggle — no anime.js needed) ══ */
       document.querySelectorAll<SVGPathElement>('.mem-hero-path').forEach((path, i) => {
@@ -413,7 +458,7 @@ export default function MembershipPage() {
           if (el.classList.contains('mem-ally-card')) {
             try {
               animate(el, {
-                opacity: [0, 1], translateY: [32, 0], duration: 650, ease: 'outExpo',
+                opacity: [0, 1], translateY: [32, 0], scale: [0.93, 1], duration: 700, ease: 'outBack',
                 onComplete: () => {
                   const badge = el.querySelector<HTMLElement>('.mem-discount-badge');
                   if (badge) {
@@ -421,6 +466,15 @@ export default function MembershipPage() {
                   }
                 },
               });
+            } catch {}
+            return;
+          }
+
+          if (el.classList.contains('mem-event-card')) {
+            const cards = document.querySelectorAll<HTMLElement>('.mem-event-card');
+            const idx = Array.from(cards).indexOf(el);
+            try {
+              animate(el, { opacity: [0, 1], translateY: [50, 0], scale: [0.94, 1], duration: 700, delay: idx * 90, ease: 'outBack' });
             } catch {}
             return;
           }
@@ -469,6 +523,8 @@ export default function MembershipPage() {
       try { goldAnim?.pause(); } catch {}
       io?.disconnect();
       ioRef.current = null;
+      lightRafIds.forEach(cancel => cancel());
+      lightResizeCleanups.forEach(fn => fn());
     };
   }, []);
 
@@ -547,9 +603,9 @@ export default function MembershipPage() {
       <section className="mem-stats">
         <div className="mem-stats-inner">
           {[
-            { cls: 'stat-members',  label: 'Miembros activos',   count: Math.max(stats.members, 1),  suffix: '+' },
-            { cls: 'stat-partners', label: 'Aliados exclusivos', count: Math.max(stats.allies, 1),   suffix: '+' },
-            { cls: 'stat-events',   label: 'Eventos al año',     count: Math.max(stats.events, 12),  suffix: '/año' },
+            { cls: 'stat-members',  label: 'Miembros activos',   count: Math.max(stats.members, 1), suffix: '+' },
+            { cls: 'stat-partners', label: 'Aliados exclusivos', count: Math.max(stats.allies, 1),  suffix: '+' },
+            { cls: 'stat-events',   label: 'Próximos eventos',   count: events.length,              suffix: '' },
           ].map(s => (
             <div key={s.cls} className="mem-stat-item">
               <span className={`mem-stat-number ${s.cls}`} data-count={s.count} data-suffix={s.suffix}>0{s.suffix}</span>
@@ -572,7 +628,7 @@ export default function MembershipPage() {
             {BENEFIT_TIERS.map(tier => (
               <button
                 key={tier.key}
-                className={`mem-tier-card${tier.key === 'gold' ? ' mem-tier-card--gold' : ''}`}
+                className={`mem-tier-card${tier.key === 'gold' ? ' mem-tier-card--gold' : ''}${tier.key === 'silver' ? ' mem-tier-card--silver' : ''}`}
                 onClick={() => setLeadTier(tier.key)}
               >
                 {tier.key === 'gold' && <div className="mem-popular-badge">Más Popular</div>}
@@ -590,10 +646,15 @@ export default function MembershipPage() {
                 </div>
                 <div className="mem-tier-divider" />
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginBottom: '1.75rem', position: 'relative', zIndex: 2 }}>
-                  {tier.benefits.map(({ icon: Icon, text }) => (
+                  {tier.benefits.map(({ icon: Icon, text, included }) => (
                     <div key={text} className="mem-benefit-item">
                       <Icon size={14} color={tier.color} style={{ flexShrink: 0, marginTop: 3 }} />
-                      <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.84rem', color: 'rgba(255,255,255,0.76)', lineHeight: 1.5 }}>{text}</span>
+                      <span style={{
+                        fontFamily: 'var(--font-montserrat)', fontSize: '0.84rem', lineHeight: 1.5,
+                        color: included ? tier.color : 'rgba(255,255,255,0.76)',
+                        fontWeight: included ? 700 : 400,
+                        fontStyle: included ? 'italic' : 'normal',
+                      }}>{text}</span>
                     </div>
                   ))}
                 </div>
@@ -608,8 +669,10 @@ export default function MembershipPage() {
       </section>
 
       {/* ─── 5. Events ───────────────────────────────── */}
-      <section id="events" className="mem-events-section" style={{ background: 'var(--makay-premium-cream)', padding: 'clamp(5rem,10vw,7rem) 1.25rem', position: 'relative' }}>
-        <div className="mem-dot-grid" />
+      <section id="events" className="mem-events-section" style={{ padding: 'clamp(5rem,10vw,7rem) 1.25rem', position: 'relative', overflow: 'hidden' }}>
+        <div className="mem-events-bg-image" />
+        <div className="mem-events-bg-overlay" />
+        <canvas ref={eventsCanvasRef} className="mem-section-canvas" />
         <div className="mem-light-section-wave">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 60" preserveAspectRatio="none" style={{ display: 'block', width: '100%', height: 60 }}>
             <path d="M0,0 C480,55 960,5 1440,40 L1440,0 Z" fill="#0d0703" />
@@ -617,12 +680,12 @@ export default function MembershipPage() {
         </div>
         <div style={{ maxWidth: 1100, margin: '0 auto', paddingTop: '2rem', position: 'relative', zIndex: 2 }}>
           <div className="mem-section-head mem-head-reveal" style={{ marginBottom: '3rem' }}>
-            <p className="mem-section-eyebrow" style={{ color: '#D4A574' }}>Próximos Eventos</p>
-            <h2 className="mem-section-title" style={{ color: 'var(--makay-dark-navy)' }}>{t('eventsTitle')}</h2>
-            <p className="mem-section-sub" style={{ color: 'var(--makay-mauve)' }}>{t('eventsSubtitle')}</p>
+            <p className="mem-section-eyebrow" style={{ color: 'var(--makay-peachy-rose)' }}>Eventos del Beach Club</p>
+            <h2 className="mem-section-title" style={{ color: '#fff' }}>{t('eventsTitle')}</h2>
+            <p className="mem-section-sub" style={{ color: 'rgba(255,255,255,0.55)' }}>{t('eventsSubtitle')}</p>
           </div>
           {loadingEvents ? (
-            <p style={{ textAlign: 'center', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', padding: '3rem' }}>{t('loadingEvents')}</p>
+            <p style={{ textAlign: 'center', color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-montserrat)', padding: '3rem' }}>{t('loadingEvents')}</p>
           ) : events.length === 0 ? (
             <div className="mem-events-empty">
               <div className="mem-ring-pulse-wrap">
@@ -641,7 +704,7 @@ export default function MembershipPage() {
                 const soldPct   = Math.round((ev.tickets_sold / ev.capacity) * 100);
                 const tags      = ev.tags ? ev.tags.split(',').map(s => s.trim()).filter(Boolean) : [];
                 return (
-                  <article key={ev.id} className="mem-event-card" style={{ background: '#fff', border: '1px solid var(--makay-sand-cream)', borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                  <article key={ev.id} className="mem-event-card" style={{ borderRadius: 20, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                     <div className="mem-event-image-wrap" style={{ position: 'relative', height: 200, background: 'linear-gradient(135deg,var(--makay-sand-cream),var(--makay-peachy-rose))' }}>
                       {ev.image_url && <img className="mem-event-image" src={ev.image_url} alt={ev.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />}
                       {!ev.image_url && <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Calendar size={48} color="rgba(255,255,255,0.6)" /></div>}
@@ -652,17 +715,17 @@ export default function MembershipPage() {
                     </div>
                     <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', flex: 1, gap: '0.75rem' }}>
                       {tags.length > 0 && <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>{tags.map(tag => <span key={tag} className="mem-event-tag" style={{ padding: '0.15rem 0.55rem', background: 'rgba(212,165,116,0.12)', borderRadius: 100, fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', fontWeight: 600, color: 'var(--makay-peachy-rose)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{tag}</span>)}</div>}
-                      <h3 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.2rem', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: 0, lineHeight: 1.2 }}>{ev.title}</h3>
-                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-mauve)', margin: 0, lineHeight: 1.6, flex: 1 }}>{ev.description?.slice(0, 120)}{(ev.description?.length ?? 0) > 120 ? '…' : ''}</p>
+                      <h3 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.2rem', fontWeight: 700, color: '#fff', margin: 0, lineHeight: 1.2 }}>{ev.title}</h3>
+                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'rgba(255,255,255,0.6)', margin: 0, lineHeight: 1.6, flex: 1 }}>{ev.description?.slice(0, 120)}{(ev.description?.length ?? 0) > 120 ? '…' : ''}</p>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                        {ev.event_date && <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-dark-navy)' }}><Calendar size={13} style={{ color: 'var(--makay-peachy-rose)', flexShrink: 0 }} />{new Date(ev.event_date).toLocaleDateString(undefined, { weekday: 'short', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>}
-                        {ev.location && <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)' }}><MapPin size={13} style={{ flexShrink: 0 }} /> {ev.location}</div>}
+                        {ev.event_date && <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.85)' }}><Calendar size={13} style={{ color: 'var(--makay-peachy-rose)', flexShrink: 0 }} />{new Date(ev.event_date).toLocaleDateString(undefined, { weekday: 'short', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>}
+                        {ev.location && <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'rgba(255,255,255,0.55)' }}><MapPin size={13} style={{ flexShrink: 0 }} /> {ev.location}</div>}
                       </div>
                       <div>
-                        <div style={{ height: 4, background: 'var(--makay-sand-cream)', borderRadius: 2, overflow: 'hidden' }}>
+                        <div style={{ height: 4, background: 'rgba(255,255,255,0.15)', borderRadius: 2, overflow: 'hidden' }}>
                           <div className="mem-event-progress-fill" style={{ height: '100%', width: `${Math.min(soldPct,100)}%`, borderRadius: 2, background: soldPct >= 90 ? '#ef4444' : soldPct >= 60 ? '#f59e0b' : '#10b981' }} />
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.3rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', color: 'var(--makay-mauve)' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.3rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', color: 'rgba(255,255,255,0.55)' }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Users size={10} />{ev.tickets_sold} {t('going')}</span>
                           <span>{soldOut ? t('soldOutBtn') : `${remaining} ${t('left')}`}</span>
                         </div>
@@ -680,10 +743,11 @@ export default function MembershipPage() {
       </section>
 
       {/* ─── 6. Allies ───────────────────────────────── */}
-      <section id="partners" style={{ background: 'var(--makay-warm-white,#fff8f0)', padding: 'clamp(4rem,8vw,6rem) 1.25rem', position: 'relative', overflow: 'hidden' }}>
+      <section id="partners" className="mem-allies-section" style={{ padding: 'clamp(4rem,8vw,6rem) 1.25rem', position: 'relative', overflow: 'hidden' }}>
         <div className="mem-allies-bg-orb" />
         <div className="mem-allies-bg-orb mem-allies-bg-orb-2" />
         <div className="mem-dot-grid mem-dot-grid-faint" />
+        <canvas ref={alliesCanvasRef} className="mem-section-canvas" />
         <div style={{ maxWidth: 1100, margin: '0 auto', position: 'relative', zIndex: 2 }}>
           <div className="mem-section-head mem-head-reveal">
             <p className="mem-section-eyebrow" style={{ color: '#D4AF37' }}>{ta('tag')}</p>
@@ -699,7 +763,7 @@ export default function MembershipPage() {
               {allies.map(ally => <AllyCard key={ally.id} ally={ally} t={t} ta={ta} />)}
             </div>
           )}
-          <div className="mem-head-reveal" style={{ marginTop: '3rem', padding: '1.5rem', background: '#fff', border: '1px solid #f0ebe4', borderRadius: 14, display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div className="mem-head-reveal" style={{ marginTop: '3rem', padding: '1.5rem', background: '#FFFBF3', border: '1px solid rgba(212,175,55,0.25)', borderRadius: 14, display: 'flex', gap: '1.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', margin: '0 auto 0 0', alignSelf: 'center' }}>{ta('accessByTier')}</p>
             {Object.entries(TIER_KEY).map(([tier, key]) => (
               <div key={tier} className="mem-tier-legend-dot" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>

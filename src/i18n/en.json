@@ -34,7 +34,8 @@
     "signOut": "Sign Out",
     "myAccount": "My Account",
     "allies": "Allies",
-    "membership": "Membership"
+    "membership": "Membership",
+    "reservations": "Reservations"
   },
   "hero": {
     "headline": "Your Connection Refuge",
@@ -454,7 +455,8 @@
       "studio": "Studio",
       "rotation": "Rotation",
       "events": "Events",
-      "memberships": "Memberships"
+      "memberships": "Memberships",
+      "reservations": "Reservations"
     },
     "sell": {
       "title": "Sell to Client",

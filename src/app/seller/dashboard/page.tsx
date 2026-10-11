@@ -16,11 +16,18 @@ export default async function SellerDashboardPage() {
     )
   `.catch(() => {});
 
-  const [ordersResult, stockResult, globalPctRows, overrideRows] = await Promise.all([
+  const [ordersResult, globalPctRows, overrideRows, lowStockRows] = await Promise.all([
     sql`SELECT * FROM seller_orders WHERE seller_id = ${userId!} ORDER BY created_at DESC LIMIT 10`,
-    sql`SELECT COUNT(*) as total, SUM(quantity) as units FROM product_stock`,
     sql`SELECT value FROM theme_settings WHERE key = 'seller_commission_pct'`.catch(() => []),
     sql`SELECT pct FROM seller_commission_overrides WHERE seller_id = ${userId!}`.catch(() => []),
+    sql`
+      SELECT p.id, p.title, COALESCE(ps.quantity, p.stock) AS quantity
+      FROM products p
+      LEFT JOIN product_stock ps ON ps.product_id = p.id
+      WHERE p.status = 'active' AND COALESCE(ps.quantity, p.stock) < 10
+      ORDER BY COALESCE(ps.quantity, p.stock) ASC
+      LIMIT 8
+    `.catch(() => []),
   ]);
 
   const commissionPct = overrideRows.length > 0
@@ -30,8 +37,8 @@ export default async function SellerDashboardPage() {
   return (
     <SellerDashboard
       recentOrders={ordersResult as any[]}
-      stockSummary={{ total: Number(stockResult[0]?.total ?? 0), units: Number(stockResult[0]?.units ?? 0) }}
       commissionPct={commissionPct}
+      lowStock={lowStockRows.map((r: any) => ({ id: r.id, title: r.title, quantity: Number(r.quantity) }))}
     />
   );
 }

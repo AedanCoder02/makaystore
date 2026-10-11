@@ -9,9 +9,6 @@ interface PaymentEntry {
   description?: string;
 }
 
-async function ensureGiftColumn() {
-  await sql`ALTER TABLE seller_orders ADD COLUMN IF NOT EXISTS is_gift BOOLEAN DEFAULT FALSE`.catch(() => {});
-}
 
 export async function GET() {
   const { userId } = await auth();
@@ -26,8 +23,6 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-
-  await ensureGiftColumn();
 
   const { client_id, client_name, client_email, items, subtotal, payment_methods, notes, is_gift } = await req.json();
 
@@ -96,21 +91,37 @@ export async function POST(req: NextRequest) {
     `;
   }
 
-  const row = await sql`
-    INSERT INTO seller_orders (seller_id, client_id, client_name, client_email, items, subtotal, payment_method, notes, is_gift)
-    VALUES (
-      ${userId},
-      ${client_id},
-      ${client_name ?? ''},
-      ${client_email ?? ''},
-      ${JSON.stringify(items)},
-      ${subtotal},
-      ${JSON.stringify(payments)},
-      ${notes ?? ''},
-      FALSE
-    )
-    RETURNING *
-  `;
+  let row;
+  try {
+    row = await sql`
+      INSERT INTO seller_orders (seller_id, client_id, client_name, client_email, items, subtotal, payment_method, notes, is_gift)
+      VALUES (
+        ${userId},
+        ${client_id},
+        ${client_name ?? ''},
+        ${client_email ?? ''},
+        ${JSON.stringify(items)},
+        ${subtotal},
+        ${JSON.stringify(payments)},
+        ${notes ?? ''},
+        FALSE
+      )
+      RETURNING *
+    `;
+  } catch (e) {
+    const msg = (e as { message?: string })?.message ?? 'DB error';
+    console.error('[seller/orders POST insert]', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+
+  // Log sale to activities so supervisor sees it in real-time feed
+  const itemsDesc = (items as { title: string; quantity?: number }[])
+    .slice(0, 2).map(i => `${i.title} ×${i.quantity ?? 1}`).join(', ')
+    + (items.length > 2 ? ` +${items.length - 2} más` : '');
+  await sql`
+    INSERT INTO activities (seller_id, type, note, status)
+    VALUES (${userId}, 'sale', ${`Venta a ${client_name ?? 'cliente'}: ${itemsDesc} — $${Number(subtotal).toFixed(2)}`}, 'approved')
+  `.catch(() => {});
 
   return NextResponse.json(row[0]);
 }

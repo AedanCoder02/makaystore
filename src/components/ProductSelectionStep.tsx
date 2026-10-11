@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Search } from 'lucide-react';
 
 interface Product {
   id: string;
@@ -18,6 +19,7 @@ export default function ProductSelectionStep({
   const [products, setProducts] = useState<Product[]>([]);
   const [selectedId, setSelectedId] = useState('');
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     fetch('/api/products')
@@ -30,6 +32,10 @@ export default function ProductSelectionStep({
   }, []);
 
   const selected = products.find((p) => p.id === selectedId);
+  const q = search.trim().toLowerCase();
+  const matches = q
+    ? products.filter(p => p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)).slice(0, 24)
+    : [];
 
   return (
     <div className="wizard-step-card">
@@ -41,11 +47,30 @@ export default function ProductSelectionStep({
         </div>
       </div>
 
+      <div className="seller-search-wrap" style={{ marginBottom: '1.25rem' }}>
+        <Search size={16} className="seller-search-icon" />
+        <input
+          className="seller-search with-icon"
+          placeholder="Buscar producto por nombre o categoría…"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          autoFocus
+        />
+      </div>
+
       {loading ? (
         <div className="wizard-loading">Loading products…</div>
+      ) : !q ? (
+        <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', color: 'var(--makay-mauve)', textAlign: 'center', padding: '2rem 0' }}>
+          Escribe para buscar entre {products.length} productos.
+        </p>
+      ) : matches.length === 0 ? (
+        <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', color: 'var(--makay-mauve)', textAlign: 'center', padding: '2rem 0' }}>
+          Sin resultados para &ldquo;{search}&rdquo;.
+        </p>
       ) : (
         <div className="product-selection-grid">
-          {products.map((p) => (
+          {matches.map((p) => (
             <button
               key={p.id}
               className={`product-select-card${selectedId === p.id ? ' selected' : ''}`}

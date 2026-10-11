@@ -1,6 +1,7 @@
 'use client';
 
-import { ClipboardList } from 'lucide-react';
+import { useEffect, useState, useCallback } from 'react';
+import { ClipboardList, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 export type TaskPriority = 'High' | 'Medium' | 'Low';
@@ -15,18 +16,33 @@ export interface BoardTask {
   status: TaskStatus;
 }
 
-interface TaskBoardProps {
-  tasks: BoardTask[];
-}
-
 const PRIORITY_COLORS: Record<TaskPriority, string> = {
   High: 'task-priority-high',
   Medium: 'task-priority-medium',
   Low: 'task-priority-low',
 };
 
-export default function TaskBoard({ tasks }: TaskBoardProps) {
+// Self-fetching so seller task completions are always live
+export default function TaskBoard({ tasks: _ignored }: { tasks?: BoardTask[] }) {
   const t = useTranslations('supervisor');
+  const [tasks, setTasks] = useState<BoardTask[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const data = await fetch('/api/supervisor/tasks')
+      .then(r => r.ok ? r.json() : [])
+      .catch(() => []);
+    setTasks(Array.isArray(data) ? data : []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    load();
+    // Poll every 30s so seller completions appear without manual refresh
+    const id = setInterval(load, 30_000);
+    return () => clearInterval(id);
+  }, [load]);
 
   const COLUMNS: { key: TaskStatus; label: string }[] = [
     { key: 'todo',        label: t('toDo') },
@@ -36,9 +52,9 @@ export default function TaskBoard({ tasks }: TaskBoardProps) {
 
   const workers = Array.from(new Set(tasks.map((t) => t.assignedTo)));
   const workerCompletion = workers.map((w) => {
-    const workerTasks = tasks.filter((t) => t.assignedTo === w);
-    const done = workerTasks.filter((t) => t.status === 'done').length;
-    return { name: w, pct: workerTasks.length > 0 ? Math.round((done / workerTasks.length) * 100) : 0 };
+    const wt = tasks.filter((t) => t.assignedTo === w);
+    const done = wt.filter((t) => t.status === 'done').length;
+    return { name: w, pct: wt.length > 0 ? Math.round((done / wt.length) * 100) : 0 };
   });
 
   return (
@@ -46,6 +62,14 @@ export default function TaskBoard({ tasks }: TaskBoardProps) {
       <div className="sup-section-header">
         <ClipboardList size={20} className="sup-section-icon" />
         <h2 className="sup-section-title">{t('taskBoard')}</h2>
+        <button
+          onClick={load}
+          disabled={loading}
+          style={{ marginLeft: 'auto', background: 'none', border: 'none', cursor: loading ? 'wait' : 'pointer', color: 'var(--makay-mauve)', display: 'flex', padding: '0.2rem' }}
+          title="Actualizar"
+        >
+          <RefreshCw size={14} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+        </button>
       </div>
 
       <div className="taskboard-worker-completion">
@@ -66,7 +90,9 @@ export default function TaskBoard({ tasks }: TaskBoardProps) {
                 <span className="taskboard-col-count">{colTasks.length}</span>
               </div>
               <div className="taskboard-col-items">
-                {colTasks.map((task) => (
+                {loading && colTasks.length === 0 ? (
+                  <p className="sup-empty-col">Cargando…</p>
+                ) : colTasks.map((task) => (
                   <div key={task.id} className="task-card">
                     <div className="task-card-name">{task.name}</div>
                     <div className="task-card-meta">
@@ -78,7 +104,7 @@ export default function TaskBoard({ tasks }: TaskBoardProps) {
                     </span>
                   </div>
                 ))}
-                {colTasks.length === 0 && <p className="sup-empty-col">{t('noTasks')}</p>}
+                {!loading && colTasks.length === 0 && <p className="sup-empty-col">{t('noTasks')}</p>}
               </div>
             </div>
           );

@@ -12,6 +12,7 @@ export interface ProductRow {
   status: RotationStatus;
   lastRotated: string;
   sku: string;
+  unitsSold30: number;
 }
 
 interface RotationTableProps {
@@ -29,7 +30,7 @@ export default function RotationTable({ onRotateNow, onSchedule, onProductsLoade
   useEffect(() => {
     fetch('/api/seller/rotation')
       .then(r => r.ok ? r.json() : [])
-      .then((rows: { id: number | string; title: string; sku: string | null; status: string; last_rotated_at: string | null }[]) => {
+      .then((rows: { id: number | string; title: string; sku: string | null; status: string; last_rotated_at: string | null; units_sold_30d?: number }[]) => {
         const mapped: ProductRow[] = rows.map(r => ({
           id: String(r.id),
           name: r.title,
@@ -38,7 +39,8 @@ export default function RotationTable({ onRotateNow, onSchedule, onProductsLoade
           lastRotated: r.last_rotated_at
             ? new Date(r.last_rotated_at).toISOString().split('T')[0]
             : '—',
-        }));
+          unitsSold30: r.units_sold_30d ?? 0,
+        })).sort((a, b) => a.unitsSold30 - b.unitsSold30);
         setProducts(mapped);
         onProductsLoaded?.(mapped);
         setLoading(false);
@@ -50,14 +52,15 @@ export default function RotationTable({ onRotateNow, onSchedule, onProductsLoade
     setLoading(true);
     fetch('/api/seller/rotation')
       .then(r => r.ok ? r.json() : [])
-      .then((rows: { id: number | string; title: string; sku: string | null; status: string; last_rotated_at: string | null }[]) => {
+      .then((rows: { id: number | string; title: string; sku: string | null; status: string; last_rotated_at: string | null; units_sold_30d?: number }[]) => {
         setProducts(rows.map(r => ({
           id: String(r.id),
           name: r.title,
           sku: r.sku ?? `SKU-${r.id}`,
           status: (['active','paused','archived'].includes(r.status) ? r.status : 'active') as RotationStatus,
           lastRotated: r.last_rotated_at ? new Date(r.last_rotated_at).toISOString().split('T')[0] : '—',
-        })));
+          unitsSold30: r.units_sold_30d ?? 0,
+        })).sort((a, b) => a.unitsSold30 - b.unitsSold30));
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -93,6 +96,7 @@ export default function RotationTable({ onRotateNow, onSchedule, onProductsLoade
             </th>
             <th>{t('productName')}</th>
             <th>{t('sku')}</th>
+            <th>Rendimiento (30d)</th>
             <th>{t('currentStatus')}</th>
             <th>{t('lastRotated')}</th>
             <th>{t('actions')}</th>
@@ -101,6 +105,7 @@ export default function RotationTable({ onRotateNow, onSchedule, onProductsLoade
         <tbody>
           {products.map(product => {
             const isSelected = selectedProducts.includes(product.id);
+            const recommendRotate = product.status === 'active' && product.unitsSold30 === 0;
             return (
               <tr key={product.id} className={isSelected ? 'selected' : ''}>
                 <td>
@@ -110,6 +115,14 @@ export default function RotationTable({ onRotateNow, onSchedule, onProductsLoade
                 </td>
                 <td data-label={t('productName')}>{product.name}</td>
                 <td data-label={t('sku')}>{product.sku}</td>
+                <td data-label="Rendimiento (30d)">
+                  <span style={{ fontWeight: 600 }}>{product.unitsSold30} vendidos</span>
+                  {recommendRotate && (
+                    <span style={{ display: 'block', marginTop: 2, fontSize: '0.68rem', fontWeight: 700, color: '#c0392b', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                      Recomendado rotar
+                    </span>
+                  )}
+                </td>
                 <td data-label={t('currentStatus')}>
                   <RotationStatusBadge status={product.status} />
                 </td>

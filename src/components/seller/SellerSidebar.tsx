@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, Crown, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, Crown, CalendarCheck, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
 
 export default function SellerSidebar() {
   const path = usePathname();
@@ -51,6 +51,7 @@ export default function SellerSidebar() {
     { href: '/seller/studio',             label: t('nav.studio'),    icon: Wand2,           key: 'studio' },
     { href: '/seller/events',             label: t('nav.events'),    icon: Calendar,        key: 'events' },
     { href: '/seller/memberships',        label: t('nav.memberships'), icon: Crown,         key: 'memberships' },
+    { href: '/seller/reservations',       label: t('nav.reservations'), icon: CalendarCheck, key: 'reservations' },
   ];
   const NAV = permissions
     ? ALL_NAV.filter(n => n.key === null || permissions.includes(n.key))

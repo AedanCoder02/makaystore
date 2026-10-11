@@ -1,11 +1,13 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { ShoppingBag, CreditCard, Smartphone, PocketKnife, Banknote, ExternalLink, ChevronDown, ChevronUp, Gift } from 'lucide-react';
+import { ShoppingBag, CreditCard, Smartphone, PocketKnife, Banknote, ExternalLink, ChevronDown, ChevronUp, Gift, ShieldCheck } from 'lucide-react';
 
 interface PaymentEntry {
   method: string;
   amount: number;
+  transactionId?: string;
+  description?: string;
   receipt_url?: string;
 }
 
@@ -31,6 +33,7 @@ interface Order {
   created_at: string;
   source: 'storefront' | 'in-person';
   is_gift: boolean;
+  payment_confirmed?: boolean;
 }
 
 const METHOD_LABEL: Record<string, string> = {
@@ -53,16 +56,37 @@ export default function SupervisorOrdersPage() {
   const [filterTo, setFilterTo]         = useState('');
   const [filterGift, setFilterGift]     = useState(false);
 
+  const [fetchError, setFetchError]     = useState('');
+  const [confirming, setConfirming]     = useState<string | null>(null);
+  const [confirmed, setConfirmed]       = useState<Set<string>>(new Set());
+
+  const confirmPayment = async (orderId: string) => {
+    setConfirming(orderId);
+    try {
+      const res = await fetch(`/api/supervisor/orders/${orderId}/confirm`, { method: 'PATCH' });
+      if (res.ok) setConfirmed(s => new Set([...s, orderId]));
+    } finally {
+      setConfirming(null);
+    }
+  };
+
   const load = useCallback(async () => {
     setLoading(true);
+    setFetchError('');
     const params = new URLSearchParams();
     if (filterMethod) params.set('method', filterMethod);
     if (filterFrom)   params.set('from', filterFrom);
     if (filterTo)     params.set('to', filterTo);
     if (filterGift)   params.set('gift', 'true');
-    const res = await fetch(`/api/supervisor/orders?${params}`).catch(() => null);
-    const data = res?.ok ? await res.json() : [];
-    setOrders(Array.isArray(data) ? data : []);
+    try {
+      const res = await fetch(`/api/supervisor/orders?${params}`);
+      const data = await res.json();
+      if (!res.ok) { setFetchError(data?.error ?? `Error ${res.status}`); setOrders([]); }
+      else setOrders(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setFetchError((e as Error)?.message ?? 'Error de conexión');
+      setOrders([]);
+    }
     setLoading(false);
   }, [filterMethod, filterFrom, filterTo, filterGift]);
 
@@ -109,6 +133,8 @@ export default function SupervisorOrdersPage() {
 
       {loading ? (
         <p className="sup-loading">Cargando órdenes…</p>
+      ) : fetchError ? (
+        <p className="sup-empty-state" style={{ color: '#ef4444' }}>{fetchError}</p>
       ) : orders.length === 0 ? (
         <p className="sup-empty-state">No se encontraron órdenes.</p>
       ) : (
@@ -193,12 +219,26 @@ export default function SupervisorOrdersPage() {
                           return (
                             <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.4rem 0', borderBottom: i < pms.length - 1 ? '1px solid #f5f0ea' : 'none' }}>
                               <Icon size={13} color="var(--makay-mauve)" />
-                              <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-dark-navy)', flex: 1 }}>{METHOD_LABEL[pm.method] ?? pm.method}</span>
+                              <div style={{ flex: 1 }}>
+                                <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-dark-navy)' }}>{METHOD_LABEL[pm.method] ?? pm.method}</span>
+                                {pm.transactionId && (
+                                  <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--makay-mauve)', marginLeft: '0.5rem', background: '#f5f0ea', padding: '0.1rem 0.4rem', borderRadius: 4 }}>#{pm.transactionId}</span>
+                                )}
+                                {pm.description && (
+                                  <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', color: 'var(--makay-mauve)', margin: '0.15rem 0 0' }}>{pm.description}</p>
+                                )}
+                              </div>
                               <span style={{ fontFamily: 'var(--font-montserrat)', fontWeight: 700, fontSize: '0.88rem', color: 'var(--makay-peachy-rose)' }}>${Number(pm.amount).toFixed(2)}</span>
                               {pm.receipt_url && (
-                                <a href={pm.receipt_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--makay-ocean-teal)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem' }}>
-                                  <ExternalLink size={12} /> Comprobante
-                                </a>
+                                pm.receipt_url.startsWith('data:') ? (
+                                  <a href={pm.receipt_url} target="_blank" rel="noopener noreferrer" title="Ver comprobante">
+                                    <img src={pm.receipt_url} alt="Comprobante" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', cursor: 'pointer', display: 'block' }} />
+                                  </a>
+                                ) : (
+                                  <a href={pm.receipt_url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--makay-ocean-teal)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem' }}>
+                                    <ExternalLink size={12} /> Comprobante
+                                  </a>
+                                )
                               )}
                             </div>
                           );
@@ -218,10 +258,27 @@ export default function SupervisorOrdersPage() {
                       </div>
                     </div>
 
-                    {!hasReceipts && pms.some(p => ['pago_movil','punto_venta'].includes(p.method)) && (
-                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: '#f59e0b', background: '#fff8ee', border: '1px solid #f59e0b30', borderRadius: 8, padding: '0.5rem 0.75rem', margin: 0 }}>
-                        Pago pendiente de verificación — sin comprobante adjunto.
-                      </p>
+                    {pms.some(p => ['pago_movil','punto_venta'].includes(p.method)) && (
+                      (confirmed.has(o.id) || o.payment_confirmed) ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.75rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8 }}>
+                          <ShieldCheck size={14} color="#10b981" />
+                          <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: '#10b981', fontWeight: 600 }}>Pago verificado por supervisor</span>
+                        </div>
+                      ) : (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0.75rem', background: '#fff8ee', border: '1px solid #f59e0b30', borderRadius: 8 }}>
+                          <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: '#f59e0b', flex: 1 }}>
+                            {hasReceipts ? 'Comprobante adjunto — pendiente de verificación.' : 'Sin comprobante — confirmar pago manualmente.'}
+                          </span>
+                          <button
+                            onClick={() => confirmPayment(o.id)}
+                            disabled={confirming === o.id}
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', padding: '0.35rem 0.75rem', background: '#10b981', color: '#fff', border: 'none', borderRadius: 7, fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, cursor: confirming === o.id ? 'wait' : 'pointer', opacity: confirming === o.id ? 0.7 : 1, whiteSpace: 'nowrap' }}
+                          >
+                            <ShieldCheck size={12} />
+                            {confirming === o.id ? 'Confirmando…' : 'Confirmar pago'}
+                          </button>
+                        </div>
+                      )
                     )}
                   </div>
                 )}

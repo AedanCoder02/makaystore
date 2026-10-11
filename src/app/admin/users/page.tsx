@@ -20,6 +20,7 @@ interface UserRow {
   fullName: string;
   email: string;
   role: string;
+  roles: string[];
   createdAt: number;
   imageUrl: string;
   permissions: string[];
@@ -31,12 +32,16 @@ const ROLE_COLORS: Record<string, string> = {
 
 const ROLE_SECTIONS: Record<string, { key: string; label: string }[]> = {
   seller: [
-    { key: 'sell',     label: 'Sell to Client' },
-    { key: 'products', label: 'Products' },
-    { key: 'stock',    label: 'Stock' },
-    { key: 'rotation', label: 'Rotation' },
-    { key: 'studio',   label: 'Studio' },
-    { key: 'activity', label: 'My Activity' },
+    { key: 'sell',        label: 'Sell to Client' },
+    { key: 'products',    label: 'Products' },
+    { key: 'stock',       label: 'Stock' },
+    { key: 'rotation',    label: 'Rotation' },
+    { key: 'studio',      label: 'Studio' },
+    { key: 'activity',    label: 'My Activity' },
+    { key: 'models3d',    label: 'Modelos 3D' },
+    { key: 'events',      label: 'Events' },
+    { key: 'memberships', label: 'Memberships' },
+    { key: 'reservations', label: 'Reservations' },
   ],
   supervisor: [
     { key: 'sup-overview', label: 'Overview' },
@@ -58,6 +63,7 @@ export default function AdminUsersPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [pendingRoles, setPendingRoles] = useState<Record<string, string>>({});
+  const [pendingExtraRoles, setPendingExtraRoles] = useState<Record<string, string[]>>({});
   const [expanded, setExpanded] = useState<string | null>(null);
   const [permDrafts, setPermDrafts] = useState<Record<string, string[]>>({});
   const [saving, setSaving] = useState<string | null>(null);
@@ -109,8 +115,13 @@ export default function AdminUsersPage() {
         setUsers(rows);
         // Init permission drafts from fetched data
         const drafts: Record<string, string[]> = {};
-        for (const u of rows) drafts[u.id] = Array.isArray(u.permissions) ? u.permissions : getDefaultPermissions(u.role);
+        const extraRoles: Record<string, string[]> = {};
+        for (const u of rows) {
+          drafts[u.id] = Array.isArray(u.permissions) ? u.permissions : getDefaultPermissions(u.role);
+          extraRoles[u.id] = Array.isArray(u.roles) ? u.roles.filter((r: string) => r !== u.role) : [];
+        }
         setPermDrafts(drafts);
+        setPendingExtraRoles(extraRoles);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -129,8 +140,12 @@ export default function AdminUsersPage() {
     setSaving(userId);
     const newRole = pendingRoles[userId];
     const perms = permDrafts[userId];
+    const extraRoles = pendingExtraRoles[userId] ?? [];
+    const primaryRole = newRole ?? users.find(u => u.id === userId)?.role ?? 'customer';
+    const allRoles = [primaryRole, ...extraRoles.filter(r => r !== primaryRole)];
     const payload: Record<string, unknown> = {};
     if (newRole && newRole !== users.find(u => u.id === userId)?.role) payload.role = newRole;
+    payload.roles = allRoles;
     if (perms !== undefined) payload.permissions = perms;
 
     const res = await fetch(`/api/admin/users/${userId}`, {
@@ -246,6 +261,38 @@ export default function AdminUsersPage() {
                   {/* Permission toggles */}
                   {isExpanded && sections.length > 0 && (
                     <div className="perm-sections">
+                      {/* Multi-role assignment */}
+                      <div style={{ borderBottom: '1px solid #f0ebe4', paddingBottom: '0.875rem', marginBottom: '0.875rem' }}>
+                        <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--makay-mauve)', display: 'block', marginBottom: '0.5rem' }}>
+                          Roles adicionales
+                        </span>
+                        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                          {(['seller', 'supervisor', 'admin'] as const).filter(r => r !== currentRole).map(r => {
+                            const extra = pendingExtraRoles[user.id] ?? [];
+                            const on = extra.includes(r);
+                            return (
+                              <label key={r} className={`perm-chip${on ? ' on' : ''}`} style={{ cursor: 'pointer' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={on}
+                                  style={{ position: 'absolute', opacity: 0, width: 0, height: 0 }}
+                                  onChange={() => setPendingExtraRoles(prev => {
+                                    const current = prev[user.id] ?? [];
+                                    return { ...prev, [user.id]: on ? current.filter(x => x !== r) : [...current, r] };
+                                  })}
+                                />
+                                + {r}
+                              </label>
+                            );
+                          })}
+                        </div>
+                        {(pendingExtraRoles[user.id] ?? []).length > 0 && (
+                          <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', color: 'var(--makay-mauve)', margin: '0.4rem 0 0' }}>
+                            Roles activos: <strong>{[currentRole, ...(pendingExtraRoles[user.id] ?? [])].join(', ')}</strong> — guarda para aplicar
+                          </p>
+                        )}
+                      </div>
+
                       <div className="perm-sections-header">
                         <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--makay-mauve)' }}>
                           Acceso por sección — {currentRole}

@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Search, Plus, Minus, Trash2, ShoppingBag, Check, Tag, Truck, User, HelpCircle, Gift, UserPlus, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Search, Plus, Minus, Trash2, ShoppingBag, Check, Tag, Truck, User, HelpCircle, Gift, UserPlus, X, Paperclip } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
@@ -12,7 +12,17 @@ interface Client {
   email: string;
   imageUrl: string;
   isWalkIn?: boolean;
+  source?: string;
 }
+
+const CONTACT_SOURCE_LABELS: Record<string, string> = {
+  yimi: 'Yimi',
+  makay_store_account: 'Makay Store',
+  makay_store_walkin: 'Makay Store',
+  makay_store_crm: 'CRM',
+  roulette: 'Roulette',
+  csv_import: 'Histórico',
+};
 interface Product {
   id: string;
   title: string;
@@ -22,7 +32,28 @@ interface Product {
   productType: 'storefront' | 'dropshipping';
 }
 interface CartItem extends Product { qty: number; duration?: string; }
-interface PaymentEntry { method: string; amount: number; transactionId: string; description: string; }
+interface PaymentEntry { method: string; amount: number; transactionId: string; description: string; receipt_url?: string; }
+
+function compressImage(file: File, maxPx = 800, quality = 0.6): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const scale = Math.min(1, maxPx / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext('2d')!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = e.target?.result as string;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 const MEMBERSHIP_MONTHLY: Record<string, number> = {
   'membership-bronze': 50,
@@ -57,6 +88,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
   const [draft, setDraft] = useState<PaymentEntry>({ ...EMPTY_PAYMENT });
   const [clientBalance, setClientBalance] = useState<number | null>(null);
   const [notes, setNotes] = useState('');
+  const receiptInputRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [orderId, setOrderId] = useState<number | null>(null);
@@ -168,54 +200,63 @@ export default function SellerSell({ products }: { products: Product[] }) {
     if (!selectedClient || cart.length === 0 || !canSubmit) return;
     setSubmitting(true);
     setSubmitError('');
-    const res = await fetch('/api/seller/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id: selectedClient.id,
-        client_name: selectedClient.name,
-        client_email: selectedClient.email,
-        items: cart.map(i => ({ id: i.id, title: i.title, price: i.price, qty: i.qty, productType: i.productType, ...(i.duration ? { duration: i.duration } : {}) })),
-        subtotal,
-        payment_methods: payments,
-        notes,
-        is_gift: false,
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      setSubmitError(data.error ?? 'Error al procesar el pago');
+    try {
+      const res = await fetch('/api/seller/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: selectedClient.id,
+          client_name: selectedClient.name,
+          client_email: selectedClient.email,
+          items: cart.map(i => ({ id: i.id, title: i.title, price: i.price, quantity: i.qty, productType: i.productType, ...(i.duration ? { duration: i.duration } : {}) })),
+          subtotal,
+          payment_methods: payments,
+          notes,
+          is_gift: false,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setSubmitError((data as { error?: string }).error ?? `Error ${res.status} al procesar el pago`);
+        setSubmitting(false);
+        return;
+      }
+      setOrderId((data as { id?: number }).id ?? null);
       setSubmitting(false);
-      return;
+      setStep('done');
+    } catch {
+      setSubmitError('Error de conexión. Intenta de nuevo.');
+      setSubmitting(false);
     }
-    setOrderId(data.id);
-    setSubmitting(false);
-    setStep('done');
   };
 
   const submitGift = async (product: Product) => {
     if (!selectedClient) return;
     setSubmittingGift(true);
-    const res = await fetch('/api/seller/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        client_id: selectedClient.id,
-        client_name: selectedClient.name,
-        client_email: selectedClient.email,
-        items: [{ id: product.id, title: product.title, price: product.price, qty: 1, productType: product.productType }],
-        subtotal: 0,
-        is_gift: true,
-        notes: '',
-      }),
-    });
-    const data = await res.json();
-    setSubmittingGift(false);
-    if (!res.ok) return;
-    setOrderId(data.id);
-    setIsGiftOrder(true);
-    setGiftTarget(null);
-    setStep('done');
+    try {
+      const res = await fetch('/api/seller/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          client_id: selectedClient.id,
+          client_name: selectedClient.name,
+          client_email: selectedClient.email,
+          items: [{ id: product.id, title: product.title, price: product.price, quantity: 1, productType: product.productType }],
+          subtotal: 0,
+          is_gift: true,
+          notes: '',
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      setSubmittingGift(false);
+      if (!res.ok) return;
+      setOrderId((data as { id?: number }).id ?? null);
+      setIsGiftOrder(true);
+      setGiftTarget(null);
+      setStep('done');
+    } catch {
+      setSubmittingGift(false);
+    }
   };
 
   const createClient = async () => {
@@ -298,7 +339,7 @@ export default function SellerSell({ products }: { products: Product[] }) {
   }
 
   return (
-    <div className="seller-page">
+    <div className="seller-page wide">
       {/* Duration picker modal */}
       {durationPicker && (
         <div className="seller-modal-overlay" onClick={() => setDurationPicker(null)}>
@@ -491,7 +532,11 @@ export default function SellerSell({ products }: { products: Product[] }) {
                   <span className="seller-client-email">
                     {c.email || (c.isWalkIn ? 'Cliente walk-in' : '—')}
                   </span>
-                  {c.isWalkIn && (
+                  {c.source ? (
+                    <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.62rem', fontWeight: 700, color: 'var(--makay-mauve)', background: '#f0ebe4', padding: '0.1rem 0.4rem', borderRadius: 99 }}>
+                      {CONTACT_SOURCE_LABELS[c.source] ?? c.source}
+                    </span>
+                  ) : c.isWalkIn && (
                     <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.62rem', fontWeight: 700, color: 'var(--makay-mauve)', background: '#f0ebe4', padding: '0.1rem 0.4rem', borderRadius: 99 }}>
                       Walk-in
                     </span>
@@ -695,6 +740,50 @@ export default function SellerSell({ products }: { products: Product[] }) {
                     value={draft.transactionId}
                     onChange={e => setDraft(d => ({ ...d, transactionId: e.target.value }))}
                   />
+                </>
+              )}
+
+              {(draft.method === 'pago_movil' || draft.method === 'transfer') && (
+                <>
+                  <label className="seller-label">
+                    Comprobante
+                    <span style={{ fontSize: '0.65rem', color: 'var(--makay-mauve)', fontWeight: 400, marginLeft: '0.35rem' }}>opcional</span>
+                  </label>
+                  <input
+                    ref={receiptInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        const url = await compressImage(file);
+                        setDraft(d => ({ ...d, receipt_url: url }));
+                      } catch { /* ignore */ }
+                      e.target.value = '';
+                    }}
+                  />
+                  {draft.receipt_url ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
+                      <img src={draft.receipt_url} alt="Comprobante" style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 8, border: '1px solid var(--makay-sand-cream)' }} />
+                      <button
+                        type="button"
+                        onClick={() => setDraft(d => ({ ...d, receipt_url: undefined }))}
+                        style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', color: '#ef4444', background: 'none', border: 'none', cursor: 'pointer' }}
+                      >
+                        Quitar
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => receiptInputRef.current?.click()}
+                      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', width: '100%', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 600, color: 'var(--makay-ocean-teal)', background: '#f0fdf4', border: '1px dashed #bbf7d0', borderRadius: 8, padding: '0.55rem 0.75rem', cursor: 'pointer', marginBottom: '0.75rem' }}
+                    >
+                      <Paperclip size={14} /> Adjuntar captura
+                    </button>
+                  )}
                 </>
               )}
 

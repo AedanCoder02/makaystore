@@ -6,12 +6,15 @@ const ALLOWED_ROLES = ['customer', 'seller', 'supervisor', 'admin'];
 // All toggleable sections per role
 export const ROLE_SECTIONS: Record<string, { key: string; label: string }[]> = {
   seller: [
-    { key: 'sell',     label: 'Sell to Client' },
-    { key: 'products', label: 'Products' },
-    { key: 'stock',    label: 'Stock' },
-    { key: 'rotation', label: 'Rotation' },
-    { key: 'studio',   label: 'Studio' },
-    { key: 'activity', label: 'My Activity' },
+    { key: 'sell',        label: 'Sell to Client' },
+    { key: 'products',    label: 'Products' },
+    { key: 'stock',       label: 'Stock' },
+    { key: 'rotation',    label: 'Rotation' },
+    { key: 'studio',      label: 'Studio' },
+    { key: 'activity',    label: 'My Activity' },
+    { key: 'models3d',    label: 'Modelos 3D' },
+    { key: 'events',      label: 'Events' },
+    { key: 'memberships', label: 'Memberships' },
   ],
   supervisor: [
     { key: 'sup-overview', label: 'Overview' },
@@ -33,7 +36,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const { id } = await params;
   const body = await req.json();
-  const { role, permissions } = body;
+  const { role, roles, permissions } = body;
 
   try {
     const client = await clerkClient();
@@ -44,6 +47,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
         return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
       }
       updates.role = role;
+    }
+
+    if (roles !== undefined) {
+      if (!Array.isArray(roles) || roles.some(r => !ALLOWED_ROLES.includes(r))) {
+        return NextResponse.json({ error: 'Invalid roles' }, { status: 400 });
+      }
+      updates.roles = roles;
     }
 
     if (permissions !== undefined) {

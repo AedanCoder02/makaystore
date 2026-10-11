@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Check, X, Plus, Trash2, HelpCircle, ChevronDown, AlertTriangle } from 'lucide-react';
+import { Check, X, Plus, Trash2, HelpCircle, ChevronDown, AlertTriangle, ArrowUp, ArrowDown } from 'lucide-react';
 import ImageUpload from './ImageUpload';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
 
 type Status = 'active' | 'paused' | 'archived';
+type SortField = 'title' | 'sku' | 'category' | 'price' | 'stock';
 
 interface Product {
   id: string;
@@ -72,6 +73,8 @@ export default function SellerProducts() {
   const [damageTarget, setDamageTarget] = useState<Product | null>(null);
   const [damageForm, setDamageForm]     = useState({ type: 'damaged', quantity: '1', description: '', destination: '', receipt_url: '' });
   const [damageSubmitting, setDamageSubmitting] = useState(false);
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const tutorialStore = useTutorialStore();
   const tutorialUI    = useTutorialOverlay('seller-products-tour');
 
@@ -104,7 +107,21 @@ export default function SellerProducts() {
     if (providerFilter !== 'all' && p.provider !== providerFilter) return false;
     const q = search.toLowerCase();
     return !q || p.title.toLowerCase().includes(q) || (p.sku ?? '').toLowerCase().includes(q) || (p.provider ?? '').toLowerCase().includes(q);
+  }).sort((a, b) => {
+    if (!sortField) return 0;
+    let cmp = 0;
+    if (sortField === 'price') cmp = Number(a.price) - Number(b.price);
+    else if (sortField === 'stock') cmp = Number(a.stock ?? 0) - Number(b.stock ?? 0);
+    else cmp = String(a[sortField] ?? '').localeCompare(String(b[sortField] ?? ''));
+    return sortDir === 'asc' ? cmp : -cmp;
   });
+
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    else { setSortField(field); setSortDir('asc'); }
+  };
+  const SortIcon = ({ field }: { field: SortField }) =>
+    sortField !== field ? null : (sortDir === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />);
 
   // --- selection ---
   const toggleSelect = (id: string) => setSelected(s => {
@@ -361,11 +378,21 @@ export default function SellerProducts() {
                     onChange={toggleAll} />
                 </th>
                 <th style={{ width: 56 }}></th>
-                <th>Producto</th>
-                <th>SKU</th>
-                <th>Categoría</th>
-                <th style={{ textAlign: 'right' }}>Precio</th>
-                <th style={{ textAlign: 'right' }}>Stock</th>
+                <th style={{ cursor: 'pointer' }} onClick={() => toggleSort('title')}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>Producto <SortIcon field="title" /></span>
+                </th>
+                <th style={{ cursor: 'pointer' }} onClick={() => toggleSort('sku')}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>SKU <SortIcon field="sku" /></span>
+                </th>
+                <th style={{ cursor: 'pointer' }} onClick={() => toggleSort('category')}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>Categoría <SortIcon field="category" /></span>
+                </th>
+                <th style={{ textAlign: 'right', cursor: 'pointer' }} onClick={() => toggleSort('price')}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', justifyContent: 'flex-end' }}>Precio <SortIcon field="price" /></span>
+                </th>
+                <th style={{ textAlign: 'right', cursor: 'pointer' }} onClick={() => toggleSort('stock')}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', justifyContent: 'flex-end' }}>Stock <SortIcon field="stock" /></span>
+                </th>
                 <th>Estado</th>
                 <th style={{ width: 80 }}></th>
               </tr>

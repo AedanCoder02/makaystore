@@ -114,6 +114,19 @@ const CONTENT_FIELDS: Record<string, {key:string;label:string;type:'text'|'texta
   ],
 };
 
+// Maps content field keys to the CSS selector of the live element they control on the storefront.
+// Only fields with a known, stable selector can be live-previewed inline — everything else still
+// works, it just requires a real save + preview reload to show up.
+const CONTENT_SELECTORS: Record<string, Record<string,string>> = {
+  home: {
+    heroTitle:        '.hero-headline',
+    heroSubtitle:      '.hero-subheadline',
+    ctaText:            '.hero-cta-inner',
+    featuredTitle:     '.featured-heading',
+    featuredSubtitle: '.featured-subtitle',
+  },
+};
+
 interface PageState { colors: Record<string,string>; typography: Record<string,string>; content: Record<string,string>; }
 function makeDefaultPage(pageId?: string): PageState {
   const content: Record<string,string> = {};
@@ -221,6 +234,34 @@ export default function StudioEditor() {
     } catch {}
   }, []);
 
+  // ── Iframe content injection — text fields have no other way to preview ──
+  const injectContent = useCallback((pageId: string, ps: PageState) => {
+    try {
+      const doc = iframeRef.current?.contentDocument;
+      if (!doc) return;
+      const map = CONTENT_SELECTORS[pageId];
+      if (!map) return;
+      Object.entries(map).forEach(([key, selector]) => {
+        const val = ps.content[key];
+        if (!val) return;
+        const el = doc.querySelector(selector);
+        if (!el) return;
+        // buttons/links may have an icon sibling after the text — only touch the leading text node
+        const firstChild = el.firstChild;
+        if (firstChild && firstChild.nodeType === Node.TEXT_NODE) firstChild.textContent = val;
+        else el.textContent = val;
+      });
+    } catch {}
+  }, []);
+
+  // ── Force a real reload so persisted DB content is refetched ────────────
+  const reloadPreview = useCallback(() => {
+    const el = iframeRef.current;
+    if (!el) return;
+    setIframeReady(false);
+    try { el.contentWindow?.location.reload(); } catch { el.src = el.src; }
+  }, []);
+
   useEffect(() => {
     if (activePage !== 'global') {
       const src = PAGES.find(p=>p.id===activePage)?.src ?? '/';
@@ -231,9 +272,11 @@ export default function StudioEditor() {
 
   useEffect(() => {
     if (iframeReady && activePage !== 'global') {
-      injectStyles(pageStates[activePage] ?? makeDefaultPage());
+      const ps = pageStates[activePage] ?? makeDefaultPage();
+      injectStyles(ps);
+      injectContent(activePage, ps);
     }
-  }, [pageStates, activePage, iframeReady, injectStyles]);
+  }, [pageStates, activePage, iframeReady, injectStyles, injectContent]);
 
   // ── Save helpers ───────────────────────────────────────────────────────
   const setSaveState = (key: string, state: SaveState) => {
@@ -296,6 +339,7 @@ export default function StudioEditor() {
     Object.entries(ps.content).forEach(([k,v]) => { if (v) patch[`page:${activePage}:content:${k}`] = v; });
     const ok = await patchSettings(patch);
     setSaveState(key, ok ? 'saved' : 'idle');
+    if (ok && activePage !== 'global') reloadPreview();
   };
 
   const publishAll = async () => {
@@ -323,6 +367,7 @@ export default function StudioEditor() {
       setSaveState('all', 'idle');
     } else {
       setSaveState('all', 'saved');
+      if (activePage !== 'global') reloadPreview();
     }
   };
 
@@ -670,7 +715,12 @@ export default function StudioEditor() {
                     ref={iframeRef}
                     src={previewSrc}
                     className="studio-iframe"
-                    onLoad={() => { setIframeReady(true); injectStyles(pageStates[activePage] ?? makeDefaultPage()); }}
+                    onLoad={() => {
+                      setIframeReady(true);
+                      const ps = pageStates[activePage] ?? makeDefaultPage();
+                      injectStyles(ps);
+                      injectContent(activePage, ps);
+                    }}
                     title="Storefront Preview"
                   />
                 )}

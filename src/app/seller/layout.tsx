@@ -8,7 +8,9 @@ export default async function SellerLayout({ children }: { children: React.React
 
   const user = await currentUser();
   const role = user?.publicMetadata?.role as string | undefined;
-  if (role !== 'seller' && role !== 'admin') redirect('/');
+  const roles = (user?.publicMetadata?.roles as string[] | undefined) ?? [];
+  const hasSeller = role === 'seller' || role === 'admin' || roles.includes('seller') || roles.includes('admin');
+  if (!hasSeller) redirect('/');
 
   return (
     <div className="seller-layout">

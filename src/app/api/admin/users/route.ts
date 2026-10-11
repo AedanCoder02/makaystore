@@ -14,8 +14,10 @@ export async function GET() {
       fullName: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || '—',
       email: u.emailAddresses[0]?.emailAddress ?? '',
       role: (u.publicMetadata?.role as string) ?? 'customer',
+      roles: (u.publicMetadata?.roles as string[]) ?? [],
       createdAt: u.createdAt,
       imageUrl: u.imageUrl,
+      permissions: (u.unsafeMetadata?.permissions as string[]) ?? [],
     }));
 
     return NextResponse.json(result);

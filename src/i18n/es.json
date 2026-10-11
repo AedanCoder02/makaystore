@@ -34,7 +34,8 @@
     "signOut": "Cerrar sesión",
     "myAccount": "Mi cuenta",
     "allies": "Aliados",
-    "membership": "Membresía"
+    "membership": "Membresía",
+    "reservations": "Reservas"
   },
   "hero": {
     "headline": "Tu Refugio de Conexión",
@@ -454,7 +455,8 @@
       "studio": "Studio",
       "rotation": "Rotación",
       "events": "Eventos",
-      "memberships": "Membresías"
+      "memberships": "Membresías",
+      "reservations": "Reservaciones"
     },
     "sell": {
       "title": "Vender a Cliente",

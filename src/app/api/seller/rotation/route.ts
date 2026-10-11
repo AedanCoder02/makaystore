@@ -9,12 +9,23 @@ async function ensureColumn() {
 export async function GET() {
   try {
     await ensureColumn();
-    const rows = await sql`
-      SELECT id, title, sku, status, last_rotated_at
-      FROM products
-      ORDER BY id ASC
-    `;
-    return NextResponse.json(rows);
+    const [rows, salesRows] = await Promise.all([
+      sql`SELECT id, title, sku, status, last_rotated_at FROM products ORDER BY id ASC`,
+      sql`
+        SELECT (item->>'id') AS product_id, SUM((item->>'quantity')::int) AS units_sold
+        FROM seller_orders, jsonb_array_elements(items::jsonb) AS item
+        WHERE created_at >= NOW() - INTERVAL '30 days'
+        GROUP BY item->>'id'
+      `.catch(() => []),
+    ]);
+
+    const salesMap = Object.fromEntries(salesRows.map((r: any) => [r.product_id, Number(r.units_sold) || 0]));
+    const enriched = rows.map((r: any) => ({
+      ...r,
+      units_sold_30d: salesMap[String(r.id)] ?? 0,
+    }));
+
+    return NextResponse.json(enriched);
   } catch (e: any) {
     console.error('[GET /api/seller/rotation]', e?.message);
     return NextResponse.json({ error: e?.message }, { status: 500 });
