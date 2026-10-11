@@ -34,7 +34,7 @@ export async function GET() {
 
   const rows = await sql`
     SELECT * FROM orders
-    WHERE customer_id = ${userId} AND location = ${STORE_LOCATION}
+    WHERE customer_id = ${userId}
     ORDER BY created_at DESC
   `;
   return NextResponse.json(rows);
