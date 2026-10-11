@@ -1,12 +1,13 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
-import { getPanelLocation } from '@/lib/location';
+import { getPanelLocation } from '@/lib/location.server';
 
 async function ensureColumns() {
   await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS sizes TEXT[] DEFAULT '{}'`;
   await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS colors JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS provider TEXT DEFAULT ''`;
+  await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS location TEXT NOT NULL DEFAULT 'guacuco'`;
 }
 
 // GET — all products (all statuses) for seller panel
