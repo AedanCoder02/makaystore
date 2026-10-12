@@ -52,10 +52,10 @@ export default function Hero() {
     headline.innerHTML = words
       .map(
         (word) =>
-          word
+          `<span class="word">${word
             .split('')
             .map((char) => `<span class="char">${char}</span>`)
-            .join('') + '<span class="word-space"> </span>'
+            .join('')}</span>` + '<span class="word-space"> </span>'
       )
       .join('');
 
