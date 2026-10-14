@@ -60,4 +60,31 @@ describe('PATCH /api/admin/theme', () => {
     const res = await PATCH(makeRequest({ heroTitle: 'x' }));
     expect(res.status).toBe(403);
   });
+
+  it('rejects a customer who spoofs their own unsafeMetadata.permissions to include "studio"', async () => {
+    // unsafeMetadata is Clerk's user-editable bucket — any signed-in user can
+    // rewrite it client-side via the Clerk SDK. This is the exact attack the
+    // permission check must not fall for: a plain customer (role unchanged,
+    // since publicMetadata is backend-only) sets their own unsafeMetadata to
+    // claim the 'studio' permission and must still be rejected.
+    (auth as jest.Mock).mockResolvedValue({ userId: 'user_5' });
+    (currentUser as jest.Mock).mockResolvedValue({
+      publicMetadata: { role: 'customer' },
+      unsafeMetadata: { permissions: ['studio'] },
+    });
+    const { PATCH } = await import('@/app/api/admin/theme/route');
+    const res = await PATCH(makeRequest({ heroTitle: 'x' }));
+    expect(res.status).toBe(403);
+  });
+
+  it('allows a supervisor with the studio permission', async () => {
+    (auth as jest.Mock).mockResolvedValue({ userId: 'user_6' });
+    (currentUser as jest.Mock).mockResolvedValue({
+      publicMetadata: { role: 'supervisor' },
+      unsafeMetadata: { permissions: ['studio'] },
+    });
+    const { PATCH } = await import('@/app/api/admin/theme/route');
+    const res = await PATCH(makeRequest({ heroTitle: 'x' }));
+    expect(res.status).toBe(200);
+  });
 });
