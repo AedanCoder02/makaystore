@@ -444,6 +444,8 @@
     "role": "Seller",
     "storeName": "Makay Store",
     "backToStore": "← Back to Store",
+    "viewGuacuco": "Guacuco",
+    "viewLaMarina": "La Marina ↗",
     "sessionsToday": "Sessions today",
     "nav": {
       "dashboard": "Dashboard",

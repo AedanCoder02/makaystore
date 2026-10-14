@@ -110,6 +110,27 @@
 }
 .seller-back-link:hover { color: rgba(255,255,255,0.6); }
 
+.seller-sites-links { padding-bottom: 0.25rem; }
+
+.seller-sites-row {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0 1rem 0.5rem;
+}
+.seller-site-link {
+  font-family: var(--font-montserrat);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+  text-decoration: none;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.04);
+  transition: color 0.2s, background 0.2s;
+}
+.seller-site-link:hover { color: var(--makay-peachy-rose); background: rgba(255,255,255,0.08); }
+
 .seller-main {
   flex: 1;
   margin-left: 220px;

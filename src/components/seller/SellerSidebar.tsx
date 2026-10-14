@@ -105,9 +105,24 @@ export default function SellerSidebar() {
           ))}
         </nav>
         {!collapsed && (
-          <Link href="/" className="seller-back-link">
-            <span className="seller-back-link-label">{t('backToStore')}</span>
-          </Link>
+          <div className="seller-sites-links">
+            <Link href="/" className="seller-back-link">
+              <span className="seller-back-link-label">{t('backToStore')}</span>
+            </Link>
+            <div className="seller-sites-row">
+              <Link href="/" className="seller-site-link">
+                {t('viewGuacuco')}
+              </Link>
+              <a
+                href="https://marina.makaybeachclub.com"
+                target="_blank"
+                rel="noreferrer"
+                className="seller-site-link"
+              >
+                {t('viewLaMarina')}
+              </a>
+            </div>
+          </div>
         )}
         <button className="sidebar-toggle" onClick={toggle} title={collapsed ? 'Expandir' : 'Contraer'}>
           {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}

@@ -436,9 +436,20 @@ export default function StudioEditor() {
             <HelpCircle size={15} />
           </button>
           {section === 'pages' && activePage !== 'global' && (
-            <a href={PAGES.find(p=>p.id===activePage)?.src ?? '/'} target="_blank" rel="noreferrer" className="studio-btn-ghost">
-              <ExternalLink size={14} /> Preview
-            </a>
+            <>
+              <a href={PAGES.find(p=>p.id===activePage)?.src ?? '/'} target="_blank" rel="noreferrer" className="studio-btn-ghost" title="Preview this edit on Guacuco">
+                <ExternalLink size={14} /> Preview Guacuco
+              </a>
+              <a
+                href={`https://marina.makaybeachclub.com${PAGES.find(p=>p.id===activePage)?.src ?? '/'}`}
+                target="_blank"
+                rel="noreferrer"
+                className="studio-btn-ghost"
+                title="La Marina has no editor — this just opens its live site for comparison"
+              >
+                <ExternalLink size={14} /> View La Marina
+              </a>
+            </>
           )}
           <button
             className={`studio-publish-btn${allSaveState === 'saved' ? ' saved' : ''}`}
