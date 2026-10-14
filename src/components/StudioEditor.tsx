@@ -409,7 +409,9 @@ export default function StudioEditor() {
           <Wand2 size={18} className="studio-topbar-icon" />
           <div>
             <h1 className="studio-title">Storefront Studio</h1>
-            <p className="studio-subtitle">Brand, pages, content — one editor</p>
+            <p className="studio-subtitle">
+              Brand, pages, content — <strong>Guacuco only</strong>. La Marina is a separate site, managed in its own codebase.
+            </p>
           </div>
         </div>
 

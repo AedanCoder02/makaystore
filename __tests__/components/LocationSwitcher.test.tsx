@@ -1,5 +1,11 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+
+let mockPathname = '/seller/dashboard';
+jest.mock('next/navigation', () => ({
+  usePathname: () => mockPathname,
+}));
+
 import LocationSwitcher from '@/components/LocationSwitcher';
 
 function setCookie(value: string) {
@@ -8,10 +14,11 @@ function setCookie(value: string) {
 
 beforeEach(() => {
   document.cookie = 'panel_location=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  mockPathname = '/seller/dashboard';
 });
 
 describe('LocationSwitcher', () => {
-  it('renders both location buttons', () => {
+  it('renders both location buttons on a location-aware page', () => {
     render(<LocationSwitcher />);
     expect(screen.getByRole('button', { name: 'Guacuco' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'La Marina' })).toBeInTheDocument();
@@ -47,5 +54,51 @@ describe('LocationSwitcher', () => {
   it('renders nothing when collapsed', () => {
     render(<LocationSwitcher collapsed />);
     expect(screen.queryByRole('button', { name: 'Guacuco' })).not.toBeInTheDocument();
+  });
+
+  describe('on pages where the switcher has no effect', () => {
+    it('renders nothing on Studio (theme editing is Guacuco-only, not location-scoped)', () => {
+      mockPathname = '/seller/studio';
+      render(<LocationSwitcher />);
+      expect(screen.queryByRole('button', { name: 'Guacuco' })).not.toBeInTheDocument();
+    });
+
+    it('renders nothing on Events (shared across both locations by design)', () => {
+      mockPathname = '/seller/events';
+      render(<LocationSwitcher />);
+      expect(screen.queryByRole('button', { name: 'Guacuco' })).not.toBeInTheDocument();
+    });
+
+    it('renders nothing on admin Users (not product/order data)', () => {
+      mockPathname = '/admin/users';
+      render(<LocationSwitcher />);
+      expect(screen.queryByRole('button', { name: 'Guacuco' })).not.toBeInTheDocument();
+    });
+
+    it('renders nothing on supervisor Staff (not product/order data)', () => {
+      mockPathname = '/supervisor/staff';
+      render(<LocationSwitcher />);
+      expect(screen.queryByRole('button', { name: 'Guacuco' })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('on pages where the switcher does take effect', () => {
+    it.each([
+      '/admin/dashboard',
+      '/admin/orders',
+      '/admin/reports',
+      '/seller/dashboard',
+      '/seller/sell',
+      '/seller/products',
+      '/seller/stock',
+      '/seller/rotation',
+      '/supervisor/dashboard',
+      '/supervisor/orders',
+      '/supervisor/reports',
+    ])('renders on %s', (pathname) => {
+      mockPathname = pathname;
+      render(<LocationSwitcher />);
+      expect(screen.getByRole('button', { name: 'Guacuco' })).toBeInTheDocument();
+    });
   });
 });
