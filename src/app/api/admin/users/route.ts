@@ -17,7 +17,9 @@ export async function GET() {
       roles: (u.publicMetadata?.roles as string[]) ?? [],
       createdAt: u.createdAt,
       imageUrl: u.imageUrl,
-      permissions: (u.unsafeMetadata?.permissions as string[]) ?? [],
+      // publicMetadata, not unsafeMetadata — permissions are a backend-granted
+      // authorization decision and must not live in client-editable metadata.
+      permissions: (u.publicMetadata?.permissions as string[]) ?? [],
     }));
 
     return NextResponse.json(result);

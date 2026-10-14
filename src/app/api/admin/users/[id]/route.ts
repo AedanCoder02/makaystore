@@ -57,8 +57,12 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     }
 
     if (permissions !== undefined) {
-      // permissions stored in unsafeMetadata so user can read it client-side
-      await client.users.updateUserMetadata(id, { unsafeMetadata: { permissions } });
+      // publicMetadata, not unsafeMetadata: publicMetadata is readable client-side
+      // (what the original comment here wanted) but — unlike unsafeMetadata — is
+      // writable only through the backend Clerk client, never by the user's own
+      // browser session. unsafeMetadata would let any signed-in user grant
+      // themselves arbitrary permissions via the client SDK.
+      await client.users.updateUserMetadata(id, { publicMetadata: { permissions } });
     }
 
     if (Object.keys(updates).length > 0) {

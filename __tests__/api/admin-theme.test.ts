@@ -34,8 +34,7 @@ describe('PATCH /api/admin/theme', () => {
   it('allows a seller with the studio permission (Studio is reachable from the seller panel)', async () => {
     (auth as jest.Mock).mockResolvedValue({ userId: 'user_2' });
     (currentUser as jest.Mock).mockResolvedValue({
-      publicMetadata: { role: 'seller' },
-      unsafeMetadata: { permissions: ['sell', 'studio'] },
+      publicMetadata: { role: 'seller', permissions: ['sell', 'studio'] },
     });
     const { PATCH } = await import('@/app/api/admin/theme/route');
     const res = await PATCH(makeRequest({ heroTitle: 'x' }));
@@ -45,8 +44,7 @@ describe('PATCH /api/admin/theme', () => {
   it('rejects a seller WITHOUT the studio permission', async () => {
     (auth as jest.Mock).mockResolvedValue({ userId: 'user_3' });
     (currentUser as jest.Mock).mockResolvedValue({
-      publicMetadata: { role: 'seller' },
-      unsafeMetadata: { permissions: ['sell'] },
+      publicMetadata: { role: 'seller', permissions: ['sell'] },
     });
     const { PATCH } = await import('@/app/api/admin/theme/route');
     const res = await PATCH(makeRequest({ heroTitle: 'x' }));
@@ -63,10 +61,9 @@ describe('PATCH /api/admin/theme', () => {
 
   it('rejects a customer who spoofs their own unsafeMetadata.permissions to include "studio"', async () => {
     // unsafeMetadata is Clerk's user-editable bucket — any signed-in user can
-    // rewrite it client-side via the Clerk SDK. This is the exact attack the
-    // permission check must not fall for: a plain customer (role unchanged,
-    // since publicMetadata is backend-only) sets their own unsafeMetadata to
-    // claim the 'studio' permission and must still be rejected.
+    // rewrite it client-side via the Clerk SDK. The route must read permissions
+    // from publicMetadata only, so a spoofed unsafeMetadata value here has no
+    // effect at all — this customer is still rejected.
     (auth as jest.Mock).mockResolvedValue({ userId: 'user_5' });
     (currentUser as jest.Mock).mockResolvedValue({
       publicMetadata: { role: 'customer' },
@@ -80,8 +77,7 @@ describe('PATCH /api/admin/theme', () => {
   it('allows a supervisor with the studio permission', async () => {
     (auth as jest.Mock).mockResolvedValue({ userId: 'user_6' });
     (currentUser as jest.Mock).mockResolvedValue({
-      publicMetadata: { role: 'supervisor' },
-      unsafeMetadata: { permissions: ['studio'] },
+      publicMetadata: { role: 'supervisor', permissions: ['studio'] },
     });
     const { PATCH } = await import('@/app/api/admin/theme/route');
     const res = await PATCH(makeRequest({ heroTitle: 'x' }));

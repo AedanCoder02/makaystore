@@ -8,20 +8,16 @@ export async function PATCH(req: NextRequest) {
 
   const user = await currentUser();
   const role = user?.publicMetadata?.role as string | undefined;
-  const permissions = user?.unsafeMetadata?.permissions as string[] | undefined;
+  // publicMetadata, not unsafeMetadata — permissions are granted exclusively
+  // by the backend admin API (/api/admin/users/[id]) and are safe to trust
+  // for authorization; unsafeMetadata is rewritable by the user's own browser
+  // session via the Clerk client SDK and must never gate a write endpoint.
+  const permissions = user?.publicMetadata?.permissions as string[] | undefined;
   // Studio is reachable from the seller panel via the 'studio' permission flag
   // (see SellerSidebar's ALL_NAV filter) — honor that grant here too, not just
   // the admin role, or a seller with Studio access can open the editor and
   // have every save silently 403.
-  //
-  // unsafeMetadata is Clerk's user-editable metadata bucket (any signed-in
-  // user can rewrite their own via the client SDK), so it must never be the
-  // sole gate on a write endpoint — it only narrows access *within* an
-  // already-trusted staff role, never grants access on its own. publicMetadata
-  // is set exclusively by the backend/admin API (see /api/admin/create-user,
-  // /api/admin/users/[id]) and is safe to trust here.
-  const isTrustedStaffRole = role === 'admin' || role === 'seller' || role === 'supervisor';
-  const canEditTheme = role === 'admin' || (isTrustedStaffRole && !!permissions && permissions.includes('studio'));
+  const canEditTheme = role === 'admin' || (!!permissions && permissions.includes('studio'));
   if (!canEditTheme) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
 
   const settings = await req.json();

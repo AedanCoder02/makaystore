@@ -14,7 +14,9 @@ export default function SellerSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useUser();
-  const permissions = (user?.unsafeMetadata?.permissions as string[] | undefined);
+  // publicMetadata, not unsafeMetadata — permissions are admin-granted and
+  // must come from metadata the user's own browser session can't rewrite.
+  const permissions = (user?.publicMetadata?.permissions as string[] | undefined);
 
   useEffect(() => {
     const saved = localStorage.getItem('seller-sidebar-collapsed');
