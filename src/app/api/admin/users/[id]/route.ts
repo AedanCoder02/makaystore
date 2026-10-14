@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { auth, currentUser, clerkClient } from '@clerk/nextjs/server';
 
 const ALLOWED_ROLES = ['customer', 'seller', 'supervisor', 'admin'];
 
@@ -33,6 +33,16 @@ export const ROLE_SECTIONS: Record<string, { key: string; label: string }[]> = {
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // This route grants role and permissions to ANY target user — it must be
+  // admin-only. Its absence let any authenticated user (including a plain
+  // customer) PATCH their own role to 'admin' or grant themselves arbitrary
+  // permissions with a single request; this is the actual fix, the
+  // publicMetadata-vs-unsafeMetadata change on its own didn't close it.
+  const caller = await currentUser();
+  if ((caller?.publicMetadata?.role as string | undefined) !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const { id } = await params;
   const body = await req.json();
