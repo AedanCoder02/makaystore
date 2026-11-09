@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Calendar, MapPin, Ticket, ArrowRight } from 'lucide-react';
 
+const BG_FALLBACK = '/images/product-tshirt.jpg';
 const BG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260719_020223_13228ad3-42dc-44fe-88f5-9624ff49e7b9.png';
 
 interface Event {
@@ -35,7 +36,8 @@ export default function HomepageEvents() {
       {/* Beach background with overlay */}
       <div style={{
         position: 'absolute', inset: 0,
-        backgroundImage: `url(${bgImage})`,
+        // Local photo underneath, so the section never falls back to flat grey if the remote image fails.
+        backgroundImage: `url(${bgImage}), url(${BG_FALLBACK})`,
         backgroundSize: 'cover', backgroundPosition: 'center',
       }} />
       <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(28,22,17,0.75) 0%, rgba(28,22,17,0.88) 100%)' }} />

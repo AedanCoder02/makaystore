@@ -290,3 +290,19 @@ h1, h2, h3, h4, h5 {
   .navbar-mobile-menu { display: none !important; }
   .navbar-mobile-right { display: none !important; }
 }
+
+/* Homepage section headings: one type treatment instead of six (some were gold,
+   some grey, some navy, mixed weights and tracking). Gold stays for accents only. */
+main .featured-heading,
+main .why-heading,
+main .testimonials-heading,
+main .how-heading,
+main .categories-heading,
+main .newsletter-heading {
+  font-family: var(--font-playfair-display), Georgia, serif;
+  font-size: clamp(2rem, 4.5vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  color: #2b211a;
+}

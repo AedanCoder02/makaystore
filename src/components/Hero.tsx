@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { animate, stagger, createTimeline } from 'animejs';
-import ShaderGradientCanvasWrapper from './ShaderGradientCanvas';
 import '../styles/hero.css';
+
+const HERO_IMAGE = '/images/hero-guacuco.webp';
 
 export default function Hero() {
   const t = useTranslations('hero');
@@ -42,40 +43,30 @@ export default function Hero() {
   const displaySubtitle = heroSubtitle || t('subheadline');
   const displayCta      = heroCta      || t('cta');
 
-  // Character stagger runs after theme is resolved so the right text is split
+  // Character stagger runs after theme is resolved so the right text is animated.
   useEffect(() => {
     if (!themeLoaded || reducedMotion) return;
     const headline = headlineRef.current;
     if (!headline) return;
 
-    const words = headline.innerText.split(' ');
-    headline.innerHTML = words
-      .map(
-        (word) =>
-          word
-            .split('')
-            .map((char) => `<span class="char">${char}</span>`)
-            .join('') + '<span class="word-space"> </span>'
-      )
-      .join('');
-
-    const tl = createTimeline({ defaults: { ease: 'outQuad' } });
+    const tl = createTimeline({ defaults: { ease: 'outExpo' } });
 
     tl.add(headline.querySelectorAll('.char'), {
       opacity: [0, 1],
-      translateY: [24, 0],
-      duration: 700,
-      delay: stagger(25),
+      translateY: ['0.5em', '0em'],
+      rotate: [4, 0],
+      duration: 1000,
+      delay: stagger(28),
     });
 
     if (subRef.current) {
-      tl.add(subRef.current, { opacity: [0, 1], translateY: [16, 0], duration: 600 }, '-=300');
+      tl.add(subRef.current, { opacity: [0, 1], translateY: [16, 0], duration: 700 }, '-=600');
     }
 
     if (ctaRef.current) {
-      tl.add(ctaRef.current, { opacity: [0, 1], translateY: [16, 0], duration: 500 }, '-=400');
+      tl.add(ctaRef.current, { opacity: [0, 1], translateY: [16, 0], duration: 600 }, '-=500');
     }
-  }, [themeLoaded, reducedMotion]);
+  }, [themeLoaded, reducedMotion, displayTitle]);
 
   // Scroll fade-out on hero
   useEffect(() => {
@@ -84,8 +75,9 @@ export default function Hero() {
     const handleScroll = () => {
       const scrollY = window.scrollY;
       const heroHeight = hero.offsetHeight;
-      const opacity = Math.max(0, 1 - scrollY / (heroHeight * 0.45));
-      hero.style.opacity = String(opacity);
+      const progress = Math.min(1, scrollY / heroHeight);
+      hero.style.setProperty('--hero-progress', progress.toFixed(3));
+      hero.querySelector<HTMLElement>('.hero-content')!.style.opacity = String(Math.max(0, 1 - scrollY / (heroHeight * 0.5)));
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -132,12 +124,28 @@ export default function Hero() {
           style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', zIndex: 0 }}
         />
       ) : (
-        <ShaderGradientCanvasWrapper />
+        <div className="hero-media" aria-hidden="true">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={HERO_IMAGE} alt="" fetchPriority="high" decoding="async" />
+        </div>
       )}
+      <div className="hero-shade" aria-hidden="true" />
 
       <div className="hero-content">
-        <h1 ref={headlineRef} className="hero-headline">
-          {displayTitle}
+        <p className="hero-eyebrow">
+          <span aria-hidden="true" />Makay Beach Club · Guacuco<span aria-hidden="true" />
+        </p>
+        <h1 ref={headlineRef} className="hero-headline" aria-label={displayTitle}>
+          {displayTitle.split(' ').map((word, wi, words) => (
+            <span key={`${word}-${wi}`} aria-hidden="true">
+              <span className="word">
+                {word.split('').map((char, ci) => (
+                  <span key={ci} className="char">{char}</span>
+                ))}
+              </span>
+              {wi < words.length - 1 ? ' ' : null}
+            </span>
+          ))}
         </h1>
 
         <p ref={subRef} className="hero-subheadline">
@@ -155,9 +163,7 @@ export default function Hero() {
       </div>
 
       <div className="hero-scroll-indicator" aria-hidden="true">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1f2937" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 5v14M5 12l7 7 7-7" />
-        </svg>
+        <span />
       </div>
     </section>
   );

@@ -6,9 +6,11 @@ import { useTranslations } from 'next-intl';
 import { Award, Star, ShoppingBag, Check } from 'lucide-react';
 
 const DEFAULT_IMAGES = {
-  bronze: 'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260719_025011_3811970f-3e59-49fb-9c36-e9d66f33d8ad.png',
-  silver: 'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260719_025018_a90c7985-632b-45b3-af61-3982b4a580e6.png',
-  gold:   'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260719_025024_d50b049e-ae8b-481e-a3d8-e015ab48c01c.png',
+  // The CloudFront originals stopped resolving (broken image on the live page);
+  // hosted locally now, same files La Marina already uses.
+  bronze: '/images/membership/bronze.jpg',
+  silver: '/images/membership/silver.jpg',
+  gold:   '/images/membership/gold.jpg',
 };
 const TIER_COLORS = { bronze: '#CD7F32', silver: '#A8A9AD', gold: '#D4AF37' };
 const TIER_ICONS  = { bronze: Award, silver: Star, gold: Star };

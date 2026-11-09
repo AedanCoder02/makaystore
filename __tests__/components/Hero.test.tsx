@@ -36,17 +36,6 @@ jest.mock('animejs', () => ({
   })),
 }));
 
-jest.mock('@shadergradient/react', () => ({
-  ShaderGradientCanvas: () => null,
-  ShaderGradient: () => null,
-}));
-
-jest.mock('@/components/ShaderGradientCanvas', () => {
-  return function MockShaderGradientCanvas() {
-    return <div data-testid="shader-gradient" />;
-  };
-});
-
 // next/link must be a forwardRef component because Hero uses ref on Link
 jest.mock('next/link', () => {
   const { forwardRef } = require('react');
@@ -65,6 +54,8 @@ import Hero from '@/components/Hero';
 // jsdom does not implement innerText — force reducedMotion=true so the
 // animation useEffect (which calls headline.innerText.split) is skipped.
 beforeAll(() => {
+  // Hero loads Studio overrides from /api/theme; jsdom has no fetch.
+  global.fetch = jest.fn(() => Promise.resolve({ ok: false, json: () => Promise.resolve({}) })) as unknown as typeof fetch;
   Object.defineProperty(window, 'matchMedia', {
     writable: true,
     value: jest.fn((query: string) => ({
@@ -101,9 +92,15 @@ describe('Hero (EN)', () => {
     expect(link).toHaveAttribute('href', '/products');
   });
 
-  it('renders the shader gradient background', () => {
-    render(<Hero />);
-    expect(screen.getByTestId('shader-gradient')).toBeInTheDocument();
+  it('renders the photo background when no hero video is configured', () => {
+    const { container } = render(<Hero />);
+    expect(container.querySelector('.hero-media img')).toHaveAttribute('src', '/images/hero-guacuco.webp');
+  });
+
+  it('keeps each headline word intact so it never breaks mid-word', () => {
+    const { container } = render(<Hero />);
+    const words = Array.from(container.querySelectorAll('.hero-headline .word')).map((w) => w.textContent);
+    expect(words).toEqual(['Discover', 'Makay']);
   });
 
   it('renders a hero section element', () => {
