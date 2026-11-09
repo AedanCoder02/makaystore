@@ -146,7 +146,7 @@ export default function MediaUpload({ value, onChange, label = 'Video' }: Props)
       )}
 
       <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.65rem', color: 'var(--makay-mauve)', opacity: 0.6, margin: 0 }}>
-        Replaces the ShaderGradient background. For large videos, upload to Cloudinary or S3 and paste the URL.
+        Replaces the hero photo. For large videos, upload to Cloudinary or S3 and paste the URL.
       </p>
 
       <input ref={inputRef} type="file" accept="video/mp4,video/quicktime,.mp4,.mov" style={{ display: 'none' }} onChange={handleFile} />
