@@ -520,5 +520,5 @@ CREATE TABLE IF NOT EXISTS event_tickets (
 - **Makaystore:** `makaystore-sandy.vercel.app` | `D:/AP/projects/makaystore`
 - **Vercel token:** in `credentials_vercel_kryptyk.md` (memory)
 - **DB:** Neon — `ep-raspy-forest-at258m7w-pooler.c-9.us-east-1.aws.neon.tech`
-- **FAL key:** `02893c1a-a829-4893-b89b-df1bd100c5f3:f5b9371cbd61883f410b40a677e9ed94` (needs balance top-up)
-- **TripoSR Railway token:** `abb684e5-f40b-431f-a166-866bb70f92e7`
+- **FAL key:** set as `FAL_KEY` in Vercel env (needs balance top-up)
+- **TripoSR Railway token:** stored outside the repo (Railway dashboard)

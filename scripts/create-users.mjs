@@ -1,7 +1,7 @@
 /**
  * Creates users in Clerk + seeds user_profiles in Neon DB.
  * Run: node scripts/create-users.mjs
- * Requires CLERK_SECRET_KEY and DATABASE_URL env vars.
+ * Requires CLERK_SECRET_KEY and DATABASE_URL env vars, and scripts/users.local.json.
  */
 import postgres from 'postgres';
 
@@ -78,62 +78,10 @@ function generatePassword() {
 }
 
 // ── User list ─────────────────────────────────────────────
-// NOTE: Jenifer De Sousa skipped — no email address provided.
-const USERS = [
-  {
-    firstName: 'Selen',   lastName: 'de Valera',
-    email: 'camposdavila1512@gmail.com',
-    dollar_balance: 400,
-  },
-  {
-    firstName: 'Martha',  lastName: 'Venturelli',
-    email: 'marthaventurelli@gmail.com',
-    phone: '04143144279',
-  },
-  {
-    firstName: 'Rosamaria', lastName: 'Garrido Alvarenga',
-    email: 'rosamariaalvarenga7@gmail.com',
-    phone: '04145495188',
-  },
-  {
-    firstName: 'Jose Gregorio', lastName: 'Rojas Yanez',
-    email: 'rojasjgx@gmail.com',
-    bio: 'Cédula: 15788401',
-  },
-  {
-    firstName: 'Alejandro', lastName: 'Scholtz',
-    email: 'parquediverland@gmail.com',
-    bio: 'El Paraíso 1, conjunto residencial Atlantis, casa #20, Pampatar',
-  },
-  {
-    firstName: 'Orlis Karina', lastName: 'Vegas',
-    email: 'pachamamavegas@gmail.com',
-    bio: 'Av. Aldonza Manriques, Res. Bahía Dorada / PB4',
-  },
-  {
-    firstName: 'Sandra',  lastName: 'Sánchez',
-    email: 'sanchezsandracarolinag@gmail.com',
-    bio: 'Avenida Bolívar, edificio Vincenzo, frente al centro comercial la Vela',
-  },
-  {
-    firstName: 'María Yolanda', lastName: 'Rivas',
-    email: 'myrivas@gmail.com',
-    bio: 'Aguamarina Country Club TH 79, Pampatar',
-  },
-  {
-    firstName: 'Yomnarys', lastName: 'Lira',
-    email: 'yomnaryslira@gmail.com',
-    bio: 'Urb. Playa El Angel, edificio Terrasol Suites',
-  },
-  {
-    firstName: 'Daniella', lastName: 'Parra',
-    email: 'danidani68@hotmail.com',
-  },
-  {
-    firstName: 'Pedro',   lastName: 'Bravo',
-    email: 'brafer0166@gmail.com',
-  },
-];
+// Personal data lives outside the repo. Put the list in scripts/users.local.json
+// (gitignored) as an array of { firstName, lastName, email, phone?, bio?, dollar_balance? }.
+import { readFileSync } from 'node:fs';
+const USERS = JSON.parse(readFileSync(new URL('./users.local.json', import.meta.url), 'utf8'));
 
 console.log(`Creating ${USERS.length} users...\n`);
 const results = [];

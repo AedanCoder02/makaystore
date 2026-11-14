@@ -42,3 +42,6 @@ next-env.d.ts
 .superpowers/
 
 .vercel
+
+# local-only personal data for scripts/create-users.mjs
+scripts/users.local.json
