@@ -1,6 +1,8 @@
 import postgres from 'postgres';
 
-const sql = postgres('postgresql://neondb_owner:npg_ivq24PYWxBjp@ep-raspy-forest-at258m7w-pooler.c-9.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require');
+const DB_URL = process.env.DATABASE_URL;
+if (!DB_URL) { console.error('Missing DATABASE_URL'); process.exit(1); }
+const sql = postgres(DB_URL);
 
 const rows = await sql`
   SELECT id, title, price, status, category
