@@ -247,4 +247,4 @@ interface HeroProps { titleOverride?: string; subtitleOverride?: string; ctaOver
 | Products table (to create) | Neon — `products` |
 | Existing real tables | `product_stock`, `product_overrides`, `seller_orders`, `theme_settings`, `user_profiles`, `activities` |
 | Vercel project | `makaystore` on kryptycstore-6214 account |
-| Deploy command | `vercel deploy --prod --scope kryptycstore-6214s-projects --token vcp_40zDH...` |
+| Deploy command | `vercel deploy --prod --scope kryptycstore-6214s-projects --token $VERCEL_TOKEN` |
