@@ -1,286 +1,435 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { CreditCard, Smartphone, PocketKnife, Banknote, Plus, Minus, Upload, CheckCircle, AlertCircle } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
+import {
+  ArrowLeft, Bitcoin, Check, Copy, CreditCard, DollarSign, FileText, Landmark, Minus, Plus,
+  ShieldCheck, Smartphone, Upload,
+} from 'lucide-react';
 import StripePaymentForm from '@/components/StripePaymentForm';
+import { PENDING_REDIRECT_KEY } from '@/components/orders/ClearCartOnReturn';
 
-export type PaymentMethod = 'stripe' | 'pago_movil' | 'punto_venta' | 'cash';
+export type PaymentMethod = 'stripe' | 'binance' | 'pago_movil' | 'transferencia' | 'zelle' | 'binance_pay_id';
 
+const MANUAL: PaymentMethod[] = ['pago_movil', 'transferencia', 'zelle', 'binance_pay_id'];
+const isManual = (m: PaymentMethod) => MANUAL.includes(m);
+
+/** One payment leg as sent to POST /api/orders. `proof` is uploaded as multipart `proof_<index>`. */
 export interface PaymentEntry {
   method: PaymentMethod;
   amount: number;
-  receipt_url: string;
+  reference: string;
+  proof: File | null;
+}
+
+type Credentials = Record<string, string | boolean>;
+
+interface PaymentConfig {
+  methods: PaymentMethod[];
+  credentials: Partial<Record<PaymentMethod, Credentials | null>>;
+  ves_rate: number;
+  instructions: string;
 }
 
 interface Props {
   total: number;
-  onSuccess: (methods: PaymentEntry[]) => Promise<void>;
+  customer: { name: string; email: string };
+  /** Creates the order server-side and returns its id. */
+  createOrder: (entries: PaymentEntry[]) => Promise<string>;
+  /** Order is placed (paid, or proof sent): clear cart and go to confirmation. */
+  onComplete: (orderId: string) => void;
   onBack: () => void;
-  loading: boolean;
-  error: string;
 }
 
-const METHOD_LABELS: Record<PaymentMethod, string> = {
-  stripe:      'Tarjeta de crédito / débito',
-  pago_movil:  'Pago Móvil',
-  punto_venta: 'Punto de Venta',
-  cash:        'Efectivo',
+const ICONS: Record<PaymentMethod, React.ComponentType<{ size?: number }>> = {
+  stripe: CreditCard,
+  binance: Bitcoin,
+  pago_movil: Smartphone,
+  transferencia: Landmark,
+  zelle: DollarSign,
+  binance_pay_id: Bitcoin,
 };
 
-const METHOD_ICONS: Record<PaymentMethod, React.ComponentType<{ size?: number; color?: string }>> = {
-  stripe:      CreditCard,
-  pago_movil:  Smartphone,
-  punto_venta: PocketKnife,
-  cash:        Banknote,
+// Which credential fields to show per manual method, in order, with their i18n label key.
+const FIELDS: Record<string, Array<[string, string]>> = {
+  pago_movil:     [['bank', 'bank'], ['phone', 'phone'], ['id_number', 'idNumber'], ['holder', 'holder']],
+  transferencia:  [['bank', 'bank'], ['account_number', 'accountNumber'], ['account_type', 'accountType'], ['id_number', 'idNumber'], ['holder', 'holder']],
+  zelle:          [['email', 'email'], ['phone', 'phone'], ['holder', 'holder']],
+  binance_pay_id: [['pay_id', 'payId'], ['email', 'email'], ['holder', 'holder']],
 };
 
-const OFF_PLATFORM: PaymentMethod[] = ['pago_movil', 'punto_venta'];
-const ALL_METHODS: PaymentMethod[] = ['stripe', 'pago_movil', 'punto_venta', 'cash'];
+const BS_METHODS: PaymentMethod[] = ['pago_movil', 'transferencia'];
+const MAX_PROOF = 4 * 1024 * 1024;
 
-function ReceiptUpload({ onUploaded }: { onUploaded: (url: string) => void }) {
-  const ref = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-  const [done, setDone] = useState(false);
+const round2 = (n: number) => Math.round(n * 100) / 100;
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/admin/upload-image', { method: 'POST', body: fd });
-      const data = await res.json();
-      if (data.url) { onUploaded(data.url); setDone(true); }
-    } catch {
-      // upload failed silently — receipt is optional
-    } finally {
-      setUploading(false);
-    }
-  };
+/** Downscale large photos so two proofs fit comfortably in one request. PDFs pass through. */
+async function compressImage(file: File): Promise<File> {
+  if (!file.type.startsWith('image/') || file.size < 900 * 1024) return file;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, 1800 / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    canvas.getContext('2d')?.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/jpeg', 0.82));
+    if (!blob || blob.size >= file.size) return file;
+    return new File([blob], file.name.replace(/\.\w+$/, '') + '.jpg', { type: 'image/jpeg' });
+  } catch {
+    return file;
+  }
+}
 
+function CopyValue({ value }: { value: string }) {
+  const t = useTranslations('checkout.pay');
+  const [copied, setCopied] = useState(false);
   return (
-    <div style={{ marginTop: '0.75rem' }}>
-      <input ref={ref} type="file" accept="image/*,application/pdf" onChange={handleFile} style={{ display: 'none' }} />
-      <button
-        type="button"
-        onClick={() => ref.current?.click()}
-        style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1rem', border: '1.5px dashed #d4cac0', borderRadius: 10, background: '#faf6f1', cursor: 'pointer', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)', width: '100%' }}
-      >
-        {done ? <CheckCircle size={14} color="#10b981" /> : uploading ? <span style={{ width: 14, height: 14, border: '2px solid #d4cac0', borderTopColor: 'var(--makay-peachy-rose)', borderRadius: '50%', animation: 'spin 0.6s linear infinite', display: 'inline-block' }} /> : <Upload size={14} />}
-        {done ? 'Comprobante subido' : uploading ? 'Subiendo…' : 'Adjuntar comprobante (opcional)'}
-      </button>
+    <button
+      type="button"
+      className={`pay-copy${copied ? ' is-copied' : ''}`}
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(value);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1600);
+        } catch { /* clipboard blocked */ }
+      }}
+      aria-label={`${t('copy')} ${value}`}
+    >
+      {copied ? <Check size={13} /> : <Copy size={13} />}
+      <span>{copied ? t('copied') : t('copy')}</span>
+    </button>
+  );
+}
+
+function CredentialBox({ method, creds, amount, vesRate }: { method: PaymentMethod; creds: Credentials; amount: number; vesRate: number }) {
+  const t = useTranslations('checkout.pay');
+  const rows = (FIELDS[method] ?? []).filter(([k]) => String(creds[k] ?? '').trim());
+  const showBs = vesRate > 0 && BS_METHODS.includes(method);
+  return (
+    <div className="pay-creds">
+      <p className="pay-creds-title">{t('sendTo')}</p>
+      <dl className="pay-creds-list">
+        {rows.map(([key, label]) => (
+          <div key={key} className="pay-creds-row">
+            <dt>{t(`fields.${label}`)}</dt>
+            <dd>
+              <span>{String(creds[key])}</span>
+              <CopyValue value={String(creds[key])} />
+            </dd>
+          </div>
+        ))}
+      </dl>
+      <div className="pay-creds-amount">
+        <div>
+          <span className="pay-creds-amount-label">{t('amountUsd')}</span>
+          <strong>${amount.toFixed(2)}</strong>
+        </div>
+        {showBs && (
+          <div>
+            <span className="pay-creds-amount-label">{t('amountBs', { rate: vesRate.toLocaleString('es-VE') })}</span>
+            <strong>
+              Bs. {(amount * vesRate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </strong>
+            <CopyValue value={(amount * vesRate).toFixed(2)} />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-export default function PaymentStep({ total, onSuccess, onBack, loading, error }: Props) {
-  const [methods, setMethods] = useState<PaymentEntry[]>([
-    { method: 'stripe', amount: total, receipt_url: '' },
-  ]);
-  const [splitEnabled, setSplitEnabled] = useState(false);
-  const [stripeProcessing, setStripeProcessing] = useState(false);
+function ProofInput({ file, onChange }: { file: File | null; onChange: (f: File | null) => void }) {
+  const t = useTranslations('checkout.pay');
+  const ref = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState('');
+  const preview = useMemo(() => (file && file.type.startsWith('image/') ? URL.createObjectURL(file) : null), [file]);
+  useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
 
-  const method1 = methods[0];
-  const method2 = methods[1];
+  return (
+    <div className="pay-proof">
+      <span className="pay-field-label">{t('proof')}</span>
+      <input
+        ref={ref}
+        type="file"
+        accept="image/*,application/pdf"
+        hidden
+        onChange={async e => {
+          const raw = e.target.files?.[0];
+          e.target.value = '';
+          if (!raw) return;
+          const f = await compressImage(raw);
+          if (f.size > MAX_PROOF) { setError(t('proofTooLarge')); return; }
+          setError('');
+          onChange(f);
+        }}
+      />
+      <button type="button" className={`pay-proof-drop${file ? ' has-file' : ''}`} onClick={() => ref.current?.click()}>
+        {preview ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={preview} alt="" className="pay-proof-thumb" />
+        ) : file ? (
+          <FileText size={22} />
+        ) : (
+          <Upload size={20} />
+        )}
+        <span className="pay-proof-text">
+          <strong>{file ? file.name : t('proofUpload')}</strong>
+          {file && <small>{t('proofChange')}</small>}
+        </span>
+      </button>
+      {error && <p className="pay-error">{error}</p>}
+    </div>
+  );
+}
 
-  const setMethod = (idx: number, method: PaymentMethod) => {
-    setMethods(prev => {
-      const next = [...prev];
-      next[idx] = { ...next[idx], method, receipt_url: '' };
-      return next;
-    });
-  };
+export default function PaymentStep({ total, customer, createOrder, onComplete, onBack }: Props) {
+  const t = useTranslations('checkout.pay');
+  const [config, setConfig] = useState<PaymentConfig | null>(null);
+  const [configError, setConfigError] = useState(false);
+  const [entries, setEntries] = useState<PaymentEntry[]>([]);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState('');
+  // Card orders are created once and reused if the card is declined and retried.
+  const cardOrderId = useRef<string | null>(null);
 
-  const setAmount = (idx: number, amount: number) => {
-    setMethods(prev => {
-      const next = [...prev];
-      next[idx] = { ...next[idx], amount };
-      if (splitEnabled && next.length > 1) {
-        const other = Math.max(0, total - amount);
-        next[1 - idx] = { ...next[1 - idx], amount: other };
+  useEffect(() => {
+    let alive = true;
+    fetch('/api/payment-config')
+      .then(r => (r.ok ? r.json() : Promise.reject()))
+      .then((cfg: PaymentConfig) => {
+        if (!alive) return;
+        setConfig(cfg);
+        if (cfg.methods[0]) setEntries([{ method: cfg.methods[0], amount: total, reference: '', proof: null }]);
+      })
+      .catch(() => alive && setConfigError(true));
+    return () => { alive = false; };
+  }, [total]);
+
+  const split = entries.length === 2;
+  const primary = entries[0];
+  const manualAvailable = config?.methods.filter(isManual) ?? [];
+
+  const update = (idx: number, patch: Partial<PaymentEntry>) => {
+    setError('');
+    setEntries(prev => {
+      const next = prev.map((e, i) => (i === idx ? { ...e, ...patch } : e));
+      if (patch.amount !== undefined && next.length === 2) {
+        next[1 - idx] = { ...next[1 - idx], amount: round2(Math.max(0, total - patch.amount)) };
       }
       return next;
     });
   };
 
-  const setReceipt = (idx: number, url: string) => {
-    setMethods(prev => {
-      const next = [...prev];
-      next[idx] = { ...next[idx], receipt_url: url };
-      return next;
-    });
+  const selectMethod = (idx: number, method: PaymentMethod) => {
+    cardOrderId.current = null;
+    if (!isManual(method) && split) {
+      setEntries([{ method, amount: total, reference: '', proof: null }]);
+      return;
+    }
+    update(idx, { method, reference: '', proof: null });
   };
 
   const enableSplit = () => {
-    const half = Math.round(total * 50) / 100;
-    setMethods([
-      { method: 'stripe', amount: half, receipt_url: '' },
-      { method: 'pago_movil', amount: total - half, receipt_url: '' },
+    const other = manualAvailable.find(m => m !== primary.method) ?? manualAvailable[0];
+    const half = round2(total / 2);
+    setEntries([
+      { ...primary, amount: half },
+      { method: other, amount: round2(total - half), reference: '', proof: null },
     ]);
-    setSplitEnabled(true);
   };
 
-  const disableSplit = () => {
-    setMethods([{ method: 'stripe', amount: total, receipt_url: '' }]);
-    setSplitEnabled(false);
+  const disableSplit = () => setEntries([{ ...primary, amount: total }]);
+
+  const covered = round2(entries.reduce((s, e) => s + e.amount, 0));
+
+  const submitManual = async () => {
+    for (const e of entries) {
+      if (!e.reference.trim()) return setError(t('errors.missingReference'));
+      if (!e.proof) return setError(t('errors.missingProof'));
+    }
+    if (Math.abs(covered - total) > 0.01) return setError(t('errors.splitMismatch'));
+    setBusy(true);
+    try {
+      const id = await createOrder(entries);
+      onComplete(id);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.order'));
+      setBusy(false);
+    }
   };
 
-  const allOffPlatform = methods.every(m => OFF_PLATFORM.includes(m.method) || m.method === 'cash');
-  const hasStripe = methods.some(m => m.method === 'stripe');
-
-  const handleOffPlatformConfirm = async () => {
-    await onSuccess(methods);
+  const payWithBinance = async () => {
+    setBusy(true);
+    setError('');
+    try {
+      const id = await createOrder(entries);
+      const res = await fetch('/api/payments/binance/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ orderId: id }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.checkoutUrl) throw new Error(data.error || t('errors.generic'));
+      try { sessionStorage.setItem(PENDING_REDIRECT_KEY, id); } catch { /* storage unavailable */ }
+      window.location.href = data.checkoutUrl;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'));
+      setBusy(false);
+    }
   };
 
-  const handleStripeSuccess = async (paymentIntentId: string) => {
-    setStripeProcessing(true);
-    const entry: PaymentEntry = { method: 'stripe', amount: method1.amount, receipt_url: paymentIntentId };
-    await onSuccess([entry, ...(method2 ? [method2] : [])]);
+  const getCardClientSecret = async () => {
+    if (!cardOrderId.current) cardOrderId.current = await createOrder(entries);
+    const res = await fetch('/api/payments/stripe/intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: cardOrderId.current }),
+    });
+    const data = await res.json();
+    if (!res.ok || !data.clientSecret) throw new Error(data.error || t('errors.generic'));
+    return data.clientSecret as string;
+  };
+
+  const onCardPaid = async () => {
+    const id = cardOrderId.current;
+    if (!id) return;
+    setBusy(true);
+    // Webhook settles it too; this makes the confirmation page show "paid" right away.
+    await fetch('/api/payments/stripe/confirm', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId: id }),
+    }).catch(() => null);
+    onComplete(id);
   };
 
   return (
-    <div>
-      <button
-        type="button"
-        onClick={onBack}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-montserrat)', fontSize: '0.875rem', color: 'var(--makay-peachy-rose)', padding: 0, marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}
-      >
-        ← Volver
+    <div className="pay-step">
+      <button type="button" className="pay-back" onClick={onBack}>
+        <ArrowLeft size={15} /> {t('back')}
       </button>
+      <h2 className="pay-title">{t('title')}</h2>
 
-      <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.5rem', fontWeight: 700, color: 'var(--makay-dark-navy)', margin: '0 0 1.5rem' }}>
-        Método de pago
-      </h2>
+      {!config && !configError && <div className="pay-skeleton" aria-busy="true">{t('loading')}</div>}
+      {(configError || (config && config.methods.length === 0)) && <p className="pay-empty">{t('none')}</p>}
 
-      {/* Method rows */}
-      {methods.map((entry, idx) => {
-        const Icon = METHOD_ICONS[entry.method];
-        const isOff = OFF_PLATFORM.includes(entry.method);
+      {config && primary && entries.map((entry, idx) => {
+        const options = idx === 1 ? manualAvailable : config.methods;
+        const creds = config.credentials[entry.method];
         return (
-          <div key={idx} style={{ marginBottom: '1.25rem', padding: '1.25rem', border: '1.5px solid #e8e0d6', borderRadius: 14, background: '#fdfaf7' }}>
-            {splitEnabled && (
-              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--makay-mauve)', marginBottom: '0.75rem' }}>
-                Pago {idx + 1} de 2
-              </p>
-            )}
+          <section key={idx} className="pay-leg">
+            {split && <p className="pay-leg-label">{t('splitLabel', { n: idx + 1 })}</p>}
 
-            {/* Method selector */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '0.5rem', marginBottom: '1rem' }}>
-              {ALL_METHODS.map(m => {
-                const MIcon = METHOD_ICONS[m];
+            <div className="pay-methods" role="radiogroup" aria-label={t('title')}>
+              {options.map(m => {
+                const Icon = ICONS[m];
                 const active = entry.method === m;
-                const otherMethod = methods[1 - idx]?.method;
-                const disabled = splitEnabled && m === otherMethod;
+                const taken = split && entries[1 - idx]?.method === m;
                 return (
                   <button
                     key={m}
                     type="button"
-                    disabled={disabled}
-                    onClick={() => setMethod(idx, m)}
-                    style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.75rem', border: `1.5px solid ${active ? 'var(--makay-peachy-rose)' : '#e0d8ce'}`, borderRadius: 10, background: active ? '#fff5ef' : '#fff', cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.4 : 1, fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: active ? 700 : 500, color: active ? 'var(--makay-peachy-rose)' : 'var(--makay-dark-navy)' }}
+                    role="radio"
+                    aria-checked={active}
+                    disabled={taken || busy}
+                    className={`pay-method${active ? ' is-active' : ''}`}
+                    onClick={() => selectMethod(idx, m)}
                   >
-                    <MIcon size={13} /> {METHOD_LABELS[m]}
+                    <span className="pay-method-icon"><Icon size={18} /></span>
+                    <span className="pay-method-text">
+                      <strong>{t(`methods.${m}`)}</strong>
+                      <small>{t(`hints.${m}`)}</small>
+                    </span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Amount if split */}
-            {splitEnabled && (
-              <div style={{ marginBottom: '0.875rem' }}>
-                <label style={{ display: 'block', fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', marginBottom: '0.4rem' }}>
-                  Monto ($)
+            <div className="pay-panel" key={entry.method}>
+              {split && (
+                <label className="pay-amount">
+                  <span className="pay-field-label">{t('amount')}</span>
+                  <input
+                    type="number"
+                    inputMode="decimal"
+                    min={0}
+                    max={total}
+                    step={0.01}
+                    value={entry.amount}
+                    onChange={e => update(idx, { amount: round2(Math.min(total, parseFloat(e.target.value) || 0)) })}
+                  />
                 </label>
-                <input
-                  type="number"
-                  min={0}
-                  max={total}
-                  step={0.01}
-                  value={entry.amount}
-                  onChange={e => setAmount(idx, parseFloat(e.target.value) || 0)}
-                  style={{ width: '100%', padding: '0.6rem 0.75rem', border: '1.5px solid #e0d8ce', borderRadius: 10, fontFamily: 'var(--font-montserrat)', fontSize: '0.9rem', background: '#fff', boxSizing: 'border-box' }}
-                />
-              </div>
-            )}
+              )}
 
-            {/* Off-platform notice + receipt */}
-            {isOff && (
-              <div style={{ background: '#fff8ef', border: '1px solid #eddcc8', borderRadius: 10, padding: '0.75rem 1rem', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-                <AlertCircle size={14} color="#D4A574" style={{ flexShrink: 0, marginTop: 1 }} />
-                <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: '#7a5c3d', margin: 0, lineHeight: 1.5 }}>
-                  El pago será verificado por nuestro equipo.
-                </p>
-              </div>
-            )}
+              {isManual(entry.method) && creds && (
+                <>
+                  <CredentialBox method={entry.method} creds={creds} amount={entry.amount} vesRate={config.ves_rate} />
+                  <label className="pay-reference">
+                    <span className="pay-field-label">{t('reference')}</span>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="off"
+                      placeholder={t('referencePlaceholder')}
+                      value={entry.reference}
+                      maxLength={100}
+                      onChange={e => update(idx, { reference: e.target.value })}
+                    />
+                  </label>
+                  <ProofInput file={entry.proof} onChange={f => update(idx, { proof: f })} />
+                </>
+              )}
 
-            {(isOff || entry.method === 'cash') && (
-              <ReceiptUpload onUploaded={url => setReceipt(idx, url)} />
-            )}
-
-            {/* Stripe form for this slot */}
-            {entry.method === 'stripe' && !splitEnabled && (
-              <div style={{ marginTop: '0.875rem' }}>
+              {entry.method === 'stripe' && (
                 <StripePaymentForm
                   amount={entry.amount}
-                  onSuccess={handleStripeSuccess}
+                  getClientSecret={getCardClientSecret}
+                  onSuccess={onCardPaid}
                   onError={() => {}}
-                  loading={loading || stripeProcessing}
+                  billing={customer}
+                  loading={busy}
                 />
-              </div>
-            )}
-          </div>
+              )}
+
+              {entry.method === 'binance' && (
+                <button type="button" className="pay-submit pay-submit--binance" onClick={payWithBinance} disabled={busy}>
+                  <Bitcoin size={17} /> {busy ? t('redirecting') : t('payBinance')}
+                </button>
+              )}
+            </div>
+          </section>
         );
       })}
 
-      {/* Split payment toggle */}
-      <div style={{ marginBottom: '1.25rem' }}>
-        {!splitEnabled ? (
-          <button
-            type="button"
-            onClick={enableSplit}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', border: '1.5px dashed #d4cac0', borderRadius: 10, background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)' }}
-          >
-            <Plus size={13} /> Agregar segundo método de pago
-          </button>
-        ) : (
-          <button
-            type="button"
-            onClick={disableSplit}
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.6rem 1rem', border: '1.5px solid #e0d8ce', borderRadius: 10, background: 'transparent', cursor: 'pointer', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)' }}
-          >
-            <Minus size={13} /> Quitar segundo método
-          </button>
-        )}
-      </div>
-
-      {/* Split balance indicator */}
-      {splitEnabled && (
-        <div style={{ padding: '0.75rem 1rem', background: '#f5efe9', borderRadius: 10, marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem' }}>
-          <span style={{ color: 'var(--makay-mauve)' }}>Total a cubrir:</span>
-          <span style={{ fontWeight: 700, color: methods.reduce((s, m) => s + m.amount, 0) === total ? '#10b981' : '#ef4444' }}>
-            ${methods.reduce((s, m) => s + m.amount, 0).toFixed(2)} / ${total.toFixed(2)}
-          </span>
-        </div>
-      )}
-
-      {error && (
-        <div style={{ padding: '0.75rem 1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: '#dc2626', marginBottom: '1rem' }}>
-          {error}
-        </div>
-      )}
-
-      {/* Confirm button for off-platform / cash / split */}
-      {(allOffPlatform || (splitEnabled && !hasStripe)) && (
-        <button
-          type="button"
-          onClick={handleOffPlatformConfirm}
-          disabled={loading || (splitEnabled && methods.reduce((s, m) => s + m.amount, 0) !== total)}
-          style={{ width: '100%', padding: '1rem', background: 'var(--makay-dark-navy)', color: '#fff', border: 'none', borderRadius: 14, cursor: 'pointer', fontFamily: 'var(--font-montserrat)', fontWeight: 700, fontSize: '0.95rem', opacity: loading ? 0.7 : 1 }}
-        >
-          {loading ? 'Procesando…' : 'Confirmar pedido'}
+      {config && primary && isManual(primary.method) && manualAvailable.length > 1 && (
+        <button type="button" className="pay-split-toggle" onClick={split ? disableSplit : enableSplit} disabled={busy}>
+          {split ? <Minus size={14} /> : <Plus size={14} />} {split ? t('splitRemove') : t('split')}
         </button>
       )}
+
+      {split && (
+        <div className={`pay-covered${Math.abs(covered - total) <= 0.01 ? ' is-ok' : ''}`}>
+          <span>{t('covered')}</span>
+          <strong>${covered.toFixed(2)} / ${total.toFixed(2)}</strong>
+        </div>
+      )}
+
+      {config?.instructions && primary && isManual(primary.method) && (
+        <p className="pay-instructions">{config.instructions}</p>
+      )}
+
+      {primary && isManual(primary.method) && (
+        <>
+          <p className="pay-hint"><ShieldCheck size={14} /> {t('proofHint')}</p>
+          <button type="button" className="pay-submit" onClick={submitManual} disabled={busy}>
+            {busy ? t('processing') : t('confirmManual')}
+          </button>
+        </>
+      )}
+
+      {error && <div className="pay-error" role="alert">{error}</div>}
     </div>
   );
 }

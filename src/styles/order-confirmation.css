@@ -171,3 +171,21 @@
     font-size: 1.5rem;
   }
 }
+
+/* Payment status variants */
+.confirmation-icon--paid,
+.confirmation-icon--verified { color: #10b981; }
+.confirmation-icon--rejected { color: #dc2626; }
+.confirmation-icon--awaiting_payment,
+.confirmation-icon--pending_verification {
+  display: inline-block;
+  animation: confirmation-breathe 2.4s ease-in-out infinite;
+}
+
+@keyframes confirmation-breathe {
+  50% { transform: scale(1.12); opacity: 0.7; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confirmation-icon--awaiting_payment,
+  .confirmation-icon--pending_verification { animation: none; }
+}
