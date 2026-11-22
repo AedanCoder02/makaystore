@@ -507,7 +507,17 @@
     "costPercent": "Cost %",
     "adjustCostPercent": "Adjust cost %",
     "editTarget": "Edit target",
-    "targetSaved": "Target saved"
+    "targetSaved": "Target saved",
+    "ranges": {
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "3m": "Last 3 months",
+      "all": "All time"
+    },
+    "supervisorView": "Order detail",
+    "supervisorViewHint": "Open the supervisor report with every order, seller and payment method. Targets and cost % are shared.",
+    "reportError": "This report ran into an issue.",
+    "retry": "Try again"
   },
   "seller": {
     "dashboard": "Dashboard",

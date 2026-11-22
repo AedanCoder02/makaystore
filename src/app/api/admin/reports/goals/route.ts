@@ -3,8 +3,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import sql from '@/lib/db';
 import { getPanelLocation } from '@/lib/location.server';
-
-const DEFAULT_TARGETS: Record<string, number> = { daily_target: 357.14, weekly_target: 2500, monthly_target: 10000 };
+import { getReportSettings, setReportSetting } from '@/lib/reportSettings';
 
 export async function GET() {
   const gate = await requireAccess('staff');
@@ -15,23 +14,13 @@ export async function GET() {
   const location = await getPanelLocation();
 
   try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS theme_settings (
-        key TEXT PRIMARY KEY,
-        value TEXT NOT NULL,
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `;
-
-    const [targetRows, dailyActualRow, weeklyActualRow, monthlyActualRow] = await Promise.all([
-      sql`SELECT key, value FROM theme_settings WHERE key IN ('daily_target', 'weekly_target', 'monthly_target')`,
+    const [targetMap, dailyActualRow, weeklyActualRow, monthlyActualRow] = await Promise.all([
+      getReportSettings(),
       sql`SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual FROM seller_orders WHERE created_at >= CURRENT_DATE AND location = ${location}`,
       sql`SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual FROM seller_orders WHERE created_at >= date_trunc('week', NOW()) AND location = ${location}`,
       sql`SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual FROM seller_orders WHERE created_at >= date_trunc('month', NOW()) AND location = ${location}`,
     ]);
 
-    const targetMap: Record<string, number> = { ...DEFAULT_TARGETS };
-    for (const row of targetRows as unknown as { key: string; value: string }[]) targetMap[row.key] = Number(row.value);
 
     const build = (target: number, actual: number) => ({ target, actual, progress: target > 0 ? (actual / target) * 100 : 0 });
 
@@ -87,11 +76,7 @@ export async function PATCH(req: Request) {
   const key = period === 'daily' ? 'daily_target' : period === 'weekly' ? 'weekly_target' : 'monthly_target';
 
   try {
-    await sql`
-      INSERT INTO theme_settings (key, value, updated_at)
-      VALUES (${key}, ${String(target)}, NOW())
-      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-    `;
+    await setReportSetting(key, target, userId);
     return NextResponse.json({ success: true });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to save' }, { status: 500 });

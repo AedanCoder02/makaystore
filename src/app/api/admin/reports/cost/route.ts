@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import sql from '@/lib/db';
 import { getPanelLocation } from '@/lib/location.server';
+import { getReportSettings, setReportSetting } from '@/lib/reportSettings';
 
 function rangeExpr(range: string) {
   switch (range) {
@@ -24,15 +25,7 @@ export async function GET(req: NextRequest) {
   const cutoff = rangeExpr(range);
 
   try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS theme_settings (
-        key TEXT PRIMARY KEY,
-        value TEXT NOT NULL,
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `;
-
-    const [sellerRev, storefrontRev, costRows, trend] = await Promise.all([
+    const [sellerRev, storefrontRev, settings, trend] = await Promise.all([
       sql`
         SELECT COALESCE(SUM(subtotal::numeric), 0) AS revenue
         FROM seller_orders
@@ -45,7 +38,7 @@ export async function GET(req: NextRequest) {
         WHERE created_at >= ${cutoff} AND location = ${location}
       `.catch(() => [{ revenue: 0 }]),
 
-      sql`SELECT value FROM theme_settings WHERE key = 'cost_percentage'`.catch(() => []),
+      getReportSettings(),
 
       sql`
         SELECT
@@ -58,7 +51,7 @@ export async function GET(req: NextRequest) {
       `.catch(() => []),
     ]);
 
-    const costPercent = costRows.length > 0 ? Number(costRows[0].value) : 40;
+    const costPercent = settings.cost_percentage;
     const revenue     = Number(sellerRev[0].revenue) + Number(storefrontRev[0].revenue);
     const totalCost   = revenue * (costPercent / 100);
     const grossMargin = 100 - costPercent;
@@ -89,11 +82,7 @@ export async function PATCH(req: Request) {
   }
 
   try {
-    await sql`
-      INSERT INTO theme_settings (key, value, updated_at)
-      VALUES ('cost_percentage', ${String(costPercent)}, NOW())
-      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-    `;
+    await setReportSetting('cost_percentage', costPercent, userId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to save' }, { status: 500 });

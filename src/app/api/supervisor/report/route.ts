@@ -3,6 +3,7 @@ import { auth, clerkClient } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
 import { getPanelLocation } from '@/lib/location.server';
+import { getReportSettings } from '@/lib/reportSettings';
 
 function getCutoff(range: string): Date {
   const d = new Date();
@@ -24,15 +25,14 @@ export async function GET(req: NextRequest) {
   const location = await getPanelLocation();
 
   try {
-    const [ordersRaw, goalRows, costRows, monthlySums, allProducts] = await Promise.all([
+    const [ordersRaw, settings, monthlySums, allProducts] = await Promise.all([
       sql`
         SELECT * FROM seller_orders
         WHERE created_at >= ${cutoff} AND location = ${location}
         ORDER BY created_at DESC
         LIMIT 500
       `,
-      sql`SELECT value FROM theme_settings WHERE key = 'monthly_target'`.catch(() => []),
-      sql`SELECT value FROM theme_settings WHERE key = 'cost_percentage'`.catch(() => []),
+      getReportSettings(),
       sql`
         SELECT COALESCE(SUM(subtotal::numeric), 0) AS actual
         FROM seller_orders
@@ -88,9 +88,9 @@ export async function GET(req: NextRequest) {
       createdAt: o.created_at,
     }));
 
-    const monthlyTarget   = goalRows.length > 0 ? Number(goalRows[0].value) : 400000;
+    const monthlyTarget   = settings.monthly_target;
     const monthlyActualDB = Number((monthlySums as { actual: unknown }[])[0]?.actual) || 0;
-    const costPercent     = costRows.length > 0 ? Number(costRows[0].value) : 40;
+    const costPercent     = settings.cost_percentage;
 
     return NextResponse.json({ orders: rows, products: allProducts, monthlyTarget, monthlyActual: monthlyActualDB, costPercent });
   } catch (e) {

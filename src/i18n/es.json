@@ -507,7 +507,17 @@
     "costPercent": "% Costo",
     "adjustCostPercent": "Ajustar % de costo",
     "editTarget": "Editar meta",
-    "targetSaved": "Meta guardada"
+    "targetSaved": "Meta guardada",
+    "ranges": {
+      "7d": "Últimos 7 días",
+      "30d": "Últimos 30 días",
+      "3m": "Últimos 3 meses",
+      "all": "Todo"
+    },
+    "supervisorView": "Detalle de ventas",
+    "supervisorViewHint": "Abre el reporte del supervisor con cada venta, vendedor y método de pago. Las metas y el % de costo son compartidos.",
+    "reportError": "Este reporte tuvo un problema.",
+    "retry": "Reintentar"
   },
   "seller": {
     "dashboard": "Panel",

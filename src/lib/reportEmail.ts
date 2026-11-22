@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import sql from '@/lib/db';
 import { clerkClient } from '@clerk/nextjs/server';
+import { getReportSettings } from '@/lib/reportSettings';
 
 export type ReportPeriod = 'daily' | 'weekly' | 'monthly';
 
@@ -96,9 +97,8 @@ async function collectData(range: ReportRange, period: ReportPeriod): Promise<Re
   const avgOrder = (orders - gifts) > 0 ? revenue / (orders - gifts) : 0;
 
   // Goal for this report's own period (daily/weekly/monthly target, set via Supervisor Reports → Metas)
-  const DEFAULT_TARGETS: Record<ReportPeriod, number> = { daily: 357.14, weekly: 2500, monthly: 10000 };
-  const [targetRow] = await sql`SELECT value FROM theme_settings WHERE key = ${`${period}_target`}`.catch(() => []);
-  const periodTarget = targetRow ? Number(targetRow.value) : DEFAULT_TARGETS[period];
+  const reportSettings = await getReportSettings();
+  const periodTarget = reportSettings[`${period}_target`];
 
   // Top products from seller_orders items JSONB
   const topProductsRaw = await sql`
@@ -280,9 +280,8 @@ async function collectData(range: ReportRange, period: ReportPeriod): Promise<Re
     outOfStock: outOfStockProducts.length,
   };
 
-  // Cost % from theme_settings (admin-configurable), same as admin cost route
-  const costSettingRow = await sql`SELECT value FROM theme_settings WHERE key = 'cost_percentage'`.catch(() => []);
-  const costPct = costSettingRow.length > 0 ? Number(costSettingRow[0].value) : 40;
+  // Cost % shared with admin/supervisor reports (lib/reportSettings)
+  const costPct = (await getReportSettings()).cost_percentage;
   const grossMargin = 100 - costPct;
 
   return {
