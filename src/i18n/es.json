@@ -1794,5 +1794,34 @@
         }
       ]
     }
+  },
+  "clientsAdmin": {
+    "title": "Clientes",
+    "subtitle": "{total} contactos en la base compartida",
+    "searchPlaceholder": "Buscar por nombre, teléfono o correo...",
+    "origin": {
+      "title": "¿De dónde vienen estos contactos?",
+      "body": "Esta lista lee la tabla compartida de contactos. La tienda no crea estas filas: las une el proceso de contactos desde Yimi, Makay Roulette, cuentas y ventas en mostrador de la tienda, el CRM y una importación histórica en CSV. Una misma persona puede venir de varias fuentes, por eso la suma por fuente es mayor que el total."
+    },
+    "sourceFilter": "Filtrar por fuente",
+    "allSources": "Todos",
+    "showing": "{from}-{to} de {matched}",
+    "loading": "Cargando...",
+    "error": "No se pudieron cargar los clientes.",
+    "empty": "Sin resultados.",
+    "noName": "Sin nombre",
+    "noContact": "Sin datos de contacto",
+    "pagination": "Paginación",
+    "prev": "Página anterior",
+    "next": "Página siguiente",
+    "pageOf": "Página {page} de {pages}",
+    "sources": {
+      "yimi": "Yimi",
+      "makay_store_account": "Tienda (cuenta)",
+      "makay_store_walkin": "Tienda (mostrador)",
+      "makay_store_crm": "Tienda (CRM)",
+      "roulette": "Makay Roulette",
+      "csv_import": "Base histórica (CSV)"
+    }
   }
 }

@@ -1794,5 +1794,34 @@
         }
       ]
     }
+  },
+  "clientsAdmin": {
+    "title": "Customers",
+    "subtitle": "{total} contacts in the shared customer base",
+    "searchPlaceholder": "Search by name, phone or email...",
+    "origin": {
+      "title": "Where do these contacts come from?",
+      "body": "This list reads the shared contacts table. The store does not create these rows: they are merged in by the contact pipeline from Yimi, Makay Roulette, store accounts and walk-in sales, the CRM and a historical CSV import. One person can come from several sources, so the counts by source add up to more than the total."
+    },
+    "sourceFilter": "Filter by source",
+    "allSources": "All",
+    "showing": "{from}-{to} of {matched}",
+    "loading": "Loading...",
+    "error": "Could not load customers.",
+    "empty": "No results.",
+    "noName": "No name",
+    "noContact": "No contact details",
+    "pagination": "Pagination",
+    "prev": "Previous page",
+    "next": "Next page",
+    "pageOf": "Page {page} of {pages}",
+    "sources": {
+      "yimi": "Yimi",
+      "makay_store_account": "Store (account)",
+      "makay_store_walkin": "Store (walk-in)",
+      "makay_store_crm": "Store (CRM)",
+      "roulette": "Makay Roulette",
+      "csv_import": "Historical base (CSV)"
+    }
   }
 }
