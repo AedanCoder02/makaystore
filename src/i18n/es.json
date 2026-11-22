@@ -991,7 +991,7 @@
           },
           "step-2": {
             "title": "Ajustar cantidades",
-            "description": "Usa los botones +1, -1, +5, -5 o escribe directamente. El stock bajo (menos de 10) se resalta en rojo.",
+            "description": "Usa los botones +1, -1, +5, -5 o escribe directamente. Los productos agotados aparecen primero en rojo y el stock bajo (menos de 10) se marca en ámbar. Usa los filtros de arriba para ver cada grupo.",
             "actionText": ""
           },
           "step-3": {
@@ -1832,6 +1832,37 @@
       "makay_store_crm": "Tienda (CRM)",
       "roulette": "Makay Roulette",
       "csv_import": "Base histórica (CSV)"
+    }
+  },
+  "backoffice": {
+    "openMenu": "Abrir menú",
+    "closeMenu": "Cerrar menú",
+    "expand": "Expandir",
+    "collapse": "Contraer",
+    "backToSite": "Volver al sitio",
+    "navLabel": "Navegación del panel",
+    "supervisorRole": "Supervisor",
+    "supNav": {
+      "overview": "Resumen",
+      "staff": "Equipo",
+      "orders": "Órdenes",
+      "payments": "Pagos",
+      "shifts": "Turnos",
+      "reports": "Reportes"
+    },
+    "adminNav": {
+      "dashboard": "Panel",
+      "orders": "Pedidos",
+      "payments": "Pagos",
+      "users": "Usuarios",
+      "clients": "Clientes",
+      "reports": "Reportes",
+      "goals": "Metas Yimi",
+      "events": "Eventos",
+      "memberships": "Membresías",
+      "reviews": "Reseñas",
+      "allies": "Aliados",
+      "payroll": "Nómina"
     }
   }
 }

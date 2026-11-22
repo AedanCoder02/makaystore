@@ -991,7 +991,7 @@
           },
           "step-2": {
             "title": "Adjust Quantities",
-            "description": "Use the +1, -1, +5, -5 buttons or type directly. Low stock (under 10) is highlighted in red.",
+            "description": "Use the +1, -1, +5, -5 buttons or type directly. Out-of-stock products are pinned to the top in red and low stock (under 10) is marked in amber. Use the filters above to see each group.",
             "actionText": ""
           },
           "step-3": {
@@ -1832,6 +1832,37 @@
       "makay_store_crm": "Store (CRM)",
       "roulette": "Makay Roulette",
       "csv_import": "Historical base (CSV)"
+    }
+  },
+  "backoffice": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "backToSite": "Back to site",
+    "navLabel": "Back-office navigation",
+    "supervisorRole": "Supervisor",
+    "supNav": {
+      "overview": "Overview",
+      "staff": "Staff",
+      "orders": "Orders",
+      "payments": "Payments",
+      "shifts": "Shifts",
+      "reports": "Reports"
+    },
+    "adminNav": {
+      "dashboard": "Dashboard",
+      "orders": "Orders",
+      "payments": "Payments",
+      "users": "Users",
+      "clients": "Customers",
+      "reports": "Reports",
+      "goals": "Yimi goals",
+      "events": "Events",
+      "memberships": "Memberships",
+      "reviews": "Reviews",
+      "allies": "Allies",
+      "payroll": "Payroll"
     }
   }
 }
