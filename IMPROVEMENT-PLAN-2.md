@@ -17,7 +17,7 @@
 ### 1. Deploy TripoSR fix to Railway
 ```
 cd D:/AP/projects/tripo-server
-$env:RAILWAY_TOKEN = "abb684e5-f40b-431f-a166-866bb70f92e7"
+$env:RAILWAY_TOKEN = "<your Railway token>"
 npx @railway/cli up --detach
 ```
 Railway project: stellar-manifestation / makay-tripo-server  
@@ -319,7 +319,7 @@ This requires updating `AdminNavCard.tsx` to accept an optional `stat` string pr
 
 ## Key Tokens / Config (do NOT ask user for these)
 - Vercel token: `VERCEL_TOKEN_REDACTED`
-- Railway TripoSR token: `abb684e5-f40b-431f-a166-866bb70f92e7`
+- Railway TripoSR token: stored outside the repo (Railway dashboard)
 - Makaystore live URL: `https://makaystore-sandy.vercel.app`
 - TripoSR Railway URL: `https://makay-tripo-server-production.up.railway.app`
 - DB: Neon (ep-raspy-forest-at258m7w-pooler.c-9.us-east-1.aws.neon.tech)

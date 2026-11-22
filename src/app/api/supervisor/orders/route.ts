@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
       sql`SELECT * FROM seller_orders WHERE location = ${location} ORDER BY created_at DESC LIMIT 500`,
       sql`
         SELECT id, customer_id, customer_email, total AS subtotal, shipping_cost,
-               items, status, shipping_method, payment_methods, created_at
+               items, status, shipping_method, payment_methods, payment_status, created_at
         FROM orders
         WHERE location = ${location}
         ORDER BY created_at DESC LIMIT 500
@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
       status?: string; shipping_method?: string; payment_id?: string;
       payment_methods: unknown; created_at: unknown; source: string; is_gift: boolean;
       payment_confirmed?: boolean;
+      payment_status?: string | null;
     };
 
     const sellerRows: OrderRow[] = (sellerRaw as Record<string, unknown>[]).map(r => ({
@@ -74,6 +75,7 @@ export async function GET(req: NextRequest) {
       created_at:       r.created_at,
       source:           'storefront',
       is_gift:          false,
+      payment_status:   (r.payment_status as string | null) ?? null,
     }));
 
     let rows = [...sellerRows, ...storefrontRows]

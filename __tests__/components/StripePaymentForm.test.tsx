@@ -1,10 +1,8 @@
 /**
- * Component tests for StripePaymentForm
- * Uses the existing stripe mock.
+ * Component tests for StripePaymentForm (real PaymentIntent flow via confirmCardPayment).
  */
 import React from 'react';
 
-// Mock Stripe before imports
 jest.mock('@stripe/react-stripe-js', () => ({
   CardElement: function MockCardElement() {
     return <div data-testid="card-element" />;
@@ -17,79 +15,82 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import StripePaymentForm from '@/components/StripePaymentForm';
 import { useStripe, useElements } from '@stripe/react-stripe-js';
 
-const mockCreatePaymentMethod = jest.fn();
+const mockConfirmCardPayment = jest.fn();
 const mockGetElement = jest.fn();
+
+const submit = async () => {
+  await act(async () => {
+    fireEvent.submit(screen.getByRole('button').closest('form')!);
+  });
+};
 
 describe('StripePaymentForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useStripe as jest.Mock).mockReturnValue({ createPaymentMethod: mockCreatePaymentMethod });
+    (useStripe as jest.Mock).mockReturnValue({ confirmCardPayment: mockConfirmCardPayment });
     (useElements as jest.Mock).mockReturnValue({ getElement: mockGetElement });
-    mockGetElement.mockReturnValue({ _element: true }); // truthy card element
+    mockGetElement.mockReturnValue({ _element: true });
   });
 
-  it('renders the Payment Information heading', () => {
-    render(<StripePaymentForm amount={99.99} onSuccess={jest.fn()} onError={jest.fn()} />);
-    expect(screen.getByText('Payment Information')).toBeInTheDocument();
+  const baseProps = () => ({
+    amount: 50,
+    getClientSecret: jest.fn().mockResolvedValue('pi_123_secret_abc'),
+    onSuccess: jest.fn(),
+    onError: jest.fn(),
   });
 
-  it('renders the test mode notice', () => {
-    render(<StripePaymentForm amount={99.99} onSuccess={jest.fn()} onError={jest.fn()} />);
-    expect(screen.getByText('Test Mode')).toBeInTheDocument();
-  });
-
-  it('renders the CardElement', () => {
-    render(<StripePaymentForm amount={99.99} onSuccess={jest.fn()} onError={jest.fn()} />);
+  it('renders the CardElement and pay button', () => {
+    render(<StripePaymentForm {...baseProps()} />);
     expect(screen.getByTestId('card-element')).toBeInTheDocument();
-  });
-
-  it('renders the pay button with formatted amount', () => {
-    render(<StripePaymentForm amount={99.99} onSuccess={jest.fn()} onError={jest.fn()} />);
-    expect(screen.getByText('Pay $99.99')).toBeInTheDocument();
+    expect(screen.getByRole('button')).toHaveTextContent('payCard');
   });
 
   it('shows Processing when loading prop is true', () => {
-    render(<StripePaymentForm amount={99.99} onSuccess={jest.fn()} onError={jest.fn()} loading={true} />);
-    expect(screen.getByText('Processing...')).toBeInTheDocument();
+    render(<StripePaymentForm {...baseProps()} loading />);
+    expect(screen.getByRole('button')).toHaveTextContent('Processing...');
   });
 
-  it('calls onSuccess when payment method is created successfully', async () => {
-    const onSuccess = jest.fn();
-    mockCreatePaymentMethod.mockResolvedValue({ paymentMethod: { id: 'pm_test' } });
+  it('confirms the server PaymentIntent and reports success with its id', async () => {
+    const props = baseProps();
+    mockConfirmCardPayment.mockResolvedValue({ paymentIntent: { id: 'pi_123', status: 'succeeded' } });
 
-    render(<StripePaymentForm amount={50} onSuccess={onSuccess} onError={jest.fn()} />);
+    render(<StripePaymentForm {...props} billing={{ name: 'Ana', email: 'a@b.co' }} />);
+    await submit();
 
-    await act(async () => {
-      fireEvent.submit(screen.getByRole('button').closest('form')!);
+    expect(props.getClientSecret).toHaveBeenCalledTimes(1);
+    expect(mockConfirmCardPayment).toHaveBeenCalledWith('pi_123_secret_abc', {
+      payment_method: { card: { _element: true }, billing_details: { name: 'Ana', email: 'a@b.co' } },
     });
-
-    expect(onSuccess).toHaveBeenCalledTimes(1);
+    expect(props.onSuccess).toHaveBeenCalledWith('pi_123');
   });
 
-  it('calls onError when stripe returns an error', async () => {
-    const onError = jest.fn();
-    mockCreatePaymentMethod.mockResolvedValue({ error: { message: 'Card declined' } });
+  it('shows the Stripe error and does not report success when the card is declined', async () => {
+    const props = baseProps();
+    mockConfirmCardPayment.mockResolvedValue({ error: { message: 'Card declined' } });
 
-    render(<StripePaymentForm amount={50} onSuccess={jest.fn()} onError={onError} />);
+    render(<StripePaymentForm {...props} />);
+    await submit();
 
-    await act(async () => {
-      fireEvent.submit(screen.getByRole('button').closest('form')!);
-    });
-
-    expect(onError).toHaveBeenCalledWith('Card declined');
+    expect(props.onError).toHaveBeenCalledWith('Card declined');
+    expect(props.onSuccess).not.toHaveBeenCalled();
     expect(screen.getByText('Card declined')).toBeInTheDocument();
   });
 
-  it('shows error message when stripe is not loaded', async () => {
+  it('surfaces server errors from creating the PaymentIntent', async () => {
+    const props = baseProps();
+    props.getClientSecret.mockRejectedValue(new Error('Pagos con tarjeta no configurados'));
+
+    render(<StripePaymentForm {...props} />);
+    await submit();
+
+    expect(mockConfirmCardPayment).not.toHaveBeenCalled();
+    expect(props.onError).toHaveBeenCalledWith('Pagos con tarjeta no configurados');
+  });
+
+  it('does not submit when Stripe has not loaded', async () => {
     (useStripe as jest.Mock).mockReturnValue(null);
-    (useElements as jest.Mock).mockReturnValue(null);
-
-    render(<StripePaymentForm amount={50} onSuccess={jest.fn()} onError={jest.fn()} />);
-
-    await act(async () => {
-      fireEvent.submit(screen.getByRole('button').closest('form')!);
-    });
-
-    expect(screen.getByText('Stripe is not loaded')).toBeInTheDocument();
+    const props = baseProps();
+    render(<StripePaymentForm {...props} />);
+    expect(screen.getByRole('button')).toBeDisabled();
   });
 });

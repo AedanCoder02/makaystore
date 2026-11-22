@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { LayoutDashboard, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, Crown, CalendarCheck, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Receipt, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, Crown, CalendarCheck, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
 import LocationSwitcher from '../LocationSwitcher';
 
 export default function SellerSidebar() {
@@ -46,6 +46,7 @@ export default function SellerSidebar() {
   const ALL_NAV = [
     { href: '/seller/dashboard',          label: t('nav.dashboard'), icon: LayoutDashboard, key: null },
     { href: '/seller/sell',               label: t('nav.sell'),      icon: ShoppingBag,     key: 'sell' },
+    { href: '/seller/payments',           label: t('nav.payments'),  icon: Receipt,         key: 'payments' },
     { href: '/seller/products',           label: t('nav.products'),  icon: Package,         key: 'products' },
     { href: '/seller/stock',              label: t('nav.stock'),     icon: Boxes,           key: 'stock' },
     { href: '/seller/activity',           label: t('nav.activity'),  icon: Clock,           key: 'activity' },
