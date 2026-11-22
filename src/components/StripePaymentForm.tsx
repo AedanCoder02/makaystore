@@ -2,107 +2,99 @@
 
 import { useState } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { useTranslations } from 'next-intl';
+import { Lock } from 'lucide-react';
 
 interface Props {
   amount: number;
-  onSuccess: (paymentIntentId: string) => void;
+  /** Creates the order (if needed) and returns the PaymentIntent client secret from the server. */
+  getClientSecret: () => Promise<string>;
+  /** Called after Stripe reports the PaymentIntent succeeded. */
+  onSuccess: (paymentIntentId: string) => void | Promise<void>;
   onError: (error: string) => void;
+  billing?: { name?: string; email?: string };
   loading?: boolean;
 }
 
+const isTestKey = (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || '').startsWith('pk_test_');
+
 export default function StripePaymentForm({
   amount,
+  getClientSecret,
   onSuccess,
   onError,
+  billing,
   loading = false,
 }: Props) {
+  const t = useTranslations('checkout.pay');
   const stripe = useStripe();
   const elements = useElements();
   const [error, setError] = useState('');
   const [processing, setProcessing] = useState(false);
 
+  const fail = (message: string) => {
+    setError(message);
+    onError(message);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!stripe || !elements) return;
 
-    if (!stripe || !elements) {
-      setError('Stripe is not loaded');
-      return;
-    }
+    const card = elements.getElement(CardElement);
+    if (!card) return;
 
     setProcessing(true);
     setError('');
-
-    // In test mode, simulate a successful payment using createPaymentMethod
-    // In production, this would call backend: POST /api/create-payment-intent
-    const mockPaymentIntentId = `pi_test_${Date.now()}`;
-
     try {
-      const cardElement = elements.getElement(CardElement);
-      if (!cardElement) {
-        throw new Error('Card element not found');
-      }
-
-      const result = await stripe.createPaymentMethod({
-        type: 'card',
-        card: cardElement,
+      const clientSecret = await getClientSecret();
+      const result = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: { card, billing_details: { name: billing?.name, email: billing?.email } },
       });
-
       if (result.error) {
-        setError(result.error.message || 'Payment failed');
-        onError(result.error.message || 'Payment failed');
+        fail(result.error.message || t('errors.generic'));
+      } else if (result.paymentIntent?.status === 'succeeded') {
+        await onSuccess(result.paymentIntent.id);
       } else {
-        // Simulate successful payment in test mode
-        onSuccess(mockPaymentIntentId);
+        fail(t('errors.generic'));
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Unknown error';
-      setError(message);
-      onError(message);
+      fail(err instanceof Error ? err.message : t('errors.generic'));
     } finally {
       setProcessing(false);
     }
   };
 
-  return (
-    <div className="stripe-payment-form">
-      <h2>Payment Information</h2>
+  const busy = processing || loading;
 
-      <div className="test-card-info">
-        <p>Test Mode</p>
-        <p className="test-card">Card: 4242 4242 4242 4242</p>
-        <p className="test-card-desc">Expires: 12/25, CVC: any 3 digits</p>
+  return (
+    <form className="pay-card-form" onSubmit={handleSubmit}>
+      <p className="pay-field-label">{t('cardTitle')}</p>
+      {isTestKey && <p className="pay-test-note">{t('testMode')}</p>}
+
+      <div className="pay-card-element">
+        <CardElement
+          options={{
+            hidePostalCode: true,
+            style: {
+              base: {
+                fontSize: '16px',
+                color: '#1f2a44',
+                fontFamily: 'Montserrat, system-ui, sans-serif',
+                '::placeholder': { color: '#a99f95' },
+              },
+              invalid: { color: '#dc2626' },
+            },
+          }}
+        />
       </div>
 
-      <form onSubmit={handleSubmit}>
-        <div className="card-element-wrapper">
-          <CardElement
-            options={{
-              style: {
-                base: {
-                  fontSize: '16px',
-                  color: '#424770',
-                  '::placeholder': {
-                    color: '#aab7c4',
-                  },
-                },
-                invalid: {
-                  color: '#fa755a',
-                },
-              },
-            }}
-          />
-        </div>
+      {error && <div className="pay-error" role="alert">{error}</div>}
 
-        {error && <div className="error-message">{error}</div>}
-
-        <button
-          type="submit"
-          className="btn-primary"
-          disabled={!stripe || processing || loading}
-        >
-          {processing || loading ? 'Processing...' : `Pay $${amount.toFixed(2)}`}
-        </button>
-      </form>
-    </div>
+      <button type="submit" className="pay-submit" disabled={!stripe || busy}>
+        {busy ? t('processing') : t('payCard', { amount: amount.toFixed(2) })}
+      </button>
+      <p className="pay-secure"><Lock size={12} /> {t('secure')}</p>
+    </form>
   );
 }

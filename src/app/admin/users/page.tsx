@@ -32,6 +32,7 @@ const ROLE_COLORS: Record<string, string> = {
 const ROLE_SECTIONS: Record<string, { key: string; label: string }[]> = {
   seller: [
     { key: 'sell',     label: 'Sell to Client' },
+    { key: 'payments', label: 'Verify Payments' },
     { key: 'products', label: 'Products' },
     { key: 'stock',    label: 'Stock' },
     { key: 'rotation', label: 'Rotation' },

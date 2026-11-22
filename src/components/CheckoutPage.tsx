@@ -24,14 +24,13 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, totalPrice, clearCart } = useCart();
   const t = useTranslations('checkout');
+  const tPay = useTranslations('checkout.pay');
 
   const [formData, setFormData] = useState<FormData>({
     name: '', email: '', address: '', city: '', zip: '', country: '',
   });
   const [shippingMethod, setShippingMethod] = useState('standard');
   const [step, setStep] = useState<'shipping' | 'payment'>('shipping');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const shippingCost = getShippingCost(shippingMethod);
   const finalTotal = totalPrice + shippingCost;
@@ -52,32 +51,29 @@ export default function CheckoutPage() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePaymentSuccess = async (paymentMethods: PaymentEntry[]) => {
-    setLoading(true);
-    setError('');
-    try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items,
-          subtotal: totalPrice,
-          shipping_cost: shippingCost,
-          total: finalTotal,
-          shipping_address: formData,
-          shipping_method: shippingMethod,
-          payment_id: paymentMethods[0]?.receipt_url ?? '',
-          customer_email: formData.email,
-          payment_methods: paymentMethods,
-        }),
-      });
-      const order = await res.json();
-      clearCart();
-      router.push(`/order-confirmation/${order.id}`);
-    } catch {
-      setError('No se pudo guardar el pedido. Contacta soporte.');
-      setLoading(false);
-    }
+  const createOrder = async (entries: PaymentEntry[]): Promise<string> => {
+    const fd = new FormData();
+    fd.append('payload', JSON.stringify({
+      items,
+      subtotal: totalPrice,
+      shipping_cost: shippingCost,
+      total: finalTotal,
+      shipping_address: formData,
+      shipping_method: shippingMethod,
+      customer_email: formData.email,
+      payment_methods: entries.map(e => ({ method: e.method, amount: e.amount, reference: e.reference })),
+    }));
+    entries.forEach((e, i) => { if (e.proof) fd.append(`proof_${i}`, e.proof); });
+
+    const res = await fetch('/api/orders', { method: 'POST', body: fd });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.id) throw new Error(data.error || tPay('errors.order'));
+    return data.id as string;
+  };
+
+  const handleComplete = (orderId: string) => {
+    clearCart();
+    router.push(`/order-confirmation/${orderId}`);
   };
 
   return (
@@ -90,7 +86,7 @@ export default function CheckoutPage() {
                 formData={formData}
                 onChange={handleFormChange}
                 onSubmit={() => setStep('payment')}
-                loading={loading}
+                loading={false}
               />
               <ShippingMethodSelector
                 selected={shippingMethod}
@@ -103,10 +99,10 @@ export default function CheckoutPage() {
             <StripeProvider>
               <PaymentStep
                 total={finalTotal}
-                onSuccess={handlePaymentSuccess}
+                customer={{ name: formData.name, email: formData.email }}
+                createOrder={createOrder}
+                onComplete={handleComplete}
                 onBack={() => setStep('shipping')}
-                loading={loading}
-                error={error}
               />
             </StripeProvider>
           )}

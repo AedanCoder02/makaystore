@@ -149,7 +149,95 @@
     "subtotal": "Subtotal",
     "shippingCost": "Shipping",
     "total": "Total",
-    "qty": "Qty"
+    "qty": "Qty",
+    "pay": {
+      "title": "Payment method",
+      "back": "Back",
+      "loading": "Loading payment methods…",
+      "none": "No payment methods are available right now. Message us to complete your purchase.",
+      "methods": {
+        "stripe": "Card",
+        "binance": "Binance Pay",
+        "pago_movil": "Pago Móvil",
+        "transferencia": "Bank transfer",
+        "zelle": "Zelle",
+        "binance_pay_id": "Binance Pay"
+      },
+      "hints": {
+        "stripe": "Visa, Mastercard, Amex",
+        "binance": "Pay with crypto in the Binance app",
+        "pago_movil": "Bolívares · manual verification",
+        "transferencia": "Bolívares · manual verification",
+        "zelle": "USD · manual verification",
+        "binance_pay_id": "USDT · manual verification"
+      },
+      "fields": {
+        "bank": "Bank",
+        "phone": "Phone",
+        "idNumber": "ID / RIF",
+        "holder": "Account holder",
+        "accountNumber": "Account number",
+        "accountType": "Account type",
+        "email": "Email",
+        "payId": "Binance Pay ID"
+      },
+      "sendTo": "Send the payment to",
+      "amountUsd": "Amount to pay",
+      "amountBs": "In bolívares (rate {rate} Bs/$)",
+      "copy": "Copy",
+      "copied": "Copied",
+      "reference": "Reference number",
+      "referencePlaceholder": "e.g. 00123456",
+      "proof": "Payment screenshot",
+      "proofUpload": "Upload screenshot or PDF",
+      "proofChange": "Change file",
+      "proofTooLarge": "File is larger than 4 MB",
+      "proofHint": "Our team will verify the payment before confirming your order.",
+      "split": "Pay with two methods",
+      "splitRemove": "Use a single method",
+      "splitLabel": "Payment {n} of 2",
+      "splitManualOnly": "Card and Binance Pay can't be combined with another method.",
+      "amount": "Amount ($)",
+      "covered": "Total covered",
+      "confirmManual": "Send proof and confirm",
+      "payCard": "Pay ${amount}",
+      "payBinance": "Continue to Binance Pay",
+      "redirecting": "Redirecting to Binance…",
+      "processing": "Processing…",
+      "cardTitle": "Card details",
+      "testMode": "Test mode: use 4242 4242 4242 4242, any future date and CVC.",
+      "secure": "Encrypted and processed by Stripe. Makay never stores your card details.",
+      "errors": {
+        "generic": "The payment could not be processed. Please try again.",
+        "missingReference": "Enter the reference number.",
+        "missingProof": "Attach the payment screenshot.",
+        "splitMismatch": "Amounts must add up to the total.",
+        "order": "The order could not be created. Please try again."
+      }
+    },
+    "paymentStatus": {
+      "awaiting_payment": {
+        "title": "Waiting for your payment",
+        "body": "We haven't received Binance Pay's confirmation yet. If you already paid, refresh this page in a few seconds."
+      },
+      "pending_verification": {
+        "title": "Payment under review",
+        "body": "We received your proof. We'll let you know once our team confirms the payment."
+      },
+      "paid": {
+        "title": "Payment confirmed!",
+        "body": "Thank you for your purchase. We're preparing your order."
+      },
+      "verified": {
+        "title": "Payment verified!",
+        "body": "Our team confirmed your payment. Thank you for your purchase."
+      },
+      "rejected": {
+        "title": "Payment rejected",
+        "body": "We couldn't verify your payment. Message us to sort it out."
+      },
+      "refresh": "Refresh status"
+    }
   },
   "admin": {
     "dashboard": "Admin Dashboard",
@@ -454,7 +542,8 @@
       "studio": "Studio",
       "rotation": "Rotation",
       "events": "Events",
-      "memberships": "Memberships"
+      "memberships": "Memberships",
+      "payments": "Payments"
     },
     "sell": {
       "title": "Sell to Client",
@@ -976,6 +1065,50 @@
       "cardLabel": "Membership Card",
       "allMembers": "All members",
       "fromSpend": "From ${amount} total spend"
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "subtitle": "Verify Pago Móvil, bank transfer, Zelle and Binance proofs.",
+    "tabs": {
+      "pending_verification": "To verify",
+      "verified": "Verified",
+      "rejected": "Rejected",
+      "settings": "Credentials"
+    },
+    "empty": "No payments in this list.",
+    "loading": "Loading…",
+    "reload": "Refresh",
+    "order": "Order",
+    "customer": "Customer",
+    "guest": "Guest",
+    "total": "Total",
+    "items": "Items",
+    "reference": "Reference",
+    "proof": "Proof",
+    "openProof": "Open proof",
+    "noProof": "No proof",
+    "verify": "Verify payment",
+    "reject": "Reject",
+    "notePlaceholder": "Note (optional, visible to staff)",
+    "confirmReject": "Reject this payment? The order will be cancelled.",
+    "reviewedAt": "Reviewed",
+    "note": "Note",
+    "error": "The payment could not be updated.",
+    "settings": {
+      "title": "Payment credentials",
+      "intro": "Customers see these details at checkout. Only active methods are shown.",
+      "enabled": "Active",
+      "save": "Save",
+      "saved": "Saved",
+      "saveError": "Could not save",
+      "vesRate": "Bs per USD rate (0 hides the Bs amount)",
+      "instructions": "Extra instructions for the customer",
+      "gateways": "Automatic gateways",
+      "gatewayOn": "Configured",
+      "gatewayOff": "Needs setup in Vercel",
+      "stripeWebhook": "Stripe webhook",
+      "binanceManualNote": "The manual Binance Pay ID only shows when the Binance Pay API is not configured."
     }
   }
 }

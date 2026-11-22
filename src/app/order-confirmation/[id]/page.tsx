@@ -1,5 +1,9 @@
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 import sql from '@/lib/db';
+import { syncBinanceOrder } from '@/lib/binancePay';
+import { binanceApiEnabled, parseJsonArray } from '@/lib/payments';
+import ClearCartOnReturn from '@/components/orders/ClearCartOnReturn';
 
 interface OrderRow {
   id: string;
@@ -10,8 +14,14 @@ interface OrderRow {
   shipping_address: { name: string; address: string; city: string; zip: string; country: string };
   shipping_method: string;
   status: string;
+  payment_status: string | null;
+  payment_methods: Array<{ method: string }>;
   created_at: string;
 }
+
+const STATUS_ICON: Record<string, string> = {
+  awaiting_payment: '…', pending_verification: '⏳', paid: '✓', verified: '✓', rejected: '✕',
+};
 
 async function fetchOrder(id: string): Promise<OrderRow | null> {
   try {
@@ -22,6 +32,7 @@ async function fetchOrder(id: string): Promise<OrderRow | null> {
       ...r,
       items: typeof r.items === 'string' ? JSON.parse(r.items) : (r.items ?? []),
       shipping_address: typeof r.shipping_address === 'string' ? JSON.parse(r.shipping_address) : (r.shipping_address ?? {}),
+      payment_methods: parseJsonArray(r.payment_methods),
     };
   } catch {
     return null;
@@ -36,7 +47,14 @@ const METHOD_LABEL: Record<string, string> = {
 
 export default async function OrderConfirmationRoute({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const order = await fetchOrder(id);
+  let order = await fetchOrder(id);
+
+  // Returning from Binance Pay: ask Binance for the real status before rendering.
+  if (order?.payment_status === 'awaiting_payment' && order.payment_methods[0]?.method === 'binance' && binanceApiEnabled()) {
+    const synced = await syncBinanceOrder(order.id).catch(() => null);
+    if (synced && synced !== order.payment_status) order = await fetchOrder(id);
+  }
+  const tStatus = await getTranslations('checkout.paymentStatus');
 
   if (!order) {
     return (
@@ -54,12 +72,31 @@ export default async function OrderConfirmationRoute({ params }: { params: Promi
   return (
     <div className="order-confirmation-container">
       <div className="confirmation-card">
-        <div className="confirmation-icon">✓</div>
-        <h1>Order Confirmed!</h1>
-        <p className="confirmation-number">Order {order.id}</p>
-        <p className="confirmation-message">
-          Thank you for your purchase. We&apos;ll send updates as your order is processed.
-        </p>
+        <ClearCartOnReturn orderId={order.id} />
+        {order.payment_status ? (
+          <>
+            <div className={`confirmation-icon confirmation-icon--${order.payment_status}`}>
+              {STATUS_ICON[order.payment_status] ?? '✓'}
+            </div>
+            <h1>{tStatus(`${order.payment_status}.title` as 'paid.title')}</h1>
+            <p className="confirmation-number">Order {order.id}</p>
+            <p className="confirmation-message">{tStatus(`${order.payment_status}.body` as 'paid.body')}</p>
+            {order.payment_status === 'awaiting_payment' && (
+              <p style={{ textAlign: 'center' }}>
+                <Link href={`/order-confirmation/${order.id}`} className="btn-secondary">{tStatus('refresh')}</Link>
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="confirmation-icon">✓</div>
+            <h1>Order Confirmed!</h1>
+            <p className="confirmation-number">Order {order.id}</p>
+            <p className="confirmation-message">
+              Thank you for your purchase. We&apos;ll send updates as your order is processed.
+            </p>
+          </>
+        )}
 
         <div className="order-summary-section">
           <h2>Order Summary</h2>

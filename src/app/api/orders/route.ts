@@ -1,34 +1,17 @@
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
-import { sendMembershipWelcomeEmail, sendMembershipContractEmail } from '@/lib/email';
-
-async function ensureTable() {
-  await sql`
-    CREATE TABLE IF NOT EXISTS orders (
-      id            TEXT PRIMARY KEY,
-      customer_id   TEXT,
-      customer_email TEXT,
-      items         JSONB NOT NULL DEFAULT '[]',
-      subtotal      NUMERIC(10,2) DEFAULT 0,
-      shipping_cost NUMERIC(10,2) DEFAULT 0,
-      total         NUMERIC(10,2) DEFAULT 0,
-      shipping_address JSONB,
-      shipping_method  TEXT DEFAULT 'standard',
-      payment_id    TEXT,
-      status        TEXT DEFAULT 'pending',
-      created_at    TIMESTAMPTZ DEFAULT NOW(),
-      updated_at    TIMESTAMPTZ DEFAULT NOW()
-    )
-  `;
-}
+import {
+  ensurePaymentSchema, getPaymentSettings, enabledMethods, isGatewayMethod, isManualMethod,
+  parseJsonArray, type CheckoutMethod,
+} from '@/lib/payments';
 
 // GET — customer's own orders
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  await ensureTable();
+  await ensurePaymentSchema();
 
   const rows = await sql`
     SELECT * FROM orders
@@ -38,129 +21,128 @@ export async function GET() {
   return NextResponse.json(rows);
 }
 
-const TIER_THRESHOLDS = [
-  { tier: 'vip',    min: 1500 },
-  { tier: 'gold',   min: 700  },
-  { tier: 'silver', min: 300  },
-  { tier: 'bronze', min: 100  },
-  { tier: 'free',   min: 0    },
-];
+const MAX_PROOF_BYTES = 4 * 1024 * 1024;
+const PROOF_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif', 'application/pdf'];
 
-async function updateMembershipTier(userId: string) {
-  try {
-    const result = await sql`
-      SELECT COALESCE(SUM(total), 0)::numeric AS lifetime_spend
-      FROM orders WHERE customer_id = ${userId}
-    `;
-    const spend = parseFloat(result[0]?.lifetime_spend ?? '0');
-    const tier = TIER_THRESHOLDS.find(t => spend >= t.min)?.tier ?? 'free';
-
-    await sql`
-      INSERT INTO user_profiles (clerk_id, membership_tier)
-      VALUES (${userId}, ${tier})
-      ON CONFLICT (clerk_id) DO UPDATE SET membership_tier = ${tier}, updated_at = NOW()
-    `;
-  } catch {
-    // non-fatal — profile update failure shouldn't block order creation
-  }
+interface IncomingPayment {
+  method: string;
+  amount: number;
+  reference?: string;
 }
 
-// POST — create order from storefront checkout
+// POST — create order from storefront checkout.
+// Gateway methods (stripe, binance) create the order as `awaiting_payment`; the provider confirms it later.
+// Manual methods (pago_movil, transferencia, zelle, binance_pay_id) need a reference + proof file each
+// and wait for staff verification. Fulfillment (points, memberships, emails) runs only once payment settles.
 export async function POST(req: NextRequest) {
   const { userId } = await auth();
-  await ensureTable();
+  await ensurePaymentSchema();
 
   const locale = req.cookies.get('NEXT_LOCALE')?.value ?? 'es';
-  const body = await req.json();
-  const { items, subtotal, shipping_cost, total, shipping_address, shipping_method, payment_id, customer_email, payment_methods } = body;
 
-  if (!items || total === undefined) {
+  let body: Record<string, unknown>;
+  let form: FormData | null = null;
+  if ((req.headers.get('content-type') ?? '').includes('multipart/form-data')) {
+    form = await req.formData();
+    try { body = JSON.parse(String(form.get('payload') ?? '{}')); } catch { body = {}; }
+  } else {
+    body = await req.json();
+  }
+
+  const { items, subtotal, shipping_cost, total, shipping_address, shipping_method, customer_email } = body as {
+    items?: unknown[]; subtotal?: number; shipping_cost?: number; total?: number;
+    shipping_address?: Record<string, unknown>; shipping_method?: string; customer_email?: string;
+  };
+  const payments = parseJsonArray<IncomingPayment>(body.payment_methods);
+
+  if (!Array.isArray(items) || items.length === 0 || total === undefined || !(Number(total) > 0)) {
     return NextResponse.json({ error: 'items and total required' }, { status: 400 });
   }
 
-  const id = `ORD-${Date.now()}`;
-  const row = await sql`
-    INSERT INTO orders
-      (id, customer_id, customer_email, items, subtotal, shipping_cost, total,
-       shipping_address, shipping_method, payment_id, payment_methods, status)
-    VALUES
-      (${id}, ${userId ?? null}, ${customer_email ?? null},
-       ${JSON.stringify(items)}, ${subtotal ?? 0}, ${shipping_cost ?? 0}, ${total},
-       ${JSON.stringify(shipping_address ?? {})}, ${shipping_method ?? 'standard'},
-       ${payment_id ?? null}, ${JSON.stringify(payment_methods ?? [])}, 'pending')
-    RETURNING *
-  `;
-
-  if (userId) {
-    await updateMembershipTier(userId);
-
-    // Credit wallet points based on admin-configured rate
-    try {
-      const cfgRows = await sql`SELECT pts_per_dollar FROM wallet_config WHERE id = 1`;
-      const pts_per_dollar = Number(cfgRows[0]?.pts_per_dollar ?? 10);
-      const pointsEarned = Math.floor(total * pts_per_dollar);
-      if (pointsEarned > 0) {
-        const profRows = await sql`SELECT id FROM user_profiles WHERE clerk_id = ${userId}`;
-        if (profRows.length) {
-          const pid = profRows[0].id as number;
-          await sql`INSERT INTO wallet_transactions (user_id, type, points, order_id, description) VALUES (${pid}, 'earn', ${pointsEarned}, ${id}, 'Points earned from purchase')`;
-          await sql`UPDATE user_profiles SET wallet_points = wallet_points + ${pointsEarned}, updated_at = NOW() WHERE id = ${pid}`;
-        }
-      }
-    } catch {
-      // non-fatal
+  // ── Validate payment methods ──
+  const settings = await getPaymentSettings();
+  const allowed = enabledMethods(settings);
+  if (payments.length === 0 || payments.length > 2) {
+    return NextResponse.json({ error: 'Selecciona uno o dos métodos de pago' }, { status: 400 });
+  }
+  for (const p of payments) {
+    if (!allowed.includes(p.method as CheckoutMethod)) {
+      return NextResponse.json({ error: `Método de pago no disponible: ${p.method}` }, { status: 400 });
     }
-
-    // Check if any item is a membership product and upgrade directly
-    const tierPriority: Record<string, number> = { free: 0, bronze: 1, silver: 2, gold: 3, vip: 4 };
-    let highestTier = '';
-    let membershipDuration = 'anual';
-    for (const item of (items as Array<{ productId?: string; category?: string; duration?: string }>) ) {
-      const pid = String(item.productId ?? '');
-      if (pid.startsWith('membership-')) {
-        const fromId = pid.replace('membership-', '');
-        if (tierPriority[fromId] !== undefined && (tierPriority[fromId] ?? 0) > (tierPriority[highestTier] ?? -1)) {
-          highestTier = fromId;
-          if (item.duration) membershipDuration = item.duration;
-        }
-      }
-    }
-    if (highestTier) {
-      const durationMonths: Record<string, number> = { trimestral: 3, semestral: 6, anual: 12 };
-      const months = durationMonths[membershipDuration] ?? 12;
-      const expiresAt = new Date();
-      expiresAt.setMonth(expiresAt.getMonth() + months);
-
-      await sql`
-        INSERT INTO user_profiles (clerk_id, membership_tier, membership_started_at, membership_expires_at, membership_duration)
-        VALUES (${userId}, ${highestTier}, NOW(), ${expiresAt.toISOString()}, ${membershipDuration})
-        ON CONFLICT (clerk_id) DO UPDATE SET
-          membership_tier = ${highestTier},
-          membership_started_at = NOW(),
-          membership_expires_at = ${expiresAt.toISOString()},
-          membership_duration = ${membershipDuration},
-          updated_at = NOW()
-      `.catch(() => {});
-
-      // Send membership emails (non-fatal)
-      if (customer_email) {
-        const emailData = {
-          to: customer_email,
-          name: (shipping_address as { name?: string })?.name ?? customer_email,
-          tier: highestTier,
-          duration: membershipDuration,
-          amount: total,
-          orderId: id,
-          expiresAt: expiresAt.toISOString(),
-          locale,
-        };
-        Promise.all([
-          sendMembershipWelcomeEmail(emailData).catch(() => {}),
-          sendMembershipContractEmail(emailData).catch(() => {}),
-        ]);
-      }
+    if (!(Number(p.amount) > 0)) {
+      return NextResponse.json({ error: 'Monto inválido' }, { status: 400 });
     }
   }
+  const hasGateway = payments.some(p => isGatewayMethod(p.method));
+  if (hasGateway && payments.length > 1) {
+    return NextResponse.json({ error: 'Tarjeta y Binance Pay no se pueden combinar con otro método' }, { status: 400 });
+  }
+  const paidSum = payments.reduce((s, p) => s + Number(p.amount), 0);
+  if (Math.abs(paidSum - Number(total)) > 0.02) {
+    return NextResponse.json({ error: 'La suma de los pagos no coincide con el total' }, { status: 400 });
+  }
+
+  // Manual methods: reference + proof file are required.
+  const proofFiles: (File | null)[] = [];
+  for (let i = 0; i < payments.length; i++) {
+    const p = payments[i];
+    if (!isManualMethod(p.method)) { proofFiles.push(null); continue; }
+    const file = form?.get(`proof_${i}`);
+    if (!String(p.reference ?? '').trim()) {
+      return NextResponse.json({ error: 'Ingresa el número de referencia del pago' }, { status: 400 });
+    }
+    if (!(file instanceof File) || file.size === 0) {
+      return NextResponse.json({ error: 'Adjunta el comprobante (captura) del pago' }, { status: 400 });
+    }
+    if (file.size > MAX_PROOF_BYTES) {
+      return NextResponse.json({ error: 'El comprobante supera 4 MB' }, { status: 400 });
+    }
+    if (!PROOF_TYPES.includes(file.type)) {
+      return NextResponse.json({ error: 'El comprobante debe ser una imagen o PDF' }, { status: 400 });
+    }
+    proofFiles.push(file);
+  }
+
+  const id = `ORD-${Date.now()}`;
+
+  const paymentStatus = hasGateway ? 'awaiting_payment' : 'pending_verification';
+  const proofBuffers = await Promise.all(
+    proofFiles.map(async f => (f ? Buffer.from(await f.arrayBuffer()) : null)),
+  );
+
+  const row = await sql.begin(async tx => {
+    const storedPayments: Array<Record<string, unknown>> = [];
+    for (let i = 0; i < payments.length; i++) {
+      const p = payments[i];
+      const entry: Record<string, unknown> = { method: p.method, amount: Number(p.amount) };
+      const file = proofFiles[i];
+      const buf = proofBuffers[i];
+      if (file && buf) {
+        const proof = await tx`
+          INSERT INTO payment_proofs (order_id, method, mime, filename, size, data)
+          VALUES (${id}, ${p.method}, ${file.type}, ${file.name.slice(0, 200)}, ${file.size}, ${buf})
+          RETURNING id
+        `;
+        entry.reference = String(p.reference).trim().slice(0, 100);
+        entry.proof_id = proof[0].id;
+      }
+      storedPayments.push(entry);
+    }
+
+    return tx`
+      INSERT INTO orders
+        (id, customer_id, customer_email, items, subtotal, shipping_cost, total,
+         shipping_address, shipping_method, payment_id, payment_methods, status,
+         payment_status, locale)
+      VALUES
+        (${id}, ${userId ?? null}, ${customer_email ?? null},
+         ${JSON.stringify(items)}, ${subtotal ?? 0}, ${shipping_cost ?? 0}, ${Number(total)},
+         ${JSON.stringify(shipping_address ?? {})}, ${shipping_method ?? 'standard'},
+         ${null}, ${JSON.stringify(storedPayments)}, 'pending',
+         ${paymentStatus}, ${locale})
+      RETURNING id, total, status, payment_status, payment_methods
+    `;
+  });
 
   return NextResponse.json(row[0], { status: 201 });
 }
