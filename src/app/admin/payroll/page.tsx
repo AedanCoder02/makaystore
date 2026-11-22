@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useEffect, useState, useCallback } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
@@ -76,6 +77,7 @@ function startOfWeekISO() {
 }
 
 export default function AdminPayrollPage() {
+  const tb = useTranslations('payrollAdmin');
   const [tab, setTab] = useState<'employees' | 'runs'>('employees');
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [sellers, setSellers] = useState<SellerOption[]>([]);
@@ -131,7 +133,7 @@ export default function AdminPayrollPage() {
       setEmployees(prev => [...prev, created]);
       setDraft(EMPTY);
       setCreating(false);
-      showToast('Empleado creado.');
+      showToast(tb('employeeCreated'));
     }
     setSaving(false);
   };
@@ -145,7 +147,7 @@ export default function AdminPayrollPage() {
       const updated: Employee = await res.json();
       setEmployees(prev => prev.map(e => e.id === id ? updated : e));
       setEditId(null); setEditDraft({});
-      showToast('Empleado actualizado.');
+      showToast(tb('employeeUpdated'));
     }
     setSaving(false);
   };
@@ -162,10 +164,10 @@ export default function AdminPayrollPage() {
   };
 
   const remove = async (id: number) => {
-    if (!confirm('¿Eliminar este empleado? Esto no borra nóminas ya generadas.')) return;
+    if (!confirm(tb('deleteThisEmployeePayrollRuns'))) return;
     await fetch(`/api/admin/payroll/employees/${id}`, { method: 'DELETE' });
     setEmployees(prev => prev.filter(e => e.id !== id));
-    showToast('Empleado eliminado.');
+    showToast(tb('employeeDeleted'));
   };
 
   const generateRun = async () => {
@@ -176,27 +178,27 @@ export default function AdminPayrollPage() {
     });
     if (res.ok) {
       await loadRuns();
-      showToast('Nómina generada.');
+      showToast(tb('payrollGenerated'));
     } else {
       const d = await res.json().catch(() => ({}));
-      showToast(d.error ?? 'Error al generar nómina.');
+      showToast(d.error ?? tb('couldNotGeneratePayroll'));
     }
     setGenerating(false);
   };
 
   const finalizeRun = async (id: number) => {
-    if (!confirm('¿Finalizar esta nómina? No podrá eliminarse después.')) return;
+    if (!confirm(tb('finalizeThisPayrollItCan'))) return;
     const res = await fetch(`/api/admin/payroll/runs/${id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status: 'finalized' }),
     });
-    if (res.ok) { await loadRuns(); showToast('Nómina finalizada.'); }
+    if (res.ok) { await loadRuns(); showToast(tb('payrollFinalized')); }
   };
 
   const deleteRun = async (id: number) => {
-    if (!confirm('¿Eliminar esta nómina en borrador?')) return;
+    if (!confirm(tb('deleteThisDraftPayroll'))) return;
     const res = await fetch(`/api/admin/payroll/runs/${id}`, { method: 'DELETE' });
-    if (res.ok) { setRuns(prev => prev.filter(r => r.id !== id)); showToast('Nómina eliminada.'); }
-    else { const d = await res.json().catch(() => ({})); showToast(d.error ?? 'No se pudo eliminar.'); }
+    if (res.ok) { setRuns(prev => prev.filter(r => r.id !== id)); showToast(tb('payrollDeleted')); }
+    else { const d = await res.json().catch(() => ({})); showToast(d.error ?? tb('couldNotDelete')); }
   };
 
   const activeCount = employees.filter(e => e.status === 'active').length;
@@ -204,8 +206,8 @@ export default function AdminPayrollPage() {
   const totalMonthly = monthly(totalWeekly);
 
   const TABS: { id: 'employees' | 'runs'; label: string }[] = [
-    { id: 'employees', label: 'Empleados' },
-    { id: 'runs', label: 'Nómina' },
+    { id: 'employees', label: tb('employees') },
+    { id: 'runs', label: tb('payroll') },
   ];
 
   return (
@@ -213,7 +215,7 @@ export default function AdminPayrollPage() {
       <AdminSidebar />
       <main className="admin-main">
         <div className="dashboard-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <h1 style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700 }}>Nómina</h1>
+          <h1 style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700 }}>{tb('payroll')}</h1>
           {tab === 'employees' && (
             <button onClick={() => setCreating(true)} style={{
               display: 'flex', alignItems: 'center', gap: '0.4rem',
@@ -221,7 +223,7 @@ export default function AdminPayrollPage() {
               padding: '0.55rem 1.1rem', borderRadius: 9, border: 'none',
               background: 'var(--makay-dark-navy)', color: '#fff', cursor: 'pointer',
             }}>
-              <Plus size={15} /> Nuevo Empleado
+              <Plus size={15} /> {tb('newEmployee')}
             </button>
           )}
         </div>
@@ -246,20 +248,20 @@ export default function AdminPayrollPage() {
         {tab === 'employees' && (
           <>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '0.75rem', marginBottom: '1.5rem' }}>
-              <StatCard icon={<Users size={20} />} label="Empleados activos" value={String(activeCount)} />
-              <StatCard icon={<DollarSign size={20} />} label="Total semanal" value={fmt(totalWeekly)} />
-              <StatCard icon={<DollarSign size={20} />} label="Total mensual (est.)" value={fmt(totalMonthly)} />
+              <StatCard icon={<Users size={20} />} label={tb('activeEmployees')} value={String(activeCount)} />
+              <StatCard icon={<DollarSign size={20} />} label={tb('weeklyTotal')} value={fmt(totalWeekly)} />
+              <StatCard icon={<DollarSign size={20} />} label={tb('monthlyTotalEst')} value={fmt(totalMonthly)} />
             </div>
 
             {creating && (
               <EmployeeForm
                 draft={draft} setDraft={setDraft} sellers={sellers}
                 onSave={create} onCancel={() => { setCreating(false); setDraft(EMPTY); }}
-                saving={saving} title="Nuevo Empleado"
+                saving={saving} title={tb('newEmployee')}
               />
             )}
 
-            {loading ? <p className="admin-loading">Cargando…</p> : (
+            {loading ? <p className="admin-loading">{tb('loading')}</p> : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {employees.length === 0 && (
                   <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', color: 'var(--makay-mauve)', padding: '2rem', textAlign: 'center' }}>
@@ -300,17 +302,17 @@ export default function AdminPayrollPage() {
                           </span>
                         )}
                         <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', color: emp.status === 'active' ? '#10b981' : '#9ca3af', fontWeight: 700 }}>
-                          {emp.status === 'active' ? 'Activo' : 'Inactivo'}
+                          {emp.status === 'active' ? tb('active') : tb('inactive')}
                         </span>
                         <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
-                          <button onClick={() => toggleStatus(emp)} title={emp.status === 'active' ? 'Desactivar' : 'Activar'} style={{ padding: '0.3rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', background: 'transparent', cursor: 'pointer', display: 'flex' }}>
+                          <button onClick={() => toggleStatus(emp)} title={emp.status === 'active' ? tb('deactivate') : tb('activate')} style={{ padding: '0.3rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', background: 'transparent', cursor: 'pointer', display: 'flex' }}>
                             {emp.status === 'active' ? <ToggleRight size={16} color="#10b981" /> : <ToggleLeft size={16} color="#b0a090" />}
                           </button>
                           <button onClick={() => { setEditId(emp.id); setEditDraft({}); }} style={{ padding: '0.3rem 0.6rem', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: 'var(--makay-mauve)' }}>
-                            <Edit2 size={11} /> Editar
+                            <Edit2 size={11} /> {tb('edit')}
                           </button>
                           <button onClick={() => remove(emp.id)} style={{ padding: '0.3rem 0.6rem', borderRadius: 6, border: '1px solid #fecaca', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: '#ef4444' }}>
-                            <Trash2 size={11} /> Eliminar
+                            <Trash2 size={11} /> {tb('delete')}
                           </button>
                         </div>
                       </div>
@@ -326,14 +328,14 @@ export default function AdminPayrollPage() {
         {tab === 'runs' && (
           <>
             <div style={{ background: '#fff', border: '1px solid var(--makay-sand-cream)', borderRadius: 14, padding: '1.5rem', marginBottom: '1.5rem' }}>
-              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', marginBottom: '1rem' }}>Generar Nueva Nómina</p>
+              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', marginBottom: '1rem' }}>{tb('generateNewPayroll')}</p>
               <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                 <div>
-                  <label style={labelStyle}>Desde</label>
+                  <label style={labelStyle}>{tb('from')}</label>
                   <input style={fieldStyle} type="date" value={periodStart} onChange={e => setPeriodStart(e.target.value)} />
                 </div>
                 <div>
-                  <label style={labelStyle}>Hasta</label>
+                  <label style={labelStyle}>{tb('to')}</label>
                   <input style={fieldStyle} type="date" value={periodEnd} onChange={e => setPeriodEnd(e.target.value)} />
                 </div>
                 <button onClick={generateRun} disabled={generating} style={{
@@ -342,7 +344,7 @@ export default function AdminPayrollPage() {
                   background: 'var(--makay-dark-navy)', color: '#fff', cursor: 'pointer',
                   fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', fontWeight: 700,
                 }}>
-                  <Play size={14} /> {generating ? 'Generando…' : 'Generar Nómina'}
+                  <Play size={14} /> {generating ? tb('generating') : tb('generatePayroll')}
                 </button>
               </div>
               <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', color: 'var(--makay-mauve)', marginTop: '0.75rem', marginBottom: 0 }}>
@@ -350,8 +352,8 @@ export default function AdminPayrollPage() {
               </p>
             </div>
 
-            {runsLoading ? <p className="admin-loading">Cargando…</p> : runs.length === 0 ? (
-              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', color: 'var(--makay-mauve)', padding: '2rem', textAlign: 'center' }}>Sin nóminas generadas todavía.</p>
+            {runsLoading ? <p className="admin-loading">{tb('loading')}</p> : runs.length === 0 ? (
+              <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', color: 'var(--makay-mauve)', padding: '2rem', textAlign: 'center' }}>{tb('noPayrollRunsYet')}</p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                 {runs.map(run => {
@@ -372,7 +374,7 @@ export default function AdminPayrollPage() {
                         </div>
                         <span style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: '1.1rem', color: 'var(--makay-peachy-rose)' }}>{fmt(run.total_amount)}</span>
                         <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', padding: '0.2rem 0.55rem', borderRadius: 100, background: run.status === 'finalized' ? '#f0fdf4' : '#fffbeb', color: run.status === 'finalized' ? '#10b981' : '#d97706' }}>
-                          {run.status === 'finalized' ? 'Finalizada' : 'Borrador'}
+                          {run.status === 'finalized' ? tb('finalized') : tb('draft')}
                         </span>
                         {expanded ? <ChevronUp size={16} color="var(--makay-mauve)" /> : <ChevronDown size={16} color="var(--makay-mauve)" />}
                       </div>
@@ -381,7 +383,7 @@ export default function AdminPayrollPage() {
                           <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
                             <thead>
                               <tr>
-                                {['Empleado', 'Departamento', 'Base', 'Comisión', 'Deducciones', 'Total'].map((h, i) => (
+                                {[tb('employee'), tb('department'), tb('base'), tb('commission'), tb('deductions'), tb('total')].map((h, i) => (
                                   <th key={h} style={{ textAlign: i > 1 ? 'right' : 'left', fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--makay-mauve)', padding: '0.4rem 0.5rem' }}>{h}</th>
                                 ))}
                               </tr>
@@ -402,10 +404,10 @@ export default function AdminPayrollPage() {
                           {run.status !== 'finalized' && (
                             <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem' }}>
                               <button onClick={() => finalizeRun(run.id)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '0.4rem 0.9rem', borderRadius: 7, border: 'none', background: 'var(--makay-dark-navy)', color: '#fff', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
-                                <Lock size={12} /> Finalizar
+                                <Lock size={12} /> {tb('finalize')}
                               </button>
                               <button onClick={() => deleteRun(run.id)} style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '0.4rem 0.9rem', borderRadius: 7, border: '1px solid #fecaca', background: 'transparent', color: '#ef4444', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer' }}>
-                                <Trash2 size={12} /> Eliminar
+                                <Trash2 size={12} /> {tb('delete')}
                               </button>
                             </div>
                           )}
@@ -442,75 +444,76 @@ function EmployeeForm({ draft, setDraft, sellers, onSave, onCancel, saving, titl
   saving: boolean;
   title: string;
 }) {
+  const tb = useTranslations('payrollAdmin');
   const set = (patch: Partial<Employee>) => setDraft((p: any) => ({ ...p, ...patch }));
   return (
     <div style={{ background: '#fff', border: '1px solid var(--makay-peachy-rose)', borderRadius: 14, padding: '1.5rem', marginBottom: '1.5rem' }}>
       <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', marginBottom: '1rem' }}>{title}</p>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
         <div>
-          <label style={labelStyle}>Nombre completo *</label>
-          <input style={fieldStyle} value={draft.full_name ?? ''} onChange={e => set({ full_name: e.target.value })} placeholder="Nombre del empleado" />
+          <label style={labelStyle}>{tb('fullName')}</label>
+          <input style={fieldStyle} value={draft.full_name ?? ''} onChange={e => set({ full_name: e.target.value })} placeholder={tb('employeeName')} />
         </div>
         <div>
-          <label style={labelStyle}>Departamento *</label>
+          <label style={labelStyle}>{tb('department2')}</label>
           <select style={fieldStyle} value={draft.department ?? DEPARTMENTS[0]} onChange={e => set({ department: e.target.value })}>
             {DEPARTMENTS.map(d => <option key={d} value={d}>{d}</option>)}
           </select>
         </div>
         <div>
-          <label style={labelStyle}>Puesto</label>
-          <input style={fieldStyle} value={draft.position ?? ''} onChange={e => set({ position: e.target.value })} placeholder="ej. Mesero, Cocinero" />
+          <label style={labelStyle}>{tb('position')}</label>
+          <input style={fieldStyle} value={draft.position ?? ''} onChange={e => set({ position: e.target.value })} placeholder={tb('eGWaiterCook')} />
         </div>
         <div>
-          <label style={labelStyle}>Fecha de inicio</label>
+          <label style={labelStyle}>{tb('startDate')}</label>
           <input style={fieldStyle} type="date" value={draft.start_date ?? ''} onChange={e => set({ start_date: e.target.value })} />
         </div>
         <div>
-          <label style={labelStyle}>Correo</label>
-          <input style={fieldStyle} type="email" value={draft.email ?? ''} onChange={e => set({ email: e.target.value })} placeholder="correo@ejemplo.com" />
+          <label style={labelStyle}>{tb('email')}</label>
+          <input style={fieldStyle} type="email" value={draft.email ?? ''} onChange={e => set({ email: e.target.value })} placeholder={tb('emailExampleCom')} />
         </div>
         <div>
-          <label style={labelStyle}>Teléfono</label>
+          <label style={labelStyle}>{tb('phone')}</label>
           <input style={fieldStyle} value={draft.phone ?? ''} onChange={e => set({ phone: e.target.value })} placeholder="+57 300 000 0000" />
         </div>
         <div>
-          <label style={labelStyle}>Sueldo semanal ($) *</label>
+          <label style={labelStyle}>{tb('weeklyWage')}</label>
           <input style={fieldStyle} type="number" min={0} step={0.01} value={draft.weekly_wage ?? 0} onChange={e => set({ weekly_wage: parseFloat(e.target.value) || 0 })} />
         </div>
         <div>
-          <label style={labelStyle}>≈ Mensual (calculado)</label>
+          <label style={labelStyle}>{tb('monthlyCalculated')}</label>
           <input style={{ ...fieldStyle, background: '#f7f4f0', color: 'var(--makay-mauve)' }} value={fmt(monthly(Number(draft.weekly_wage ?? 0)))} readOnly />
         </div>
         <div>
-          <label style={labelStyle}>Comisión (%)</label>
+          <label style={labelStyle}>{tb('commission2')}</label>
           <input style={fieldStyle} type="number" min={0} max={100} step={0.1} value={draft.commission_pct ?? 0} onChange={e => set({ commission_pct: parseFloat(e.target.value) || 0 })} />
         </div>
         <div>
-          <label style={labelStyle}>Comisión fija adicional ($)</label>
+          <label style={labelStyle}>{tb('fixedExtraCommission')}</label>
           <input style={fieldStyle} type="number" min={0} step={0.01} value={draft.commission_fixed ?? 0} onChange={e => set({ commission_fixed: parseFloat(e.target.value) || 0 })} />
         </div>
         <div style={{ gridColumn: '1/-1' }}>
-          <label style={labelStyle}>Vincular a cuenta de vendedor (opcional — habilita comisión automática por ventas reales)</label>
+          <label style={labelStyle}>{tb('linkToASellerAccount')}</label>
           <select style={fieldStyle} value={draft.linked_seller_id ?? ''} onChange={e => set({ linked_seller_id: e.target.value })}>
-            <option value="">— Sin vincular —</option>
+            <option value="">{tb('notLinked')}</option>
             {sellers.map(s => <option key={s.workerId} value={s.workerId}>{s.name} ({s.email})</option>)}
           </select>
         </div>
         <div>
-          <label style={labelStyle}>Estado</label>
+          <label style={labelStyle}>{tb('status')}</label>
           <select style={fieldStyle} value={draft.status ?? 'active'} onChange={e => set({ status: e.target.value })}>
-            <option value="active">Activo</option>
-            <option value="inactive">Inactivo</option>
+            <option value="active">{tb('active')}</option>
+            <option value="inactive">{tb('inactive')}</option>
           </select>
         </div>
         <div style={{ gridColumn: '1/-1' }}>
-          <label style={labelStyle}>Notas</label>
-          <input style={fieldStyle} value={draft.notes ?? ''} onChange={e => set({ notes: e.target.value })} placeholder="Notas internas (opcional)" />
+          <label style={labelStyle}>{tb('notes')}</label>
+          <input style={fieldStyle} value={draft.notes ?? ''} onChange={e => set({ notes: e.target.value })} placeholder={tb('internalNotesOptional')} />
         </div>
       </div>
       <div style={{ display: 'flex', gap: '0.5rem' }}>
         <button onClick={onSave} disabled={saving} style={{ padding: '0.45rem 1.1rem', borderRadius: 8, border: 'none', background: 'var(--makay-dark-navy)', color: '#fff', fontFamily: 'var(--font-montserrat)', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}>
-          <Check size={13} /> {saving ? 'Guardando…' : 'Guardar'}
+          <Check size={13} /> {saving ? tb('saving') : tb('save')}
         </button>
         <button onClick={onCancel} style={{ padding: '0.45rem 0.9rem', borderRadius: 8, border: '1px solid var(--makay-sand-cream)', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
           <X size={13} />
