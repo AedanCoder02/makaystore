@@ -1,21 +1,25 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslations, useLocale } from 'next-intl';
+import { Plus, Edit3, Trash2, Users, Calendar, MapPin, Tag, Clock, Image as ImageIcon, Check, X, ExternalLink, Images, FileText } from 'lucide-react';
 import AdminSidebar from '@/components/AdminSidebar';
-import { Plus, Edit3, Trash2, Users, Check, X, Calendar, MapPin, Tag, Clock, Image as ImageIcon } from 'lucide-react';
+import '@/styles/events-admin.css';
 
-interface Event {
+export interface EventRecord {
   id: number;
   title: string;
   description: string;
-  event_date: string;
+  content: string;
+  event_date: string | null;
   location: string;
   image_url: string;
+  gallery: string[];
   price: number;
   capacity: number;
   status: string;
   tickets_sold: number;
-  tags?: string;
+  tags: string;
 }
 
 interface Ticket {
@@ -25,20 +29,145 @@ interface Ticket {
   quantity: number;
   total_paid: number;
   purchased_at: string;
+  order_id?: string | null;
 }
 
-const EMPTY: Partial<Event> = {
-  title: '', description: '', location: '', image_url: '',
-  price: 0, capacity: 100, status: 'active', tags: '',
+type Draft = Omit<Partial<EventRecord>, 'gallery'> & { galleryText?: string };
+
+const EMPTY: Draft = {
+  title: '', description: '', content: '', location: '', image_url: '', galleryText: '',
+  price: 0, capacity: 100, status: 'active', tags: '', event_date: '',
 };
 
-export default function AdminEvents() {
-  const [events, setEvents] = useState<Event[]>([]);
+/** <input type="datetime-local"> wants local "YYYY-MM-DDTHH:mm". */
+function toLocalInput(iso: string | null | undefined): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function toPayload(d: Draft) {
+  const { galleryText, ...rest } = d;
+  return {
+    ...rest,
+    event_date: d.event_date ? new Date(d.event_date).toISOString() : null,
+    gallery: (galleryText ?? '').split('\n').map(s => s.trim()).filter(Boolean),
+  };
+}
+
+function EventForm({ data, onChange, onSave, onCancel, saveLabel, saving }: {
+  data: Draft;
+  onChange: (patch: Draft) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  saveLabel: string;
+  saving: boolean;
+}) {
+  const t = useTranslations('eventsAdmin');
+  const galleryUrls = (data.galleryText ?? '').split('\n').map(s => s.trim()).filter(Boolean);
+
+  return (
+    <div className="ae-form">
+      <div className="ae-form-grid">
+        <div className="ae-span">
+          <label className="seller-label">{t('fields.title')} *</label>
+          <input className="seller-input ae-title-input" placeholder={t('placeholders.title')} value={data.title ?? ''} onChange={e => onChange({ title: e.target.value })} />
+        </div>
+
+        <div>
+          <label className="seller-label"><Calendar size={12} /> {t('fields.date')}</label>
+          <input type="datetime-local" className="seller-input" value={data.event_date ?? ''} onChange={e => onChange({ event_date: e.target.value })} />
+        </div>
+
+        <div>
+          <label className="seller-label"><MapPin size={12} /> {t('fields.location')}</label>
+          <input className="seller-input" placeholder={t('placeholders.location')} value={data.location ?? ''} onChange={e => onChange({ location: e.target.value })} />
+        </div>
+
+        <div>
+          <label className="seller-label">{t('fields.price')}</label>
+          <input type="number" min={0} step={0.01} className="seller-input" value={data.price ?? 0} onChange={e => onChange({ price: Number(e.target.value) })} />
+          <p className="ae-hint">{t('hints.price')}</p>
+        </div>
+
+        <div>
+          <label className="seller-label"><Users size={12} /> {t('fields.capacity')}</label>
+          <input type="number" min={1} className="seller-input" value={data.capacity ?? 100} onChange={e => onChange({ capacity: Number(e.target.value) })} />
+        </div>
+
+        <div>
+          <label className="seller-label"><Tag size={12} /> {t('fields.tags')}</label>
+          <input className="seller-input" placeholder={t('placeholders.tags')} value={data.tags ?? ''} onChange={e => onChange({ tags: e.target.value })} />
+        </div>
+
+        <div>
+          <label className="seller-label"><Clock size={12} /> {t('fields.status')}</label>
+          <select className="seller-input" value={data.status ?? 'active'} onChange={e => onChange({ status: e.target.value })}>
+            <option value="active">{t('status.activeLong')}</option>
+            <option value="draft">{t('status.draftLong')}</option>
+            <option value="cancelled">{t('status.cancelled')}</option>
+          </select>
+        </div>
+
+        <div className="ae-span">
+          <label className="seller-label"><ImageIcon size={12} /> {t('fields.cover')}</label>
+          <input className="seller-input" placeholder="https://… / drive.google.com/file/d/…" value={data.image_url ?? ''} onChange={e => onChange({ image_url: e.target.value })} />
+          <p className="ae-hint">{t('hints.drive')}</p>
+        </div>
+
+        <div className="ae-span">
+          <label className="seller-label">{t('fields.summary')}</label>
+          <textarea className="seller-textarea" rows={2} placeholder={t('placeholders.summary')} value={data.description ?? ''} onChange={e => onChange({ description: e.target.value })} />
+        </div>
+
+        <div className="ae-span">
+          <label className="seller-label"><FileText size={12} /> {t('fields.content')}</label>
+          <textarea className="seller-textarea ae-content" rows={8} placeholder={t('placeholders.content')} value={data.content ?? ''} onChange={e => onChange({ content: e.target.value })} />
+          <p className="ae-hint">{t('hints.content')}</p>
+        </div>
+
+        <div className="ae-span">
+          <label className="seller-label"><Images size={12} /> {t('fields.gallery')}</label>
+          <textarea className="seller-textarea" rows={4} placeholder={t('placeholders.gallery')} value={data.galleryText ?? ''} onChange={e => onChange({ galleryText: e.target.value })} />
+          <p className="ae-hint">{t('hints.gallery', { count: galleryUrls.length })}</p>
+          {(data.image_url || galleryUrls.length > 0) && (
+            <div className="ae-gallery-preview">
+              {[data.image_url, ...galleryUrls].filter(Boolean).slice(0, 12).map((u, i) => (
+                // Preview only; the server converts Drive share links on save.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img key={i} src={String(u)} alt="" onError={e => { (e.target as HTMLImageElement).style.opacity = '0.2'; }} />
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="seller-form-actions">
+        <button className="seller-btn-primary" onClick={onSave} disabled={saving || !data.title}>
+          <Check size={14} /> {saving ? t('saving') : saveLabel}
+        </button>
+        <button className="seller-btn-ghost" onClick={onCancel}><X size={14} /> {t('cancel')}</button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Events editor. Rendered inside the admin layout, or `embedded` in the
+ * seller panel for staff granted the "events" permission.
+ */
+export default function AdminEvents({ embedded = false }: { embedded?: boolean }) {
+  const t = useTranslations('eventsAdmin');
+  const locale = useLocale();
+  const [events, setEvents] = useState<EventRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [showCreate, setShowCreate] = useState(false);
-  const [form, setForm] = useState<Partial<Event>>(EMPTY);
+  const [form, setForm] = useState<Draft>(EMPTY);
   const [editing, setEditing] = useState<number | null>(null);
-  const [editForm, setEditForm] = useState<Partial<Event>>({});
+  const [editForm, setEditForm] = useState<Draft>({});
   const [saving, setSaving] = useState(false);
   const [attendees, setAttendees] = useState<Record<number, Ticket[]>>({});
   const [showAttendees, setShowAttendees] = useState<number | null>(null);
@@ -46,10 +175,13 @@ export default function AdminEvents() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch('/api/events');
-    const data = await res.json();
-    setEvents(Array.isArray(data) ? data : []);
-    setLoading(false);
+    try {
+      const res = await fetch('/api/events?scope=all');
+      const data = await res.json();
+      setEvents(Array.isArray(data) ? data : []);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { load(); }, [load]);
@@ -63,298 +195,234 @@ export default function AdminEvents() {
   };
 
   const now = new Date();
-  const visible = events.filter(ev => {
-    if (tab === 'all') return true;
-    const date = ev.event_date ? new Date(ev.event_date) : null;
-    if (tab === 'upcoming') return !date || date >= now;
-    if (tab === 'past')     return date && date < now;
-    return true;
-  });
+  const isPast = (ev: EventRecord) => !!ev.event_date && new Date(ev.event_date) < now;
+  const counts = {
+    upcoming: events.filter(e => !isPast(e)).length,
+    past: events.filter(isPast).length,
+    all: events.length,
+  };
+  const visible = events
+    .filter(ev => tab === 'all' || (tab === 'past' ? isPast(ev) : !isPast(ev)))
+    .sort((a, b) => {
+      const da = a.event_date ? new Date(a.event_date).getTime() : Infinity;
+      const db = b.event_date ? new Date(b.event_date).getTime() : Infinity;
+      return tab === 'upcoming' ? da - db : db - da;
+    });
+
+  const submit = async (url: string, method: 'POST' | 'PATCH', draft: Draft) => {
+    setSaving(true);
+    setError('');
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(toPayload(draft)),
+      });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        throw new Error(d.error || t('errors.save'));
+      }
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : t('errors.save'));
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const create = async () => {
     if (!form.title) return;
-    setSaving(true);
-    await fetch('/api/events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form),
-    });
-    setSaving(false);
-    setForm(EMPTY);
-    setShowCreate(false);
-    await load();
+    if (await submit('/api/events', 'POST', form)) {
+      setForm(EMPTY);
+      setShowCreate(false);
+      await load();
+    }
   };
 
   const saveEdit = async () => {
     if (!editing) return;
-    setSaving(true);
-    await fetch(`/api/events/${editing}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editForm),
-    });
-    setSaving(false);
-    setEditing(null);
-    await load();
+    if (await submit(`/api/events/${editing}`, 'PATCH', editForm)) {
+      setEditing(null);
+      await load();
+    }
   };
 
   const deleteEvent = async (id: number, title: string) => {
-    if (!confirm(`Delete "${title}"?`)) return;
-    await fetch(`/api/events/${id}`, { method: 'DELETE' });
+    if (!confirm(t('confirmDelete', { title }))) return;
+    const res = await fetch(`/api/events/${id}`, { method: 'DELETE' });
+    if (!res.ok) setError(t('errors.delete'));
     await load();
   };
 
-  const startEdit = (ev: Event) => {
+  const startEdit = (ev: EventRecord) => {
+    setShowCreate(false);
     setEditing(ev.id);
     setEditForm({
-      title: ev.title, description: ev.description,
-      event_date: ev.event_date, location: ev.location,
-      image_url: ev.image_url, price: ev.price,
-      capacity: ev.capacity, status: ev.status, tags: ev.tags,
+      title: ev.title, description: ev.description, content: ev.content ?? '',
+      event_date: toLocalInput(ev.event_date), location: ev.location,
+      image_url: ev.image_url, galleryText: (ev.gallery ?? []).join('\n'), price: Number(ev.price),
+      capacity: ev.capacity, status: ev.status, tags: ev.tags ?? '',
     });
   };
 
-  function F({ label, val, setter, type = 'text', full = false }: { label: string; val: string | number; setter: (v: string) => void; type?: string; full?: boolean }) {
-    return (
-      <div style={full ? { gridColumn: '1 / -1' } : {}}>
-        <label className="seller-label">{label}</label>
-        <input type={type} value={val ?? ''} onChange={e => setter(e.target.value)} className="seller-input" style={{ width: '100%' }} />
-      </div>
-    );
-  }
+  const dateFmt = (iso: string) => new Date(iso).toLocaleString(locale === 'es' ? 'es-VE' : 'en-US', {
+    month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit',
+  });
 
-  function EventForm({ data, onChange, onSave, onCancel, saveLabel }: {
-    data: Partial<Event>;
-    onChange: (patch: Partial<Event>) => void;
-    onSave: () => void;
-    onCancel: () => void;
-    saveLabel: string;
-  }) {
-    return (
-      <div className="ae-form">
-        {/* Image preview */}
-        {data.image_url && (
-          <div className="ae-img-preview">
-            <img src={data.image_url} alt="Preview" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-          </div>
-        )}
-
-        <div className="ae-form-grid">
-          <div style={{ gridColumn: '1 / -1' }}>
-            <label className="seller-label">Event Title *</label>
-            <input className="seller-input ae-title-input" placeholder="e.g. Sunset Cocktail Night" value={data.title ?? ''} onChange={e => onChange({ title: e.target.value })} style={{ width: '100%' }} />
-          </div>
-
-          <div>
-            <label className="seller-label"><Calendar size={12} style={{ display: 'inline', marginRight: 4 }} />Date & Time</label>
-            <input type="datetime-local" className="seller-input" value={data.event_date ? data.event_date.slice(0, 16) : ''} onChange={e => onChange({ event_date: e.target.value })} style={{ width: '100%' }} />
-          </div>
-
-          <div>
-            <label className="seller-label"><MapPin size={12} style={{ display: 'inline', marginRight: 4 }} />Location</label>
-            <input className="seller-input" placeholder="Beach Club Terrace" value={data.location ?? ''} onChange={e => onChange({ location: e.target.value })} style={{ width: '100%' }} />
-          </div>
-
-          <div>
-            <label className="seller-label">Ticket Price ($)</label>
-            <input type="number" min={0} step={0.01} className="seller-input" value={data.price ?? 0} onChange={e => onChange({ price: Number(e.target.value) })} style={{ width: '100%' }} />
-            <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', color: 'var(--makay-mauve)', marginTop: '0.25rem' }}>Set 0 for free events</p>
-          </div>
-
-          <div>
-            <label className="seller-label"><Users size={12} style={{ display: 'inline', marginRight: 4 }} />Capacity</label>
-            <input type="number" min={1} className="seller-input" value={data.capacity ?? 100} onChange={e => onChange({ capacity: Number(e.target.value) })} style={{ width: '100%' }} />
-          </div>
-
-          <div style={{ gridColumn: '1 / -1' }}>
-            <label className="seller-label"><ImageIcon size={12} style={{ display: 'inline', marginRight: 4 }} />Cover Image URL</label>
-            <input className="seller-input" placeholder="https://..." value={data.image_url ?? ''} onChange={e => onChange({ image_url: e.target.value })} style={{ width: '100%' }} />
-          </div>
-
-          <div>
-            <label className="seller-label"><Tag size={12} style={{ display: 'inline', marginRight: 4 }} />Tags (comma-separated)</label>
-            <input className="seller-input" placeholder="cocktails, live music, sunset" value={data.tags ?? ''} onChange={e => onChange({ tags: e.target.value })} style={{ width: '100%' }} />
-          </div>
-
-          <div>
-            <label className="seller-label"><Clock size={12} style={{ display: 'inline', marginRight: 4 }} />Status</label>
-            <select className="seller-input" value={data.status ?? 'active'} onChange={e => onChange({ status: e.target.value })} style={{ width: '100%' }}>
-              <option value="active">Active — visible to customers</option>
-              <option value="draft">Draft — hidden from storefront</option>
-              <option value="cancelled">Cancelled</option>
-            </select>
-          </div>
-
-          <div style={{ gridColumn: '1 / -1' }}>
-            <label className="seller-label">Description</label>
-            <textarea className="seller-textarea" rows={4} placeholder="Describe the event experience…" value={data.description ?? ''} onChange={e => onChange({ description: e.target.value })} style={{ width: '100%' }} />
-          </div>
+  const body = (
+    <>
+      <div className={embedded ? 'seller-page-header' : 'dashboard-header'}>
+        <div>
+          <h1 className={embedded ? 'seller-page-title' : 'ae-page-title'}>{t('title')}</h1>
+          <p className="ae-sub">{t('subtitle')}</p>
         </div>
-
-        <div className="seller-form-actions">
-          <button className="seller-btn-primary" onClick={onSave} disabled={saving || !data.title}>
-            <Check size={14} /> {saving ? 'Saving…' : saveLabel}
-          </button>
-          <button className="seller-btn-ghost" onClick={onCancel}><X size={14} /> Cancel</button>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="admin-layout">
-      <AdminSidebar />
-      <main className="admin-main">
-        <div className="dashboard-header">
-          <h1 style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700 }}>Events</h1>
+        <div className="ae-header-actions">
+          <a href="/events" target="_blank" rel="noopener noreferrer" className="seller-btn-ghost"><ExternalLink size={14} /> {t('customerView')}</a>
           <button className="seller-btn-primary" onClick={() => { setShowCreate(v => !v); setEditing(null); }}>
-            <Plus size={15} /> New Event
+            <Plus size={15} /> {t('newEvent')}
           </button>
         </div>
+      </div>
 
-        {showCreate && (
-          <div style={{ marginBottom: '2rem' }}>
-            <EventForm
-              data={form}
-              onChange={patch => setForm(f => ({ ...f, ...patch }))}
-              onSave={create}
-              onCancel={() => setShowCreate(false)}
-              saveLabel="Create Event"
-            />
-          </div>
-        )}
+      {error && <p className="ae-error" role="alert">{error}</p>}
 
-        {/* Tabs */}
-        <div className="sp-tabs" style={{ marginBottom: '1.25rem' }}>
-          {(['upcoming', 'all', 'past'] as const).map(t => (
-            <button key={t} className={`sp-tab${tab === t ? ' active' : ''}`} onClick={() => setTab(t)}>
-              {t === 'upcoming' ? 'Upcoming' : t === 'all' ? 'All' : 'Past'}
-              <span className="sp-tab-count">
-                {t === 'upcoming' ? events.filter(e => !e.event_date || new Date(e.event_date) >= now).length
-                 : t === 'past' ? events.filter(e => e.event_date && new Date(e.event_date) < now).length
-                 : events.length}
-              </span>
-            </button>
-          ))}
+      {showCreate && (
+        <div className="ae-create">
+          <EventForm
+            data={form}
+            onChange={patch => setForm(f => ({ ...f, ...patch }))}
+            onSave={create}
+            onCancel={() => setShowCreate(false)}
+            saveLabel={t('create')}
+            saving={saving}
+          />
         </div>
+      )}
 
-        {loading ? (
-          <p style={{ color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', padding: '2rem 0' }}>Loading…</p>
-        ) : visible.length === 0 ? (
-          <div className="ae-empty">
-            <Calendar size={40} />
-            <p>No {tab} events. {tab === 'upcoming' ? 'Create your first event above.' : ''}</p>
-          </div>
-        ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {visible.map(ev => {
-              const remaining = ev.capacity - ev.tickets_sold;
-              const soldPct = Math.round((ev.tickets_sold / ev.capacity) * 100);
-              const isPast = ev.event_date && new Date(ev.event_date) < now;
+      <div className="sp-tabs ae-tabs" role="tablist">
+        {(['upcoming', 'all', 'past'] as const).map(k => (
+          <button key={k} role="tab" aria-selected={tab === k} className={`sp-tab${tab === k ? ' active' : ''}`} onClick={() => setTab(k)}>
+            {t(`tabs.${k}`)}
+            <span className="sp-tab-count">{counts[k]}</span>
+          </button>
+        ))}
+      </div>
 
-              return (
-                <div key={ev.id} className={`ae-event-card${editing === ev.id ? ' editing' : ''}`}>
-                  <div className="ae-event-row">
-                    {/* Cover thumbnail */}
-                    <div className="ae-thumb-wrap">
-                      {ev.image_url
-                        ? <img src={ev.image_url} alt={ev.title} className="ae-thumb" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
-                        : <div className="ae-thumb-placeholder"><Calendar size={20} /></div>
-                      }
-                    </div>
+      {loading ? (
+        <p className="ae-muted">{t('loading')}</p>
+      ) : visible.length === 0 ? (
+        <div className="ae-empty">
+          <Calendar size={40} />
+          <p>{t(`empty.${tab}`)}</p>
+        </div>
+      ) : (
+        <div className="ae-list">
+          {visible.map(ev => {
+            const remaining = ev.capacity - ev.tickets_sold;
+            const soldPct = ev.capacity > 0 ? Math.round((ev.tickets_sold / ev.capacity) * 100) : 0;
+            const past = isPast(ev);
+            const galleryCount = (ev.gallery ?? []).length;
 
-                    {/* Info */}
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.3rem', flexWrap: 'wrap' }}>
-                        <span style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700, fontSize: '1.05rem', color: 'var(--makay-dark-navy)' }}>{ev.title}</span>
-                        <span className={`ae-status ae-status--${ev.status}`}>{ev.status}</span>
-                        {isPast && <span className="ae-status ae-status--past">Past</span>}
-                      </div>
-
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)', marginBottom: '0.5rem' }}>
-                        {ev.event_date && (
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                            <Calendar size={11} />
-                            {new Date(ev.event_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                          </span>
-                        )}
-                        {ev.location && <span style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}><MapPin size={11} />{ev.location}</span>}
-                        <span style={{ fontFamily: 'var(--font-playfair-display)', fontWeight: 700, color: 'var(--makay-peachy-rose)' }}>
-                          {Number(ev.price) === 0 ? 'Free' : `$${Number(ev.price).toFixed(2)}`}
-                        </span>
-                      </div>
-
-                      {/* Capacity bar */}
-                      <div className="ae-capacity-bar-wrap">
-                        <div className="ae-capacity-bar" style={{ width: `${Math.min(soldPct, 100)}%`, background: soldPct >= 90 ? '#ef4444' : soldPct >= 60 ? '#f59e0b' : '#10b981' }} />
-                      </div>
-                      <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.7rem', color: 'var(--makay-mauve)', marginTop: '0.25rem' }}>
-                        {ev.tickets_sold}/{ev.capacity} tickets sold · {remaining} remaining
-                      </p>
-                    </div>
-
-                    {/* Actions */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flexShrink: 0 }}>
-                      <button className="seller-icon-btn edit" title="Edit" onClick={() => editing === ev.id ? setEditing(null) : startEdit(ev)}>
-                        <Edit3 size={14} />
-                      </button>
-                      <button className="seller-icon-btn cancel" title="Delete" onClick={() => deleteEvent(ev.id, ev.title)}>
-                        <Trash2 size={14} />
-                      </button>
-                      <button className="ae-attendees-btn" onClick={() => showAttendees === ev.id ? setShowAttendees(null) : loadAttendees(ev.id)}>
-                        <Users size={13} />
-                      </button>
-                    </div>
+            return (
+              <div key={ev.id} className={`ae-event-card${editing === ev.id ? ' editing' : ''}`}>
+                <div className="ae-event-row">
+                  <div className="ae-thumb-wrap">
+                    {ev.image_url
+                      // eslint-disable-next-line @next/next/no-img-element
+                      ? <img src={ev.image_url} alt={ev.title} className="ae-thumb" onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                      : <div className="ae-thumb-placeholder"><Calendar size={20} /></div>}
                   </div>
 
-                  {/* Edit form */}
-                  {editing === ev.id && (
-                    <div className="ae-edit-panel">
-                      <EventForm
-                        data={editForm}
-                        onChange={patch => setEditForm(f => ({ ...f, ...patch }))}
-                        onSave={saveEdit}
-                        onCancel={() => setEditing(null)}
-                        saveLabel="Save Changes"
-                      />
+                  <div className="ae-info">
+                    <div className="ae-title-row">
+                      <span className="ae-title">{ev.title}</span>
+                      <span className={`ae-status ae-status--${ev.status}`}>{t(`status.${ev.status === 'active' || ev.status === 'draft' || ev.status === 'cancelled' ? ev.status : 'active'}`)}</span>
+                      {past && <span className="ae-status ae-status--past">{t('status.past')}</span>}
                     </div>
-                  )}
 
-                  {/* Attendees list */}
-                  {showAttendees === ev.id && (
-                    <div className="ae-attendees-panel">
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                        <h3 style={{ fontFamily: 'var(--font-montserrat)', fontWeight: 700, fontSize: '0.85rem', color: 'var(--makay-dark-navy)', margin: 0 }}>
-                          Attendees ({attendees[ev.id]?.length ?? 0})
-                        </h3>
-                        <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--makay-mauve)' }} onClick={() => setShowAttendees(null)}><X size={14} /></button>
-                      </div>
-                      {!attendees[ev.id]?.length ? (
-                        <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-mauve)' }}>No tickets purchased yet.</p>
-                      ) : (
+                    <div className="ae-meta">
+                      {ev.event_date && <span><Calendar size={11} />{dateFmt(ev.event_date)}</span>}
+                      {ev.location && <span><MapPin size={11} />{ev.location}</span>}
+                      {galleryCount > 0 && <span><Images size={11} />{t('photos', { count: galleryCount })}</span>}
+                      <span className="ae-price">{Number(ev.price) === 0 ? t('free') : `$${Number(ev.price).toFixed(2)}`}</span>
+                    </div>
+
+                    <div className="ae-capacity-bar-wrap">
+                      <div className="ae-capacity-bar" style={{ width: `${Math.min(soldPct, 100)}%`, background: soldPct >= 90 ? '#ef4444' : soldPct >= 60 ? '#f59e0b' : '#10b981' }} />
+                    </div>
+                    <p className="ae-hint">{t('capacity', { sold: ev.tickets_sold, capacity: ev.capacity, remaining })}</p>
+                  </div>
+
+                  <div className="ae-actions">
+                    <button className="seller-icon-btn edit" title={t('edit')} aria-label={t('edit')} onClick={() => editing === ev.id ? setEditing(null) : startEdit(ev)}>
+                      <Edit3 size={14} />
+                    </button>
+                    <button className="seller-icon-btn cancel" title={t('delete')} aria-label={t('delete')} onClick={() => deleteEvent(ev.id, ev.title)}>
+                      <Trash2 size={14} />
+                    </button>
+                    <button className="ae-attendees-btn" title={t('attendees')} aria-label={t('attendees')} onClick={() => showAttendees === ev.id ? setShowAttendees(null) : loadAttendees(ev.id)}>
+                      <Users size={13} />
+                    </button>
+                  </div>
+                </div>
+
+                {editing === ev.id && (
+                  <div className="ae-edit-panel">
+                    <EventForm
+                      data={editForm}
+                      onChange={patch => setEditForm(f => ({ ...f, ...patch }))}
+                      onSave={saveEdit}
+                      onCancel={() => setEditing(null)}
+                      saveLabel={t('save')}
+                      saving={saving}
+                    />
+                  </div>
+                )}
+
+                {showAttendees === ev.id && (
+                  <div className="ae-attendees-panel">
+                    <div className="ae-attendees-head">
+                      <h3>{t('attendeesCount', { count: attendees[ev.id]?.length ?? 0 })}</h3>
+                      <button onClick={() => setShowAttendees(null)} aria-label={t('cancel')}><X size={14} /></button>
+                    </div>
+                    {!attendees[ev.id]?.length ? (
+                      <p className="ae-muted">{t('noTickets')}</p>
+                    ) : (
+                      <div className="ae-table-scroll">
                         <table className="sup-table">
-                          <thead><tr><th>Name</th><th>Email</th><th>Qty</th><th>Paid</th><th>Date</th></tr></thead>
+                          <thead><tr><th>{t('cols.name')}</th><th>{t('cols.email')}</th><th>{t('cols.qty')}</th><th>{t('cols.paid')}</th><th>{t('cols.order')}</th><th>{t('cols.date')}</th></tr></thead>
                           <tbody>
                             {attendees[ev.id].map(a => (
                               <tr key={a.id}>
                                 <td>{a.customer_name}</td>
-                                <td style={{ color: 'var(--makay-mauve)', fontSize: '0.78rem' }}>{a.customer_email}</td>
+                                <td className="ae-muted-cell">{a.customer_email}</td>
                                 <td>{a.quantity}</td>
-                                <td style={{ fontWeight: 600 }}>${Number(a.total_paid).toFixed(2)}</td>
-                                <td style={{ color: 'var(--makay-mauve)', fontSize: '0.75rem' }}>{new Date(a.purchased_at).toLocaleDateString()}</td>
+                                <td><strong>${Number(a.total_paid).toFixed(2)}</strong></td>
+                                <td className="ae-muted-cell">{a.order_id ?? '—'}</td>
+                                <td className="ae-muted-cell">{new Date(a.purchased_at).toLocaleDateString(locale === 'es' ? 'es-VE' : 'en-US')}</td>
                               </tr>
                             ))}
                           </tbody>
                         </table>
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </main>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </>
+  );
+
+  if (embedded) return <div className="seller-page">{body}</div>;
+
+  return (
+    <div className="admin-layout">
+      <AdminSidebar />
+      <main className="admin-main">{body}</main>
     </div>
   );
 }

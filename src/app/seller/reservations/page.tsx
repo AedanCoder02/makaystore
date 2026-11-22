@@ -68,7 +68,9 @@ export default function SellerReservationsPage() {
     setUpdating(null);
   };
 
-  const todayCount = reservations.filter(r => r.reservation_date.slice(0, 10) === new Date().toISOString().slice(0, 10)).length;
+  // Venezuela local date (UTC-4), not UTC, so the count doesn't roll over at 8 PM.
+  const todayLocal = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Caracas' });
+  const todayCount = reservations.filter(r => r.reservation_date.slice(0, 10) === todayLocal).length;
   const totalGuests = reservations.reduce((s, r) => s + r.party_size, 0);
 
   return (
@@ -163,7 +165,7 @@ export default function SellerReservationsPage() {
             <tbody>
               {reservations.map(r => (
                 <tr key={r.id} className="sp-row">
-                  <td style={{ whiteSpace: 'nowrap' }}>{new Date(r.reservation_date + 'T00:00:00').toLocaleDateString('es', { day: 'numeric', month: 'short' })}</td>
+                  <td style={{ whiteSpace: 'nowrap' }}>{new Date(r.reservation_date.slice(0, 10) + 'T00:00:00').toLocaleDateString('es', { day: 'numeric', month: 'short' })}</td>
                   <td style={{ whiteSpace: 'nowrap' }}>{r.reservation_time}</td>
                   <td>
                     <span className="sp-title">{r.experience_name || '—'}</span>

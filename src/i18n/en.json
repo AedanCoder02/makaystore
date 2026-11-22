@@ -664,138 +664,406 @@
       "worker-clock-in": {
         "name": "How to Use Your Dashboard",
         "steps": {
-          "step-1": { "title": "Your Shift Controls", "description": "Use the buttons here to clock in when your shift starts and clock out when it ends.", "actionText": "" },
-          "step-2": { "title": "Activity Log", "description": "Every clock in, clock out, and completed task is recorded here in real time.", "actionText": "" },
-          "step-3": { "title": "Need Help?", "description": "Click this button anytime to replay this tutorial.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Your Shift Controls",
+            "description": "Use the buttons here to clock in when your shift starts and clock out when it ends.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Activity Log",
+            "description": "Every clock in, clock out, and completed task is recorded here in real time.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Need Help?",
+            "description": "Click this button anytime to replay this tutorial.",
+            "actionText": "Got it"
+          }
         }
       },
       "supervisor-approve": {
         "name": "Supervisor Dashboard Tour",
         "steps": {
-          "step-1":  { "title": "Supervisor Dashboard",   "description": "This is your control centre. Monitor team activity, review performance, and manage shifts in real time.", "actionText": "" },
-          "step-2":  { "title": "Team Chips",             "description": "Each chip shows a worker and whether they are currently clocked in. Click any chip to see their details.", "actionText": "" },
-          "step-3":  { "title": "Worker Status Cards",    "description": "These cards give you a live snapshot — who is working, how many hours logged, and total team activity.", "actionText": "" },
-          "step-4":  { "title": "Live Activity Feed",     "description": "Every clock-in and clock-out appears here instantly. Use this to confirm your team is on schedule.", "actionText": "" },
-          "step-5":  { "title": "Sales Performance",      "description": "See today's sales totals and revenue per seller at a glance. Identify your top performers.", "actionText": "" },
-          "step-6":  { "title": "Task Board",             "description": "Assign tasks to your team, set priorities, and track completion. Drag cards between columns to update status.", "actionText": "" },
-          "step-7":  { "title": "Performance Rankings",   "description": "This section ranks sellers by revenue, orders, and hours. Use it for performance reviews and incentives.", "actionText": "" },
-          "step-8":  { "title": "Alerts Panel",           "description": "Any unusual activity — missed clock-outs, low stock, or flagged transactions — surfaces here for your review.", "actionText": "" },
-          "step-9":  { "title": "Approve Activity",       "description": "Workers' clock-in and clock-out entries require your approval. Approve to confirm or reject to flag for follow-up.", "actionText": "" },
-          "step-10": { "title": "Need Help?",             "description": "Click this button anytime to replay this full tour.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Supervisor Dashboard",
+            "description": "This is your control centre. Monitor team activity, review performance, and manage shifts in real time.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Team Chips",
+            "description": "Each chip shows a worker and whether they are currently clocked in. Click any chip to see their details.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Worker Status Cards",
+            "description": "These cards give you a live snapshot — who is working, how many hours logged, and total team activity.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Live Activity Feed",
+            "description": "Every clock-in and clock-out appears here instantly. Use this to confirm your team is on schedule.",
+            "actionText": ""
+          },
+          "step-5": {
+            "title": "Sales Performance",
+            "description": "See today's sales totals and revenue per seller at a glance. Identify your top performers.",
+            "actionText": ""
+          },
+          "step-6": {
+            "title": "Task Board",
+            "description": "Assign tasks to your team, set priorities, and track completion. Drag cards between columns to update status.",
+            "actionText": ""
+          },
+          "step-7": {
+            "title": "Performance Rankings",
+            "description": "This section ranks sellers by revenue, orders, and hours. Use it for performance reviews and incentives.",
+            "actionText": ""
+          },
+          "step-8": {
+            "title": "Alerts Panel",
+            "description": "Any unusual activity — missed clock-outs, low stock, or flagged transactions — surfaces here for your review.",
+            "actionText": ""
+          },
+          "step-9": {
+            "title": "Approve Activity",
+            "description": "Workers' clock-in and clock-out entries require your approval. Approve to confirm or reject to flag for follow-up.",
+            "actionText": ""
+          },
+          "step-10": {
+            "title": "Need Help?",
+            "description": "Click this button anytime to replay this full tour.",
+            "actionText": "Got it"
+          }
         }
       },
       "admin-tour": {
         "name": "Admin Panel Tour",
         "steps": {
-          "step-1": { "title": "Welcome to Admin",    "description": "This is your central hub for managing Makay Store. Every tool you need is accessible from here.", "actionText": "" },
-          "step-2": { "title": "Live Stats",          "description": "This strip shows real-time totals — products in your catalog, orders this month, and sellers active today.", "actionText": "" },
-          "step-3": { "title": "Products & 3D",       "description": "Create products and generate 3D models from a single product photo using AI.", "actionText": "" },
-          "step-4": { "title": "Orders",              "description": "View every order placed by your sellers, filter by seller, and inspect order details.", "actionText": "" },
-          "step-5": { "title": "Users & Roles",       "description": "Assign roles to every user — customer, seller, supervisor, or admin. Role controls which panel they access.", "actionText": "" },
-          "step-6":  { "title": "Reports",             "description": "Sales charts, cost/margin analysis, monthly goal tracking, and inventory health — all with real data.", "actionText": "" },
-          "step-7":  { "title": "Product Rotation",   "description": "Schedule when products cycle between Active, Paused, and Archived. Keep your catalog fresh automatically.", "actionText": "" },
-          "step-8":  { "title": "Storefront Studio",  "description": "One editor for everything: brand palette, scroll colors, per-page typography, content overrides, product images, and member card design.", "actionText": "" },
-          "step-9":  { "title": "Sidebar Navigation", "description": "The sidebar gives you instant access to all 7 sections — Panel, Products, Orders, Users, Reports, Rotation, and Studio.", "actionText": "" },
-          "step-10": { "title": "Need Help?",         "description": "Click this button anytime to replay this tour.", "actionText": "Let's go" }
+          "step-1": {
+            "title": "Welcome to Admin",
+            "description": "This is your central hub for managing Makay Store. Every tool you need is accessible from here.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Live Stats",
+            "description": "This strip shows real-time totals — products in your catalog, orders this month, and sellers active today.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Products & 3D",
+            "description": "Create products and generate 3D models from a single product photo using AI.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Orders",
+            "description": "View every order placed by your sellers, filter by seller, and inspect order details.",
+            "actionText": ""
+          },
+          "step-5": {
+            "title": "Users & Roles",
+            "description": "Assign roles to every user — customer, seller, supervisor, or admin. Role controls which panel they access.",
+            "actionText": ""
+          },
+          "step-6": {
+            "title": "Reports",
+            "description": "Sales charts, cost/margin analysis, monthly goal tracking, and inventory health — all with real data.",
+            "actionText": ""
+          },
+          "step-7": {
+            "title": "Product Rotation",
+            "description": "Schedule when products cycle between Active, Paused, and Archived. Keep your catalog fresh automatically.",
+            "actionText": ""
+          },
+          "step-8": {
+            "title": "Storefront Studio",
+            "description": "One editor for everything: brand palette, scroll colors, per-page typography, content overrides, product images, and member card design.",
+            "actionText": ""
+          },
+          "step-9": {
+            "title": "Sidebar Navigation",
+            "description": "The sidebar gives you instant access to all 7 sections — Panel, Products, Orders, Users, Reports, Rotation, and Studio.",
+            "actionText": ""
+          },
+          "step-10": {
+            "title": "Need Help?",
+            "description": "Click this button anytime to replay this tour.",
+            "actionText": "Let's go"
+          }
         }
       },
       "reports-tour": {
         "name": "Reports & Analytics Tour",
         "steps": {
-          "step-1": { "title": "Reports & Analytics", "description": "Track sales, costs, goals, inventory, and rotation metrics all in one place.", "actionText": "" },
-          "step-2": { "title": "Report Tabs", "description": "Switch between Sales, Costs, Goals, Inventory, and Rotation using these tabs.", "actionText": "" },
-          "step-3": { "title": "Key Metrics", "description": "Each card shows a critical number with trend direction indicators.", "actionText": "" },
-          "step-4": { "title": "Need Help?", "description": "Replay this tour anytime by clicking the help button.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Reports & Analytics",
+            "description": "Track sales, costs, goals, inventory, and rotation metrics all in one place.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Report Tabs",
+            "description": "Switch between Sales, Costs, Goals, Inventory, and Rotation using these tabs.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Key Metrics",
+            "description": "Each card shows a critical number with trend direction indicators.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Need Help?",
+            "description": "Replay this tour anytime by clicking the help button.",
+            "actionText": "Got it"
+          }
         }
       },
       "rotation-tour": {
         "name": "Product Rotation Tour",
         "steps": {
-          "step-1": { "title": "Product Rotation", "description": "Schedule when products change between Active, Paused, and Archived states.", "actionText": "" },
-          "step-2": { "title": "Product Table", "description": "All products are listed here with their current status. Click column headers to sort.", "actionText": "" },
-          "step-3": { "title": "Need Help?", "description": "Replay this tour anytime.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Product Rotation",
+            "description": "Schedule when products change between Active, Paused, and Archived states.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Product Table",
+            "description": "All products are listed here with their current status. Click column headers to sort.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Need Help?",
+            "description": "Replay this tour anytime.",
+            "actionText": "Got it"
+          }
         }
       },
       "admin-products": {
         "name": "3D Product Generator Tour",
         "steps": {
-          "step-1": { "title": "3D Product Generator", "description": "Upload a product photo and an AI model will generate a 3D version automatically.", "actionText": "" },
-          "step-2": { "title": "Step by Step", "description": "Follow the flow: select product → upload photo → generate → preview → confirm.", "actionText": "Got it" }
+          "step-1": {
+            "title": "3D Product Generator",
+            "description": "Upload a product photo and an AI model will generate a 3D version automatically.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Step by Step",
+            "description": "Follow the flow: select product → upload photo → generate → preview → confirm.",
+            "actionText": "Got it"
+          }
         }
       },
       "theme-editor-tour": {
         "name": "Theme Editor Tour",
         "steps": {
-          "step-1": { "title": "Theme Editor", "description": "Edit the look and feel of the entire storefront from here. Changes preview instantly — only Publish makes them live.", "actionText": "" },
-          "step-2": { "title": "Four Control Areas", "description": "Colors controls the palette, Scroll sets per-section backgrounds, Images lets you change product photos, Card customises the member card.", "actionText": "" },
-          "step-3": { "title": "Preset Themes", "description": "Pick a preset to instantly apply a full palette — Makay Default, Dark Luxury, Ocean Breeze, Sunset Coral, or Minimal White.", "actionText": "" },
-          "step-4": { "title": "Live Preview", "description": "Every change is reflected here in real time before you publish.", "actionText": "" },
-          "step-5": { "title": "Publish", "description": "When you're happy, click Publish. Your theme goes live on the store immediately.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Theme Editor",
+            "description": "Edit the look and feel of the entire storefront from here. Changes preview instantly — only Publish makes them live.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Four Control Areas",
+            "description": "Colors controls the palette, Scroll sets per-section backgrounds, Images lets you change product photos, Card customises the member card.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Preset Themes",
+            "description": "Pick a preset to instantly apply a full palette — Makay Default, Dark Luxury, Ocean Breeze, Sunset Coral, or Minimal White.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Live Preview",
+            "description": "Every change is reflected here in real time before you publish.",
+            "actionText": ""
+          },
+          "step-5": {
+            "title": "Publish",
+            "description": "When you're happy, click Publish. Your theme goes live on the store immediately.",
+            "actionText": "Got it"
+          }
         }
       },
       "seller-dashboard-tour": {
         "name": "Seller Dashboard Tour",
         "steps": {
-          "step-1": { "title": "Your Numbers",        "description": "Revenue, orders, tracked products, and stock units — updated every time you visit.", "actionText": "" },
-          "step-2": { "title": "Revenue Card",        "description": "This is your total revenue from all sales you have processed. It includes all order totals.", "actionText": "" },
-          "step-3": { "title": "Quick Actions",       "description": "Jump straight to selling, managing products, updating stock, or viewing your shift activity.", "actionText": "" },
-          "step-4": { "title": "Sell to Client",      "description": "This is your primary tool. Use it to search for a client, add products, and complete a sale in 3 steps.", "actionText": "" },
-          "step-5": { "title": "Recent Sales",        "description": "Your latest completed sales appear here. Click any row to view the full order details.", "actionText": "" },
-          "step-6": { "title": "Sidebar Navigation",  "description": "Switch between Sell, Products, Stock, and Activity using the sidebar. Your current section is highlighted.", "actionText": "" },
-          "step-7": { "title": "You're all set",      "description": "Click this button anytime to replay this tour. Start by clicking 'Sell to Client' to process your first sale.", "actionText": "Let's sell" }
+          "step-1": {
+            "title": "Your Numbers",
+            "description": "Revenue, orders, tracked products, and stock units — updated every time you visit.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Revenue Card",
+            "description": "This is your total revenue from all sales you have processed. It includes all order totals.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Quick Actions",
+            "description": "Jump straight to selling, managing products, updating stock, or viewing your shift activity.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Sell to Client",
+            "description": "This is your primary tool. Use it to search for a client, add products, and complete a sale in 3 steps.",
+            "actionText": ""
+          },
+          "step-5": {
+            "title": "Recent Sales",
+            "description": "Your latest completed sales appear here. Click any row to view the full order details.",
+            "actionText": ""
+          },
+          "step-6": {
+            "title": "Sidebar Navigation",
+            "description": "Switch between Sell, Products, Stock, and Activity using the sidebar. Your current section is highlighted.",
+            "actionText": ""
+          },
+          "step-7": {
+            "title": "You're all set",
+            "description": "Click this button anytime to replay this tour. Start by clicking 'Sell to Client' to process your first sale.",
+            "actionText": "Let's sell"
+          }
         }
       },
       "seller-products-tour": {
         "name": "Products Management Tour",
         "steps": {
-          "step-1": { "title": "Product Management", "description": "Edit any product's price, description, image, or type. Changes here override store defaults.", "actionText": "" },
-          "step-2": { "title": "Search Products", "description": "Filter by name or SKU to find products quickly.", "actionText": "" },
-          "step-3": { "title": "Edit a Product", "description": "Click the pencil icon to edit price, image, description, or switch between Storefront and Dropshipping.", "actionText": "" },
-          "step-4": { "title": "Add New Products", "description": "Use Add Product to create a brand-new item specific to your store.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Product Management",
+            "description": "Edit any product's price, description, image, or type. Changes here override store defaults.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Search Products",
+            "description": "Filter by name or SKU to find products quickly.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Edit a Product",
+            "description": "Click the pencil icon to edit price, image, description, or switch between Storefront and Dropshipping.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Add New Products",
+            "description": "Use Add Product to create a brand-new item specific to your store.",
+            "actionText": "Got it"
+          }
         }
       },
       "seller-stock-tour": {
         "name": "Stock Management Tour",
         "steps": {
-          "step-1": { "title": "Stock Management", "description": "Control how many units of each product are available.", "actionText": "" },
-          "step-2": { "title": "Adjust Quantities", "description": "Use the +1, -1, +5, -5 buttons or type directly. Low stock (under 10) is highlighted in red.", "actionText": "" },
-          "step-3": { "title": "Save Each Row", "description": "Hit Save on each row to persist that product's stock level to the database.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Stock Management",
+            "description": "Control how many units of each product are available.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Adjust Quantities",
+            "description": "Use the +1, -1, +5, -5 buttons or type directly. Low stock (under 10) is highlighted in red.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Save Each Row",
+            "description": "Hit Save on each row to persist that product's stock level to the database.",
+            "actionText": "Got it"
+          }
         }
       },
       "seller-sell-tour": {
         "name": "Sell to Client Tour",
         "steps": {
-          "step-1": { "title": "3-Step Sale Process", "description": "Selling on behalf of a client takes 3 steps: select client, add products, then checkout.", "actionText": "" },
-          "step-2": { "title": "Step 1 — Select Client", "description": "Search for the client by name or email and click their card to select them.", "actionText": "" },
-          "step-3": { "title": "Storefront & Dropshipping", "description": "Mix Storefront products (shipped from stock) and Dropshipping products (shipped from supplier) in the same sale.", "actionText": "" },
-          "step-4": { "title": "Complete the Sale", "description": "After adding products, proceed to checkout, choose a payment method, and complete the sale. The order is saved to the client's record.", "actionText": "Got it" }
+          "step-1": {
+            "title": "3-Step Sale Process",
+            "description": "Selling on behalf of a client takes 3 steps: select client, add products, then checkout.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Step 1 — Select Client",
+            "description": "Search for the client by name or email and click their card to select them.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Storefront & Dropshipping",
+            "description": "Mix Storefront products (shipped from stock) and Dropshipping products (shipped from supplier) in the same sale.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Complete the Sale",
+            "description": "After adding products, proceed to checkout, choose a payment method, and complete the sale. The order is saved to the client's record.",
+            "actionText": "Got it"
+          }
         }
       },
       "editor-tour": {
         "name": "Marketing Editor Tour",
         "steps": {
-          "step-1": { "title": "Select a Page", "description": "Choose which store page to customize — Home, All Products, Product Detail, or Checkout.", "actionText": "" },
-          "step-2": { "title": "Three Control Areas", "description": "Colors lets you override the palette for that page. Typography sets fonts and heading scale. Content edits the text fields.", "actionText": "" },
-          "step-3": { "title": "Live Preview", "description": "Every change you make is reflected here instantly — see exactly how the page will look before publishing.", "actionText": "" },
-          "step-4": { "title": "Publish Changes", "description": "When you are happy with the result, click Publish. Your changes go live on the store immediately.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Select a Page",
+            "description": "Choose which store page to customize — Home, All Products, Product Detail, or Checkout.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Three Control Areas",
+            "description": "Colors lets you override the palette for that page. Typography sets fonts and heading scale. Content edits the text fields.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Live Preview",
+            "description": "Every change you make is reflected here instantly — see exactly how the page will look before publishing.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Publish Changes",
+            "description": "When you are happy with the result, click Publish. Your changes go live on the store immediately.",
+            "actionText": "Got it"
+          }
         }
       },
       "seller-3d-tour": {
         "name": "3D Model Generator",
         "steps": {
-          "step-1": { "title": "Pick a Product", "description": "Select which product you want a 3D model for. Click any card to choose it.", "actionText": "" },
-          "step-2": { "title": "Upload a Photo", "description": "Drag and drop a clean product photo — best results with a white or plain background.", "actionText": "" },
-          "step-3": { "title": "AI Generation", "description": "Our AI converts your photo into a 3D mesh. This takes about 2–3 minutes — you can leave this page and come back.", "actionText": "" },
-          "step-4": { "title": "Preview & Save", "description": "Rotate and inspect the 3D model. If it looks good, save it — it will appear on the product page for customers.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Pick a Product",
+            "description": "Select which product you want a 3D model for. Click any card to choose it.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Upload a Photo",
+            "description": "Drag and drop a clean product photo — best results with a white or plain background.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "AI Generation",
+            "description": "Our AI converts your photo into a 3D mesh. This takes about 2–3 minutes — you can leave this page and come back.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Preview & Save",
+            "description": "Rotate and inspect the 3D model. If it looks good, save it — it will appear on the product page for customers.",
+            "actionText": "Got it"
+          }
         }
       },
       "profile-tour": {
         "name": "Your Makay Profile",
         "steps": {
-          "step-1": { "title": "Your Profile", "description": "This is your Makay Beach Club profile. Your avatar is managed through your Clerk account settings.", "actionText": "" },
-          "step-2": { "title": "Your Bio", "description": "Click Edit to add a short bio that appears on your member card.", "actionText": "" },
-          "step-3": { "title": "Makay Wallet", "description": "Your wallet balance can be used for discounts and exclusive member benefits.", "actionText": "" },
-          "step-4": { "title": "Your Member Card", "description": "This is your digital Makay Beach Club card. Share it or save it — the QR code lets staff verify your membership.", "actionText": "Enjoy Makay" }
+          "step-1": {
+            "title": "Your Profile",
+            "description": "This is your Makay Beach Club profile. Your avatar is managed through your Clerk account settings.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Your Bio",
+            "description": "Click Edit to add a short bio that appears on your member card.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Makay Wallet",
+            "description": "Your wallet balance can be used for discounts and exclusive member benefits.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Your Member Card",
+            "description": "This is your digital Makay Beach Club card. Share it or save it — the QR code lets staff verify your membership.",
+            "actionText": "Enjoy Makay"
+          }
         }
       }
     }
@@ -1113,6 +1381,115 @@
       "gatewayOff": "Needs setup in Vercel",
       "stripeWebhook": "Stripe webhook",
       "binanceManualNote": "The manual Binance Pay ID only shows when the Binance Pay API is not configured."
+    }
+  },
+  "eventsAdmin": {
+    "title": "Events",
+    "subtitle": "Create events, write the full story, add photos and track attendees.",
+    "customerView": "Customer view",
+    "newEvent": "New event",
+    "create": "Create event",
+    "save": "Save changes",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "attendees": "Attendees",
+    "attendeesCount": "Attendees ({count})",
+    "noTickets": "No tickets yet.",
+    "loading": "Loading…",
+    "free": "Free",
+    "photos": "{count, plural, one {# photo} other {# photos}}",
+    "capacity": "{sold}/{capacity} tickets · {remaining} left",
+    "confirmDelete": "Delete \"{title}\"? This also removes its tickets.",
+    "tabs": {
+      "upcoming": "Upcoming",
+      "all": "All",
+      "past": "Past"
+    },
+    "empty": {
+      "upcoming": "No upcoming events. Create one above.",
+      "all": "No events yet.",
+      "past": "No past events."
+    },
+    "status": {
+      "active": "Active",
+      "draft": "Draft",
+      "cancelled": "Cancelled",
+      "past": "Past",
+      "activeLong": "Active (visible on the site)",
+      "draftLong": "Draft (hidden)"
+    },
+    "fields": {
+      "title": "Title",
+      "date": "Date and time",
+      "location": "Location",
+      "price": "Ticket price (USD)",
+      "capacity": "Capacity",
+      "tags": "Tags",
+      "status": "Status",
+      "cover": "Cover image",
+      "summary": "Short summary",
+      "content": "Full story",
+      "gallery": "Photo gallery"
+    },
+    "placeholders": {
+      "title": "Sunset Sessions",
+      "location": "Main deck",
+      "tags": "music, sunset, dj",
+      "summary": "One or two lines shown on cards and at the top of the page.",
+      "content": "Write the full post. Leave a blank line between paragraphs.",
+      "gallery": "One image link per line (https://… or a Google Drive share link)"
+    },
+    "hints": {
+      "price": "Use 0 for free events. Paid tickets are sold through checkout.",
+      "drive": "Google Drive links work if the file is shared as \"Anyone with the link\".",
+      "content": "Shown on the event page below the summary.",
+      "gallery": "{count, plural, =0 {No photos yet.} one {# photo. Drive links are converted when you save.} other {# photos. Drive links are converted when you save.}}"
+    },
+    "cols": {
+      "name": "Name",
+      "email": "Email",
+      "qty": "Qty",
+      "paid": "Paid",
+      "order": "Order",
+      "date": "Date"
+    },
+    "errors": {
+      "save": "Could not save the event.",
+      "delete": "Could not delete the event."
+    }
+  },
+  "eventPage": {
+    "loading": "Loading…",
+    "notFound": "Event not found.",
+    "back": "Back to events",
+    "soldOut": "Sold out",
+    "spotsLeft": "{count, plural, one {# spot left} other {# spots left}}",
+    "gallery": "Gallery",
+    "openPhoto": "Open photo {n}",
+    "getTickets": "Get tickets",
+    "reserve": "Reserve your spot",
+    "free": "Free",
+    "perPerson": "per person",
+    "ended": "This event has ended.",
+    "youreIn": "You're in!",
+    "confirmation": "We saved your spot for {email}.",
+    "soldOutLong": "This event is sold out.",
+    "quantity": "Tickets (max {max})",
+    "total": "Total",
+    "addToCart": "Add to cart",
+    "paidHint": "You'll pay at checkout. Your ticket is issued once the payment is confirmed.",
+    "name": "Full name",
+    "email": "Email",
+    "processing": "Processing…",
+    "confirm": "Confirm",
+    "close": "Close",
+    "prev": "Previous photo",
+    "next": "Next photo",
+    "errors": {
+      "generic": "Something went wrong.",
+      "network": "Network error. Please try again."
     }
   }
 }

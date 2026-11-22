@@ -1,6 +1,7 @@
 import sql from '@/lib/db';
 import { STORE_LOCATION } from '@/lib/location';
 import { getShippingCost, membershipPrice, roundMoney } from '@/lib/pricing';
+import { ensureEventsSchema, parseEventProductId, UPCOMING_GRACE } from '@/lib/events';
 
 export interface IncomingItem {
   productId?: unknown;
@@ -39,7 +40,27 @@ interface Variant { id?: string | number; price?: number | string }
 export async function priceCart(items: IncomingItem[], shippingMethod: string): Promise<PricedCart> {
   if (items.length === 0 || items.length > 50) throw new PricingError('Carrito inválido');
 
-  const ids = [...new Set(items.map(i => String(i.productId ?? '')))].filter(Boolean);
+  const allIds = [...new Set(items.map(i => String(i.productId ?? '')))].filter(Boolean);
+  const eventIds = allIds.map(parseEventProductId).filter((n): n is number => n !== null);
+  const ids = allIds.filter(id => parseEventProductId(id) === null);
+
+  // Event tickets are priced from the events table and capped by remaining capacity.
+  const eventsById = new Map<string, { title: string; price: number; remaining: number }>();
+  if (eventIds.length) {
+    await ensureEventsSchema();
+    const evRows = await sql`
+      SELECT e.id, e.title, e.price, e.capacity,
+        COALESCE((SELECT SUM(quantity) FROM event_tickets WHERE event_id = e.id), 0)::int AS sold
+      FROM events e
+      WHERE e.id IN ${sql(eventIds)} AND e.status = 'active'
+        AND (e.event_date IS NULL OR e.event_date >= NOW() - ${UPCOMING_GRACE}::interval)
+    `;
+    for (const r of evRows) {
+      eventsById.set(`event-${r.id}`, {
+        title: String(r.title), price: Number(r.price), remaining: Number(r.capacity) - Number(r.sold),
+      });
+    }
+  }
   const rows = ids.length
     ? await sql`
         SELECT p.id, p.title, p.category, p.variants,
@@ -56,6 +77,14 @@ export async function priceCart(items: IncomingItem[], shippingMethod: string): 
     const quantity = Number(raw.quantity);
     if (!Number.isInteger(quantity) || quantity < 1 || quantity > 99) {
       throw new PricingError('Cantidad inválida');
+    }
+    const ev = eventsById.get(productId);
+    if (ev) {
+      if (quantity > ev.remaining) throw new PricingError(`Solo quedan ${Math.max(0, ev.remaining)} entradas para ${ev.title}`);
+      return {
+        productId, variantId: productId, quantity, price: roundMoney(ev.price),
+        title: ev.title, category: 'event',
+      };
     }
     const row = byId.get(productId);
     if (!row) throw new PricingError('Un producto del carrito ya no está disponible');

@@ -31,7 +31,10 @@ export interface StaffCaller {
  *   const gate = await requireAccess('admin');
  *   if (gate instanceof NextResponse) return gate;
  */
-export async function requireAccess(level: AccessLevel): Promise<StaffCaller | NextResponse> {
+export async function requireAccess(
+  level: AccessLevel,
+  opts: { orPermission?: string } = {},
+): Promise<StaffCaller | NextResponse> {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -39,7 +42,12 @@ export async function requireAccess(level: AccessLevel): Promise<StaffCaller | N
   const role = (user?.publicMetadata?.role as string | undefined) ?? 'customer';
   const roles = (user?.publicMetadata?.roles as string[] | undefined) ?? [];
   const allowed = ALLOWED[level];
-  if (!allowed.includes(role) && !roles.some(r => allowed.includes(r))) {
+  const permissions = (user?.publicMetadata?.permissions as string[] | undefined) ?? [];
+  const isStaff = ALLOWED.staff.includes(role) || roles.some(r => ALLOWED.staff.includes(r));
+  // A staff account explicitly granted a section (e.g. 'events') may use that
+  // section's endpoints even below the level the endpoint otherwise requires.
+  const viaPermission = !!opts.orPermission && isStaff && permissions.includes(opts.orPermission);
+  if (!viaPermission && !allowed.includes(role) && !roles.some(r => allowed.includes(r))) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
   return { userId, role, roles };

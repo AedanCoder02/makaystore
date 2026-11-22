@@ -1,6 +1,7 @@
 import sql from '@/lib/db';
 import { sendMembershipWelcomeEmail, sendMembershipContractEmail } from '@/lib/email';
 import { ensurePaymentSchema, type PaymentStatus } from '@/lib/payments';
+import { ensureEventsSchema, parseEventProductId } from '@/lib/events';
 
 const TIER_THRESHOLDS = [
   { tier: 'vip',    min: 1500 },
@@ -47,13 +48,28 @@ export async function fulfillOrder(orderId: string): Promise<void> {
   if (!order) return;
 
   const userId = order.customer_id as string | null;
-  if (!userId) return;
-
   const id = order.id as string;
   const total = Number(order.total);
   const items = (typeof order.items === 'string' ? JSON.parse(order.items) : order.items) ?? [];
   const shippingAddress = (typeof order.shipping_address === 'string' ? JSON.parse(order.shipping_address) : order.shipping_address) ?? {};
   const customerEmail = order.customer_email as string | null;
+
+  // Issue event tickets bought through checkout (guests included).
+  const ticketItems = (items as Array<{ productId?: string; quantity?: number; price?: number }>)
+    .map(i => ({ eventId: parseEventProductId(String(i.productId ?? '')), qty: Number(i.quantity ?? 1), price: Number(i.price ?? 0) }))
+    .filter((t): t is { eventId: number; qty: number; price: number } => t.eventId !== null);
+  if (ticketItems.length) {
+    await ensureEventsSchema();
+    const name = String((shippingAddress as { name?: string })?.name ?? customerEmail ?? '');
+    for (const t of ticketItems) {
+      await sql`
+        INSERT INTO event_tickets (event_id, customer_id, customer_name, customer_email, quantity, total_paid, order_id)
+        VALUES (${t.eventId}, ${userId}, ${name}, ${customerEmail}, ${t.qty}, ${t.price * t.qty}, ${id})
+      `.catch(e => console.error('[fulfillOrder] ticket insert failed', id, e));
+    }
+  }
+
+  if (!userId) return;
   const locale = (order.locale as string | null) ?? 'es';
 
   await updateMembershipTier(userId);
