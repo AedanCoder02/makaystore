@@ -160,3 +160,6 @@
     transition: none !important;
   }
 }
+
+.newsletter-error { margin-top: 0.75rem; color: #b4505a; font-size: 0.9rem; }
+.newsletter-button:disabled { opacity: 0.6; cursor: wait; }

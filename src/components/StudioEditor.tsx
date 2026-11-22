@@ -118,6 +118,12 @@ const CONTENT_FIELDS: Record<string, {key:string;label:string;type:'text'|'texta
     { key:'day_night_title', label:'Day: Night Title', type:'text', placeholder:'' },
     { key:'day_night_text', label:'Day: Night Text', type:'textarea', placeholder:'' },
     { key:'community_title', label:'Community Title', type:'text', placeholder:'What our guests say' },
+    { key:'footer_tagline',   label:'Footer Tagline',            type:'textarea', placeholder:'See you on the sand...' },
+    { key:'footer_address',   label:'Footer Address',            type:'text',     placeholder:'Playa Guacuco, Isla de Margarita' },
+    { key:'footer_hours',     label:'Footer Opening Hours',      type:'text',     placeholder:'' },
+    { key:'footer_whatsapp',  label:'Footer WhatsApp Number',    type:'text',     placeholder:'+58 414 296 6058' },
+    { key:'footer_instagram', label:'Footer Instagram Handle',   type:'text',     placeholder:'' },
+    { key:'footer_email',     label:'Footer Contact Email',      type:'text',     placeholder:'' },
   ],
   products: [
     { key:'pageTitle',   label:'Page Heading',       type:'text', placeholder:'Our Collection'          },

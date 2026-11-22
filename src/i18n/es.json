@@ -1199,38 +1199,44 @@
     }
   },
   "newsletter": {
-    "heading": "Mantente Conectado",
-    "subheading": "Recibe exclusivas, actualizaciones de la comunidad y ofertas especiales en tu bandeja de entrada",
-    "emailPlaceholder": "Ingresa tu correo...",
-    "subscribe": "Suscribirse",
-    "successMessage": "¡Gracias por suscribirte! Revisa tu correo para una oferta especial de bienvenida.",
-    "privacy": "Respetamos tu privacidad. Puedes darte de baja en cualquier momento."
+    "heading": "Mantente al tanto",
+    "subheading": "Eventos, novedades para miembros y algún atardecer que vale la pena. Sin spam.",
+    "emailPlaceholder": "Tu correo...",
+    "subscribe": "Suscribirme",
+    "sending": "Enviando...",
+    "successMessage": "Ya estás en la lista. Nos vemos en Makay.",
+    "invalid": "Ingresa un correo válido.",
+    "error": "No pudimos guardar tu correo. Inténtalo de nuevo.",
+    "privacy": "Solo usamos tu correo para novedades de Makay. Escríbenos por WhatsApp para darte de baja cuando quieras."
   },
   "footer": {
-    "brand": {
-      "description": "Conectando personas a través de la moda inspirada en la playa y la comunidad. Tu refugio de conexión."
-    },
-    "shop": {
-      "title": "Tienda",
-      "allProducts": "Todos los Productos",
-      "women": "Mujeres",
-      "men": "Hombres",
-      "accessories": "Accesorios"
-    },
-    "community": {
-      "title": "Comunidad",
-      "about": "Nosotros",
+    "tagline": "Nos vemos en la arena, del amanecer a la última canción.",
+    "bookCta": "Reserva por WhatsApp",
+    "address": "Playa Guacuco, Isla de Margarita, Venezuela",
+    "navLabel": "Secciones del sitio",
+    "club": {
+      "title": "El club",
       "events": "Eventos",
-      "blog": "Diario",
-      "sustainability": "Sostenibilidad"
+      "reservations": "Reservaciones",
+      "membership": "Membresía",
+      "allies": "Aliados"
     },
-    "connect": {
-      "title": "Contacto"
+    "discover": {
+      "title": "Descubre",
+      "experience": "La experiencia",
+      "community": "Comunidad",
+      "shop": "Tienda"
+    },
+    "account": {
+      "title": "Tu cuenta",
+      "profile": "Perfil",
+      "orders": "Pedidos",
+      "cart": "Carrito"
     },
     "legal": {
-      "privacy": "Política de Privacidad",
-      "terms": "Términos de Servicio",
-      "cookies": "Configuración de Cookies"
+      "privacy": "Política de privacidad",
+      "terms": "Términos de uso",
+      "cookies": "Política de cookies"
     },
     "copyright": "Todos los derechos reservados."
   },
@@ -1606,5 +1612,162 @@
     "hide": "Ocultar",
     "toPending": "Volver a pendiente",
     "delete": "Eliminar"
+  },
+  "legal": {
+    "updated": "Última actualización: {date}",
+    "updatedDate": "22 de noviembre de 2026",
+    "tocLabel": "Contenido",
+    "privacy": {
+      "title": "Política de privacidad",
+      "intro": "Esta política explica qué información personal recoge Makay Beach Club a través de este sitio, para qué la usamos y qué puedes pedirnos hacer con ella.",
+      "sections": [
+        {
+          "h": "Quiénes somos",
+          "p": [
+            "Makay Beach Club opera este sitio para reservaciones, eventos, membresías y nuestra tienda. Puedes contactarnos por WhatsApp al número que aparece en el pie de página."
+          ]
+        },
+        {
+          "h": "Qué datos recogemos",
+          "p": [
+            "Datos de cuenta: tu nombre, correo e información de inicio de sesión cuando creas una cuenta.",
+            "Pedidos y reservaciones: los datos de contacto, envío y reserva que ingresas, lo que compras y el método de pago que eliges.",
+            "Reseñas y boletín: la calificación y el comentario que escribes, y el correo que nos das para recibir novedades.",
+            "Datos técnicos: el idioma que eliges y la información de sesión necesaria para mantenerte conectado."
+          ]
+        },
+        {
+          "h": "Para qué los usamos",
+          "p": [
+            "Para confirmar y entregar tus pedidos, entradas, reservaciones y membresías.",
+            "Para verificar pagos y prevenir fraudes.",
+            "Para publicar las reseñas que escribes, después de que nuestro equipo las apruebe, mostrando tu nombre y la inicial de tu apellido.",
+            "Para enviarte el boletín, solo si te suscribiste."
+          ]
+        },
+        {
+          "h": "Pagos",
+          "p": [
+            "Los pagos con tarjeta los procesa Stripe y los pagos en cripto Binance Pay. No guardamos los números de tu tarjeta. Para Pago Móvil, transferencias y Zelle guardamos la referencia que nos das para que nuestro equipo verifique el pago."
+          ]
+        },
+        {
+          "h": "Con quién los compartimos",
+          "p": [
+            "Solo compartimos datos con los servicios necesarios para operar el sitio: nuestro proveedor de inicio de sesión, el alojamiento de la base de datos, los procesadores de pago y el proveedor de correo. No vendemos tu información personal."
+          ]
+        },
+        {
+          "h": "Cuánto tiempo los guardamos",
+          "p": [
+            "Guardamos los registros de pedidos y pagos el tiempo necesario para la contabilidad y las obligaciones legales. Puedes pedirnos borrar tu cuenta, tus reseñas o tu suscripción en cualquier momento."
+          ]
+        },
+        {
+          "h": "Tus opciones",
+          "p": [
+            "Puedes pedir ver, corregir o borrar tu información, o dejar de recibir correos, escribiéndonos por WhatsApp. Es posible que primero confirmemos tu identidad."
+          ]
+        },
+        {
+          "h": "Cambios",
+          "p": [
+            "Si cambiamos esta política actualizaremos la fecha al inicio de esta página."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Términos de uso",
+      "intro": "Estos términos aplican cuando usas este sitio para hacer reservaciones, comprar entradas, membresías o productos, o escribir reseñas.",
+      "sections": [
+        {
+          "h": "Uso del sitio",
+          "p": [
+            "Al usar este sitio aceptas estos términos. Si no estás de acuerdo, por favor no lo uses."
+          ]
+        },
+        {
+          "h": "Tu cuenta",
+          "p": [
+            "Eres responsable de mantener seguros tus datos de acceso y de la actividad en tu cuenta. Avísanos si crees que alguien más la usó."
+          ]
+        },
+        {
+          "h": "Precios y pagos",
+          "p": [
+            "Los precios se muestran en dólares estadounidenses y nuestro sistema los confirma al hacer el pedido. Un pedido queda confirmado cuando se recibe el pago y, en los métodos manuales, cuando nuestro equipo lo verifica."
+          ]
+        },
+        {
+          "h": "Reservaciones y eventos",
+          "p": [
+            "Las reservaciones y entradas están sujetas a disponibilidad y a las condiciones indicadas para cada fecha. El cupo de los eventos es limitado y cada entrada es válida solo para el evento para el que se emitió."
+          ]
+        },
+        {
+          "h": "Membresías",
+          "p": [
+            "Los beneficios, la duración y el precio de cada membresía son los que aparecen en la página de membresías al momento de la compra. Los beneficios en locales aliados dependen de cada aliado."
+          ]
+        },
+        {
+          "h": "Reseñas",
+          "p": [
+            "Las reseñas deben tratar sobre tu propia experiencia en Makay. Podemos rechazar o retirar reseñas ofensivas, engañosas o que no tengan relación."
+          ]
+        },
+        {
+          "h": "Cambios y cancelaciones",
+          "p": [
+            "Para cambios, cancelaciones o reembolsos, escríbenos por WhatsApp con tu número de pedido. Cada solicitud se revisa caso por caso según las condiciones del producto o evento."
+          ]
+        },
+        {
+          "h": "Responsabilidad",
+          "p": [
+            "Trabajamos para que el sitio sea preciso y esté disponible, pero no podemos garantizar que siempre esté libre de errores o interrupciones."
+          ]
+        },
+        {
+          "h": "Cambios a estos términos",
+          "p": [
+            "Podemos actualizar estos términos. La fecha al inicio indica la versión más reciente."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Política de cookies",
+      "intro": "Las cookies son pequeños archivos que guarda tu navegador. Este sitio usa solo las cookies necesarias para funcionar. No usamos cookies de publicidad ni de analítica.",
+      "sections": [
+        {
+          "h": "Cookies que usamos",
+          "p": [
+            "Idioma (NEXT_LOCALE): recuerda si navegas en español o en inglés.",
+            "Inicio de sesión (las coloca nuestro proveedor de autenticación, Clerk): te mantienen conectado y protegen tu cuenta.",
+            "Pagos: cuando pagas con tarjeta, Stripe puede colocar sus propias cookies en su página de pago para procesarlo y prevenir fraudes."
+          ]
+        },
+        {
+          "h": "Almacenamiento local",
+          "p": [
+            "Tu carrito se guarda en tu navegador para que siga ahí cuando vuelvas."
+          ]
+        },
+        {
+          "h": "Cómo gestionarlas",
+          "p": [
+            "Puedes borrar o bloquear las cookies desde la configuración de tu navegador. Si bloqueas las de inicio de sesión no podrás entrar a tu cuenta y el sitio volverá a su idioma predeterminado."
+          ]
+        },
+        {
+          "h": "Cambios",
+          "p": [
+            "Si agregamos nuevas cookies actualizaremos esta página y la fecha al inicio."
+          ]
+        }
+      ]
+    }
   }
 }

@@ -1199,38 +1199,44 @@
     }
   },
   "newsletter": {
-    "heading": "Stay Connected",
-    "subheading": "Get exclusive drops, community updates, and special offers delivered to your inbox",
-    "emailPlaceholder": "Enter your email...",
+    "heading": "Stay in the loop",
+    "subheading": "Events, member news and the occasional sunset worth seeing. No spam.",
+    "emailPlaceholder": "Your email...",
     "subscribe": "Subscribe",
-    "successMessage": "Thank you for subscribing! Check your email for a special welcome offer.",
-    "privacy": "We respect your privacy. Unsubscribe at any time."
+    "sending": "Sending...",
+    "successMessage": "You're on the list. See you at Makay.",
+    "invalid": "Please enter a valid email.",
+    "error": "We couldn't save your email. Please try again.",
+    "privacy": "We only use your email for Makay news. Write to us on WhatsApp to unsubscribe at any time."
   },
   "footer": {
-    "brand": {
-      "description": "Connecting people through beach-inspired fashion and community. Your refuge of connection."
-    },
-    "shop": {
-      "title": "Shop",
-      "allProducts": "All Products",
-      "women": "Women",
-      "men": "Men",
-      "accessories": "Accessories"
-    },
-    "community": {
-      "title": "Community",
-      "about": "About Us",
+    "tagline": "See you on the sand, from sunrise to the last song.",
+    "bookCta": "Book on WhatsApp",
+    "address": "Playa Guacuco, Isla de Margarita, Venezuela",
+    "navLabel": "Site sections",
+    "club": {
+      "title": "The club",
       "events": "Events",
-      "blog": "Journal",
-      "sustainability": "Sustainability"
+      "reservations": "Reservations",
+      "membership": "Membership",
+      "allies": "Allies"
     },
-    "connect": {
-      "title": "Connect"
+    "discover": {
+      "title": "Discover",
+      "experience": "The experience",
+      "community": "Community",
+      "shop": "Shop"
+    },
+    "account": {
+      "title": "Your account",
+      "profile": "Profile",
+      "orders": "Orders",
+      "cart": "Cart"
     },
     "legal": {
       "privacy": "Privacy Policy",
-      "terms": "Terms of Service",
-      "cookies": "Cookie Settings"
+      "terms": "Terms of Use",
+      "cookies": "Cookie Policy"
     },
     "copyright": "All rights reserved."
   },
@@ -1606,5 +1612,162 @@
     "hide": "Hide",
     "toPending": "Move back to pending",
     "delete": "Delete"
+  },
+  "legal": {
+    "updated": "Last updated: {date}",
+    "updatedDate": "November 22, 2026",
+    "tocLabel": "Contents",
+    "privacy": {
+      "title": "Privacy Policy",
+      "intro": "This policy explains what personal information Makay Beach Club collects through this website, why we collect it and what you can ask us to do with it.",
+      "sections": [
+        {
+          "h": "Who we are",
+          "p": [
+            "Makay Beach Club operates this website for reservations, events, memberships and our shop. You can reach us on WhatsApp at the number shown in the footer."
+          ]
+        },
+        {
+          "h": "What we collect",
+          "p": [
+            "Account details: your name, email and sign-in information when you create an account.",
+            "Orders and reservations: the contact, shipping and booking details you enter, the items or tickets you buy and the payment method you choose.",
+            "Reviews and newsletter: the rating and comment you write, and the email you give us to receive news.",
+            "Technical data: the language you choose and the session information needed to keep you signed in."
+          ]
+        },
+        {
+          "h": "How we use it",
+          "p": [
+            "To confirm and deliver your orders, tickets, reservations and memberships.",
+            "To verify payments and prevent fraud.",
+            "To publish reviews you write, after our team approves them, showing your first name and last initial.",
+            "To send newsletter emails, only if you subscribed."
+          ]
+        },
+        {
+          "h": "Payments",
+          "p": [
+            "Card payments are processed by Stripe and crypto payments by Binance Pay. We do not store your card numbers. For Pago Móvil, bank transfers and Zelle we keep the reference you provide so our team can verify the payment."
+          ]
+        },
+        {
+          "h": "Who we share it with",
+          "p": [
+            "We share data only with the services needed to run the site: our sign-in provider, our database host, our payment processors and our email provider. We do not sell your personal information."
+          ]
+        },
+        {
+          "h": "How long we keep it",
+          "p": [
+            "We keep order and payment records for as long as we need them for accounting and legal obligations. You can ask us to delete your account, reviews or newsletter subscription at any time."
+          ]
+        },
+        {
+          "h": "Your choices",
+          "p": [
+            "You can ask to see, correct or delete your personal information, or to stop receiving emails, by writing to us on WhatsApp. We may need to confirm your identity first."
+          ]
+        },
+        {
+          "h": "Changes",
+          "p": [
+            "If we change this policy we will update the date at the top of this page."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "intro": "These terms apply when you use this website to make reservations, buy tickets, memberships or products, or write reviews.",
+      "sections": [
+        {
+          "h": "Using the site",
+          "p": [
+            "By using this website you agree to these terms. If you do not agree, please do not use it."
+          ]
+        },
+        {
+          "h": "Your account",
+          "p": [
+            "You are responsible for keeping your sign-in details safe and for the activity on your account. Tell us if you think someone else has used it."
+          ]
+        },
+        {
+          "h": "Prices and payments",
+          "p": [
+            "Prices are shown in US dollars and are confirmed by our system when you place the order. An order is confirmed once the payment has been received and, for manual methods, verified by our team."
+          ]
+        },
+        {
+          "h": "Reservations and events",
+          "p": [
+            "Reservations and event tickets are subject to availability and to the conditions shown for each date. Event capacity is limited and a ticket is valid only for the event it was issued for."
+          ]
+        },
+        {
+          "h": "Memberships",
+          "p": [
+            "Membership benefits, duration and price are those shown on the membership page at the time of purchase. Benefits at partner venues depend on each partner."
+          ]
+        },
+        {
+          "h": "Reviews",
+          "p": [
+            "Reviews must be about your own experience at Makay. We may decline or remove reviews that are offensive, misleading or unrelated."
+          ]
+        },
+        {
+          "h": "Changes and cancellations",
+          "p": [
+            "For changes, cancellations or refunds, contact us on WhatsApp with your order number. Each request is reviewed case by case according to the conditions of the product or event."
+          ]
+        },
+        {
+          "h": "Liability",
+          "p": [
+            "We work to keep the site accurate and available, but we cannot guarantee it will always be free of errors or interruptions."
+          ]
+        },
+        {
+          "h": "Changes to these terms",
+          "p": [
+            "We may update these terms. The date at the top shows the latest version."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "intro": "Cookies are small files your browser stores. This site uses only the cookies it needs to work. We do not use advertising or analytics cookies.",
+      "sections": [
+        {
+          "h": "Cookies we use",
+          "p": [
+            "Language (NEXT_LOCALE): remembers whether you browse in English or Spanish.",
+            "Sign-in (set by our authentication provider, Clerk): keeps you signed in and protects your account.",
+            "Payments: when you pay by card, Stripe may set its own cookies on its checkout page to process the payment and prevent fraud."
+          ]
+        },
+        {
+          "h": "Local storage",
+          "p": [
+            "Your cart is saved in your browser so it is still there when you come back."
+          ]
+        },
+        {
+          "h": "Managing cookies",
+          "p": [
+            "You can delete or block cookies in your browser settings. If you block the sign-in cookies you will not be able to sign in, and the site will return to its default language."
+          ]
+        },
+        {
+          "h": "Changes",
+          "p": [
+            "If we add new cookies we will update this page and the date at the top."
+          ]
+        }
+      ]
+    }
   }
 }
