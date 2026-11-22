@@ -210,3 +210,8 @@
     animation: none;
   }
 }
+
+/* Studio-controlled overlay between background and copy */
+.hero-overlay { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+.hero-headline { text-wrap: balance; }
+.hero-headline--gradient { display: inline-block; padding-bottom: 0.08em; }

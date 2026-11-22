@@ -8,6 +8,7 @@ import ProductSort, { SortOption } from '@/components/ProductSort';
 import ProductGrid from '@/components/ProductGrid';
 import { Product } from '@/lib/mockData';
 import '@/styles/products.css';
+import { useSiteContent } from '@/components/providers/SiteContentProvider';
 
 export default function ProductsPage() {
   const t = useTranslations('storefront');
@@ -17,9 +18,10 @@ export default function ProductsPage() {
   const [sort, setSort] = useState<SortOption>('popular');
   const [filtersOpen, setFiltersOpen] = useState(false);
 
-  const [pageTitle, setPageTitle]       = useState('');
-  const [pageSubtitle, setPageSubtitle] = useState('');
-  const [emptyText, setEmptyText]       = useState('');
+  const { text } = useSiteContent();
+  const pageTitle    = text('page:products:content:pageTitle');
+  const pageSubtitle = text('page:products:content:pageSubtitle');
+  const emptyText    = text('page:products:content:emptyState');
 
   useEffect(() => {
     fetch('/api/products')
@@ -27,14 +29,6 @@ export default function ProductsPage() {
       .then(data => { setProducts(Array.isArray(data) ? data : []); setLoading(false); })
       .catch(() => setLoading(false));
 
-    fetch('/api/theme')
-      .then(r => r.ok ? r.json() : {})
-      .then((d: Record<string, string>) => {
-        setPageTitle(d['page:products:content:pageTitle']    || '');
-        setPageSubtitle(d['page:products:content:pageSubtitle'] || '');
-        setEmptyText(d['page:products:content:emptyState']   || '');
-      })
-      .catch(() => {});
   }, []);
 
   const displayTitle    = pageTitle    || t('collection');

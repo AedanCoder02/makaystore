@@ -10,6 +10,8 @@ import ImageUpload from '@/components/seller/ImageUpload';
 import MediaUpload from '@/components/seller/MediaUpload';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
+import { HERO_KEYS, HERO_DEFAULTS } from '@/lib/heroStyle';
+import { STUDIO_PREVIEW_MESSAGE } from '@/components/providers/SiteContentProvider';
 import { CardCanvas, type CardLayout, type CardColors, DEFAULT_CARD_LAYOUT, DEFAULT_CARD_COLORS, CARD_TEMPLATES, ELEMENT_LABELS, mergeLayout } from '@/components/CardDesigner';
 
 // ── Brand presets ──────────────────────────────────────────────────────────
@@ -129,10 +131,11 @@ const CONTENT_SELECTORS: Record<string, Record<string,string>> = {
 
 interface PageState { colors: Record<string,string>; typography: Record<string,string>; content: Record<string,string>; }
 function makeDefaultPage(pageId?: string): PageState {
+  // Content starts empty: an empty field falls back to the site's translated
+  // text. (Pre-filling English placeholders used to save them over the
+  // Spanish copy the first time anyone pressed Save.)
+  void pageId;
   const content: Record<string,string> = {};
-  if (pageId && CONTENT_FIELDS[pageId]) {
-    CONTENT_FIELDS[pageId].forEach(f => { if (f.type !== 'image') content[f.key] = f.placeholder; });
-  }
   return {
     colors: Object.fromEntries(PAGE_COLOR_CONTROLS.map(c=>[c.key,c.default])),
     typography: { headingFont:'playfair', headingScale:'md', bodySize:'md', letterSpacing:'normal' },
@@ -182,6 +185,17 @@ export default function StudioEditor() {
   // Save states
   const [saves, setSaves] = useState<Record<string,SaveState>>({});
 
+  // Which language the text fields edit: both (neutral key), or one language
+  // only (key@es / key@en), which wins over the neutral value on the site.
+  const [contentLang, setContentLang] = useState<'all'|'es'|'en'>('all');
+  const langSuffix = contentLang === 'all' ? '' : `@${contentLang}`;
+
+  // Hero title styling (page:home:hero:*)
+  const [heroStyle, setHeroStyle] = useState<Record<string,string>>({});
+  const heroVal = (k: keyof typeof HERO_KEYS) => heroStyle[HERO_KEYS[k]] ?? HERO_DEFAULTS[k];
+  const setHeroVal = (k: keyof typeof HERO_KEYS, v: string) => setHeroStyle(h => ({ ...h, [HERO_KEYS[k]]: v }));
+  const heroPatch = () => Object.fromEntries(Object.entries(heroStyle).map(([k, v]) => [k, v === '' ? null : v]));
+
   const tutorialStore = useTutorialStore();
   const tutorialUI = useTutorialOverlay('theme-editor-tour');
 
@@ -194,6 +208,7 @@ export default function StudioEditor() {
       if (data['--scroll-colors']) { try { setScrollColors(JSON.parse(data['--scroll-colors'])); } catch {} }
       if (data['card_layout']) { try { setCardLayout(mergeLayout(JSON.parse(data['card_layout']))); } catch {} }
       if (data['card_colors']) { try { setCardColors(JSON.parse(data['card_colors'])); } catch {} }
+      setHeroStyle(Object.fromEntries(Object.entries(data).filter(([k]) => k.startsWith('page:home:hero:'))));
       setPageStates(prev => {
         const next = { ...prev };
         PAGES.filter(p=>p.id!=='global').forEach(({ id: pid }) => {
@@ -234,25 +249,32 @@ export default function StudioEditor() {
     } catch {}
   }, []);
 
-  // ── Iframe content injection — text fields have no other way to preview ──
-  const injectContent = useCallback((pageId: string, ps: PageState) => {
-    try {
-      const doc = iframeRef.current?.contentDocument;
-      if (!doc) return;
-      const map = CONTENT_SELECTORS[pageId];
-      if (!map) return;
-      Object.entries(map).forEach(([key, selector]) => {
-        const val = ps.content[key];
-        if (!val) return;
-        const el = doc.querySelector(selector);
-        if (!el) return;
-        // buttons/links may have an icon sibling after the text — only touch the leading text node
-        const firstChild = el.firstChild;
-        if (firstChild && firstChild.nodeType === Node.TEXT_NODE) firstChild.textContent = val;
-        else el.textContent = val;
-      });
-    } catch {}
+  // ── Live preview: post unsaved text + hero style to the site in the iframe.
+  // SiteContentProvider there re-renders with them (no DOM patching).
+  const contentPatch = useCallback((pageId: string, ps: PageState): Record<string,string|null> => {
+    const patch: Record<string,string|null> = {};
+    Object.entries(ps.content).forEach(([k, v]) => { patch[`page:${pageId}:content:${k}`] = v ? v : null; });
+    return patch;
   }, []);
+
+  const postPreview = useCallback(() => {
+    const win = iframeRef.current?.contentWindow;
+    if (!win || activePage === 'global') return;
+    const ps = pageStates[activePage] ?? makeDefaultPage();
+    const settings: Record<string,string> = {};
+    // Send empty strings for cleared fields so the preview falls back too.
+    Object.entries(contentPatch(activePage, ps)).forEach(([k, v]) => { settings[k] = v ?? ''; });
+    if (activePage === 'home') Object.assign(settings, heroStyle);
+    win.postMessage({ type: STUDIO_PREVIEW_MESSAGE, settings }, window.location.origin);
+  }, [activePage, pageStates, heroStyle, contentPatch]);
+
+  useEffect(() => {
+    const onMsg = (e: MessageEvent) => {
+      if (e.origin === window.location.origin && e.data?.type === `${STUDIO_PREVIEW_MESSAGE}:ready`) postPreview();
+    };
+    window.addEventListener('message', onMsg);
+    return () => window.removeEventListener('message', onMsg);
+  }, [postPreview]);
 
   // ── Force a real reload so persisted DB content is refetched ────────────
   const reloadPreview = useCallback(() => {
@@ -274,9 +296,9 @@ export default function StudioEditor() {
     if (iframeReady && activePage !== 'global') {
       const ps = pageStates[activePage] ?? makeDefaultPage();
       injectStyles(ps);
-      injectContent(activePage, ps);
+      postPreview();
     }
-  }, [pageStates, activePage, iframeReady, injectStyles, injectContent]);
+  }, [pageStates, activePage, iframeReady, injectStyles, postPreview]);
 
   // ── Save helpers ───────────────────────────────────────────────────────
   const setSaveState = (key: string, state: SaveState) => {
@@ -284,19 +306,14 @@ export default function StudioEditor() {
     if (state === 'saved') setTimeout(() => setSaves(s => ({ ...s, [key]: 'idle' })), 2500);
   };
 
-  const getExistingSettings = async (): Promise<Record<string,string>> => {
-    const r = await fetch('/api/theme');
-    return r.ok ? r.json() : {};
-  };
-
   const [saveError, setSaveError] = useState('');
 
-  const patchSettings = async (patch: Record<string,string>): Promise<boolean> => {
-    const existing = await getExistingSettings();
+  // The API merges on the server; send only what changed. null deletes a key.
+  const patchSettings = async (patch: Record<string,string|null>): Promise<boolean> => {
     const res = await fetch('/api/admin/theme', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...existing, ...patch }),
+      body: JSON.stringify(patch),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -329,14 +346,15 @@ export default function StudioEditor() {
     const key = `page-${activePage}`;
     setSaveState(key, 'saving');
     const ps = pageStates[activePage] ?? makeDefaultPage();
-    const patch: Record<string,string> = {};
+    const patch: Record<string,string|null> = {};
     PAGE_COLOR_CONTROLS.forEach(c => { patch[`page:${activePage}:colors:${c.key}`] = ps.colors[c.key] ?? c.default; });
     patch[`page:${activePage}:typography:headingFont`]           = ps.typography.headingFont;
     patch[`page:${activePage}:typography:headingFontCustomName`] = ps.typography.headingFontCustomName ?? '';
     patch[`page:${activePage}:typography:headingScale`]          = ps.typography.headingScale;
     patch[`page:${activePage}:typography:bodySize`]              = ps.typography.bodySize;
     patch[`page:${activePage}:typography:letterSpacing`]         = ps.typography.letterSpacing;
-    Object.entries(ps.content).forEach(([k,v]) => { if (v) patch[`page:${activePage}:content:${k}`] = v; });
+    Object.assign(patch, contentPatch(activePage, ps));
+    if (activePage === 'home') Object.assign(patch, heroPatch());
     const ok = await patchSettings(patch);
     setSaveState(key, ok ? 'saved' : 'idle');
     if (ok && activePage !== 'global') reloadPreview();
@@ -344,7 +362,7 @@ export default function StudioEditor() {
 
   const publishAll = async () => {
     setSaveState('all', 'saving');
-    const patch: Record<string,string> = { ...colors, '--scroll-colors': JSON.stringify(scrollColors), card_layout: JSON.stringify(cardLayout), card_colors: JSON.stringify(cardColors) };
+    const patch: Record<string,string|null> = { ...colors, ...heroPatch(), '--scroll-colors': JSON.stringify(scrollColors), card_layout: JSON.stringify(cardLayout), card_colors: JSON.stringify(cardColors) };
     PAGES.filter(p=>p.id!=='global').forEach(({ id: pid }) => {
       const ps = pageStates[pid] ?? makeDefaultPage();
       PAGE_COLOR_CONTROLS.forEach(c => { patch[`page:${pid}:colors:${c.key}`] = ps.colors[c.key] ?? c.default; });
@@ -353,12 +371,11 @@ export default function StudioEditor() {
       patch[`page:${pid}:typography:headingScale`]          = ps.typography.headingScale;
       patch[`page:${pid}:typography:bodySize`]              = ps.typography.bodySize;
       patch[`page:${pid}:typography:letterSpacing`]         = ps.typography.letterSpacing;
-      Object.entries(ps.content).forEach(([k,v]) => { if (v) patch[`page:${pid}:content:${k}`] = v; });
+      Object.assign(patch, contentPatch(pid, ps));
     });
-    const existing = await getExistingSettings();
     const res = await fetch('/api/admin/theme', {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...existing, ...patch }),
+      body: JSON.stringify(patch),
     });
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -676,12 +693,71 @@ export default function StudioEditor() {
 
                     {pageSubTab === 'content' && (
                       <div className="studio-content-list">
-                        {(CONTENT_FIELDS[activePage] ?? []).map(field => (
+                        <div className="studio-lang-toggle" role="group" aria-label="Language">
+                          {([['all','Both languages'],['es','Español only'],['en','English only']] as const).map(([id,label]) => (
+                            <button key={id} className={`studio-scale-btn${contentLang===id?' active':''}`} onClick={() => setContentLang(id)}>{label}</button>
+                          ))}
+                        </div>
+                        <p className="studio-hint">
+                          {contentLang === 'all'
+                            ? 'Text here shows in both languages unless a language-specific version exists. Leave a field empty to use the default translation.'
+                            : `Editing the ${contentLang === 'es' ? 'Spanish' : 'English'} version. It overrides the "both languages" text for ${contentLang === 'es' ? 'Spanish' : 'English'} visitors.`}
+                        </p>
+
+                        {activePage === 'home' && (
+                          <details className="studio-hero-style" open>
+                            <summary>Hero title style</summary>
+                            <div className="studio-hero-grid">
+                              <label className="studio-color-label">Max size <span>{heroVal('size')} rem</span>
+                                <input type="range" min={2.5} max={9} step={0.25} value={heroVal('size')} onChange={e => setHeroVal('size', e.target.value)} />
+                              </label>
+                              <label className="studio-color-label">Weight <span>{heroVal('weight')}</span>
+                                <input type="range" min={400} max={900} step={100} value={heroVal('weight')} onChange={e => setHeroVal('weight', e.target.value)} />
+                              </label>
+                              <label className="studio-color-label">Opacity <span>{heroVal('opacity')}%</span>
+                                <input type="range" min={10} max={100} step={5} value={heroVal('opacity')} onChange={e => setHeroVal('opacity', e.target.value)} />
+                              </label>
+                              <label className="studio-color-label">Letter spacing <span>{heroVal('tracking')} em</span>
+                                <input type="range" min={-0.05} max={0.3} step={0.01} value={heroVal('tracking')} onChange={e => setHeroVal('tracking', e.target.value)} />
+                              </label>
+                              <label className="studio-color-label">Background overlay <span>{heroVal('overlay')}%</span>
+                                <input type="range" min={0} max={80} step={5} value={heroVal('overlay')} onChange={e => setHeroVal('overlay', e.target.value)} />
+                              </label>
+                              <div className="studio-hero-toggles">
+                                {([['italic','Italic'],['uppercase','Uppercase'],['shadow','Shadow'],['gradient','Gradient']] as const).map(([k,label]) => (
+                                  <button key={k} className={`studio-scale-btn${heroVal(k)==='1'?' active':''}`} onClick={() => setHeroVal(k, heroVal(k)==='1' ? '0' : '1')} aria-pressed={heroVal(k)==='1'}>{label}</button>
+                                ))}
+                              </div>
+                              {heroVal('gradient') === '1' ? (
+                                <>
+                                  <label className="studio-color-label">Gradient from <input type="color" value={heroVal('gradientFrom')} onChange={e => setHeroVal('gradientFrom', e.target.value)} /></label>
+                                  <label className="studio-color-label">Gradient to <input type="color" value={heroVal('gradientTo')} onChange={e => setHeroVal('gradientTo', e.target.value)} /></label>
+                                  <label className="studio-color-label">Angle <span>{heroVal('gradientAngle')}°</span>
+                                    <input type="range" min={0} max={360} step={5} value={heroVal('gradientAngle')} onChange={e => setHeroVal('gradientAngle', e.target.value)} />
+                                  </label>
+                                </>
+                              ) : (
+                                <label className="studio-color-label">Title color <input type="color" value={heroVal('color')} onChange={e => setHeroVal('color', e.target.value)} /></label>
+                              )}
+                              <label className="studio-color-label">Subtitle color <input type="color" value={heroVal('subtitleColor')} onChange={e => setHeroVal('subtitleColor', e.target.value)} /></label>
+                              <label className="studio-color-label studio-hero-wide">Button link
+                                <input type="text" className="studio-input" placeholder="/reservations" value={heroStyle[HERO_KEYS.ctaHref] ?? ''} onChange={e => setHeroVal('ctaHref', e.target.value)} />
+                              </label>
+                              <button className="studio-scale-btn studio-hero-wide" onClick={() => setHeroStyle(Object.fromEntries(Object.values(HERO_KEYS).map(k => [k, ''])))}>Reset hero style</button>
+                            </div>
+                          </details>
+                        )}
+
+                        {(CONTENT_FIELDS[activePage] ?? []).map(field => {
+                          const neutral = field.type === 'image' || field.type === 'video';
+                          const key = neutral ? field.key : field.key + langSuffix;
+                          const ph = langSuffix ? (current.content[field.key] || field.placeholder) : field.placeholder;
+                          return (
                           <div key={field.key} className="studio-content-field">
-                            <label className="studio-color-label">{field.label}</label>
+                            <label className="studio-color-label">{field.label}{!neutral && langSuffix ? ` (${contentLang.toUpperCase()})` : ''}</label>
                             {field.type === 'textarea' ? (
-                              <textarea className="studio-textarea" rows={2} placeholder={field.placeholder}
-                                value={current.content[field.key]??''} onChange={e => updatePageContent(field.key, e.target.value)} />
+                              <textarea className="studio-textarea" rows={2} placeholder={ph}
+                                value={current.content[key]??''} onChange={e => updatePageContent(key, e.target.value)} />
                             ) : field.type === 'video' ? (
                               <MediaUpload
                                 value={current.content[field.key]??''}
@@ -693,11 +769,12 @@ export default function StudioEditor() {
                                 onChange={url => updatePageContent(field.key, url)}
                               />
                             ) : (
-                              <input type="text" className="studio-input" placeholder={field.placeholder}
-                                value={current.content[field.key]??''} onChange={e => updatePageContent(field.key, e.target.value)} />
+                              <input type="text" className="studio-input" placeholder={ph}
+                                value={current.content[key]??''} onChange={e => updatePageContent(key, e.target.value)} />
                             )}
                           </div>
-                        ))}
+                          );
+                        })}
                         {!(CONTENT_FIELDS[activePage]?.length) && (
                           <p className="studio-hint">No content fields for this page.</p>
                         )}
@@ -732,7 +809,7 @@ export default function StudioEditor() {
                       setIframeReady(true);
                       const ps = pageStates[activePage] ?? makeDefaultPage();
                       injectStyles(ps);
-                      injectContent(activePage, ps);
+                      postPreview();
                     }}
                     title="Storefront Preview"
                   />

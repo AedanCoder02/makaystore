@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { animate, stagger, createTimeline } from 'animejs';
 import ShaderGradientCanvasWrapper from './ShaderGradientCanvas';
+import { useSiteContent } from '@/components/providers/SiteContentProvider';
+import { readHeroStyle, heroTitleCss } from '@/lib/heroStyle';
 import '../styles/hero.css';
 
 export default function Hero() {
@@ -18,64 +20,36 @@ export default function Hero() {
       ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
       : false;
 
-  const [themeLoaded, setThemeLoaded] = useState(false);
-  const [heroVideo, setHeroVideo]       = useState('');
-  const [videoFailed, setVideoFailed]   = useState(false);
-  const [heroTitle, setHeroTitle]       = useState('');
-  const [heroSubtitle, setHeroSubtitle] = useState('');
-  const [heroCta, setHeroCta]           = useState('');
+  const { text, get } = useSiteContent();
+  const style = readHeroStyle(get);
+  const heroVideo = get('page:home:content:heroVideo') ?? '';
+  const [videoFailed, setVideoFailed] = useState(false);
 
+  const displayTitle    = text('page:home:content:heroTitle', t('headline'));
+  const displaySubtitle = text('page:home:content:heroSubtitle', t('subheadline'));
+  const displayCta      = text('page:home:content:ctaText', t('cta'));
+  const words = displayTitle.split(/\s+/).filter(Boolean);
+
+  // Entrance: per-character rise (solid colour) or a soft reveal of the whole
+  // line (gradient text, where per-character transforms would break the clip).
+  // React renders the spans; anime only animates them, so Studio edits and
+  // language switches re-render normally.
   useEffect(() => {
-    fetch('/api/theme')
-      .then(r => r.ok ? r.json() : {})
-      .then((d: Record<string, string>) => {
-        setHeroVideo(d['page:home:content:heroVideo']    || '');
-        setHeroTitle(d['page:home:content:heroTitle']    || '');
-        setHeroSubtitle(d['page:home:content:heroSubtitle'] || '');
-        setHeroCta(d['page:home:content:ctaText']        || '');
-        setThemeLoaded(true);
-      })
-      .catch(() => setThemeLoaded(true));
-  }, []);
-
-  const displayTitle    = heroTitle    || t('headline');
-  const displaySubtitle = heroSubtitle || t('subheadline');
-  const displayCta      = heroCta      || t('cta');
-
-  // Character stagger runs after theme is resolved so the right text is split
-  useEffect(() => {
-    if (!themeLoaded || reducedMotion) return;
     const headline = headlineRef.current;
     if (!headline) return;
-
-    const words = headline.innerText.split(' ');
-    headline.innerHTML = words
-      .map(
-        (word) =>
-          `<span class="word">${word
-            .split('')
-            .map((char) => `<span class="char">${char}</span>`)
-            .join('')}</span>` + '<span class="word-space"> </span>'
-      )
-      .join('');
-
+    // Reduced motion: hero.css shows everything statically.
+    if (reducedMotion) return;
     const tl = createTimeline({ defaults: { ease: 'outQuad' } });
-
-    tl.add(headline.querySelectorAll('.char'), {
-      opacity: [0, 1],
-      translateY: [24, 0],
-      duration: 700,
-      delay: stagger(25),
-    });
-
-    if (subRef.current) {
-      tl.add(subRef.current, { opacity: [0, 1], translateY: [16, 0], duration: 600 }, '-=300');
+    const chars = headline.querySelectorAll('.char');
+    if (chars.length) {
+      tl.add(chars, { opacity: [0, 1], translateY: [24, 0], duration: 700, delay: stagger(22) });
+    } else {
+      tl.add(headline, { opacity: [0, style.opacity / 100], translateY: [24, 0], filter: ['blur(8px)', 'blur(0px)'], duration: 900 });
     }
-
-    if (ctaRef.current) {
-      tl.add(ctaRef.current, { opacity: [0, 1], translateY: [16, 0], duration: 500 }, '-=400');
-    }
-  }, [themeLoaded, reducedMotion]);
+    if (subRef.current) tl.add(subRef.current, { opacity: [0, 1], translateY: [16, 0], duration: 600 }, '-=300');
+    if (ctaRef.current) tl.add(ctaRef.current, { opacity: [0, 1], translateY: [16, 0], duration: 500 }, '-=400');
+    return () => { tl.pause(); };
+  }, [displayTitle, style.gradient, style.opacity, reducedMotion]);
 
   // Scroll fade-out on hero
   useEffect(() => {
@@ -134,17 +108,32 @@ export default function Hero() {
       ) : (
         <ShaderGradientCanvasWrapper />
       )}
+      {style.overlay > 0 && (
+        <div className="hero-overlay" aria-hidden="true" style={{ background: `rgba(10, 8, 6, ${style.overlay / 100})` }} />
+      )}
 
       <div className="hero-content">
-        <h1 ref={headlineRef} className="hero-headline">
-          {displayTitle}
+        <h1
+          ref={headlineRef}
+          className={`hero-headline${style.gradient ? ' hero-headline--gradient' : ''}`}
+          style={heroTitleCss(style)}
+          aria-label={displayTitle}
+        >
+          {style.gradient
+            ? displayTitle
+            : words.map((word, wi) => (
+                <span key={`${displayTitle}-${wi}`} className="word" aria-hidden="true">
+                  {Array.from(word).map((ch, ci) => <span key={ci} className="char">{ch}</span>)}
+                  {wi < words.length - 1 && <span className="word-space"> </span>}
+                </span>
+              ))}
         </h1>
 
-        <p ref={subRef} className="hero-subheadline">
+        <p ref={subRef} className="hero-subheadline" style={{ color: style.subtitleColor }}>
           {displaySubtitle}
         </p>
 
-        <Link ref={ctaRef} href="/products" className="hero-cta">
+        <Link ref={ctaRef} href={style.ctaHref} className="hero-cta">
           <span className="hero-cta-inner">
             {displayCta}
             <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

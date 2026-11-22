@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Award, Star, ShoppingBag, Check } from 'lucide-react';
+import { useSiteContent } from '@/components/providers/SiteContentProvider';
 
 const DEFAULT_IMAGES = {
   bronze: 'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260719_025011_3811970f-3e59-49fb-9c36-e9d66f33d8ad.png',
@@ -27,14 +28,7 @@ export default function HomepageMembership() {
   const t = useTranslations('homepage.membership');
   const [active, setActive] = useState<TierKey>('bronze');
   const [imgKey, setImgKey] = useState(0);
-  const [themeData, setThemeData] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    fetch('/api/theme')
-      .then(r => r.ok ? r.json() : {})
-      .then((d: Record<string, string>) => setThemeData(d))
-      .catch(() => {});
-  }, []);
+  const { text, get } = useSiteContent();
 
   function selectTier(key: TierKey) {
     if (key === active) return;
@@ -43,17 +37,17 @@ export default function HomepageMembership() {
   }
 
   function getTierData(key: TierKey): TierData {
-    const content = (k: string) => themeData[`page:memberships:content:${key}_${k}`] ?? '';
-    const label = content('label') || t(`${key}Label` as any);
-    const imageUrl = content('image') || DEFAULT_IMAGES[key];
-    const perksRaw = content('perks') || t(`${key}Perks` as any);
+    const k = (f: string) => `page:memberships:content:${key}_${f}`;
+    const label = text(k('label'), t(`${key}Label` as any));
+    const imageUrl = get(k('image')) || DEFAULT_IMAGES[key];
+    const perksRaw = text(k('perks'), t(`${key}Perks` as any));
     const perks = perksRaw.split(/\n|\|/).map((s: string) => s.trim()).filter(Boolean);
     return { label, image: imageUrl, perks, productHref: `/products/membership-${key}` };
   }
 
   const tier = getTierData(active);
-  const heading = themeData['page:memberships:content:heading'] || t('title');
-  const tagLabel = themeData['page:memberships:content:tag_label'] || t('sectionTag');
+  const heading = text('page:memberships:content:heading', t('title'));
+  const tagLabel = text('page:memberships:content:tag_label', t('sectionTag'));
 
   return (
     <section id="memberships" style={{ background: '#0e0b08', position: 'relative', overflow: 'hidden' }}>

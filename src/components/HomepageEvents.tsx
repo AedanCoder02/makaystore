@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { Calendar, MapPin, Ticket, ArrowRight } from 'lucide-react';
+import { useSiteContent } from '@/components/providers/SiteContentProvider';
 
 const BG = 'https://d8j0ntlcm91z4.cloudfront.net/user_3EB2I1ekVpQy4uJr8950nm5Jt41/hf_20260719_020223_13228ad3-42dc-44fe-88f5-9624ff49e7b9.png';
 
@@ -16,19 +17,15 @@ interface Event {
 export default function HomepageEvents() {
   const t = useTranslations('homepage.events');
   const [events, setEvents] = useState<Event[]>([]);
-  const [themeData, setThemeData] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    fetch('/api/theme').then(r => r.ok ? r.json() : {}).then(setThemeData).catch(() => {});
-  }, []);
+  const { text, get } = useSiteContent();
 
   useEffect(() => {
     fetch('/api/events').then(r => r.ok ? r.json() : []).then(d => setEvents(Array.isArray(d) ? d.slice(0, 3) : [])).catch(() => {});
   }, []);
 
-  const bgImage = themeData['page:events:content:bg_image'] || BG;
-  const heading  = themeData['page:events:content:heading']  || t('title');
-  const tagLabel = themeData['page:events:content:tag_label'] || t('sectionTag');
+  const bgImage = get('page:events:content:bg_image') || BG;
+  const heading  = text('page:events:content:heading', t('title'));
+  const tagLabel = text('page:events:content:tag_label', t('sectionTag'));
 
   return (
     <section style={{ position: 'relative', overflow: 'hidden' }}>
