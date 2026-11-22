@@ -1,3 +1,4 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import sql from '@/lib/db';
@@ -13,6 +14,8 @@ function rangeExpr(range: string) {
 }
 
 export async function GET(req: NextRequest) {
+  const gate = await requireAccess('admin');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -75,6 +78,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: Request) {
+  const gate = await requireAccess('admin');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

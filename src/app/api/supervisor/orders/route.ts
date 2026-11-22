@@ -1,9 +1,12 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
 import { getPanelLocation } from '@/lib/location.server';
 
 export async function GET(req: NextRequest) {
+  const gate = await requireAccess('supervisor');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

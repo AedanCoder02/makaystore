@@ -1,3 +1,4 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
 import { getPanelLocation } from '@/lib/location.server';
@@ -8,6 +9,8 @@ async function ensureColumn() {
 }
 
 export async function GET() {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   try {
     await ensureColumn();
     const location = await getPanelLocation();
@@ -35,6 +38,8 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   try {
     const { id, status } = await req.json();
     if (!id || !status) return NextResponse.json({ error: 'id and status required' }, { status: 400 });

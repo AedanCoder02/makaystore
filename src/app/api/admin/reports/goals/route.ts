@@ -1,3 +1,4 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import sql from '@/lib/db';
@@ -6,6 +7,8 @@ import { getPanelLocation } from '@/lib/location.server';
 const DEFAULT_TARGETS: Record<string, number> = { daily_target: 357.14, weekly_target: 2500, monthly_target: 10000 };
 
 export async function GET() {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -72,6 +75,8 @@ export async function GET() {
 }
 
 export async function PATCH(req: Request) {
+  const gate = await requireAccess('admin');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

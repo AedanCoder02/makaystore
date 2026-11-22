@@ -1,9 +1,12 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
 
 // GET — attendees list (admin only, not enforced here — keep simple)
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const gate = await requireAccess('supervisor');
+  if (gate instanceof NextResponse) return gate;
   const { id } = await params;
   const rows = await sql`
     SELECT * FROM event_tickets WHERE event_id = ${Number(id)} ORDER BY purchased_at DESC
