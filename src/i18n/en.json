@@ -612,7 +612,32 @@
       "saved": "Saved",
       "saving": "Saving...",
       "save": "Save",
-      "showTutorial": "Show tutorial"
+      "showTutorial": "Show tutorial",
+      "filterLabel": "Filter by stock level",
+      "filter": {
+        "all": "All products",
+        "out": "Out of stock",
+        "low": "Low stock",
+        "ok": "In stock"
+      },
+      "badge": {
+        "out": "Out of stock",
+        "low": "Low",
+        "ok": "In stock"
+      },
+      "searchPlaceholder": "Search by name, SKU or category...",
+      "sortBy": "Sort by:",
+      "sort": {
+        "title": "Product",
+        "sku": "SKU",
+        "category": "Category",
+        "stock": "Stock"
+      },
+      "empty": "No products found.",
+      "retry": "Retry",
+      "minus": "Remove {n}",
+      "plus": "Add {n}",
+      "quantityFor": "Quantity for {product}"
     }
   },
   "rotation": {

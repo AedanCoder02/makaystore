@@ -503,7 +503,7 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
         id: 'step-2',
         target: '.seller-stock-row',
         title: 'Adjust Quantities',
-        description: 'Use the +1, -1, +5, -5 buttons or type directly. Low stock (under 10) is highlighted in red.',
+        description: 'Use the +1, -1, +5, -5 buttons or type directly. Out-of-stock products are pinned to the top in red, low stock (under 10) is marked in amber.',
         placement: 'left',
         skipAllowed: true,
       },
