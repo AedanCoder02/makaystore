@@ -1,8 +1,7 @@
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
-process.env.GMAIL_USER = 'ap.bymakay@gmail.com';
-process.env.GMAIL_APP_PASSWORD = 'jfwhaajnojpaqkpn';
+// GMAIL_USER and GMAIL_APP_PASSWORD come from .env.local
 
 const { sendMembershipWelcomeEmail, sendMembershipContractEmail } = await import('../src/lib/email.ts');
 

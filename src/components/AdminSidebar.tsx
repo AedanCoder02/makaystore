@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, ShoppingBag, Users, BarChart2, Calendar, Crown, Handshake, Target, PanelLeftClose, PanelLeftOpen, Menu, X, Contact, Wallet } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, BarChart2, Calendar, Crown, Handshake, Target, PanelLeftClose, PanelLeftOpen, Menu, X, Contact, Wallet, Receipt } from 'lucide-react';
 import LocationSwitcher from './LocationSwitcher';
 
 const NAV = [
   { label: 'Panel',       href: '/admin/dashboard',  icon: LayoutDashboard },
   { label: 'Pedidos',     href: '/admin/orders',      icon: ShoppingBag },
+  { label: 'Pagos',       href: '/admin/payments',    icon: Receipt },
   { label: 'Usuarios',    href: '/admin/users',       icon: Users },
   { label: 'Clientes',    href: '/admin/clients',     icon: Contact },
   { label: 'Reportes',    href: '/admin/reports',     icon: BarChart2 },
