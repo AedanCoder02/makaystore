@@ -583,7 +583,9 @@
   background: #fff;
   border: 1px solid var(--makay-sand-cream);
   border-radius: 16px;
-  overflow: hidden;
+  /* Scroll instead of clipping columns when the sidebar narrows the panel. */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .sp-table {
   width: 100%;
