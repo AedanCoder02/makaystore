@@ -1,17 +1,24 @@
+// Sends the membership welcome + contract emails to test inboxes.
+// Usage: GMAIL_USER and GMAIL_APP_PASSWORD in .env.local,
+//        TEST_EMAILS="a@example.com,b@example.com" node scripts/test-emails.mjs
 import { config } from 'dotenv';
 config({ path: '.env.local' });
 
-process.env.GMAIL_USER = 'ap.bymakay@gmail.com';
-process.env.GMAIL_APP_PASSWORD = 'jfwhaajnojpaqkpn';
+if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+  console.error('Set GMAIL_USER and GMAIL_APP_PASSWORD in .env.local');
+  process.exit(1);
+}
+
+const TEST_ADDRESSES = (process.env.TEST_EMAILS ?? '').split(',').map(s => s.trim()).filter(Boolean);
+if (TEST_ADDRESSES.length === 0) {
+  console.error('Set TEST_EMAILS to a comma-separated list of recipients');
+  process.exit(1);
+}
 
 const { sendMembershipWelcomeEmail, sendMembershipContractEmail } = await import('../src/lib/email.ts');
 
-const TEST_ADDRESSES = [
-  'mentoriabelo@gmail.com',
-];
-
 const TEST_DATA = {
-  name: 'Aedan Proger',
+  name: 'Test Member',
   tier: 'gold',
   duration: 'trimestral',
   amount: 450,
