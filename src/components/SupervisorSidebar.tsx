@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, Users, ShoppingBag, Clock, FileBarChart2, ChevronLeft, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingBag, Receipt, Clock, FileBarChart2, ChevronLeft, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
 import LocationSwitcher from './LocationSwitcher';
 
 const NAV = [
   { href: '/supervisor/dashboard', label: 'Overview',  icon: LayoutDashboard },
   { href: '/supervisor/staff',     label: 'Staff',     icon: Users },
   { href: '/supervisor/orders',    label: 'Órdenes',   icon: ShoppingBag },
+  { href: '/supervisor/payments',  label: 'Pagos',     icon: Receipt },
   { href: '/supervisor/shifts',    label: 'Turnos',    icon: Clock },
   { href: '/supervisor/reports',   label: 'Reportes',  icon: FileBarChart2 },
 ];

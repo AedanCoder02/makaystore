@@ -150,7 +150,95 @@
     "subtotal": "Subtotal",
     "shippingCost": "Envío",
     "total": "Total",
-    "qty": "Cant."
+    "qty": "Cant.",
+    "pay": {
+      "title": "Método de pago",
+      "back": "Volver",
+      "loading": "Cargando métodos de pago…",
+      "none": "No hay métodos de pago disponibles en este momento. Escríbenos para completar tu compra.",
+      "methods": {
+        "stripe": "Tarjeta",
+        "binance": "Binance Pay",
+        "pago_movil": "Pago Móvil",
+        "transferencia": "Transferencia",
+        "zelle": "Zelle",
+        "binance_pay_id": "Binance Pay"
+      },
+      "hints": {
+        "stripe": "Visa, Mastercard, Amex",
+        "binance": "Paga con cripto en la app de Binance",
+        "pago_movil": "Bolívares · verificación manual",
+        "transferencia": "Bolívares · verificación manual",
+        "zelle": "USD · verificación manual",
+        "binance_pay_id": "USDT · verificación manual"
+      },
+      "fields": {
+        "bank": "Banco",
+        "phone": "Teléfono",
+        "idNumber": "Cédula / RIF",
+        "holder": "Titular",
+        "accountNumber": "Número de cuenta",
+        "accountType": "Tipo de cuenta",
+        "email": "Correo",
+        "payId": "Binance Pay ID"
+      },
+      "sendTo": "Envía el pago a",
+      "amountUsd": "Monto a pagar",
+      "amountBs": "En bolívares (tasa {rate} Bs/$)",
+      "copy": "Copiar",
+      "copied": "Copiado",
+      "reference": "Número de referencia",
+      "referencePlaceholder": "Ej. 00123456",
+      "proof": "Captura del comprobante",
+      "proofUpload": "Subir captura o PDF",
+      "proofChange": "Cambiar archivo",
+      "proofTooLarge": "El archivo supera 4 MB",
+      "proofHint": "Nuestro equipo verificará el pago antes de confirmar tu pedido.",
+      "split": "Pagar con dos métodos",
+      "splitRemove": "Usar un solo método",
+      "splitLabel": "Pago {n} de 2",
+      "splitManualOnly": "Tarjeta y Binance Pay no se pueden combinar con otro método.",
+      "amount": "Monto ($)",
+      "covered": "Total cubierto",
+      "confirmManual": "Enviar comprobante y confirmar",
+      "payCard": "Pagar ${amount}",
+      "payBinance": "Continuar a Binance Pay",
+      "redirecting": "Redirigiendo a Binance…",
+      "processing": "Procesando…",
+      "cardTitle": "Datos de la tarjeta",
+      "testMode": "Modo de prueba: usa 4242 4242 4242 4242, cualquier fecha futura y CVC.",
+      "secure": "Pago cifrado y procesado por Stripe. Makay no guarda los datos de tu tarjeta.",
+      "errors": {
+        "generic": "No se pudo procesar el pago. Intenta de nuevo.",
+        "missingReference": "Ingresa el número de referencia.",
+        "missingProof": "Adjunta la captura del comprobante.",
+        "splitMismatch": "Los montos deben sumar el total.",
+        "order": "No se pudo crear el pedido. Intenta de nuevo."
+      }
+    },
+    "paymentStatus": {
+      "awaiting_payment": {
+        "title": "Esperando tu pago",
+        "body": "Aún no recibimos la confirmación de Binance Pay. Si ya pagaste, recarga esta página en unos segundos."
+      },
+      "pending_verification": {
+        "title": "Pago en verificación",
+        "body": "Recibimos tu comprobante. Te avisaremos cuando nuestro equipo confirme el pago."
+      },
+      "paid": {
+        "title": "¡Pago confirmado!",
+        "body": "Gracias por tu compra. Ya estamos preparando tu pedido."
+      },
+      "verified": {
+        "title": "¡Pago verificado!",
+        "body": "Nuestro equipo confirmó tu pago. Gracias por tu compra."
+      },
+      "rejected": {
+        "title": "Pago rechazado",
+        "body": "No pudimos verificar tu pago. Escríbenos para resolverlo."
+      },
+      "refresh": "Actualizar estado"
+    }
   },
   "admin": {
     "dashboard": "Panel de Administración",
@@ -458,7 +546,8 @@
       "rotation": "Rotación",
       "events": "Eventos",
       "memberships": "Membresías",
-      "reservations": "Reservaciones"
+      "reservations": "Reservaciones",
+      "payments": "Pagos"
     },
     "sell": {
       "title": "Vender a Cliente",
@@ -980,6 +1069,50 @@
       "cardLabel": "Tarjeta de Membresía",
       "allMembers": "Todos los miembros",
       "fromSpend": "Desde ${amount} en compras"
+    }
+  },
+  "payments": {
+    "title": "Pagos",
+    "subtitle": "Verifica comprobantes de Pago Móvil, Transferencia, Zelle y Binance.",
+    "tabs": {
+      "pending_verification": "Por verificar",
+      "verified": "Verificados",
+      "rejected": "Rechazados",
+      "settings": "Credenciales"
+    },
+    "empty": "No hay pagos en esta lista.",
+    "loading": "Cargando…",
+    "reload": "Actualizar",
+    "order": "Pedido",
+    "customer": "Cliente",
+    "guest": "Invitado",
+    "total": "Total",
+    "items": "Productos",
+    "reference": "Referencia",
+    "proof": "Comprobante",
+    "openProof": "Abrir comprobante",
+    "noProof": "Sin comprobante",
+    "verify": "Verificar pago",
+    "reject": "Rechazar",
+    "notePlaceholder": "Nota (opcional, visible para el equipo)",
+    "confirmReject": "¿Rechazar este pago? El pedido quedará cancelado.",
+    "reviewedAt": "Revisado",
+    "note": "Nota",
+    "error": "No se pudo actualizar el pago.",
+    "settings": {
+      "title": "Credenciales de pago",
+      "intro": "Estos datos se muestran al cliente en el checkout. Solo los métodos activos aparecen.",
+      "enabled": "Activo",
+      "save": "Guardar",
+      "saved": "Guardado",
+      "saveError": "No se pudo guardar",
+      "vesRate": "Tasa Bs por USD (0 para ocultar el monto en Bs)",
+      "instructions": "Instrucciones adicionales para el cliente",
+      "gateways": "Pasarelas automáticas",
+      "gatewayOn": "Configurada",
+      "gatewayOff": "Falta configurar en Vercel",
+      "stripeWebhook": "Webhook de Stripe",
+      "binanceManualNote": "El Binance Pay ID manual solo se muestra si la API de Binance Pay no está configurada."
     }
   }
 }

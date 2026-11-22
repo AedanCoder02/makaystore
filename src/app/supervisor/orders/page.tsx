@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
-import { ShoppingBag, CreditCard, Smartphone, PocketKnife, Banknote, ExternalLink, ChevronDown, ChevronUp, Gift, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, CreditCard, Smartphone, PocketKnife, Banknote, ExternalLink, ChevronDown, ChevronUp, Gift, Landmark, DollarSign, Bitcoin, ShieldCheck } from 'lucide-react';
 
 interface PaymentEntry {
   method: string;
@@ -9,6 +9,8 @@ interface PaymentEntry {
   transactionId?: string;
   description?: string;
   receipt_url?: string;
+  reference?: string;
+  proof_id?: string;
 }
 
 interface OrderItem {
@@ -38,9 +40,11 @@ interface Order {
 
 const METHOD_LABEL: Record<string, string> = {
   stripe: 'Tarjeta', pago_movil: 'Pago Móvil', punto_venta: 'P.d.V.', cash: 'Efectivo',
+  transferencia: 'Transferencia', zelle: 'Zelle', binance: 'Binance Pay', binance_pay_id: 'Binance Pay',
 };
 const METHOD_ICON: Record<string, React.ComponentType<{ size?: number; color?: string }>> = {
   stripe: CreditCard, pago_movil: Smartphone, punto_venta: PocketKnife, cash: Banknote,
+  transferencia: Landmark, zelle: DollarSign, binance: Bitcoin, binance_pay_id: Bitcoin,
 };
 const STATUS_COLOR: Record<string, string> = {
   placed: '#f59e0b', confirmed: '#3b82f6', shipped: '#8b5cf6',
@@ -119,6 +123,10 @@ export default function SupervisorOrdersPage() {
             <option value="pago_movil">Pago Móvil</option>
             <option value="punto_venta">Punto de Venta</option>
             <option value="cash">Efectivo</option>
+            <option value="transferencia">Transferencia</option>
+            <option value="zelle">Zelle</option>
+            <option value="binance">Binance Pay</option>
+            <option value="binance_pay_id">Binance Pay (manual)</option>
           </select>
           <input type="date" className="seller-input" style={{ maxWidth: 145, margin: 0 }} value={filterFrom} onChange={e => setFilterFrom(e.target.value)} placeholder="Desde" />
           <input type="date" className="seller-input" style={{ maxWidth: 145, margin: 0 }} value={filterTo} onChange={e => setFilterTo(e.target.value)} placeholder="Hasta" />
@@ -142,7 +150,7 @@ export default function SupervisorOrdersPage() {
           {orders.map(o => {
             const open = expanded.has(o.id);
             const pms: PaymentEntry[] = Array.isArray(o.payment_methods) ? o.payment_methods : [];
-            const hasReceipts = pms.some(p => p.receipt_url);
+            const hasReceipts = pms.some(p => p.receipt_url || p.proof_id);
 
             return (
               <div key={`${o.source}-${o.id}`} style={{ background: '#fff', border: '1px solid #f0ebe4', borderRadius: 14, overflow: 'hidden' }}>
@@ -229,7 +237,14 @@ export default function SupervisorOrdersPage() {
                                 )}
                               </div>
                               <span style={{ fontFamily: 'var(--font-montserrat)', fontWeight: 700, fontSize: '0.88rem', color: 'var(--makay-peachy-rose)' }}>${Number(pm.amount).toFixed(2)}</span>
-                              {pm.receipt_url && (
+                              {pm.reference && (
+                                <code style={{ fontSize: '0.72rem', color: 'var(--makay-mauve)' }}>Ref {pm.reference}</code>
+                              )}
+                              {pm.proof_id ? (
+                                <a href={`/api/payments/proofs/${pm.proof_id}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--makay-ocean-teal)', display: 'flex', alignItems: 'center', gap: '0.25rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem' }}>
+                                  <ExternalLink size={12} /> Comprobante
+                                </a>
+                              ) : pm.receipt_url && (
                                 pm.receipt_url.startsWith('data:') ? (
                                   <a href={pm.receipt_url} target="_blank" rel="noopener noreferrer" title="Ver comprobante">
                                     <img src={pm.receipt_url} alt="Comprobante" style={{ width: 56, height: 56, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--makay-sand-cream)', cursor: 'pointer', display: 'block' }} />
@@ -258,7 +273,7 @@ export default function SupervisorOrdersPage() {
                       </div>
                     </div>
 
-                    {pms.some(p => ['pago_movil','punto_venta'].includes(p.method)) && (
+                    {pms.some(p => ['pago_movil','punto_venta','transferencia','zelle','binance_pay_id'].includes(p.method)) && (
                       (confirmed.has(o.id) || o.payment_confirmed) ? (
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.75rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8 }}>
                           <ShieldCheck size={14} color="#10b981" />
