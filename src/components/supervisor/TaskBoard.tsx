@@ -58,7 +58,7 @@ export default function TaskBoard({ tasks: _ignored }: { tasks?: BoardTask[] }) 
   });
 
   return (
-    <div className="sup-section">
+    <div className="sup-section task-board">
       <div className="sup-section-header">
         <ClipboardList size={20} className="sup-section-icon" />
         <h2 className="sup-section-title">{t('taskBoard')}</h2>

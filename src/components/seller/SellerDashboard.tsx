@@ -129,7 +129,7 @@ export default function SellerDashboard({ recentOrders, commissionPct, lowStock 
           )}
 
           {recentOrders.length > 0 ? (
-            <div className="seller-widget">
+            <div className="seller-widget seller-recent">
               <h2 className="seller-widget-title">{t('recentSales')}</h2>
               <div className="seller-orders-list">
                 {recentOrders.map(o => {
