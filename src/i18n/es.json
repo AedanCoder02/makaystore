@@ -1491,5 +1491,120 @@
       "generic": "Algo salió mal.",
       "network": "Error de red. Intenta de nuevo."
     }
+  },
+  "homeOfferings": {
+    "eyebrow": "La experiencia",
+    "title": "Aquí pasa todo",
+    "subtitle": "Comida, tragos, gente y noches para recordar, sobre la arena.",
+    "food": {
+      "title": "Comida",
+      "text": "Platos frescos para largas tardes de playa.",
+      "cta": "Reservar mesa"
+    },
+    "drinks": {
+      "title": "Tragos",
+      "text": "Cócteles, cervezas frías y rondas al atardecer.",
+      "cta": "Reservar ahora"
+    },
+    "people": {
+      "title": "Gente",
+      "text": "Una comunidad que vuelve cada temporada.",
+      "cta": "Hazte miembro"
+    },
+    "events": {
+      "title": "Eventos",
+      "text": "Música en vivo, DJs y encuentros frente al mar.",
+      "cta": "Ver eventos"
+    }
+  },
+  "homeWhy": {
+    "eyebrow": "Por qué Makay",
+    "title": "Más que un día de playa",
+    "text": "Un lugar para bajar el ritmo, conocer gente y quedarse hasta que salgan las estrellas.",
+    "sea": {
+      "title": "Frente al mar",
+      "text": "Tumbonas, sombra y el Caribe a pocos pasos."
+    },
+    "sunset": {
+      "title": "El mejor atardecer",
+      "text": "La hora dorada es el evento principal, todos los días."
+    },
+    "music": {
+      "title": "Música para cada momento",
+      "text": "Relajada de día, más animada cuando llega la noche."
+    },
+    "service": {
+      "title": "Un servicio que te recuerda",
+      "text": "Un equipo que cuida los detalles para que tú no tengas que hacerlo."
+    }
+  },
+  "homeDay": {
+    "eyebrow": "Un día en Makay",
+    "title": "Del amanecer a la última canción",
+    "morning": {
+      "time": "Mañana",
+      "title": "Llega y desconéctate",
+      "text": "Elige tu lugar, pide un café y deja que el mar marque el ritmo."
+    },
+    "noon": {
+      "time": "Mediodía",
+      "title": "Sol y sal",
+      "text": "Báñate, come algo fresco y quédate a la sombra el tiempo que quieras."
+    },
+    "sunset": {
+      "time": "Atardecer",
+      "title": "Hora dorada",
+      "text": "Un trago en la mano mientras el cielo cambia de color sobre el agua."
+    },
+    "night": {
+      "time": "Noche",
+      "title": "Empieza la noche",
+      "text": "Música, luces y la gente que conociste durante el día."
+    }
+  },
+  "homeCommunity": {
+    "eyebrow": "Comunidad",
+    "title": "Lo que dicen nuestros invitados",
+    "scoreLabel": "Calificación promedio {average} de 5 en {count} reseñas",
+    "count": "{count, plural, one {# reseña} other {# reseñas}}",
+    "empty": "Aún no hay reseñas. Sé el primero en contar tu día en Makay.",
+    "write": "Escribir una reseña",
+    "signInToWrite": "Inicia sesión para escribir una reseña",
+    "thanks": "Gracias. Tu reseña aparecerá cuando nuestro equipo la apruebe.",
+    "yourRating": "Tu calificación",
+    "starsAria": "{n, plural, one {# estrella} other {# estrellas}}",
+    "yourComment": "Tu reseña",
+    "placeholder": "Cuéntanos cómo fue tu día en Makay...",
+    "moderated": "Revisada antes de publicarse",
+    "cancel": "Cancelar",
+    "sending": "Enviando...",
+    "send": "Enviar reseña",
+    "errors": {
+      "recent": "Ya enviaste una reseña en los últimos 30 días.",
+      "length": "Tu reseña debe tener entre 10 y 600 caracteres.",
+      "generic": "Algo salió mal. Inténtalo de nuevo."
+    }
+  },
+  "reviewsAdmin": {
+    "title": "Reseñas",
+    "subtitle": "Aprueba u oculta las reseñas antes de que aparezcan en la página principal.",
+    "error": "No se pudo completar la acción.",
+    "confirmDelete": "¿Eliminar esta reseña de forma permanente?",
+    "tabs": {
+      "pending": "Pendientes",
+      "approved": "Aprobadas",
+      "hidden": "Ocultas"
+    },
+    "loading": "Cargando...",
+    "empty": {
+      "pending": "No hay reseñas esperando aprobación.",
+      "approved": "Aún no hay reseñas aprobadas.",
+      "hidden": "No hay reseñas ocultas."
+    },
+    "rating": "{n} de 5 estrellas",
+    "approve": "Aprobar",
+    "hide": "Ocultar",
+    "toPending": "Volver a pendiente",
+    "delete": "Eliminar"
   }
 }

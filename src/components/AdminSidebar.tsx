@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, ShoppingBag, Users, BarChart2, Calendar, Crown, Handshake, Target, PanelLeftClose, PanelLeftOpen, Menu, X, Contact, Wallet, Receipt } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Users, BarChart2, Calendar, Crown, Handshake, Target, PanelLeftClose, PanelLeftOpen, Menu, X, Contact, Wallet, Receipt, Star } from 'lucide-react';
 import LocationSwitcher from './LocationSwitcher';
 
 const NAV = [
@@ -16,6 +16,7 @@ const NAV = [
   { label: 'Metas Yimi',  href: '/admin/yimi-goals',  icon: Target },
   { label: 'Eventos',     href: '/admin/events',      icon: Calendar },
   { label: 'Membresías',  href: '/admin/memberships', icon: Crown },
+  { label: 'Reseñas',     href: '/admin/reviews',     icon: Star },
   { label: 'Aliados',     href: '/admin/allies',      icon: Handshake },
   { label: 'Nómina',      href: '/admin/payroll',     icon: Wallet },
 ];

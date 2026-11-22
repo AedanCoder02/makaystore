@@ -1491,5 +1491,120 @@
       "generic": "Something went wrong.",
       "network": "Network error. Please try again."
     }
+  },
+  "homeOfferings": {
+    "eyebrow": "The experience",
+    "title": "Everything happens here",
+    "subtitle": "Food, drinks, people and nights to remember, right on the sand.",
+    "food": {
+      "title": "Food",
+      "text": "Fresh plates made for long beach afternoons.",
+      "cta": "Book a table"
+    },
+    "drinks": {
+      "title": "Drinks",
+      "text": "Cocktails, cold beers and sunset rounds.",
+      "cta": "Reserve now"
+    },
+    "people": {
+      "title": "People",
+      "text": "A community that comes back every season.",
+      "cta": "Become a member"
+    },
+    "events": {
+      "title": "Events",
+      "text": "Live music, DJs and gatherings by the sea.",
+      "cta": "See events"
+    }
+  },
+  "homeWhy": {
+    "eyebrow": "Why Makay",
+    "title": "More than a day at the beach",
+    "text": "A place to slow down, meet people and stay until the stars come out.",
+    "sea": {
+      "title": "Right on the sea",
+      "text": "Loungers, shade and the Caribbean a few steps away."
+    },
+    "sunset": {
+      "title": "The best sunset",
+      "text": "Golden hour is the main event, every single day."
+    },
+    "music": {
+      "title": "Music that fits the mood",
+      "text": "Chill by day, livelier as the night arrives."
+    },
+    "service": {
+      "title": "Service that remembers you",
+      "text": "A team that takes care of the details so you don't have to."
+    }
+  },
+  "homeDay": {
+    "eyebrow": "A day at Makay",
+    "title": "From sunrise to the last song",
+    "morning": {
+      "time": "Morning",
+      "title": "Arrive and unwind",
+      "text": "Pick your spot, order a coffee and let the sea set the pace."
+    },
+    "noon": {
+      "time": "Midday",
+      "title": "Sun and salt",
+      "text": "Swim, eat something fresh and stay in the shade as long as you like."
+    },
+    "sunset": {
+      "time": "Sunset",
+      "title": "Golden hour",
+      "text": "Drinks in hand while the sky changes colour over the water."
+    },
+    "night": {
+      "time": "Night",
+      "title": "The night begins",
+      "text": "Music, lights and the people you met during the day."
+    }
+  },
+  "homeCommunity": {
+    "eyebrow": "Community",
+    "title": "What our guests say",
+    "scoreLabel": "Average rating {average} out of 5 from {count} reviews",
+    "count": "{count, plural, one {# review} other {# reviews}}",
+    "empty": "No reviews yet. Be the first to share your day at Makay.",
+    "write": "Write a review",
+    "signInToWrite": "Sign in to write a review",
+    "thanks": "Thank you. Your review will appear once our team approves it.",
+    "yourRating": "Your rating",
+    "starsAria": "{n, plural, one {# star} other {# stars}}",
+    "yourComment": "Your review",
+    "placeholder": "Tell us about your day at Makay...",
+    "moderated": "Reviewed before publishing",
+    "cancel": "Cancel",
+    "sending": "Sending...",
+    "send": "Send review",
+    "errors": {
+      "recent": "You already sent a review in the last 30 days.",
+      "length": "Your review must be between 10 and 600 characters.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "reviewsAdmin": {
+    "title": "Reviews",
+    "subtitle": "Approve or hide guest reviews before they appear on the homepage.",
+    "error": "The action could not be completed.",
+    "confirmDelete": "Delete this review permanently?",
+    "tabs": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "hidden": "Hidden"
+    },
+    "loading": "Loading...",
+    "empty": {
+      "pending": "No reviews waiting for approval.",
+      "approved": "No approved reviews yet.",
+      "hidden": "No hidden reviews."
+    },
+    "rating": "{n} out of 5 stars",
+    "approve": "Approve",
+    "hide": "Hide",
+    "toPending": "Move back to pending",
+    "delete": "Delete"
   }
 }
