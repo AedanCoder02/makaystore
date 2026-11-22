@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useState, useEffect, useCallback } from 'react';
 import { Check, X, Plus, Trash2, HelpCircle, ChevronDown, AlertTriangle, ArrowUp, ArrowDown } from 'lucide-react';
@@ -33,11 +34,11 @@ const EMPTY_FORM = {
   markup_percent: false, markup_amount: '0',
 };
 
-const STATUS_TABS: { key: 'all' | Status; label: string }[] = [
-  { key: 'all',      label: 'Todos' },
-  { key: 'active',   label: 'Activo' },
-  { key: 'paused',   label: 'Pausado' },
-  { key: 'archived', label: 'Archivado' },
+const STATUS_TABS: { key: 'all' | Status }[] = [
+  { key: 'all' },
+  { key: 'active' },
+  { key: 'paused' },
+  { key: 'archived' },
 ];
 
 const STATUS_COLOR: Record<Status, string> = {
@@ -58,6 +59,7 @@ function parseColors(c: string[] | string | undefined): string {
 }
 
 export default function SellerProducts() {
+  const tb = useTranslations('seller.productsPage');
   const [products, setProducts]         = useState<Product[]>([]);
   const [loading, setLoading]           = useState(true);
   const [statusTab, setStatusTab]       = useState<'all' | Status>('all');
@@ -85,7 +87,7 @@ export default function SellerProducts() {
       if (!res.ok) throw new Error(await res.text());
       setProducts(await res.json());
     } catch (e: any) {
-      setError(e.message ?? 'Error al cargar los productos');
+      setError(e.message ?? tb('couldNotLoadProducts'));
     } finally {
       setLoading(false);
     }
@@ -153,7 +155,7 @@ export default function SellerProducts() {
   // --- bulk delete ---
   const bulkDelete = async () => {
     const ids = [...selected];
-    if (!ids.length || !confirm(`¿Eliminar ${ids.length} producto(s)?`)) return;
+    if (!ids.length || !confirm(tb('confirmDeleteMany', { count: ids.length }))) return;
     setSaving(true);
     await Promise.all(ids.map(id => fetch(`/api/seller/products/${id}`, { method: 'DELETE' })));
     setSaving(false);
@@ -163,7 +165,7 @@ export default function SellerProducts() {
 
   // --- single delete ---
   const deleteOne = async (id: string, title: string) => {
-    if (!confirm(`¿Eliminar "${title}"?`)) return;
+    if (!confirm(tb('confirmDeleteOne', { title }))) return;
     setSaving(true);
     await fetch(`/api/seller/products/${id}`, { method: 'DELETE' });
     setSaving(false);
@@ -257,11 +259,11 @@ export default function SellerProducts() {
       {/* Header */}
       <div className="seller-page-header">
         <div>
-          <h1 className="seller-page-title">Productos</h1>
-          <p className="seller-page-sub">Administra tu catálogo — crea, edita, publica o archiva.</p>
+          <h1 className="seller-page-title">{tb('products')}</h1>
+          <p className="seller-page-sub">{tb('manageYourCatalogCreateEdit')}</p>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
-          <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-products-tour')} aria-label="Show tutorial">
+          <button className="seller-btn-ghost help-button" onClick={() => tutorialStore.showTutorial('seller-products-tour')} aria-label={tb('showTutorial')}>
             <HelpCircle size={16} />
           </button>
           <button className="seller-btn-primary" onClick={() => { setShowCreate(v => !v); setEditing(null); }}>
@@ -275,43 +277,43 @@ export default function SellerProducts() {
       {/* Create form */}
       {showCreate && (
         <div className="seller-add-form">
-          <h3 className="seller-form-title">Nuevo Producto</h3>
+          <h3 className="seller-form-title">{tb('newProduct')}</h3>
           <div className="seller-form-grid">
-            <input className="seller-input" placeholder="Nombre del producto *" value={newForm.title}
+            <input className="seller-input" placeholder={tb('productName')} value={newForm.title}
               onChange={e => setNewForm(f => ({ ...f, title: e.target.value }))} />
-            <input className="seller-input" placeholder="Precio * (ej. 49.99)" type="number" value={newForm.price}
+            <input className="seller-input" placeholder={tb('priceEG4999')} type="number" value={newForm.price}
               onChange={e => setNewForm(f => ({ ...f, price: e.target.value }))} />
-            <input className="seller-input" placeholder="Proveedor (ej. Havaianas, Makay, Tarbay)" value={newForm.provider}
+            <input className="seller-input" placeholder={tb('supplierEGHavaianasMakay')} value={newForm.provider}
               onChange={e => setNewForm(f => ({ ...f, provider: e.target.value }))} />
             <input className="seller-input" placeholder="SKU" value={newForm.sku}
               onChange={e => setNewForm(f => ({ ...f, sku: e.target.value }))} />
             <input className="seller-input" placeholder="Stock" type="number" value={newForm.stock}
               onChange={e => setNewForm(f => ({ ...f, stock: e.target.value }))} />
-            <input className="seller-input" placeholder="Categoría" value={newForm.category}
+            <input className="seller-input" placeholder={tb('category')} value={newForm.category}
               onChange={e => setNewForm(f => ({ ...f, category: e.target.value }))} />
             <select className="seller-input" value={newForm.status}
               onChange={e => setNewForm(f => ({ ...f, status: e.target.value as Status }))}>
-              <option value="active">Activo</option>
-              <option value="paused">Pausado</option>
-              <option value="archived">Archivado</option>
+              <option value="active">{tb('status.active')}</option>
+              <option value="paused">{tb('status.paused')}</option>
+              <option value="archived">{tb('status.archived')}</option>
             </select>
             <ImageUpload
               value={newForm.image}
               onChange={url => setNewForm(f => ({ ...f, image: url }))}
-              label="Imagen del producto"
+              label={tb('productImage')}
             />
-            <input className="seller-input" placeholder="Tallas (ej. S, M, L, XL)" value={newForm.sizes}
+            <input className="seller-input" placeholder={tb('sizesEGSM')} value={newForm.sizes}
               onChange={e => setNewForm(f => ({ ...f, sizes: e.target.value }))} />
           </div>
-          <input className="seller-input" style={{ marginTop: '0.5rem' }} placeholder="Colores (ej. Negro, Blanco, Arena)" value={newForm.colors}
+          <input className="seller-input" style={{ marginTop: '0.5rem' }} placeholder={tb('colorsEGBlackWhite')} value={newForm.colors}
             onChange={e => setNewForm(f => ({ ...f, colors: e.target.value }))} />
-          <textarea className="seller-textarea" placeholder="Descripción" value={newForm.description}
+          <textarea className="seller-textarea" placeholder={tb('description')} value={newForm.description}
             onChange={e => setNewForm(f => ({ ...f, description: e.target.value }))} />
           <div className="seller-form-actions">
             <button className="seller-btn-primary" onClick={createProduct} disabled={saving || !newForm.title || !newForm.price}>
-              {saving ? 'Guardando…' : 'Guardar Producto'}
+              {saving ? tb('saving') : tb('saveProduct')}
             </button>
-            <button className="seller-btn-ghost" onClick={() => setShowCreate(false)}>Cancelar</button>
+            <button className="seller-btn-ghost" onClick={() => setShowCreate(false)}>{tb('cancel')}</button>
           </div>
         </div>
       )}
@@ -324,7 +326,7 @@ export default function SellerProducts() {
             className={`sp-tab${statusTab === tab.key ? ' active' : ''}`}
             onClick={() => { setStatusTab(tab.key); clearSelection(); }}
           >
-            {tab.label}
+            {tb(`status.${tab.key}`)}
             <span className="sp-tab-count">{counts[tab.key]}</span>
           </button>
         ))}
@@ -339,7 +341,7 @@ export default function SellerProducts() {
             value={providerFilter}
             onChange={e => { setProviderFilter(e.target.value); clearSelection(); }}
           >
-            <option value="all">Todos los proveedores</option>
+            <option value="all">{tb('allSuppliers')}</option>
             {providers.filter(p => p !== 'all').map(p => (
               <option key={p} value={p}>{p}</option>
             ))}
@@ -349,25 +351,25 @@ export default function SellerProducts() {
 
       {/* Search + bulk actions */}
       <div className="sp-toolbar">
-        <input className="seller-search" style={{ flex: 1, margin: 0 }} placeholder="Buscar por nombre, SKU o proveedor…"
+        <input className="seller-search" style={{ flex: 1, margin: 0 }} placeholder={tb('searchByNameSkuOr')}
           value={search} onChange={e => { setSearch(e.target.value); clearSelection(); }} />
         {selected.size > 0 && (
           <div className="sp-bulk">
             <span className="sp-bulk-count">{selected.size} seleccionados</span>
-            <button className="sp-bulk-btn green" onClick={() => bulkStatus('active')} disabled={saving}>Publicar</button>
-            <button className="sp-bulk-btn amber" onClick={() => bulkStatus('paused')} disabled={saving}>Pausar</button>
-            <button className="sp-bulk-btn gray"  onClick={() => bulkStatus('archived')} disabled={saving}>Archivar</button>
-            <button className="sp-bulk-btn red"   onClick={bulkDelete} disabled={saving}>Eliminar</button>
-            <button className="sp-bulk-btn ghost" onClick={clearSelection}>Cancelar</button>
+            <button className="sp-bulk-btn green" onClick={() => bulkStatus('active')} disabled={saving}>{tb('publish')}</button>
+            <button className="sp-bulk-btn amber" onClick={() => bulkStatus('paused')} disabled={saving}>{tb('pause')}</button>
+            <button className="sp-bulk-btn gray"  onClick={() => bulkStatus('archived')} disabled={saving}>{tb('archive')}</button>
+            <button className="sp-bulk-btn red"   onClick={bulkDelete} disabled={saving}>{tb('delete')}</button>
+            <button className="sp-bulk-btn ghost" onClick={clearSelection}>{tb('cancel')}</button>
           </div>
         )}
       </div>
 
       {/* Table */}
       {loading ? (
-        <p style={{ padding: '2rem', textAlign: 'center', color: '#9ca3af' }}>Cargando…</p>
+        <p style={{ padding: '2rem', textAlign: 'center', color: '#9ca3af' }}>{tb('loading')}</p>
       ) : visible.length === 0 ? (
-        <p style={{ padding: '2rem', textAlign: 'center', color: '#9ca3af' }}>No se encontraron productos.</p>
+        <p style={{ padding: '2rem', textAlign: 'center', color: '#9ca3af' }}>{tb('noProductsFound')}</p>
       ) : (
         <div className="sp-table-wrap">
           <table className="sp-table">
@@ -379,21 +381,21 @@ export default function SellerProducts() {
                 </th>
                 <th style={{ width: 56 }}></th>
                 <th style={{ cursor: 'pointer' }} onClick={() => toggleSort('title')}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>Producto <SortIcon field="title" /></span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>{tb('product')} <SortIcon field="title" /></span>
                 </th>
                 <th style={{ cursor: 'pointer' }} onClick={() => toggleSort('sku')}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>SKU <SortIcon field="sku" /></span>
                 </th>
                 <th style={{ cursor: 'pointer' }} onClick={() => toggleSort('category')}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>Categoría <SortIcon field="category" /></span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem' }}>{tb('category')} <SortIcon field="category" /></span>
                 </th>
                 <th style={{ textAlign: 'right', cursor: 'pointer' }} onClick={() => toggleSort('price')}>
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', justifyContent: 'flex-end' }}>Precio <SortIcon field="price" /></span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', justifyContent: 'flex-end' }}>{tb('price')} <SortIcon field="price" /></span>
                 </th>
                 <th style={{ textAlign: 'right', cursor: 'pointer' }} onClick={() => toggleSort('stock')}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', justifyContent: 'flex-end' }}>Stock <SortIcon field="stock" /></span>
                 </th>
-                <th>Estado</th>
+                <th>{tb('statusLabel')}</th>
                 <th style={{ width: 80 }}></th>
               </tr>
             </thead>
@@ -442,17 +444,17 @@ export default function SellerProducts() {
                     <td style={{ textAlign: 'right' }}>{p.stock ?? 0}</td>
                     <td>
                       <span className="sp-status-dot" style={{ background: STATUS_COLOR[p.status] }} />
-                      <span className="sp-status-label">{{ active: 'Activo', paused: 'Pausado', archived: 'Archivado' }[p.status]}</span>
+                      <span className="sp-status-label">{tb(`status.${p.status}`)}</span>
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '4px' }}>
-                        <button className="seller-icon-btn edit" title="Editar" onClick={() => editing === p.id ? setEditing(null) : startEdit(p)}>
+                        <button className="seller-icon-btn edit" title={tb('edit')} onClick={() => editing === p.id ? setEditing(null) : startEdit(p)}>
                           <ChevronDown size={14} style={{ transform: editing === p.id ? 'rotate(180deg)' : 'none', transition: '0.2s' }} />
                         </button>
-                        <button className="seller-icon-btn" title="Reportar daño / pérdida" style={{ color: '#f59e0b' }} onClick={() => setDamageTarget(p)}>
+                        <button className="seller-icon-btn" title={tb('reportDamageLoss')} style={{ color: '#f59e0b' }} onClick={() => setDamageTarget(p)}>
                           <AlertTriangle size={14} />
                         </button>
-                        <button className="seller-icon-btn cancel" title="Eliminar" onClick={() => deleteOne(p.id, p.title)}>
+                        <button className="seller-icon-btn cancel" title={tb('delete')} onClick={() => deleteOne(p.id, p.title)}>
                           <Trash2 size={14} />
                         </button>
                       </div>
@@ -465,12 +467,12 @@ export default function SellerProducts() {
                         <div className="sp-edit-panel">
                           <div className="seller-form-grid">
                             <div>
-                              <label className="seller-label">Nombre *</label>
+                              <label className="seller-label">{tb('name')}</label>
                               <input className="seller-input" value={editDraft.title}
                                 onChange={e => setEditDraft(d => ({ ...d, title: e.target.value }))} />
                             </div>
                             <div>
-                              <label className="seller-label">Precio *</label>
+                              <label className="seller-label">{tb('price2')}</label>
                               <input className="seller-input" type="number" value={editDraft.price}
                                 onChange={e => setEditDraft(d => ({ ...d, price: e.target.value }))} />
                             </div>
@@ -485,39 +487,39 @@ export default function SellerProducts() {
                                 onChange={e => setEditDraft(d => ({ ...d, stock: e.target.value }))} />
                             </div>
                             <div>
-                              <label className="seller-label">Categoría</label>
+                              <label className="seller-label">{tb('category')}</label>
                               <input className="seller-input" value={editDraft.category}
                                 onChange={e => setEditDraft(d => ({ ...d, category: e.target.value }))} />
                             </div>
                             <div>
-                              <label className="seller-label">Estado</label>
+                              <label className="seller-label">{tb('statusLabel')}</label>
                               <select className="seller-input" value={editDraft.status}
                                 onChange={e => setEditDraft(d => ({ ...d, status: e.target.value as Status }))}>
-                                <option value="active">Activo</option>
-                                <option value="paused">Pausado</option>
-                                <option value="archived">Archivado</option>
+                                <option value="active">{tb('status.active')}</option>
+                                <option value="paused">{tb('status.paused')}</option>
+                                <option value="archived">{tb('status.archived')}</option>
                               </select>
                             </div>
                             <div>
                               <ImageUpload
                                 value={editDraft.image}
                                 onChange={url => setEditDraft(d => ({ ...d, image: url }))}
-                                label="Imagen del producto"
+                                label={tb('productImage')}
                               />
                             </div>
                             <div>
-                              <label className="seller-label">Tallas (separadas por coma)</label>
+                              <label className="seller-label">{tb('sizesCommaSeparated')}</label>
                               <input className="seller-input" placeholder="S, M, L, XL" value={editDraft.sizes}
                                 onChange={e => setEditDraft(d => ({ ...d, sizes: e.target.value }))} />
                             </div>
                             <div>
-                              <label className="seller-label">Colores (separados por coma)</label>
-                              <input className="seller-input" placeholder="Negro, Blanco, Arena" value={editDraft.colors}
+                              <label className="seller-label">{tb('colorsCommaSeparated')}</label>
+                              <input className="seller-input" placeholder={tb('blackWhiteSand')} value={editDraft.colors}
                                 onChange={e => setEditDraft(d => ({ ...d, colors: e.target.value }))} />
                             </div>
                             <div>
-                              <label className="seller-label">Proveedor</label>
-                              <input className="seller-input" placeholder="ej. Havaianas, Makay, Tarbay" value={editDraft.provider}
+                              <label className="seller-label">{tb('supplier')}</label>
+                              <input className="seller-input" placeholder={tb('eGHavaianasMakayTarbay')} value={editDraft.provider}
                                 onChange={e => setEditDraft(d => ({ ...d, provider: e.target.value }))} />
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.6rem 0', gridColumn: 'span 2' }}>
@@ -527,27 +529,27 @@ export default function SellerProducts() {
                                   checked={editDraft.markup_percent}
                                   onChange={e => setEditDraft(d => ({ ...d, markup_percent: e.target.checked }))}
                                 />
-                                Agregar 10% al precio
+                                {tb('add10ToThePrice')}
                               </label>
                             </div>
                             <div>
-                              <label className="seller-label">Monto adicional fijo ($)</label>
+                              <label className="seller-label">{tb('fixedExtraAmount')}</label>
                               <input className="seller-input" type="number" min="0" step="0.01" placeholder="0.00"
                                 value={editDraft.markup_amount}
                                 onChange={e => setEditDraft(d => ({ ...d, markup_amount: e.target.value }))} />
                             </div>
                           </div>
                           <div>
-                            <label className="seller-label">Descripción</label>
+                            <label className="seller-label">{tb('description')}</label>
                             <textarea className="seller-textarea sm" rows={2} value={editDraft.description}
                               onChange={e => setEditDraft(d => ({ ...d, description: e.target.value }))} />
                           </div>
                           <div className="seller-form-actions">
                             <button className="seller-btn-primary" onClick={saveEdit} disabled={saving}>
-                              <Check size={14} /> {saving ? 'Guardando…' : 'Guardar cambios'}
+                              <Check size={14} /> {saving ? tb('saving') : tb('saveChanges')}
                             </button>
                             <button className="seller-btn-ghost" onClick={() => setEditing(null)}>
-                              <X size={14} /> Cancelar
+                              <X size={14} /> {tb('cancel')}
                             </button>
                           </div>
                         </div>
@@ -568,7 +570,7 @@ export default function SellerProducts() {
           <div style={{ background: '#fff', borderRadius: 18, width: '100%', maxWidth: 440, padding: '1.75rem', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
               <h3 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.15rem', fontWeight: 700, margin: 0, color: 'var(--makay-dark-navy)' }}>
-                Reportar daño / pérdida
+                {tb('reportDamageLoss')}
               </h3>
               <button onClick={() => setDamageTarget(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--makay-mauve)' }}><X size={18} /></button>
             </div>
@@ -577,22 +579,22 @@ export default function SellerProducts() {
             </p>
 
             {[
-              { label: 'Tipo', content: (
+              { label: tb('type'), content: (
                 <select className="seller-input" value={damageForm.type} onChange={e => setDamageForm(f => ({ ...f, type: e.target.value }))}>
-                  <option value="damaged">Dañado</option>
-                  <option value="lost">Perdido</option>
+                  <option value="damaged">{tb('damaged')}</option>
+                  <option value="lost">{tb('lost')}</option>
                 </select>
               )},
-              { label: 'Cantidad', content: (
+              { label: tb('quantity'), content: (
                 <input className="seller-input" type="number" min="1" value={damageForm.quantity}
                   onChange={e => setDamageForm(f => ({ ...f, quantity: e.target.value }))} />
               )},
-              { label: 'Descripción', content: (
+              { label: tb('description'), content: (
                 <textarea className="seller-textarea sm" rows={2} placeholder="¿Qué ocurrió?" value={damageForm.description}
                   onChange={e => setDamageForm(f => ({ ...f, description: e.target.value }))} />
               )},
-              { label: 'Destino / paradero', content: (
-                <input className="seller-input" placeholder="Dónde fue / qué pasó con el producto" value={damageForm.destination}
+              { label: tb('destinationWhereabouts'), content: (
+                <input className="seller-input" placeholder={tb('whereItWentWhatHappened')} value={damageForm.destination}
                   onChange={e => setDamageForm(f => ({ ...f, destination: e.target.value }))} />
               )},
             ].map(({ label, content }) => (
@@ -604,9 +606,9 @@ export default function SellerProducts() {
 
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.25rem' }}>
               <button className="seller-btn-primary" onClick={submitDamageReport} disabled={damageSubmitting} style={{ flex: 1 }}>
-                {damageSubmitting ? 'Enviando…' : 'Enviar reporte'}
+                {damageSubmitting ? tb('sending') : tb('sendReport')}
               </button>
-              <button className="seller-btn-ghost" onClick={() => setDamageTarget(null)}>Cancelar</button>
+              <button className="seller-btn-ghost" onClick={() => setDamageTarget(null)}>{tb('cancel')}</button>
             </div>
           </div>
         </div>
