@@ -15,12 +15,7 @@ interface Props {
   product: Product;
 }
 
-const MEMBERSHIP_MONTHLY: Record<string, number> = {
-  'membership-bronze': 50,
-  'membership-silver': 100,
-  'membership-gold':   150,
-};
-const DURATION_MONTHS: Record<string, number> = { trimestral: 3, semestral: 6, anual: 12 };
+import { MEMBERSHIP_MONTHLY, MEMBERSHIP_DURATION_MONTHS as DURATION_MONTHS } from '@/lib/pricing';
 const DURATION_LABELS: Record<string, string> = { trimestral: '3 meses', semestral: '6 meses', anual: '1 año' };
 
 export default function ProductDetail({ product }: Props) {

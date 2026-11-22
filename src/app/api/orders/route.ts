@@ -6,6 +6,7 @@ import {
   parseJsonArray, type CheckoutMethod,
 } from '@/lib/payments';
 import { STORE_LOCATION } from '@/lib/location';
+import { priceCart, PricingError, type IncomingItem, type PricedCart } from '@/lib/orderPricing';
 
 // GET — customer's own orders
 export async function GET() {
@@ -50,14 +51,29 @@ export async function POST(req: NextRequest) {
     body = await req.json();
   }
 
-  const { items, subtotal, shipping_cost, total, shipping_address, shipping_method, customer_email } = body as {
-    items?: unknown[]; subtotal?: number; shipping_cost?: number; total?: number;
+  const { items, total, shipping_address, shipping_method, customer_email } = body as {
+    items?: unknown[]; total?: number;
     shipping_address?: Record<string, unknown>; shipping_method?: string; customer_email?: string;
   };
   const payments = parseJsonArray<IncomingPayment>(body.payment_methods);
 
   if (!Array.isArray(items) || items.length === 0 || total === undefined || !(Number(total) > 0)) {
     return NextResponse.json({ error: 'items and total required' }, { status: 400 });
+  }
+
+  // ── Recompute the cart from the database; never trust client prices ──
+  let cart: PricedCart;
+  try {
+    cart = await priceCart(items as IncomingItem[], String(shipping_method ?? 'standard'));
+  } catch (e) {
+    if (e instanceof PricingError) return NextResponse.json({ error: e.message }, { status: 400 });
+    throw e;
+  }
+  if (Math.abs(cart.total - Number(total)) > 0.02) {
+    return NextResponse.json(
+      { error: 'Los precios cambiaron. Actualiza tu carrito e intenta de nuevo.', total: cart.total },
+      { status: 409 },
+    );
   }
 
   // ── Validate payment methods ──
@@ -79,7 +95,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Tarjeta y Binance Pay no se pueden combinar con otro método' }, { status: 400 });
   }
   const paidSum = payments.reduce((s, p) => s + Number(p.amount), 0);
-  if (Math.abs(paidSum - Number(total)) > 0.02) {
+  if (Math.abs(paidSum - cart.total) > 0.02) {
     return NextResponse.json({ error: 'La suma de los pagos no coincide con el total' }, { status: 400 });
   }
 
@@ -137,7 +153,7 @@ export async function POST(req: NextRequest) {
          payment_status, locale, location)
       VALUES
         (${id}, ${userId ?? null}, ${customer_email ?? null},
-         ${JSON.stringify(items)}, ${subtotal ?? 0}, ${shipping_cost ?? 0}, ${Number(total)},
+         ${JSON.stringify(cart.items)}, ${cart.subtotal}, ${cart.shippingCost}, ${cart.total},
          ${JSON.stringify(shipping_address ?? {})}, ${shipping_method ?? 'standard'},
          ${null}, ${JSON.stringify(storedPayments)}, 'pending',
          ${paymentStatus}, ${locale}, ${STORE_LOCATION})

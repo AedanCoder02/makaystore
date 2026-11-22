@@ -2,16 +2,9 @@
 
 import { useTranslations } from 'next-intl';
 
-export interface ShippingMethod {
-  id: 'standard' | 'express' | 'overnight';
-  cost: number;
-}
+import { SHIPPING_OPTIONS, getShippingCost } from '@/lib/pricing';
 
-const SHIPPING_OPTIONS: ShippingMethod[] = [
-  { id: 'standard', cost: 5 },
-  { id: 'express', cost: 15 },
-  { id: 'overnight', cost: 30 },
-];
+export { getShippingCost };
 
 interface Props {
   selected: string;
@@ -44,8 +37,4 @@ export default function ShippingMethodSelector({ selected, onChange }: Props) {
       </div>
     </div>
   );
-}
-
-export function getShippingCost(method: string): number {
-  return SHIPPING_OPTIONS.find((o) => o.id === method)?.cost || 0;
 }
