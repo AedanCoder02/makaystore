@@ -3,7 +3,11 @@
  */
 // next/server needs the Fetch API globals (Request/Response/Headers), which
 // jsdom (this project's default test environment) doesn't provide.
-jest.mock('@clerk/nextjs/server', () => ({ auth: jest.fn() }));
+// requireAccess('staff') reads the caller's role from currentUser().
+jest.mock('@clerk/nextjs/server', () => ({
+  auth: jest.fn(),
+  currentUser: jest.fn(() => Promise.resolve({ publicMetadata: { role: 'seller' } })),
+}));
 const mockRows = [{ id: 1 }];
 const mockSql: any = jest.fn(() => Promise.resolve(mockRows));
 jest.mock('@/lib/db', () => ({ __esModule: true, default: mockSql }));

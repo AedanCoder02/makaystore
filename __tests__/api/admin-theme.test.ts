@@ -5,6 +5,7 @@
 // jsdom (this project's default test environment) doesn't provide.
 jest.mock('@clerk/nextjs/server', () => ({ auth: jest.fn(), currentUser: jest.fn() }));
 const mockSql: any = jest.fn(() => Promise.resolve([]));
+mockSql.array = jest.fn((v: unknown) => v); // sql.array() for the keys-to-remove list
 jest.mock('@/lib/db', () => ({ __esModule: true, default: mockSql }));
 
 import { auth, currentUser } from '@clerk/nextjs/server';
