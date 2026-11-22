@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useEffect, useState, useRef } from 'react';
 import { useUser } from '@clerk/nextjs';
@@ -26,6 +27,7 @@ const DEFAULT_CONFIG: StoreConfig = {
 };
 
 export default function AdminProfile() {
+  const tp = useTranslations('staffProfile');
   const { user, isLoaded } = useUser();
   const [stats, setStats] = useState<AdminStats>({ totalProducts: 0, ordersThisMonth: 0, totalRevenue: 0, pendingOrders: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
@@ -109,7 +111,7 @@ export default function AdminProfile() {
     ? new Date(user.createdAt).toLocaleDateString([], { month: 'long', year: 'numeric' })
     : '—';
 
-  if (!isLoaded) return <div className="profile-loading">Loading…</div>;
+  if (!isLoaded) return <div className="profile-loading">{tp('loading')}</div>;
 
   return (
     <div className="profile-page">
@@ -123,7 +125,7 @@ export default function AdminProfile() {
           <button
             onClick={() => avatarInputRef.current?.click()}
             disabled={avatarUploading}
-            title="Change profile picture"
+            title={tp('changeProfilePicture')}
             style={{
               position: 'absolute', bottom: 0, right: 0,
               width: 28, height: 28, borderRadius: '50%',
@@ -161,12 +163,12 @@ export default function AdminProfile() {
           ) : (
             <div className="profile-name-row">
               <h1 className="profile-name">{user?.fullName ?? user?.firstName ?? 'Admin'}</h1>
-              <button className="profile-edit-btn" onClick={() => setEditingName(true)} title="Edit name">
+              <button className="profile-edit-btn" onClick={() => setEditingName(true)} title={tp('editName')}>
                 <Pencil size={13} />
               </button>
             </div>
           )}
-          <span className="profile-role-badge" style={{ background: '#7C3AED' }}>Administrator</span>
+          <span className="profile-role-badge" style={{ background: '#7C3AED' }}>{tp('administrator')}</span>
           <p className="profile-member-since">Member since {memberSince}</p>
           <p className="profile-email">{user?.primaryEmailAddress?.emailAddress}</p>
         </div>
@@ -174,45 +176,45 @@ export default function AdminProfile() {
 
       {/* ── System Health ── */}
       <section className="profile-section">
-        <h2 className="profile-section-title"><BarChart2 size={18} /> System Health</h2>
+        <h2 className="profile-section-title"><BarChart2 size={18} /> {tp('systemHealth')}</h2>
         <div className="profile-stats-grid">
           <div className="profile-stat-card">
             <p className="profile-stat-value">{statsLoading ? '…' : stats.totalProducts}</p>
-            <p className="profile-stat-label">Products in DB</p>
+            <p className="profile-stat-label">{tp('productsInDb')}</p>
           </div>
           <div className="profile-stat-card">
             <p className="profile-stat-value">{statsLoading ? '…' : stats.ordersThisMonth}</p>
-            <p className="profile-stat-label">Orders This Month</p>
+            <p className="profile-stat-label">{tp('ordersThisMonth')}</p>
           </div>
           <div className="profile-stat-card">
             <p className="profile-stat-value">{statsLoading ? '…' : `$${stats.totalRevenue.toFixed(0)}`}</p>
-            <p className="profile-stat-label">Monthly Revenue</p>
+            <p className="profile-stat-label">{tp('monthlyRevenue')}</p>
           </div>
           <div className={`profile-stat-card${stats.pendingOrders > 0 ? ' profile-stat-alert' : ''}`}>
             <p className="profile-stat-value">{statsLoading ? '…' : stats.pendingOrders}</p>
-            <p className="profile-stat-label">Pending Orders</p>
+            <p className="profile-stat-label">{tp('pendingOrders')}</p>
           </div>
         </div>
       </section>
 
       {/* ── Access Level ── */}
       <section className="profile-section">
-        <h2 className="profile-section-title"><Users size={18} /> Access Level</h2>
+        <h2 className="profile-section-title"><Users size={18} /> {tp('accessLevel')}</h2>
         <div className="profile-permissions">
-          <p className="profile-permission allow">Full store access — all panels</p>
-          <p className="profile-permission allow">Can view, edit, and delete all data</p>
-          <p className="profile-permission allow">Can change user roles</p>
-          <p className="profile-permission allow">Can publish storefront and studio changes</p>
-          <p className="profile-permission allow">Can access financial reports</p>
+          <p className="profile-permission allow">{tp('fullAccessToEveryPanel')}</p>
+          <p className="profile-permission allow">{tp('canViewEditAndDelete')}</p>
+          <p className="profile-permission allow">{tp('canChangeUserRoles')}</p>
+          <p className="profile-permission allow">{tp('canPublishSiteAndStudio')}</p>
+          <p className="profile-permission allow">{tp('canAccessFinancialReports')}</p>
         </div>
       </section>
 
       {/* ── Configuration ── */}
       <section className="profile-section">
-        <h2 className="profile-section-title"><Settings size={18} /> Configuration</h2>
+        <h2 className="profile-section-title"><Settings size={18} /> {tp('configuration')}</h2>
         <div className="profile-config-form">
           <div className="profile-config-row">
-            <label className="profile-config-label">Store Name</label>
+            <label className="profile-config-label">{tp('storeName')}</label>
             <input
               className="profile-config-input"
               value={configDraft.storeName}
@@ -220,7 +222,7 @@ export default function AdminProfile() {
             />
           </div>
           <div className="profile-config-row">
-            <label className="profile-config-label">Contact Email</label>
+            <label className="profile-config-label">{tp('contactEmail')}</label>
             <input
               className="profile-config-input"
               type="email"
@@ -229,7 +231,7 @@ export default function AdminProfile() {
             />
           </div>
           <div className="profile-config-row">
-            <label className="profile-config-label">Low Stock Alert (units)</label>
+            <label className="profile-config-label">{tp('lowStockAlertUnits')}</label>
             <input
               className="profile-config-input profile-config-input--short"
               type="number"
@@ -240,28 +242,28 @@ export default function AdminProfile() {
           </div>
           <div className="profile-config-actions">
             <button className="profile-save-config-btn" onClick={saveConfig} disabled={configSaving}>
-              {configSaving ? 'Saving…' : configSaved ? '✓ Saved' : 'Save Settings'}
+              {configSaving ? tp('saving') : configSaved ? tp('saved') : tp('saveSettings')}
             </button>
-            <a href="/user" className="profile-clerk-link">Change Password →</a>
+            <a href="/user" className="profile-clerk-link">{tp('changePassword')}</a>
           </div>
         </div>
       </section>
 
       {/* ── Quick Links ── */}
       <section className="profile-section">
-        <h2 className="profile-section-title">Quick Links</h2>
+        <h2 className="profile-section-title">{tp('quickLinks')}</h2>
         <div className="profile-quick-links">
           <Link href="/admin/dashboard" className="profile-quick-link">
-            <LayoutDashboard size={16} /> Admin Dashboard
+            <LayoutDashboard size={16} /> {tp('adminDashboard')}
           </Link>
           <Link href="/admin/reports" className="profile-quick-link">
-            <BarChart2 size={16} /> Reports
+            <BarChart2 size={16} /> {tp('reports')}
           </Link>
           <Link href="/admin/orders" className="profile-quick-link">
-            <ShoppingBag size={16} /> Orders
+            <ShoppingBag size={16} /> {tp('orders')}
           </Link>
           <Link href="/seller/studio" className="profile-quick-link">
-            <Wand2 size={16} /> Studio
+            <Wand2 size={16} /> {tp('studio')}
           </Link>
         </div>
       </section>
