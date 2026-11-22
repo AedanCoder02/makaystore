@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useEffect, useState } from 'react';
 import { Calendar, MapPin, Users, ExternalLink } from 'lucide-react';
@@ -18,6 +19,7 @@ interface Event {
 }
 
 export default function SellerEventsList() {
+  const te = useTranslations('eventsUi');
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -32,20 +34,20 @@ export default function SellerEventsList() {
     <div className="seller-page">
       <div className="seller-page-header">
         <div>
-          <h1 className="seller-page-title">Upcoming Events</h1>
-          <p className="seller-page-sub">Share these events with your clients to drive engagement.</p>
+          <h1 className="seller-page-title">{te('upcomingEvents')}</h1>
+          <p className="seller-page-sub">{te('shareTheseEventsWithYour')}</p>
         </div>
         <Link href="/membership" target="_blank" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.65rem 1.25rem', background: 'var(--makay-sand-cream)', borderRadius: '10px', fontFamily: 'var(--font-montserrat)', fontSize: '0.82rem', color: 'var(--makay-dark-navy)', textDecoration: 'none', fontWeight: 600 }}>
-          <ExternalLink size={14} /> Customer View
+          <ExternalLink size={14} /> {te('customerView')}
         </Link>
       </div>
 
       {loading ? (
-        <p style={{ fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)' }}>Loading…</p>
+        <p style={{ fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)' }}>{te('loading')}</p>
       ) : events.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)' }}>
           <Calendar size={40} style={{ margin: '0 auto 1rem', color: 'var(--makay-sand-cream)', display: 'block' }} />
-          <p>No events scheduled yet. Admins create events in the admin panel.</p>
+          <p>{te('noEventsScheduledYetAdmins')}</p>
         </div>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
@@ -73,12 +75,12 @@ export default function SellerEventsList() {
                       </span>
                     )}
                     <span style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: soldOut ? '#ef4444' : '#10b981', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                      <Users size={11} /> {soldOut ? 'Sold out' : `${remaining} spots left`}
+                      <Users size={11} /> {soldOut ? te('soldOut') : te('spotsLeft', { count: remaining })}
                     </span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                     <span style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--makay-peachy-rose)' }}>
-                      {Number(ev.price) === 0 ? 'Free' : `$${Number(ev.price).toFixed(2)}`}
+                      {Number(ev.price) === 0 ? te('free') : `$${Number(ev.price).toFixed(2)}`}
                     </span>
                     {!soldOut && (
                       <Link href={`/events/${ev.id}`} target="_blank" style={{ fontSize: '0.75rem', fontFamily: 'var(--font-montserrat)', fontWeight: 600, color: 'var(--makay-dark-navy)', textDecoration: 'underline' }}>

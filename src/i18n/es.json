@@ -2280,5 +2280,33 @@
     "dashboard": "Panel",
     "products": "Productos",
     "myActivity": "Mi actividad"
+  },
+  "eventsUi": {
+    "free": "Gratis",
+    "soldOut": "Agotado",
+    "left": "Quedan {count}",
+    "getTickets": "Comprar entradas",
+    "spotsLeft": "{count, plural, one {Queda # cupo} other {Quedan # cupos}}",
+    "browseEvents": "Ver eventos",
+    "loadingEvents": "Cargando eventos...",
+    "noEventsScheduledYet": "Aún no hay eventos programados.",
+    "checkBackSoonForUpcoming": "Vuelve pronto para ver los próximos eventos del club.",
+    "upcomingEvents": "Próximos eventos",
+    "shareTheseEventsWithYour": "Comparte estos eventos con tus clientes.",
+    "customerView": "Vista del cliente",
+    "loading": "Cargando...",
+    "noEventsScheduledYetAdmins": "Aún no hay eventos. Los administradores los crean en el panel de administración."
+  },
+  "uploads": {
+    "theFileIsOver8": "El archivo supera los 8 MB. Pega una URL en su lugar (Cloudinary, S3, CDN...).",
+    "uploadFailed": "No se pudo subir",
+    "changeUrl": "Cambiar URL",
+    "upload": "Subir",
+    "pasteVideoUrl": "Pegar URL del video",
+    "uploading": "Subiendo...",
+    "uploadFileMax8Mb": "Subir archivo (máx. 8 MB)",
+    "max10Mb": "Máximo 10 MB",
+    "change": "Cambiar",
+    "uploadImage": "Subir imagen"
   }
 }

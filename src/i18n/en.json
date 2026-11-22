@@ -2280,5 +2280,33 @@
     "dashboard": "Dashboard",
     "products": "Products",
     "myActivity": "My activity"
+  },
+  "eventsUi": {
+    "free": "Free",
+    "soldOut": "Sold out",
+    "left": "{count} left",
+    "getTickets": "Get tickets",
+    "spotsLeft": "{count, plural, one {# spot left} other {# spots left}}",
+    "browseEvents": "Browse events",
+    "loadingEvents": "Loading events...",
+    "noEventsScheduledYet": "No events scheduled yet.",
+    "checkBackSoonForUpcoming": "Check back soon for upcoming beach club events.",
+    "upcomingEvents": "Upcoming events",
+    "shareTheseEventsWithYour": "Share these events with your clients.",
+    "customerView": "Customer view",
+    "loading": "Loading...",
+    "noEventsScheduledYetAdmins": "No events scheduled yet. Admins create events in the admin panel."
+  },
+  "uploads": {
+    "theFileIsOver8": "The file is over 8 MB. Paste a URL instead (Cloudinary, S3, CDN...).",
+    "uploadFailed": "Upload failed",
+    "changeUrl": "Change URL",
+    "upload": "Upload",
+    "pasteVideoUrl": "Paste video URL",
+    "uploading": "Uploading...",
+    "uploadFileMax8Mb": "Upload file (max 8 MB)",
+    "max10Mb": "Max 10 MB",
+    "change": "Change",
+    "uploadImage": "Upload image"
   }
 }

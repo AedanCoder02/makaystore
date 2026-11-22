@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useRef, useState } from 'react';
 import { Upload, X, Loader, Video, Link } from 'lucide-react';
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function MediaUpload({ value, onChange, label = 'Video' }: Props) {
+  const tu = useTranslations('uploads');
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError]         = useState('');
@@ -20,7 +22,7 @@ export default function MediaUpload({ value, onChange, label = 'Video' }: Props)
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 8 * 1024 * 1024) {
-      setError('File exceeds 8 MB limit. Paste a URL instead (Cloudinary, S3, CDN…).');
+      setError(tu('theFileIsOver8'));
       if (inputRef.current) inputRef.current.value = '';
       return;
     }
@@ -31,10 +33,10 @@ export default function MediaUpload({ value, onChange, label = 'Video' }: Props)
       const res = await fetch('/api/admin/upload-image', { method: 'POST', body: fd });
       let data: Record<string, string> = {};
       try { data = await res.json(); } catch {}
-      if (!res.ok) throw new Error(data.error || `Upload failed (${res.status})`);
+      if (!res.ok) throw new Error(data.error || `${tu('uploadFailed')} (${res.status})`);
       onChange(data.url);
     } catch (err: any) {
-      setError(err.message || 'Upload failed');
+      setError(err.message || tu('uploadFailed'));
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -66,12 +68,12 @@ export default function MediaUpload({ value, onChange, label = 'Video' }: Props)
             <button type="button" onClick={() => setShowUrlInput(true)}
               style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, background: 'transparent', border: 'none', cursor: 'pointer' }}>
               <Link size={10} color="#fff" />
-              <span style={{ fontSize: '0.6rem', color: '#fff', fontFamily: 'var(--font-montserrat)' }}>Change URL</span>
+              <span style={{ fontSize: '0.6rem', color: '#fff', fontFamily: 'var(--font-montserrat)' }}>{tu('changeUrl')}</span>
             </button>
             <button type="button" onClick={() => inputRef.current?.click()} disabled={uploading}
               style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, background: 'transparent', border: 'none', cursor: 'pointer' }}>
               {uploading ? <Loader size={10} color="#fff" className="studio-spin" /> : <Upload size={10} color="#fff" />}
-              <span style={{ fontSize: '0.6rem', color: '#fff', fontFamily: 'var(--font-montserrat)' }}>Upload</span>
+              <span style={{ fontSize: '0.6rem', color: '#fff', fontFamily: 'var(--font-montserrat)' }}>{tu('upload')}</span>
             </button>
             <button type="button" onClick={() => onChange('')}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'transparent', border: 'none', cursor: 'pointer', padding: '0 0.3rem' }}>
@@ -118,7 +120,7 @@ export default function MediaUpload({ value, onChange, label = 'Video' }: Props)
                 fontFamily: 'var(--font-montserrat)', fontSize: '0.8rem',
                 color: 'var(--makay-peachy-rose)', cursor: 'pointer', width: '100%',
               }}>
-              <Link size={14} /> Paste video URL
+              <Link size={14} /> {tu('pasteVideoUrl')}
             </button>
           )}
 
@@ -133,8 +135,8 @@ export default function MediaUpload({ value, onChange, label = 'Video' }: Props)
               color: 'var(--makay-mauve)', cursor: uploading ? 'wait' : 'pointer', width: '100%',
             }}>
             {uploading
-              ? <><Loader size={13} className="studio-spin" /> Uploading…</>
-              : <><Upload size={13} /> Upload file (max 8 MB)</>}
+              ? <><Loader size={13} className="studio-spin" /> {tu('uploading')}</>
+              : <><Upload size={13} /> {tu('uploadFileMax8Mb')}</>}
           </button>
         </div>
       )}
