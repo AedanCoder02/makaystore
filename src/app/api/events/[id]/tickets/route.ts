@@ -1,9 +1,12 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
 
 // GET — attendees list (admin only, not enforced here — keep simple)
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const gate = await requireAccess('supervisor');
+  if (gate instanceof NextResponse) return gate;
   const { id } = await params;
   const rows = await sql`
     SELECT * FROM event_tickets WHERE event_id = ${Number(id)} ORDER BY purchased_at DESC
@@ -27,13 +30,22 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
   const sold = await sql`SELECT COALESCE(SUM(quantity),0)::int AS total FROM event_tickets WHERE event_id = ${Number(id)}`;
   const remaining = event[0].capacity - sold[0].total;
-  if (quantity > remaining) return NextResponse.json({ error: `Only ${remaining} tickets remaining` }, { status: 409 });
+  if (Number(quantity) > remaining) return NextResponse.json({ error: `Only ${remaining} tickets remaining` }, { status: 409 });
 
-  const total_paid = Number(event[0].price) * quantity;
+  // Paid tickets go through checkout (cart item "event-<id>") so they are paid
+  // and verified before a ticket is issued. This endpoint only books free events.
+  if (Number(event[0].price) > 0) {
+    return NextResponse.json({ error: 'Paid events are booked through checkout' }, { status: 400 });
+  }
+  if (event[0].status !== 'active') return NextResponse.json({ error: 'Event not available' }, { status: 409 });
+  const qty = Math.floor(Number(quantity));
+  if (!(qty >= 1 && qty <= 10)) return NextResponse.json({ error: 'Invalid quantity' }, { status: 400 });
+
+  const total_paid = 0;
 
   const row = await sql`
     INSERT INTO event_tickets (event_id, customer_id, customer_name, customer_email, quantity, total_paid)
-    VALUES (${Number(id)}, ${userId ?? null}, ${customer_name}, ${customer_email}, ${quantity}, ${total_paid})
+    VALUES (${Number(id)}, ${userId ?? null}, ${customer_name}, ${customer_email}, ${qty}, ${total_paid})
     RETURNING *
   `;
   return NextResponse.json(row[0], { status: 201 });

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, Component, ReactNode } from 'react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useTutorialStore } from '@/stores/tutorialStore';
 import { useTutorialOverlay } from '@/hooks/useTutorialOverlay';
@@ -14,19 +15,19 @@ import RotationReport from './RotationReport';
 
 export type DateRange = '7d' | '30d' | '3m' | 'all';
 
-class ReportErrorBoundary extends Component<{ children: ReactNode }, { error: boolean }> {
+class ReportErrorBoundary extends Component<{ children: ReactNode; labels: { error: string; retry: string } }, { error: boolean }> {
   state = { error: false };
   static getDerivedStateFromError() { return { error: true }; }
   render() {
     if (this.state.error) {
       return (
         <div style={{ padding: '2rem', color: 'var(--makay-mauve)', textAlign: 'center' }}>
-          <p style={{ marginBottom: '0.75rem', fontWeight: 600 }}>This report ran into an issue.</p>
+          <p style={{ marginBottom: '0.75rem', fontWeight: 600 }}>{this.props.labels.error}</p>
           <button
             style={{ fontSize: '0.8rem', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--makay-peachy-rose)' }}
             onClick={() => this.setState({ error: false })}
           >
-            Try again
+            {this.props.labels.retry}
           </button>
         </div>
       );
@@ -44,13 +45,6 @@ function renderReport(activeTab: ReportTab, dateRange: DateRange) {
     case 'rotation': return <RotationReport dateRange={dateRange} />;
   }
 }
-
-const DATE_RANGE_LABELS: Record<DateRange, string> = {
-  '7d':  'Last 7 days',
-  '30d': 'Last 30 days',
-  '3m':  'Last 3 months',
-  'all': 'All time',
-};
 
 export default function AdminReportsDashboard() {
   const { activeTab, setActiveTab } = useReportsStore();
@@ -83,16 +77,19 @@ export default function AdminReportsDashboard() {
           <h1>{t('analytics')}</h1>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div className="reports-date-range">
-              {(Object.keys(DATE_RANGE_LABELS) as DateRange[]).map((r) => (
+              {(['7d', '30d', '3m', 'all'] as DateRange[]).map((r) => (
                 <button
                   key={r}
                   className={`date-range-btn${dateRange === r ? ' active' : ''}`}
                   onClick={() => setDateRange(r)}
                 >
-                  {DATE_RANGE_LABELS[r]}
+                  {t(`ranges.${r}`)}
                 </button>
               ))}
             </div>
+            <Link className="date-range-btn" href="/supervisor/reports" title={t('supervisorViewHint')}>
+              {t('supervisorView')}
+            </Link>
             <button
               className="help-button"
               onClick={() => tutorialStore.showTutorial('reports-tour')}
@@ -118,7 +115,7 @@ export default function AdminReportsDashboard() {
         </div>
 
         <div className="report-content">
-          <ReportErrorBoundary key={activeTab}>
+          <ReportErrorBoundary key={activeTab} labels={{ error: t('reportError'), retry: t('retry') }}>
             {renderReport(activeTab, dateRange)}
           </ReportErrorBoundary>
         </div>

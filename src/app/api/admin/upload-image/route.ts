@@ -1,8 +1,11 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { fal } from '@fal-ai/client';
 
 export async function POST(req: NextRequest) {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

@@ -1,3 +1,4 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { getPredictionStatus } from '@/lib/services/productGeneration';
 
@@ -5,6 +6,8 @@ export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ requestId: string }> }
 ) {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   try {
     const { requestId } = await params;
     const result = await getPredictionStatus(requestId);

@@ -23,9 +23,10 @@ export async function GET() {
 
   await ensureTable();
 
-  const [clerkResult, walkIns] = await Promise.all([
+  const [clerkResult, walkIns, unifiedContacts] = await Promise.all([
     clerkClient().then(c => c.users.getUserList({ limit: 200, orderBy: '-created_at' })).catch(() => ({ data: [] })),
     sql`SELECT id, name, email, phone FROM walk_in_clients ORDER BY created_at DESC LIMIT 200`.catch(() => [] as unknown[]),
+    sql`SELECT id, full_name, email, sources FROM contacts ORDER BY full_name LIMIT 500`.catch(() => [] as unknown[]),
   ]);
 
   const clerkCustomers = ((clerkResult as { data: unknown[] }).data ?? [])
@@ -59,7 +60,16 @@ export async function GET() {
     isWalkIn: true,
   }));
 
-  return NextResponse.json([...clerkCustomers, ...walkInCustomers]);
+  const contactCustomers = (unifiedContacts as { id: number; full_name: string; email: string | null; sources: string[] }[]).map(c => ({
+    id: 'contact_' + c.id,
+    name: c.full_name,
+    email: c.email ?? '',
+    imageUrl: '',
+    isWalkIn: true,
+    source: c.sources[0],
+  }));
+
+  return NextResponse.json([...clerkCustomers, ...walkInCustomers, ...contactCustomers]);
 }
 
 export async function POST(req: NextRequest) {

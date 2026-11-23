@@ -1,6 +1,9 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location.server';
+import { getReportSettings, setReportSetting } from '@/lib/reportSettings';
 
 function rangeExpr(range: string) {
   switch (range) {
@@ -12,48 +15,43 @@ function rangeExpr(range: string) {
 }
 
 export async function GET(req: NextRequest) {
+  const gate = await requireAccess('admin');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const location = await getPanelLocation();
   const range  = req.nextUrl.searchParams.get('range') ?? '30d';
   const cutoff = rangeExpr(range);
 
   try {
-    await sql`
-      CREATE TABLE IF NOT EXISTS theme_settings (
-        key TEXT PRIMARY KEY,
-        value TEXT NOT NULL,
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-      )
-    `;
-
-    const [sellerRev, storefrontRev, costRows, trend] = await Promise.all([
+    const [sellerRev, storefrontRev, settings, trend] = await Promise.all([
       sql`
         SELECT COALESCE(SUM(subtotal::numeric), 0) AS revenue
         FROM seller_orders
-        WHERE created_at >= ${cutoff}
+        WHERE created_at >= ${cutoff} AND location = ${location}
       `.catch(() => [{ revenue: 0 }]),
 
       sql`
         SELECT COALESCE(SUM(total::numeric), 0) AS revenue
         FROM orders
-        WHERE created_at >= ${cutoff}
+        WHERE created_at >= ${cutoff} AND location = ${location}
       `.catch(() => [{ revenue: 0 }]),
 
-      sql`SELECT value FROM theme_settings WHERE key = 'cost_percentage'`.catch(() => []),
+      getReportSettings(),
 
       sql`
         SELECT
           DATE_TRUNC('day', created_at) AS bucket,
           SUM(subtotal::numeric) AS revenue
         FROM seller_orders
-        WHERE created_at >= ${cutoff}
+        WHERE created_at >= ${cutoff} AND location = ${location}
         GROUP BY DATE_TRUNC('day', created_at)
         ORDER BY bucket ASC
       `.catch(() => []),
     ]);
 
-    const costPercent = costRows.length > 0 ? Number(costRows[0].value) : 40;
+    const costPercent = settings.cost_percentage;
     const revenue     = Number(sellerRev[0].revenue) + Number(storefrontRev[0].revenue);
     const totalCost   = revenue * (costPercent / 100);
     const grossMargin = 100 - costPercent;
@@ -73,6 +71,8 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: Request) {
+  const gate = await requireAccess('admin');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -82,11 +82,7 @@ export async function PATCH(req: Request) {
   }
 
   try {
-    await sql`
-      INSERT INTO theme_settings (key, value, updated_at)
-      VALUES ('cost_percentage', ${String(costPercent)}, NOW())
-      ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = NOW()
-    `;
+    await setReportSetting('cost_percentage', costPercent, userId);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to save' }, { status: 500 });

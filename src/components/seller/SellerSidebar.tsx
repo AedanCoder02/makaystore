@@ -5,7 +5,8 @@ import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
-import { LayoutDashboard, Receipt, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, Crown, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Receipt, Package, Boxes, ShoppingBag, Box, Clock, Wand2, RefreshCw, Calendar, Crown, CalendarCheck, PanelLeftClose, PanelLeftOpen, Menu, X } from 'lucide-react';
+import LocationSwitcher from '../LocationSwitcher';
 
 export default function SellerSidebar() {
   const path = usePathname();
@@ -13,7 +14,9 @@ export default function SellerSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useUser();
-  const permissions = (user?.unsafeMetadata?.permissions as string[] | undefined);
+  // publicMetadata, not unsafeMetadata — permissions are admin-granted and
+  // must come from metadata the user's own browser session can't rewrite.
+  const permissions = (user?.publicMetadata?.permissions as string[] | undefined);
 
   useEffect(() => {
     const saved = localStorage.getItem('seller-sidebar-collapsed');
@@ -52,6 +55,7 @@ export default function SellerSidebar() {
     { href: '/seller/studio',             label: t('nav.studio'),    icon: Wand2,           key: 'studio' },
     { href: '/seller/events',             label: t('nav.events'),    icon: Calendar,        key: 'events' },
     { href: '/seller/memberships',        label: t('nav.memberships'), icon: Crown,         key: 'memberships' },
+    { href: '/seller/reservations',       label: t('nav.reservations'), icon: CalendarCheck, key: 'reservations' },
   ];
   const NAV = permissions
     ? ALL_NAV.filter(n => n.key === null || permissions.includes(n.key))
@@ -89,6 +93,7 @@ export default function SellerSidebar() {
           {!collapsed && <span className="seller-sidebar-role">{t('role')}</span>}
           {!collapsed && <span className="seller-sidebar-sub">{t('storeName')}</span>}
         </div>
+        <LocationSwitcher collapsed={collapsed} />
         <nav className="seller-sidebar-nav">
           {NAV.map(({ href, label, icon: Icon }) => (
             <Link
@@ -103,9 +108,24 @@ export default function SellerSidebar() {
           ))}
         </nav>
         {!collapsed && (
-          <Link href="/" className="seller-back-link">
-            <span className="seller-back-link-label">{t('backToStore')}</span>
-          </Link>
+          <div className="seller-sites-links">
+            <Link href="/" className="seller-back-link">
+              <span className="seller-back-link-label">{t('backToStore')}</span>
+            </Link>
+            <div className="seller-sites-row">
+              <Link href="/" className="seller-site-link">
+                {t('viewGuacuco')}
+              </Link>
+              <a
+                href="https://marina.makaybeachclub.com"
+                target="_blank"
+                rel="noreferrer"
+                className="seller-site-link"
+              >
+                {t('viewLaMarina')}
+              </a>
+            </div>
+          </div>
         )}
         <button className="sidebar-toggle" onClick={toggle} title={collapsed ? 'Expandir' : 'Contraer'}>
           {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}

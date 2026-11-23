@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { STORE_LOCATION } from '@/lib/location';
 
 export const revalidate = 60;
 
@@ -19,7 +20,7 @@ export async function GET(
       FROM products p
       LEFT JOIN product_overrides po ON po.product_id = p.id
       LEFT JOIN product_stock ps ON ps.product_id = p.id
-      WHERE p.id = ${id} AND p.status = 'active'
+      WHERE p.id = ${id} AND p.status = 'active' AND p.location = ${STORE_LOCATION}
       GROUP BY p.id, p.title, p.description, p.category, p.variants, p.sku, p.status,
                po.price, po.image_url, po.product_type
       LIMIT 1

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { animate } from 'animejs';
 import Link from 'next/link';
 import '../styles/featured-collection.css';
+import { useSiteContent } from '@/components/providers/SiteContentProvider';
 
 export default function FeaturedCollection() {
   const t = useTranslations('featured');
@@ -19,21 +20,10 @@ export default function FeaturedCollection() {
     '/images/product-event.jpg',
   ];
 
-  const [featuredTitle, setFeaturedTitle]       = useState('');
-  const [featuredSubtitle, setFeaturedSubtitle] = useState('');
+  const { text } = useSiteContent();
 
-  useEffect(() => {
-    fetch('/api/theme')
-      .then(r => r.ok ? r.json() : {})
-      .then((d: Record<string, string>) => {
-        setFeaturedTitle(d['page:home:content:featuredTitle']    || '');
-        setFeaturedSubtitle(d['page:home:content:featuredSubtitle'] || '');
-      })
-      .catch(() => {});
-  }, []);
-
-  const displayTitle    = featuredTitle    || t('title');
-  const displaySubtitle = featuredSubtitle || t('description');
+  const displayTitle    = text('page:home:content:featuredTitle', t('title'));
+  const displaySubtitle = text('page:home:content:featuredSubtitle', t('description'));
 
   useEffect(() => {
     const observer = new IntersectionObserver(

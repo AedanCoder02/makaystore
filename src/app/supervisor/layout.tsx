@@ -8,7 +8,9 @@ export default async function SupervisorLayout({ children }: { children: React.R
 
   const user = await currentUser();
   const role = user?.publicMetadata?.role as string | undefined;
-  if (role !== 'supervisor' && role !== 'admin') redirect('/');
+  const roles = (user?.publicMetadata?.roles as string[] | undefined) ?? [];
+  const hasSupervisor = role === 'supervisor' || role === 'admin' || roles.includes('supervisor') || roles.includes('admin');
+  if (!hasSupervisor) redirect('/');
 
   return (
     <div className="supervisor-layout">

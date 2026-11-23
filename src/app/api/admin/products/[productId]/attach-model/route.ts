@@ -1,3 +1,4 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -12,6 +13,8 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ productId: string }> }
 ) {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   try {
     const { glbUrl } = await req.json();
     const { productId } = await params;

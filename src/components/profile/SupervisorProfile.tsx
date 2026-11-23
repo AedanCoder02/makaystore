@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
@@ -14,6 +15,7 @@ interface SupervisorStats {
 }
 
 export default function SupervisorProfile() {
+  const tp = useTranslations('staffProfile');
   const { user, isLoaded } = useUser();
   const [stats, setStats] = useState<SupervisorStats>({
     activeToday: 0,
@@ -51,7 +53,7 @@ export default function SupervisorProfile() {
     ? new Date(user.createdAt).toLocaleDateString([], { month: 'long', year: 'numeric' })
     : '—';
 
-  if (!isLoaded || loading) return <div className="profile-loading">Loading…</div>;
+  if (!isLoaded || loading) return <div className="profile-loading">{tp('loading')}</div>;
 
   return (
     <div className="profile-page">
@@ -74,41 +76,41 @@ export default function SupervisorProfile() {
 
       {/* Team overview */}
       <section className="profile-section">
-        <h2 className="profile-section-title"><Users size={18} /> Team Overview</h2>
+        <h2 className="profile-section-title"><Users size={18} /> {tp('teamOverview')}</h2>
         <div className="profile-stats-grid">
           <div className="profile-stat-card">
             <p className="profile-stat-value">{stats.activeToday}</p>
-            <p className="profile-stat-label">Active Today</p>
+            <p className="profile-stat-label">{tp('activeToday')}</p>
           </div>
           <div className="profile-stat-card">
             <p className="profile-stat-value">{stats.totalSellers}</p>
-            <p className="profile-stat-label">Total Sellers</p>
+            <p className="profile-stat-label">{tp('totalSellers')}</p>
           </div>
           <div className="profile-stat-card" style={{ position: 'relative' }}>
             <p className="profile-stat-value">{stats.pendingApprovals}</p>
-            <p className="profile-stat-label">Pending Approvals</p>
+            <p className="profile-stat-label">{tp('pendingApprovals')}</p>
           </div>
         </div>
       </section>
 
       {/* Permissions info */}
       <section className="profile-section">
-        <h2 className="profile-section-title"><CheckSquare size={18} /> Access Level</h2>
+        <h2 className="profile-section-title"><CheckSquare size={18} /> {tp('accessLevel')}</h2>
         <div className="profile-permissions">
-          <p className="profile-permission allow">Can view all seller activity</p>
-          <p className="profile-permission allow">Can approve / reject clock events</p>
-          <p className="profile-permission allow">Can assign tasks to sellers</p>
-          <p className="profile-permission deny">Cannot edit products or pricing</p>
-          <p className="profile-permission deny">Cannot access financial reports</p>
+          <p className="profile-permission allow">{tp('canViewAllSellerActivity')}</p>
+          <p className="profile-permission allow">{tp('canApproveOrRejectClock')}</p>
+          <p className="profile-permission allow">{tp('canAssignTasksToSellers')}</p>
+          <p className="profile-permission deny">{tp('cannotEditProductsOrPricing')}</p>
+          <p className="profile-permission deny">{tp('cannotAccessFinancialReports')}</p>
         </div>
       </section>
 
       {/* Quick links */}
       <section className="profile-section">
-        <h2 className="profile-section-title">Quick Links</h2>
+        <h2 className="profile-section-title">{tp('quickLinks')}</h2>
         <div className="profile-quick-links">
           <Link href="/supervisor/dashboard" className="profile-quick-link">
-            <LayoutDashboard size={16} /> Supervisor Dashboard
+            <LayoutDashboard size={16} /> {tp('supervisorDashboard')}
           </Link>
         </div>
       </section>

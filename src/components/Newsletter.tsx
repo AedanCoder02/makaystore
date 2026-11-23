@@ -46,13 +46,20 @@ export default function Newsletter() {
     return () => observer.disconnect();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      setSubmitted(true);
-      setEmail('');
-      setTimeout(() => setSubmitted(false), 3000);
-    }
+    if (!email || sending) return;
+    setSending(true);
+    setError('');
+    const res = await fetch('/api/newsletter', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }),
+    }).catch(() => null);
+    setSending(false);
+    if (res?.ok) { setSubmitted(true); setEmail(''); return; }
+    setError(res?.status === 400 ? t('invalid') : t('error'));
   };
 
   return (
@@ -79,11 +86,12 @@ export default function Newsletter() {
               className="newsletter-input"
               required
             />
-            <button type="submit" className="newsletter-button">
-              {t('subscribe')}
+            <button type="submit" className="newsletter-button" disabled={sending}>
+              {sending ? t('sending') : t('subscribe')}
             </button>
           </form>
         )}
+        {error && <p className="newsletter-error" role="alert">{error}</p>}
 
         <p className="newsletter-privacy">{t('privacy')}</p>
       </div>

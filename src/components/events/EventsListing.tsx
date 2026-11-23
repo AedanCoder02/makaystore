@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
@@ -30,6 +31,7 @@ const TIER_SPEND: Record<string, number | null> = {
 };
 
 export default function EventsListing() {
+  const te = useTranslations('eventsUi');
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -73,7 +75,7 @@ export default function EventsListing() {
             fontWeight: 600, fontSize: '0.9rem', textDecoration: 'none',
             transition: 'opacity 0.2s',
           }}>
-            <Ticket size={16} /> Browse Events
+            <Ticket size={16} /> {te('browseEvents')}
           </Link>
         </div>
       </section>
@@ -90,12 +92,12 @@ export default function EventsListing() {
         </div>
 
         {loading ? (
-          <p style={{ textAlign: 'center', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', padding: '3rem' }}>Loading events…</p>
+          <p style={{ textAlign: 'center', color: 'var(--makay-mauve)', fontFamily: 'var(--font-montserrat)', padding: '3rem' }}>{te('loadingEvents')}</p>
         ) : events.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '4rem 0' }}>
             <Calendar size={52} style={{ color: 'var(--makay-sand-cream)', marginBottom: '1.25rem', display: 'block', margin: '0 auto 1.25rem' }} />
-            <p style={{ fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)', fontSize: '1rem', marginBottom: '0.5rem' }}>No events scheduled yet.</p>
-            <p style={{ fontFamily: 'var(--font-montserrat)', color: '#c4b4a0', fontSize: '0.85rem' }}>Check back soon for upcoming beach club events.</p>
+            <p style={{ fontFamily: 'var(--font-montserrat)', color: 'var(--makay-mauve)', fontSize: '1rem', marginBottom: '0.5rem' }}>{te('noEventsScheduledYet')}</p>
+            <p style={{ fontFamily: 'var(--font-montserrat)', color: '#c4b4a0', fontSize: '0.85rem' }}>{te('checkBackSoonForUpcoming')}</p>
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
@@ -133,14 +135,14 @@ export default function EventsListing() {
                       color: '#fff', padding: '0.3rem 0.75rem', borderRadius: '100px',
                       fontFamily: 'var(--font-playfair-display)', fontSize: '0.95rem', fontWeight: 700,
                     }}>
-                      {Number(ev.price) === 0 ? 'Free' : `$${Number(ev.price).toFixed(2)}`}
+                      {Number(ev.price) === 0 ? te('free') : `$${Number(ev.price).toFixed(2)}`}
                     </div>
                     {soldOut && (
                       <div style={{
                         position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.55)',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         fontFamily: 'var(--font-montserrat)', fontWeight: 700, color: '#fff', fontSize: '1rem', letterSpacing: '0.1em',
-                      }}>SOLD OUT</div>
+                      }}>{te('soldOut')}</div>
                     )}
                   </div>
 
@@ -183,7 +185,7 @@ export default function EventsListing() {
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '0.3rem', fontFamily: 'var(--font-montserrat)', fontSize: '0.68rem', color: 'var(--makay-mauve)' }}>
                         <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Users size={10} />{ev.tickets_sold} going</span>
-                        <span>{soldOut ? 'Sold out' : `${remaining} left`}</span>
+                        <span>{soldOut ? te('soldOut') : te('left', { count: remaining })}</span>
                       </div>
                     </div>
 
@@ -195,7 +197,7 @@ export default function EventsListing() {
                       fontFamily: 'var(--font-montserrat)', fontSize: '0.85rem', fontWeight: 600,
                       textDecoration: 'none', pointerEvents: soldOut ? 'none' : 'auto',
                     }}>
-                      <Ticket size={14} /> {soldOut ? 'Sold Out' : 'Get Tickets'}
+                      <Ticket size={14} /> {soldOut ? te('soldOut') : te('getTickets')}
                     </Link>
                   </div>
                 </article>

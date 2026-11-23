@@ -1,7 +1,10 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { NextRequest, NextResponse } from 'next/server';
 import { generateProductModel, getGenerationProvider } from '@/lib/services/productGeneration';
 
 export async function GET() {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   try {
     getGenerationProvider(); // throws if nothing configured
     const provider =
@@ -16,6 +19,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   try {
     getGenerationProvider(); // throws with clear message if nothing configured
   } catch (e) {

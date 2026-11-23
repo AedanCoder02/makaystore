@@ -1,10 +1,11 @@
 import Hero from '@/components/Hero';
 import HomepageEvents from '@/components/HomepageEvents';
 import HomepageMembership from '@/components/HomepageMembership';
-import FeaturedCollection from '@/components/FeaturedCollection';
-import WhyMakay from '@/components/WhyMakay';
-import Testimonials from '@/components/Testimonials';
-import HowItWorks from '@/components/HowItWorks';
+import HomeOfferings from '@/components/home/HomeOfferings';
+import HomeWhy from '@/components/home/HomeWhy';
+import HomeCommunity from '@/components/home/HomeCommunity';
+import HomeDay from '@/components/home/HomeDay';
+import '@/styles/home-sections.css';
 import Categories from '@/components/Categories';
 import Newsletter from '@/components/Newsletter';
 import Footer from '@/components/Footer';
@@ -19,10 +20,10 @@ export default function Home() {
       </div>
       <HomepageEvents />
       <HomepageMembership />
-      <FeaturedCollection />
-      <WhyMakay />
-      <Testimonials />
-      <HowItWorks />
+      <HomeOfferings />
+      <HomeWhy />
+      <HomeDay />
+      <HomeCommunity />
       <Categories />
       <Newsletter />
       <Footer />

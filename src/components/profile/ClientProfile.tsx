@@ -369,7 +369,7 @@ export default function ClientProfile() {
         </div>
 
         {/* ── MY MAKAY CARD (with wallet info inside) ── */}
-        <div className="profile-section">
+        <div className="profile-section tour-member-card">
           <div className="profile-section-header">
             <h2 className="profile-section-title">My Makay Card</h2>
             <div className="profile-card-actions">
@@ -402,7 +402,7 @@ export default function ClientProfile() {
             }}
           >
             {/* Wallet overlay — absolutely positioned inside card */}
-            <div style={{
+            <div className="tour-wallet" style={{
               position: 'absolute', left: '34%', top: '72%', zIndex: 2,
               display: 'flex', flexDirection: 'column', gap: '0.15rem',
             }}>

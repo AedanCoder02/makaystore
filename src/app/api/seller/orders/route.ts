@@ -1,6 +1,8 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location.server';
 
 interface PaymentEntry {
   method: string;
@@ -9,26 +11,27 @@ interface PaymentEntry {
   description?: string;
 }
 
-async function ensureGiftColumn() {
-  await sql`ALTER TABLE seller_orders ADD COLUMN IF NOT EXISTS is_gift BOOLEAN DEFAULT FALSE`.catch(() => {});
-}
 
 export async function GET() {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+  const location = await getPanelLocation();
   const rows = await sql`
-    SELECT * FROM seller_orders WHERE seller_id = ${userId} ORDER BY created_at DESC LIMIT 50
+    SELECT * FROM seller_orders WHERE seller_id = ${userId} AND location = ${location} ORDER BY created_at DESC LIMIT 50
   `;
   return NextResponse.json(rows);
 }
 
 export async function POST(req: NextRequest) {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  await ensureGiftColumn();
-
+  const location = await getPanelLocation();
   const { client_id, client_name, client_email, items, subtotal, payment_methods, notes, is_gift } = await req.json();
 
   if (!client_id || !items?.length) {
@@ -38,7 +41,7 @@ export async function POST(req: NextRequest) {
   // Gift orders: skip payment validation, record at $0
   if (is_gift) {
     const row = await sql`
-      INSERT INTO seller_orders (seller_id, client_id, client_name, client_email, items, subtotal, payment_method, notes, is_gift)
+      INSERT INTO seller_orders (seller_id, client_id, client_name, client_email, items, subtotal, payment_method, notes, is_gift, location)
       VALUES (
         ${userId},
         ${client_id},
@@ -48,7 +51,8 @@ export async function POST(req: NextRequest) {
         0,
         ${'[]'},
         ${notes ?? ''},
-        TRUE
+        TRUE,
+        ${location}
       )
       RETURNING *
     `;
@@ -96,21 +100,38 @@ export async function POST(req: NextRequest) {
     `;
   }
 
-  const row = await sql`
-    INSERT INTO seller_orders (seller_id, client_id, client_name, client_email, items, subtotal, payment_method, notes, is_gift)
-    VALUES (
-      ${userId},
-      ${client_id},
-      ${client_name ?? ''},
-      ${client_email ?? ''},
-      ${JSON.stringify(items)},
-      ${subtotal},
-      ${JSON.stringify(payments)},
-      ${notes ?? ''},
-      FALSE
-    )
-    RETURNING *
-  `;
+  let row;
+  try {
+    row = await sql`
+      INSERT INTO seller_orders (seller_id, client_id, client_name, client_email, items, subtotal, payment_method, notes, is_gift, location)
+      VALUES (
+        ${userId},
+        ${client_id},
+        ${client_name ?? ''},
+        ${client_email ?? ''},
+        ${JSON.stringify(items)},
+        ${subtotal},
+        ${JSON.stringify(payments)},
+        ${notes ?? ''},
+        FALSE,
+        ${location}
+      )
+      RETURNING *
+    `;
+  } catch (e) {
+    const msg = (e as { message?: string })?.message ?? 'DB error';
+    console.error('[seller/orders POST insert]', msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
+  }
+
+  // Log sale to activities so supervisor sees it in real-time feed
+  const itemsDesc = (items as { title: string; quantity?: number }[])
+    .slice(0, 2).map(i => `${i.title} ×${i.quantity ?? 1}`).join(', ')
+    + (items.length > 2 ? ` +${items.length - 2} más` : '');
+  await sql`
+    INSERT INTO activities (seller_id, type, note, status)
+    VALUES (${userId}, 'sale', ${`Venta a ${client_name ?? 'cliente'}: ${itemsDesc} — $${Number(subtotal).toFixed(2)}`}, 'approved')
+  `.catch(() => {});
 
   return NextResponse.json(row[0]);
 }

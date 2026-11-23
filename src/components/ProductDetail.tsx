@@ -15,12 +15,8 @@ interface Props {
   product: Product;
 }
 
-const MEMBERSHIP_MONTHLY: Record<string, number> = {
-  'membership-bronze': 50,
-  'membership-silver': 100,
-  'membership-gold':   150,
-};
-const DURATION_MONTHS: Record<string, number> = { trimestral: 3, semestral: 6, anual: 12 };
+import { MEMBERSHIP_MONTHLY, MEMBERSHIP_DURATION_MONTHS as DURATION_MONTHS } from '@/lib/pricing';
+import { useSiteContent } from '@/components/providers/SiteContentProvider';
 const DURATION_LABELS: Record<string, string> = { trimestral: '3 meses', semestral: '6 meses', anual: '1 año' };
 
 export default function ProductDetail({ product }: Props) {
@@ -32,20 +28,10 @@ export default function ProductDetail({ product }: Props) {
   const t = useTranslations('storefront');
   const isMembership = product.id.startsWith('membership-');
 
-  const [addToCartLabel, setAddToCartLabel]   = useState('');
-  const [reviewsTitle, setReviewsTitle]       = useState('');
-  const [relatedTitle, setRelatedTitle]       = useState('');
-
-  useEffect(() => {
-    fetch('/api/theme')
-      .then(r => r.ok ? r.json() : {})
-      .then((d: Record<string, string>) => {
-        setAddToCartLabel(d['page:product-detail:content:addToCart']   || '');
-        setReviewsTitle(d['page:product-detail:content:reviewsTitle']  || '');
-        setRelatedTitle(d['page:product-detail:content:relatedTitle']  || '');
-      })
-      .catch(() => {});
-  }, []);
+  const { text } = useSiteContent();
+  const addToCartLabel = text('page:product-detail:content:addToCart');
+  const reviewsTitle   = text('page:product-detail:content:reviewsTitle');
+  const relatedTitle   = text('page:product-detail:content:relatedTitle');
 
   const currentVariant = product.variants[selectedVariant];
   const basePrice = currentVariant?.price ?? product.price;

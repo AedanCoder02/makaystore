@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useState, useEffect } from 'react';
 import { Crown, Check, Users, AlertTriangle } from 'lucide-react';
@@ -11,6 +12,7 @@ const TIER_COLOR: Record<string, string> = {
 };
 
 export default function SellerMembershipsPage() {
+  const tb = useTranslations('seller.membershipsPage');
   const [tiers, setTiers]   = useState<Tier[]>([]);
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedTier, setSelectedTier]   = useState('');
@@ -54,12 +56,12 @@ export default function SellerMembershipsPage() {
         }),
       });
       if (!res.ok) throw new Error((await res.json()).error);
-      setSuccess(`${tier?.label} membership sold to ${selectedClient?.name ?? clientSearch}`);
+      setSuccess(tb('soldTo', { tier: tier?.label ?? '', client: selectedClient?.name ?? clientSearch }));
       setSelectedClient(null); setClientSearch(''); setSelectedTier(''); setNotes('');
       // Refresh recent sales
       fetch('/api/memberships/stats').then(r => r.json()).then(d => setRecentSales(d.recent ?? [])).catch(() => {});
     } catch (e: any) {
-      setError(e.message ?? 'Sale failed');
+      setError(e.message ?? tb('saleFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -69,8 +71,8 @@ export default function SellerMembershipsPage() {
     <div className="seller-page">
       <div className="seller-page-header">
         <div>
-          <h1 className="seller-page-title">Sell Membership</h1>
-          <p className="seller-page-sub">Upgrade a client to a paid beach club membership tier.</p>
+          <h1 className="seller-page-title">{tb('sellMembership')}</h1>
+          <p className="seller-page-sub">{tb('upgradeAClientToA')}</p>
         </div>
       </div>
 
@@ -89,7 +91,7 @@ export default function SellerMembershipsPage() {
         {/* Step 1: Choose tier */}
         <div>
           <h2 style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--makay-mauve)', marginBottom: '0.875rem' }}>
-            1. Select Tier
+            {tb('k1SelectTier')}
           </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {tiers.map(tier => (
@@ -116,9 +118,9 @@ export default function SellerMembershipsPage() {
         {/* Step 2: Choose client */}
         <div>
           <h2 style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--makay-mauve)', marginBottom: '0.875rem' }}>
-            2. Select Client
+            {tb('k2SelectClient')}
           </h2>
-          <input className="seller-search" style={{ marginBottom: '0.75rem' }} placeholder="Search by name or email…"
+          <input className="seller-search" style={{ marginBottom: '0.75rem' }} placeholder={tb('searchByNameOrEmail')}
             value={clientSearch} onChange={e => { setClientSearch(e.target.value); setSelectedClient(null); }} />
 
           {selectedClient && (
@@ -149,7 +151,7 @@ export default function SellerMembershipsPage() {
               ))}
               {filteredClients.length === 0 && clientSearch && (
                 <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', color: 'var(--makay-mauve)', padding: '0.5rem' }}>
-                  No existing client found — will sell to email: <strong>{clientSearch}</strong>
+                  {tb('noClientFound')} <strong>{clientSearch}</strong>
                 </p>
               )}
             </div>
@@ -160,10 +162,10 @@ export default function SellerMembershipsPage() {
       {/* Payment + confirm */}
       {selectedTier && (selectedClient || clientSearch) && (
         <div style={{ background: '#fff', border: '1.5px solid var(--makay-peachy-rose)', borderRadius: 14, padding: '1.5rem', maxWidth: 480 }}>
-          <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--makay-dark-navy)', marginBottom: '1.25rem' }}>Confirm Sale</h2>
+          <h2 style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.1rem', fontWeight: 700, color: 'var(--makay-dark-navy)', marginBottom: '1.25rem' }}>{tb('confirmSale')}</h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.875rem' }}>
             <div>
-              <label className="seller-label">Payment Method</label>
+              <label className="seller-label">{tb('paymentMethod')}</label>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
                 {['cash', 'card', 'transfer'].map(m => (
                   <button key={m} onClick={() => setPayment(m)} className={`seller-payment-btn${payment === m ? ' selected' : ''}`} style={{ textTransform: 'capitalize' }}>{m}</button>
@@ -171,18 +173,18 @@ export default function SellerMembershipsPage() {
               </div>
             </div>
             <div>
-              <label className="seller-label">Notes (optional)</label>
-              <textarea className="seller-textarea sm" rows={2} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add any notes…" />
+              <label className="seller-label">{tb('notesOptional')}</label>
+              <textarea className="seller-textarea sm" rows={2} value={notes} onChange={e => setNotes(e.target.value)} placeholder={tb('addAnyNotes')} />
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--makay-sand-cream)', paddingTop: '0.875rem' }}>
               <div>
-                <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: 'var(--makay-mauve)', margin: 0 }}>Total</p>
+                <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.75rem', color: 'var(--makay-mauve)', margin: 0 }}>{tb('total')}</p>
                 <p style={{ fontFamily: 'var(--font-playfair-display)', fontSize: '1.4rem', fontWeight: 700, color: 'var(--makay-peachy-rose)', margin: 0 }}>
                   ${tiers.find(t => t.key === selectedTier)?.price ?? 0}
                 </p>
               </div>
               <button className="seller-btn-primary" onClick={handleSell} disabled={submitting}>
-                {submitting ? 'Processing…' : 'Complete Sale'}
+                {submitting ? tb('processing') : tb('completeSale')}
               </button>
             </div>
           </div>
@@ -193,17 +195,17 @@ export default function SellerMembershipsPage() {
       {expiringMembers.length > 0 && (
         <div style={{ marginTop: '2.5rem' }}>
           <h2 style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#f59e0b', marginBottom: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <AlertTriangle size={13} /> Próximas a vencer ({expiringMembers.length})
+            <AlertTriangle size={13} /> {tb('expiringSoon', { count: expiringMembers.length })}
           </h2>
           <div className="sp-table-wrap">
             <table className="sp-table">
               <thead>
                 <tr>
-                  <th>ID Cliente</th>
-                  <th>Tier</th>
-                  <th>Duración</th>
-                  <th>Vence</th>
-                  <th style={{ textAlign: 'right' }}>Días restantes</th>
+                  <th>{tb('clientId')}</th>
+                  <th>{tb('tier')}</th>
+                  <th>{tb('duration')}</th>
+                  <th>{tb('expires')}</th>
+                  <th style={{ textAlign: 'right' }}>{tb('daysLeft')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -230,11 +232,11 @@ export default function SellerMembershipsPage() {
       {recentSales.length > 0 && (
         <div style={{ marginTop: '2.5rem' }}>
           <h2 style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--makay-mauve)', marginBottom: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Users size={13} /> Recent Sales
+            <Users size={13} /> {tb('recentSales')}
           </h2>
           <div className="sp-table-wrap">
             <table className="sp-table">
-              <thead><tr><th>Client</th><th>Tier</th><th>Payment</th><th>Price</th><th>Date</th></tr></thead>
+              <thead><tr><th>{tb('client')}</th><th>{tb('tier')}</th><th>{tb('payment')}</th><th>{tb('price')}</th><th>{tb('date')}</th></tr></thead>
               <tbody>
                 {recentSales.slice(0, 10).map((s: any) => (
                   <tr key={s.id} className="sp-row">

@@ -26,15 +26,34 @@ export default function QuickActions({ workers }: QuickActionsProps) {
     duration: '30',
   });
   const [submitted, setSubmitted] = useState<string | null>(null);
+  const [saving, setSaving]       = useState(false);
 
   const close = () => {
     setActiveModal(null);
     setSubmitted(null);
+    setSaving(false);
     setFormData({ workerId: workers[0]?.workerId ?? '', taskName: '', dueTime: '', message: '', duration: '30' });
   };
 
-  const handleSubmit = (e: React.FormEvent, label: string) => {
+  const handleSubmit = async (e: React.FormEvent, label: string) => {
     e.preventDefault();
+    setSaving(true);
+    try {
+      if (activeModal === 'assign-task') {
+        const worker = workers.find(w => w.workerId === formData.workerId);
+        await fetch('/api/supervisor/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: formData.taskName,
+            assigned_to: formData.workerId,
+            assigned_to_name: worker?.name ?? '',
+            priority: 'medium',
+          }),
+        });
+      }
+    } catch { /* non-blocking */ }
+    setSaving(false);
     setSubmitted(label);
     setTimeout(close, 1200);
   };
@@ -75,7 +94,7 @@ export default function QuickActions({ workers }: QuickActionsProps) {
             ) : (
               <form
                 className="modal-form"
-                onSubmit={(e) => handleSubmit(e,
+                onSubmit={async (e) => handleSubmit(e,
                   activeModal === 'assign-task' ? t('assignTask')
                   : activeModal === 'send-message' ? t('sendMessage')
                   : t('extendShift')
@@ -126,7 +145,9 @@ export default function QuickActions({ workers }: QuickActionsProps) {
                   </div>
                 )}
 
-                <button type="submit" className="modal-submit-btn">{t('confirm')}</button>
+                <button type="submit" className="modal-submit-btn" disabled={saving}>
+                  {saving ? 'Guardando…' : t('confirm')}
+                </button>
               </form>
             )}
           </div>

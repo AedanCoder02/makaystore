@@ -3,24 +3,28 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { LayoutDashboard, ShoppingBag, Users, BarChart2, Calendar, Crown, Handshake, Target, PanelLeftClose, PanelLeftOpen, Menu, X, Contact, Wallet, Receipt } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { LayoutDashboard, ShoppingBag, Users, BarChart2, Calendar, Crown, Handshake, Target, PanelLeftClose, PanelLeftOpen, Menu, X, Contact, Wallet, Receipt, Star } from 'lucide-react';
+import LocationSwitcher from './LocationSwitcher';
 
 const NAV = [
-  { label: 'Panel',       href: '/admin/dashboard',  icon: LayoutDashboard },
-  { label: 'Pedidos',     href: '/admin/orders',      icon: ShoppingBag },
-  { label: 'Pagos',       href: '/admin/payments',    icon: Receipt },
-  { label: 'Usuarios',    href: '/admin/users',       icon: Users },
-  { label: 'Clientes',    href: '/admin/clients',     icon: Contact },
-  { label: 'Reportes',    href: '/admin/reports',     icon: BarChart2 },
-  { label: 'Metas Yimi',  href: '/admin/yimi-goals',  icon: Target },
-  { label: 'Eventos',     href: '/admin/events',      icon: Calendar },
-  { label: 'Membresías',  href: '/admin/memberships', icon: Crown },
-  { label: 'Aliados',     href: '/admin/allies',      icon: Handshake },
-  { label: 'Nómina',      href: '/admin/payroll',     icon: Wallet },
+  { key: 'dashboard',   href: '/admin/dashboard',  icon: LayoutDashboard },
+  { key: 'orders',      href: '/admin/orders',      icon: ShoppingBag },
+  { key: 'payments',    href: '/admin/payments',    icon: Receipt },
+  { key: 'users',       href: '/admin/users',       icon: Users },
+  { key: 'clients',     href: '/admin/clients',     icon: Contact },
+  { key: 'reports',     href: '/admin/reports',     icon: BarChart2 },
+  { key: 'goals',       href: '/admin/yimi-goals',  icon: Target },
+  { key: 'events',      href: '/admin/events',      icon: Calendar },
+  { key: 'memberships', href: '/admin/memberships', icon: Crown },
+  { key: 'reviews',     href: '/admin/reviews',     icon: Star },
+  { key: 'allies',      href: '/admin/allies',      icon: Handshake },
+  { key: 'payroll',     href: '/admin/payroll',     icon: Wallet },
 ];
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const t = useTranslations('backoffice');
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -51,7 +55,7 @@ export default function AdminSidebar() {
       <button
         className="sidebar-ham-btn sidebar-ham-btn--admin"
         onClick={() => setMobileOpen(true)}
-        aria-label="Abrir menú"
+        aria-label={t('openMenu')}
       >
         <Menu size={20} />
       </button>
@@ -62,20 +66,21 @@ export default function AdminSidebar() {
           style={{ left: 195 }}
           onClick={() => setMobileOpen(false)}
           role="button"
-          aria-label="Cerrar menú"
+          aria-label={t('closeMenu')}
         />
       )}
 
       <aside className={`admin-sidebar${collapsed ? ' sidebar-collapsed' : ''}${mobileOpen ? ' mobile-open' : ''}`}>
-        <button className="sidebar-close-mobile" onClick={() => setMobileOpen(false)} aria-label="Cerrar menú">
+        <button className="sidebar-close-mobile" onClick={() => setMobileOpen(false)} aria-label={t('closeMenu')}>
           <X size={18} />
         </button>
 
         <div className="sidebar-brand">
           {!collapsed && <span className="sidebar-brand-name">Makay Admin</span>}
         </div>
-        <nav className="sidebar-nav" aria-label="Admin navigation">
-          {NAV.map(({ href, label, icon: Icon }) => (
+        <LocationSwitcher collapsed={collapsed} />
+        <nav className="sidebar-nav" aria-label={t('navLabel')}>
+          {NAV.map(({ href, key, icon: Icon }) => { const label = t(`adminNav.${key}`); return (
             <Link
               key={href}
               href={href}
@@ -86,10 +91,10 @@ export default function AdminSidebar() {
               <Icon size={18} className="sidebar-icon" />
               {!collapsed && <span className="sidebar-label">{label}</span>}
             </Link>
-          ))}
+          ); })}
         </nav>
-        <button className="sidebar-toggle-admin" onClick={toggle} title={collapsed ? 'Expandir' : 'Contraer'}>
-          {collapsed ? <PanelLeftOpen size={16} /> : <><PanelLeftClose size={16} /><span>Contraer</span></>}
+        <button className="sidebar-toggle-admin" onClick={toggle} title={collapsed ? t('expand') : t('collapse')}>
+          {collapsed ? <PanelLeftOpen size={16} /> : <><PanelLeftClose size={16} /><span>{t('collapse')}</span></>}
         </button>
       </aside>
     </>

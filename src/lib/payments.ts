@@ -81,7 +81,8 @@ export function ensurePaymentSchema(): Promise<void> {
           ADD COLUMN IF NOT EXISTS payment_verified_at  TIMESTAMPTZ,
           ADD COLUMN IF NOT EXISTS payment_note         TEXT,
           ADD COLUMN IF NOT EXISTS fulfilled_at         TIMESTAMPTZ,
-          ADD COLUMN IF NOT EXISTS locale               TEXT
+          ADD COLUMN IF NOT EXISTS locale               TEXT,
+          ADD COLUMN IF NOT EXISTS location             TEXT NOT NULL DEFAULT 'guacuco'
       `;
       await sql`CREATE INDEX IF NOT EXISTS orders_payment_status_idx ON orders (payment_status)`;
       await sql`CREATE INDEX IF NOT EXISTS orders_payment_provider_ref_idx ON orders (payment_provider_ref)`;

@@ -1,9 +1,16 @@
 import { NextResponse } from 'next/server';
-import { auth, clerkClient } from '@clerk/nextjs/server';
+import { auth, currentUser, clerkClient } from '@clerk/nextjs/server';
 
 export async function GET() {
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  // Lists every account's name/email/role — admin-only. Its absence let any
+  // authenticated user enumerate the full user base.
+  const caller = await currentUser();
+  if ((caller?.publicMetadata?.role as string | undefined) !== 'admin') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   try {
     const client = await clerkClient();
@@ -14,8 +21,12 @@ export async function GET() {
       fullName: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || '—',
       email: u.emailAddresses[0]?.emailAddress ?? '',
       role: (u.publicMetadata?.role as string) ?? 'customer',
+      roles: (u.publicMetadata?.roles as string[]) ?? [],
       createdAt: u.createdAt,
       imageUrl: u.imageUrl,
+      // publicMetadata, not unsafeMetadata — permissions are a backend-granted
+      // authorization decision and must not live in client-editable metadata.
+      permissions: (u.publicMetadata?.permissions as string[]) ?? [],
     }));
 
     return NextResponse.json(result);

@@ -1,4 +1,5 @@
 'use client';
+import { useTranslations } from 'next-intl';
 
 import { useRef, useState } from 'react';
 import { Upload, X, Loader } from 'lucide-react';
@@ -10,6 +11,7 @@ interface Props {
 }
 
 export default function ImageUpload({ value, onChange, label = 'Image' }: Props) {
+  const tu = useTranslations('uploads');
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -17,17 +19,17 @@ export default function ImageUpload({ value, onChange, label = 'Image' }: Props)
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 10 * 1024 * 1024) { setError('Max 10MB'); return; }
+    if (file.size > 10 * 1024 * 1024) { setError(tu('max10Mb')); return; }
     setUploading(true); setError('');
     try {
       const fd = new FormData();
       fd.append('file', file);
       const res = await fetch('/api/admin/upload-image', { method: 'POST', body: fd });
-      if (!res.ok) throw new Error((await res.json()).error ?? 'Upload failed');
+      if (!res.ok) throw new Error((await res.json()).error ?? tu('uploadFailed'));
       const { url } = await res.json();
       onChange(url);
     } catch (err: any) {
-      setError(err.message ?? 'Upload failed');
+      setError(err.message ?? tu('uploadFailed'));
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = '';
@@ -57,7 +59,7 @@ export default function ImageUpload({ value, onChange, label = 'Image' }: Props)
             style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.55)', border: 'none', cursor: 'pointer', padding: '0.2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}
           >
             {uploading ? <Loader size={10} color="#fff" className="studio-spin" /> : <Upload size={10} color="#fff" />}
-            <span style={{ fontSize: '0.6rem', color: '#fff', fontFamily: 'var(--font-montserrat)' }}>Change</span>
+            <span style={{ fontSize: '0.6rem', color: '#fff', fontFamily: 'var(--font-montserrat)' }}>{tu('change')}</span>
           </button>
         </div>
       ) : (
@@ -78,8 +80,8 @@ export default function ImageUpload({ value, onChange, label = 'Image' }: Props)
           }}
         >
           {uploading
-            ? <><Loader size={14} className="studio-spin" /> Uploading…</>
-            : <><Upload size={14} /> Upload Image</>}
+            ? <><Loader size={14} className="studio-spin" /> {tu('uploading')}</>
+            : <><Upload size={14} /> {tu('uploadImage')}</>}
         </button>
       )}
 

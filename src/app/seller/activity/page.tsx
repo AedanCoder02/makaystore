@@ -15,6 +15,25 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString([], { month: 'short', day: 'numeric' });
 }
 
+function formatDayHeader(iso: string) {
+  const d = new Date(iso);
+  const today = new Date();
+  const isToday = d.toDateString() === today.toDateString();
+  if (isToday) return 'Hoy';
+  return d.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' });
+}
+
+function groupByDay(entries: { id: number; created_at: string }[]) {
+  const groups: { day: string; items: typeof entries }[] = [];
+  entries.forEach(entry => {
+    const day = new Date(entry.created_at).toDateString();
+    let group = groups.find(g => g.day === day);
+    if (!group) { group = { day, items: [] }; groups.push(group); }
+    group.items.push(entry);
+  });
+  return groups;
+}
+
 export default function SellerActivityPage() {
   const t = useTranslations('worker');
   const ts = useTranslations('seller');
@@ -109,15 +128,27 @@ export default function SellerActivityPage() {
           {activity.log.length === 0 ? (
             <p style={{ color: 'var(--makay-mauve)', fontSize: '0.875rem' }}>{t('noActivity')}</p>
           ) : (
-            <div className="activity-log-list">
-              {activity.log.map((entry) => (
-                <div key={entry.id} className="activity-log-row">
-                  <span className={`activity-log-type ${entry.type === 'clock-in' ? 'in' : 'out'}`}>
-                    {entry.type === 'clock-in' ? '→' : '←'} {entry.type === 'clock-in' ? t('clockIn') : t('clockOut')}
-                  </span>
-                  <span className="activity-log-time">
-                    {formatDate(entry.created_at)} {formatTime(entry.created_at)}
-                  </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {groupByDay(activity.log).map(group => (
+                <div key={group.day}>
+                  <p style={{ fontFamily: 'var(--font-montserrat)', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--makay-mauve)', margin: '0 0 0.5rem' }}>
+                    {formatDayHeader(group.items[0].created_at)}
+                    <span style={{ marginLeft: '0.5rem', fontWeight: 600, textTransform: 'none', letterSpacing: 'normal', color: 'var(--makay-peachy-rose)' }}>
+                      {group.items.filter((e: any) => e.type === 'clock-in').length} sesión{group.items.filter((e: any) => e.type === 'clock-in').length !== 1 ? 'es' : ''}
+                    </span>
+                  </p>
+                  <div className="activity-log-list">
+                    {group.items.map((entry: any) => (
+                      <div key={entry.id} className="activity-log-row">
+                        <span className={`activity-log-type ${entry.type === 'clock-in' ? 'in' : 'out'}`}>
+                          {entry.type === 'clock-in' ? '→' : '←'} {entry.type === 'clock-in' ? t('clockIn') : t('clockOut')}
+                        </span>
+                        <span className="activity-log-time">
+                          {formatDate(entry.created_at)} {formatTime(entry.created_at)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ))}
             </div>

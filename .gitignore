@@ -43,6 +43,7 @@ next-env.d.ts
 
 .vercel
 
+.worktrees/
 # local-only personal data for scripts/create-users.mjs
 scripts/users.local.json
 .neon

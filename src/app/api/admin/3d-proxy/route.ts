@@ -1,6 +1,9 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(req: NextRequest) {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   const url = req.nextUrl.searchParams.get('url');
   if (!url) return NextResponse.json({ error: 'Missing url' }, { status: 400 });
 

@@ -1,63 +1,53 @@
-import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { requireAccess } from '@/lib/apiAuth';
+import { ensureEventsSchema, normalizeGallery, normalizeImageUrl, UPCOMING_GRACE } from '@/lib/events';
 
-async function ensureTables() {
-  await sql`
-    CREATE TABLE IF NOT EXISTS events (
-      id          SERIAL PRIMARY KEY,
-      title       TEXT NOT NULL,
-      description TEXT,
-      event_date  TIMESTAMPTZ,
-      location    TEXT,
-      image_url   TEXT,
-      price       NUMERIC(10,2) DEFAULT 0,
-      capacity    INTEGER DEFAULT 100,
-      status      TEXT DEFAULT 'active',
-      created_at  TIMESTAMPTZ DEFAULT NOW(),
-      updated_at  TIMESTAMPTZ DEFAULT NOW()
-    )
-  `;
-  await sql`
-    CREATE TABLE IF NOT EXISTS event_tickets (
-      id             SERIAL PRIMARY KEY,
-      event_id       INTEGER REFERENCES events(id) ON DELETE CASCADE,
-      customer_id    TEXT,
-      customer_name  TEXT,
-      customer_email TEXT,
-      quantity       INTEGER DEFAULT 1,
-      total_paid     NUMERIC(10,2) DEFAULT 0,
-      purchased_at   TIMESTAMPTZ DEFAULT NOW()
-    )
-  `;
-}
+// GET — public: active events that haven't passed yet, soonest first.
+//       ?scope=all (staff only): every event, any status, newest first.
+export async function GET(req: NextRequest) {
+  await ensureEventsSchema();
 
-// GET — public listing of active events
-export async function GET() {
-  await ensureTables();
+  if (req.nextUrl.searchParams.get('scope') === 'all') {
+    const gate = await requireAccess('staff');
+    if (gate instanceof NextResponse) return gate;
+    const rows = await sql`
+      SELECT e.*,
+        COALESCE((SELECT SUM(quantity) FROM event_tickets WHERE event_id = e.id), 0)::int AS tickets_sold
+      FROM events e
+      ORDER BY e.event_date DESC NULLS FIRST
+    `;
+    return NextResponse.json(rows);
+  }
+
   const rows = await sql`
     SELECT e.*,
       COALESCE((SELECT SUM(quantity) FROM event_tickets WHERE event_id = e.id), 0)::int AS tickets_sold
     FROM events e
     WHERE e.status = 'active'
-    ORDER BY e.event_date ASC
+      AND (e.event_date IS NULL OR e.event_date >= NOW() - ${UPCOMING_GRACE}::interval)
+    ORDER BY e.event_date ASC NULLS LAST
   `;
   return NextResponse.json(rows);
 }
 
-// POST — admin creates event
+// POST — create event (admin, or staff with the "events" permission)
 export async function POST(req: NextRequest) {
-  const { userId } = await auth();
-  if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const gate = await requireAccess('admin', { orPermission: 'events' });
+  if (gate instanceof NextResponse) return gate;
 
-  await ensureTables();
+  await ensureEventsSchema();
 
-  const { title, description, event_date, location, image_url, price, capacity } = await req.json();
+  const { title, description, content, event_date, location, image_url, gallery, tags, price, capacity, status } = await req.json();
   if (!title) return NextResponse.json({ error: 'title required' }, { status: 400 });
 
   const row = await sql`
-    INSERT INTO events (title, description, event_date, location, image_url, price, capacity)
-    VALUES (${title}, ${description ?? ''}, ${event_date ?? null}, ${location ?? ''}, ${image_url ?? ''}, ${Number(price ?? 0)}, ${Number(capacity ?? 100)})
+    INSERT INTO events (title, description, content, event_date, location, image_url, gallery, tags, price, capacity, status)
+    VALUES (
+      ${title}, ${description ?? ''}, ${content ?? ''}, ${event_date || null}, ${location ?? ''},
+      ${normalizeImageUrl(String(image_url ?? ''))}, ${JSON.stringify(normalizeGallery(gallery))}::jsonb,
+      ${tags ?? ''}, ${Number(price ?? 0)}, ${Number(capacity ?? 100)}, ${status ?? 'active'}
+    )
     RETURNING *
   `;
   return NextResponse.json(row[0], { status: 201 });

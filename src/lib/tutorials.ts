@@ -67,7 +67,7 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
       },
       {
         id: 'step-2',
-        target: '.worker-profile-list',
+        target: '.worker-cards',
         title: 'Team Chips',
         description: 'Each chip shows a worker and whether they are currently clocked in. Click any chip to see their details.',
         placement: 'bottom',
@@ -123,7 +123,7 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
       },
       {
         id: 'step-9',
-        target: '.activity-approval-list',
+        target: '.pending-approvals',
         title: 'Approve Activity',
         description: 'Workers\' clock-in and clock-out entries require your approval. Approve to confirm or reject to flag for follow-up.',
         placement: 'top',
@@ -403,7 +403,7 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
       },
       {
         id: 'step-3',
-        target: '.seller-action-grid',
+        target: '.seller-action-list',
         title: 'Quick Actions',
         description: 'Jump straight to selling, managing products, updating stock, or viewing your shift activity.',
         placement: 'top',
@@ -411,7 +411,7 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
       },
       {
         id: 'step-4',
-        target: '.seller-action-card.primary',
+        target: '.seller-action-row.primary',
         title: 'Sell to Client',
         description: 'This is your primary tool. Use it to search for a client, add products, and complete a sale in 3 steps.',
         placement: 'right',
@@ -468,7 +468,7 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
       },
       {
         id: 'step-3',
-        target: '.seller-product-row',
+        target: '.sp-row',
         title: 'Edit a Product',
         description: 'Click the pencil icon to edit price, image, description, or switch between Storefront and Dropshipping.',
         placement: 'left',
@@ -503,7 +503,7 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
         id: 'step-2',
         target: '.seller-stock-row',
         title: 'Adjust Quantities',
-        description: 'Use the +1, -1, +5, -5 buttons or type directly. Low stock (under 10) is highlighted in red.',
+        description: 'Use the +1, -1, +5, -5 buttons or type directly. Out-of-stock products are pinned to the top in red, low stock (under 10) is marked in amber.',
         placement: 'left',
         skipAllowed: true,
       },
@@ -668,7 +668,7 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
       },
       {
         id: 'step-3',
-        target: '.profile-wallet-card',
+        target: '.tour-wallet',
         title: 'Makay Wallet',
         description: 'Your wallet balance can be used for discounts and exclusive member benefits.',
         placement: 'top',
@@ -676,7 +676,7 @@ export const TUTORIAL_DEFINITIONS: Record<string, Tutorial> = {
       },
       {
         id: 'step-4',
-        target: '.makay-client-card',
+        target: '.tour-member-card',
         title: 'Your Member Card',
         description: 'This is your digital Makay Beach Club card. Share it or save it — the QR code lets staff verify your membership.',
         placement: 'top',

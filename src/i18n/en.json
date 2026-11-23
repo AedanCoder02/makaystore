@@ -34,7 +34,8 @@
     "signOut": "Sign Out",
     "myAccount": "My Account",
     "allies": "Allies",
-    "membership": "Membership"
+    "membership": "Membership",
+    "reservations": "Reservations"
   },
   "hero": {
     "headline": "Your Connection Refuge",
@@ -506,7 +507,17 @@
     "costPercent": "Cost %",
     "adjustCostPercent": "Adjust cost %",
     "editTarget": "Edit target",
-    "targetSaved": "Target saved"
+    "targetSaved": "Target saved",
+    "ranges": {
+      "7d": "Last 7 days",
+      "30d": "Last 30 days",
+      "3m": "Last 3 months",
+      "all": "All time"
+    },
+    "supervisorView": "Order detail",
+    "supervisorViewHint": "Open the supervisor report with every order, seller and payment method. Targets and cost % are shared.",
+    "reportError": "This report ran into an issue.",
+    "retry": "Try again"
   },
   "seller": {
     "dashboard": "Dashboard",
@@ -531,6 +542,8 @@
     "role": "Seller",
     "storeName": "Makay Store",
     "backToStore": "← Back to Store",
+    "viewGuacuco": "Guacuco",
+    "viewLaMarina": "La Marina ↗",
     "sessionsToday": "Sessions today",
     "nav": {
       "dashboard": "Dashboard",
@@ -543,6 +556,7 @@
       "rotation": "Rotation",
       "events": "Events",
       "memberships": "Memberships",
+      "reservations": "Reservations",
       "payments": "Payments"
     },
     "sell": {
@@ -608,7 +622,150 @@
       "saved": "Saved",
       "saving": "Saving...",
       "save": "Save",
-      "showTutorial": "Show tutorial"
+      "showTutorial": "Show tutorial",
+      "filterLabel": "Filter by stock level",
+      "filter": {
+        "all": "All products",
+        "out": "Out of stock",
+        "low": "Low stock",
+        "ok": "In stock"
+      },
+      "badge": {
+        "out": "Out of stock",
+        "low": "Low",
+        "ok": "In stock"
+      },
+      "searchPlaceholder": "Search by name, SKU or category...",
+      "sortBy": "Sort by:",
+      "sort": {
+        "title": "Product",
+        "sku": "SKU",
+        "category": "Category",
+        "stock": "Stock"
+      },
+      "empty": "No products found.",
+      "retry": "Retry",
+      "minus": "Remove {n}",
+      "plus": "Add {n}",
+      "quantityFor": "Quantity for {product}"
+    },
+    "productsPage": {
+      "status": {
+        "all": "All",
+        "active": "Active",
+        "paused": "Paused",
+        "archived": "Archived"
+      },
+      "confirmDeleteMany": "Delete {count, plural, one {# product} other {# products}}?",
+      "confirmDeleteOne": "Delete \"{title}\"?",
+      "couldNotLoadProducts": "Could not load products",
+      "products": "Products",
+      "manageYourCatalogCreateEdit": "Manage your catalog: create, edit, publish or archive.",
+      "showTutorial": "Show tutorial",
+      "newProduct": "New product",
+      "productName": "Product name *",
+      "priceEG4999": "Price * (e.g. 49.99)",
+      "supplierEGHavaianasMakay": "Supplier (e.g. Havaianas, Makay, Tarbay)",
+      "category": "Category",
+      "sizesEGSM": "Sizes (e.g. S, M, L, XL)",
+      "colorsEGBlackWhite": "Colors (e.g. Black, White, Sand)",
+      "description": "Description",
+      "productImage": "Product image",
+      "cancel": "Cancel",
+      "allSuppliers": "All suppliers",
+      "searchByNameSkuOr": "Search by name, SKU or supplier...",
+      "publish": "Publish",
+      "pause": "Pause",
+      "archive": "Archive",
+      "delete": "Delete",
+      "loading": "Loading...",
+      "noProductsFound": "No products found.",
+      "product": "Product",
+      "price": "Price",
+      "edit": "Edit",
+      "reportDamageLoss": "Report damage / loss",
+      "name": "Name *",
+      "price2": "Price *",
+      "sizesCommaSeparated": "Sizes (comma separated)",
+      "colorsCommaSeparated": "Colors (comma separated)",
+      "blackWhiteSand": "Black, White, Sand",
+      "supplier": "Supplier",
+      "eGHavaianasMakayTarbay": "e.g. Havaianas, Makay, Tarbay",
+      "add10ToThePrice": "Add 10% to the price",
+      "fixedExtraAmount": "Fixed extra amount ($)",
+      "saving": "Saving...",
+      "saveChanges": "Save changes",
+      "damaged": "Damaged",
+      "lost": "Lost",
+      "type": "Type",
+      "quantity": "Quantity",
+      "destinationWhereabouts": "Destination / whereabouts",
+      "whereItWentWhatHappened": "Where it went / what happened to the product",
+      "sending": "Sending...",
+      "sendReport": "Send report",
+      "statusLabel": "Status",
+      "saveProduct": "Save product"
+    },
+    "reservationsPage": {
+      "range": {
+        "upcoming": "Upcoming",
+        "month": "This month",
+        "all": "All"
+      },
+      "status": {
+        "confirmed": "Confirmed",
+        "attended": "Attended",
+        "cancelled": "Cancelled"
+      },
+      "reservations": "Reservations",
+      "upcomingExperienceBookingsCheckAnd": "Upcoming experience bookings: check and confirm arrivals.",
+      "createABookingForA": "Create a booking for a guest (walk-in or by phone).",
+      "newBooking": "New booking",
+      "viewBookings": "View bookings",
+      "showTutorial": "Show tutorial",
+      "today": "Today",
+      "totalGuests": "Total guests",
+      "loading": "Loading...",
+      "noUpcomingBookingsForNow": "No upcoming bookings for now.",
+      "date": "Date",
+      "time": "Time",
+      "experience": "Experience",
+      "guest": "Guest",
+      "guests": "Guests",
+      "total": "Total",
+      "status2": "Status",
+      "actions": "Actions",
+      "markAsAttended": "Mark as attended",
+      "cancel": "Cancel"
+    },
+    "membershipsPage": {
+      "soldTo": "{tier} membership sold to {client}",
+      "currentTier": "Current: {tier}",
+      "noClientFound": "No existing client found. The membership will be sold to this email:",
+      "expiringSoon": "Expiring soon ({count})",
+      "saleFailed": "Sale failed",
+      "sellMembership": "Sell membership",
+      "upgradeAClientToA": "Upgrade a client to a paid beach club membership tier.",
+      "k1SelectTier": "1. Select tier",
+      "k2SelectClient": "2. Select client",
+      "searchByNameOrEmail": "Search by name or email...",
+      "confirmSale": "Confirm sale",
+      "paymentMethod": "Payment method",
+      "notesOptional": "Notes (optional)",
+      "addAnyNotes": "Add any notes...",
+      "total": "Total",
+      "processing": "Processing...",
+      "completeSale": "Complete sale",
+      "clientId": "Client ID",
+      "tier": "Tier",
+      "duration": "Duration",
+      "expires": "Expires",
+      "daysLeft": "Days left",
+      "recentSales": "Recent sales",
+      "client": "Client",
+      "payment": "Payment",
+      "price": "Price",
+      "date": "Date"
     }
   },
   "rotation": {
@@ -660,138 +817,406 @@
       "worker-clock-in": {
         "name": "How to Use Your Dashboard",
         "steps": {
-          "step-1": { "title": "Your Shift Controls", "description": "Use the buttons here to clock in when your shift starts and clock out when it ends.", "actionText": "" },
-          "step-2": { "title": "Activity Log", "description": "Every clock in, clock out, and completed task is recorded here in real time.", "actionText": "" },
-          "step-3": { "title": "Need Help?", "description": "Click this button anytime to replay this tutorial.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Your Shift Controls",
+            "description": "Use the buttons here to clock in when your shift starts and clock out when it ends.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Activity Log",
+            "description": "Every clock in, clock out, and completed task is recorded here in real time.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Need Help?",
+            "description": "Click this button anytime to replay this tutorial.",
+            "actionText": "Got it"
+          }
         }
       },
       "supervisor-approve": {
         "name": "Supervisor Dashboard Tour",
         "steps": {
-          "step-1":  { "title": "Supervisor Dashboard",   "description": "This is your control centre. Monitor team activity, review performance, and manage shifts in real time.", "actionText": "" },
-          "step-2":  { "title": "Team Chips",             "description": "Each chip shows a worker and whether they are currently clocked in. Click any chip to see their details.", "actionText": "" },
-          "step-3":  { "title": "Worker Status Cards",    "description": "These cards give you a live snapshot — who is working, how many hours logged, and total team activity.", "actionText": "" },
-          "step-4":  { "title": "Live Activity Feed",     "description": "Every clock-in and clock-out appears here instantly. Use this to confirm your team is on schedule.", "actionText": "" },
-          "step-5":  { "title": "Sales Performance",      "description": "See today's sales totals and revenue per seller at a glance. Identify your top performers.", "actionText": "" },
-          "step-6":  { "title": "Task Board",             "description": "Assign tasks to your team, set priorities, and track completion. Drag cards between columns to update status.", "actionText": "" },
-          "step-7":  { "title": "Performance Rankings",   "description": "This section ranks sellers by revenue, orders, and hours. Use it for performance reviews and incentives.", "actionText": "" },
-          "step-8":  { "title": "Alerts Panel",           "description": "Any unusual activity — missed clock-outs, low stock, or flagged transactions — surfaces here for your review.", "actionText": "" },
-          "step-9":  { "title": "Approve Activity",       "description": "Workers' clock-in and clock-out entries require your approval. Approve to confirm or reject to flag for follow-up.", "actionText": "" },
-          "step-10": { "title": "Need Help?",             "description": "Click this button anytime to replay this full tour.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Supervisor Dashboard",
+            "description": "This is your control centre. Monitor team activity, review performance, and manage shifts in real time.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Team Chips",
+            "description": "Each chip shows a worker and whether they are currently clocked in. Click any chip to see their details.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Worker Status Cards",
+            "description": "These cards give you a live snapshot — who is working, how many hours logged, and total team activity.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Live Activity Feed",
+            "description": "Every clock-in and clock-out appears here instantly. Use this to confirm your team is on schedule.",
+            "actionText": ""
+          },
+          "step-5": {
+            "title": "Sales Performance",
+            "description": "See today's sales totals and revenue per seller at a glance. Identify your top performers.",
+            "actionText": ""
+          },
+          "step-6": {
+            "title": "Task Board",
+            "description": "Assign tasks to your team, set priorities, and track completion. Drag cards between columns to update status.",
+            "actionText": ""
+          },
+          "step-7": {
+            "title": "Performance Rankings",
+            "description": "This section ranks sellers by revenue, orders, and hours. Use it for performance reviews and incentives.",
+            "actionText": ""
+          },
+          "step-8": {
+            "title": "Alerts Panel",
+            "description": "Any unusual activity — missed clock-outs, low stock, or flagged transactions — surfaces here for your review.",
+            "actionText": ""
+          },
+          "step-9": {
+            "title": "Approve Activity",
+            "description": "Workers' clock-in and clock-out entries require your approval. Approve to confirm or reject to flag for follow-up.",
+            "actionText": ""
+          },
+          "step-10": {
+            "title": "Need Help?",
+            "description": "Click this button anytime to replay this full tour.",
+            "actionText": "Got it"
+          }
         }
       },
       "admin-tour": {
         "name": "Admin Panel Tour",
         "steps": {
-          "step-1": { "title": "Welcome to Admin",    "description": "This is your central hub for managing Makay Store. Every tool you need is accessible from here.", "actionText": "" },
-          "step-2": { "title": "Live Stats",          "description": "This strip shows real-time totals — products in your catalog, orders this month, and sellers active today.", "actionText": "" },
-          "step-3": { "title": "Products & 3D",       "description": "Create products and generate 3D models from a single product photo using AI.", "actionText": "" },
-          "step-4": { "title": "Orders",              "description": "View every order placed by your sellers, filter by seller, and inspect order details.", "actionText": "" },
-          "step-5": { "title": "Users & Roles",       "description": "Assign roles to every user — customer, seller, supervisor, or admin. Role controls which panel they access.", "actionText": "" },
-          "step-6":  { "title": "Reports",             "description": "Sales charts, cost/margin analysis, monthly goal tracking, and inventory health — all with real data.", "actionText": "" },
-          "step-7":  { "title": "Product Rotation",   "description": "Schedule when products cycle between Active, Paused, and Archived. Keep your catalog fresh automatically.", "actionText": "" },
-          "step-8":  { "title": "Storefront Studio",  "description": "One editor for everything: brand palette, scroll colors, per-page typography, content overrides, product images, and member card design.", "actionText": "" },
-          "step-9":  { "title": "Sidebar Navigation", "description": "The sidebar gives you instant access to all 7 sections — Panel, Products, Orders, Users, Reports, Rotation, and Studio.", "actionText": "" },
-          "step-10": { "title": "Need Help?",         "description": "Click this button anytime to replay this tour.", "actionText": "Let's go" }
+          "step-1": {
+            "title": "Welcome to Admin",
+            "description": "This is your central hub for managing Makay Store. Every tool you need is accessible from here.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Live Stats",
+            "description": "This strip shows real-time totals — products in your catalog, orders this month, and sellers active today.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Products & 3D",
+            "description": "Create products and generate 3D models from a single product photo using AI.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Orders",
+            "description": "View every order placed by your sellers, filter by seller, and inspect order details.",
+            "actionText": ""
+          },
+          "step-5": {
+            "title": "Users & Roles",
+            "description": "Assign roles to every user — customer, seller, supervisor, or admin. Role controls which panel they access.",
+            "actionText": ""
+          },
+          "step-6": {
+            "title": "Reports",
+            "description": "Sales charts, cost/margin analysis, monthly goal tracking, and inventory health — all with real data.",
+            "actionText": ""
+          },
+          "step-7": {
+            "title": "Product Rotation",
+            "description": "Schedule when products cycle between Active, Paused, and Archived. Keep your catalog fresh automatically.",
+            "actionText": ""
+          },
+          "step-8": {
+            "title": "Storefront Studio",
+            "description": "One editor for everything: brand palette, scroll colors, per-page typography, content overrides, product images, and member card design.",
+            "actionText": ""
+          },
+          "step-9": {
+            "title": "Sidebar Navigation",
+            "description": "The sidebar gives you instant access to all 7 sections — Panel, Products, Orders, Users, Reports, Rotation, and Studio.",
+            "actionText": ""
+          },
+          "step-10": {
+            "title": "Need Help?",
+            "description": "Click this button anytime to replay this tour.",
+            "actionText": "Let's go"
+          }
         }
       },
       "reports-tour": {
         "name": "Reports & Analytics Tour",
         "steps": {
-          "step-1": { "title": "Reports & Analytics", "description": "Track sales, costs, goals, inventory, and rotation metrics all in one place.", "actionText": "" },
-          "step-2": { "title": "Report Tabs", "description": "Switch between Sales, Costs, Goals, Inventory, and Rotation using these tabs.", "actionText": "" },
-          "step-3": { "title": "Key Metrics", "description": "Each card shows a critical number with trend direction indicators.", "actionText": "" },
-          "step-4": { "title": "Need Help?", "description": "Replay this tour anytime by clicking the help button.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Reports & Analytics",
+            "description": "Track sales, costs, goals, inventory, and rotation metrics all in one place.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Report Tabs",
+            "description": "Switch between Sales, Costs, Goals, Inventory, and Rotation using these tabs.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Key Metrics",
+            "description": "Each card shows a critical number with trend direction indicators.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Need Help?",
+            "description": "Replay this tour anytime by clicking the help button.",
+            "actionText": "Got it"
+          }
         }
       },
       "rotation-tour": {
         "name": "Product Rotation Tour",
         "steps": {
-          "step-1": { "title": "Product Rotation", "description": "Schedule when products change between Active, Paused, and Archived states.", "actionText": "" },
-          "step-2": { "title": "Product Table", "description": "All products are listed here with their current status. Click column headers to sort.", "actionText": "" },
-          "step-3": { "title": "Need Help?", "description": "Replay this tour anytime.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Product Rotation",
+            "description": "Schedule when products change between Active, Paused, and Archived states.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Product Table",
+            "description": "All products are listed here with their current status. Click column headers to sort.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Need Help?",
+            "description": "Replay this tour anytime.",
+            "actionText": "Got it"
+          }
         }
       },
       "admin-products": {
         "name": "3D Product Generator Tour",
         "steps": {
-          "step-1": { "title": "3D Product Generator", "description": "Upload a product photo and an AI model will generate a 3D version automatically.", "actionText": "" },
-          "step-2": { "title": "Step by Step", "description": "Follow the flow: select product → upload photo → generate → preview → confirm.", "actionText": "Got it" }
+          "step-1": {
+            "title": "3D Product Generator",
+            "description": "Upload a product photo and an AI model will generate a 3D version automatically.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Step by Step",
+            "description": "Follow the flow: select product → upload photo → generate → preview → confirm.",
+            "actionText": "Got it"
+          }
         }
       },
       "theme-editor-tour": {
         "name": "Theme Editor Tour",
         "steps": {
-          "step-1": { "title": "Theme Editor", "description": "Edit the look and feel of the entire storefront from here. Changes preview instantly — only Publish makes them live.", "actionText": "" },
-          "step-2": { "title": "Four Control Areas", "description": "Colors controls the palette, Scroll sets per-section backgrounds, Images lets you change product photos, Card customises the member card.", "actionText": "" },
-          "step-3": { "title": "Preset Themes", "description": "Pick a preset to instantly apply a full palette — Makay Default, Dark Luxury, Ocean Breeze, Sunset Coral, or Minimal White.", "actionText": "" },
-          "step-4": { "title": "Live Preview", "description": "Every change is reflected here in real time before you publish.", "actionText": "" },
-          "step-5": { "title": "Publish", "description": "When you're happy, click Publish. Your theme goes live on the store immediately.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Theme Editor",
+            "description": "Edit the look and feel of the entire storefront from here. Changes preview instantly — only Publish makes them live.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Four Control Areas",
+            "description": "Colors controls the palette, Scroll sets per-section backgrounds, Images lets you change product photos, Card customises the member card.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Preset Themes",
+            "description": "Pick a preset to instantly apply a full palette — Makay Default, Dark Luxury, Ocean Breeze, Sunset Coral, or Minimal White.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Live Preview",
+            "description": "Every change is reflected here in real time before you publish.",
+            "actionText": ""
+          },
+          "step-5": {
+            "title": "Publish",
+            "description": "When you're happy, click Publish. Your theme goes live on the store immediately.",
+            "actionText": "Got it"
+          }
         }
       },
       "seller-dashboard-tour": {
         "name": "Seller Dashboard Tour",
         "steps": {
-          "step-1": { "title": "Your Numbers",        "description": "Revenue, orders, tracked products, and stock units — updated every time you visit.", "actionText": "" },
-          "step-2": { "title": "Revenue Card",        "description": "This is your total revenue from all sales you have processed. It includes all order totals.", "actionText": "" },
-          "step-3": { "title": "Quick Actions",       "description": "Jump straight to selling, managing products, updating stock, or viewing your shift activity.", "actionText": "" },
-          "step-4": { "title": "Sell to Client",      "description": "This is your primary tool. Use it to search for a client, add products, and complete a sale in 3 steps.", "actionText": "" },
-          "step-5": { "title": "Recent Sales",        "description": "Your latest completed sales appear here. Click any row to view the full order details.", "actionText": "" },
-          "step-6": { "title": "Sidebar Navigation",  "description": "Switch between Sell, Products, Stock, and Activity using the sidebar. Your current section is highlighted.", "actionText": "" },
-          "step-7": { "title": "You're all set",      "description": "Click this button anytime to replay this tour. Start by clicking 'Sell to Client' to process your first sale.", "actionText": "Let's sell" }
+          "step-1": {
+            "title": "Your Numbers",
+            "description": "Revenue, orders, tracked products, and stock units — updated every time you visit.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Revenue Card",
+            "description": "This is your total revenue from all sales you have processed. It includes all order totals.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Quick Actions",
+            "description": "Jump straight to selling, managing products, updating stock, or viewing your shift activity.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Sell to Client",
+            "description": "This is your primary tool. Use it to search for a client, add products, and complete a sale in 3 steps.",
+            "actionText": ""
+          },
+          "step-5": {
+            "title": "Recent Sales",
+            "description": "Your latest completed sales appear here. Click any row to view the full order details.",
+            "actionText": ""
+          },
+          "step-6": {
+            "title": "Sidebar Navigation",
+            "description": "Switch between Sell, Products, Stock, and Activity using the sidebar. Your current section is highlighted.",
+            "actionText": ""
+          },
+          "step-7": {
+            "title": "You're all set",
+            "description": "Click this button anytime to replay this tour. Start by clicking 'Sell to Client' to process your first sale.",
+            "actionText": "Let's sell"
+          }
         }
       },
       "seller-products-tour": {
         "name": "Products Management Tour",
         "steps": {
-          "step-1": { "title": "Product Management", "description": "Edit any product's price, description, image, or type. Changes here override store defaults.", "actionText": "" },
-          "step-2": { "title": "Search Products", "description": "Filter by name or SKU to find products quickly.", "actionText": "" },
-          "step-3": { "title": "Edit a Product", "description": "Click the pencil icon to edit price, image, description, or switch between Storefront and Dropshipping.", "actionText": "" },
-          "step-4": { "title": "Add New Products", "description": "Use Add Product to create a brand-new item specific to your store.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Product Management",
+            "description": "Edit any product's price, description, image, or type. Changes here override store defaults.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Search Products",
+            "description": "Filter by name or SKU to find products quickly.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Edit a Product",
+            "description": "Click the pencil icon to edit price, image, description, or switch between Storefront and Dropshipping.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Add New Products",
+            "description": "Use Add Product to create a brand-new item specific to your store.",
+            "actionText": "Got it"
+          }
         }
       },
       "seller-stock-tour": {
         "name": "Stock Management Tour",
         "steps": {
-          "step-1": { "title": "Stock Management", "description": "Control how many units of each product are available.", "actionText": "" },
-          "step-2": { "title": "Adjust Quantities", "description": "Use the +1, -1, +5, -5 buttons or type directly. Low stock (under 10) is highlighted in red.", "actionText": "" },
-          "step-3": { "title": "Save Each Row", "description": "Hit Save on each row to persist that product's stock level to the database.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Stock Management",
+            "description": "Control how many units of each product are available.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Adjust Quantities",
+            "description": "Use the +1, -1, +5, -5 buttons or type directly. Out-of-stock products are pinned to the top in red and low stock (under 10) is marked in amber. Use the filters above to see each group.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Save Each Row",
+            "description": "Hit Save on each row to persist that product's stock level to the database.",
+            "actionText": "Got it"
+          }
         }
       },
       "seller-sell-tour": {
         "name": "Sell to Client Tour",
         "steps": {
-          "step-1": { "title": "3-Step Sale Process", "description": "Selling on behalf of a client takes 3 steps: select client, add products, then checkout.", "actionText": "" },
-          "step-2": { "title": "Step 1 — Select Client", "description": "Search for the client by name or email and click their card to select them.", "actionText": "" },
-          "step-3": { "title": "Storefront & Dropshipping", "description": "Mix Storefront products (shipped from stock) and Dropshipping products (shipped from supplier) in the same sale.", "actionText": "" },
-          "step-4": { "title": "Complete the Sale", "description": "After adding products, proceed to checkout, choose a payment method, and complete the sale. The order is saved to the client's record.", "actionText": "Got it" }
+          "step-1": {
+            "title": "3-Step Sale Process",
+            "description": "Selling on behalf of a client takes 3 steps: select client, add products, then checkout.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Step 1 — Select Client",
+            "description": "Search for the client by name or email and click their card to select them.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Storefront & Dropshipping",
+            "description": "Mix Storefront products (shipped from stock) and Dropshipping products (shipped from supplier) in the same sale.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Complete the Sale",
+            "description": "After adding products, proceed to checkout, choose a payment method, and complete the sale. The order is saved to the client's record.",
+            "actionText": "Got it"
+          }
         }
       },
       "editor-tour": {
         "name": "Marketing Editor Tour",
         "steps": {
-          "step-1": { "title": "Select a Page", "description": "Choose which store page to customize — Home, All Products, Product Detail, or Checkout.", "actionText": "" },
-          "step-2": { "title": "Three Control Areas", "description": "Colors lets you override the palette for that page. Typography sets fonts and heading scale. Content edits the text fields.", "actionText": "" },
-          "step-3": { "title": "Live Preview", "description": "Every change you make is reflected here instantly — see exactly how the page will look before publishing.", "actionText": "" },
-          "step-4": { "title": "Publish Changes", "description": "When you are happy with the result, click Publish. Your changes go live on the store immediately.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Select a Page",
+            "description": "Choose which store page to customize — Home, All Products, Product Detail, or Checkout.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Three Control Areas",
+            "description": "Colors lets you override the palette for that page. Typography sets fonts and heading scale. Content edits the text fields.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Live Preview",
+            "description": "Every change you make is reflected here instantly — see exactly how the page will look before publishing.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Publish Changes",
+            "description": "When you are happy with the result, click Publish. Your changes go live on the store immediately.",
+            "actionText": "Got it"
+          }
         }
       },
       "seller-3d-tour": {
         "name": "3D Model Generator",
         "steps": {
-          "step-1": { "title": "Pick a Product", "description": "Select which product you want a 3D model for. Click any card to choose it.", "actionText": "" },
-          "step-2": { "title": "Upload a Photo", "description": "Drag and drop a clean product photo — best results with a white or plain background.", "actionText": "" },
-          "step-3": { "title": "AI Generation", "description": "Our AI converts your photo into a 3D mesh. This takes about 2–3 minutes — you can leave this page and come back.", "actionText": "" },
-          "step-4": { "title": "Preview & Save", "description": "Rotate and inspect the 3D model. If it looks good, save it — it will appear on the product page for customers.", "actionText": "Got it" }
+          "step-1": {
+            "title": "Pick a Product",
+            "description": "Select which product you want a 3D model for. Click any card to choose it.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Upload a Photo",
+            "description": "Drag and drop a clean product photo — best results with a white or plain background.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "AI Generation",
+            "description": "Our AI converts your photo into a 3D mesh. This takes about 2–3 minutes — you can leave this page and come back.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Preview & Save",
+            "description": "Rotate and inspect the 3D model. If it looks good, save it — it will appear on the product page for customers.",
+            "actionText": "Got it"
+          }
         }
       },
       "profile-tour": {
         "name": "Your Makay Profile",
         "steps": {
-          "step-1": { "title": "Your Profile", "description": "This is your Makay Beach Club profile. Your avatar is managed through your Clerk account settings.", "actionText": "" },
-          "step-2": { "title": "Your Bio", "description": "Click Edit to add a short bio that appears on your member card.", "actionText": "" },
-          "step-3": { "title": "Makay Wallet", "description": "Your wallet balance can be used for discounts and exclusive member benefits.", "actionText": "" },
-          "step-4": { "title": "Your Member Card", "description": "This is your digital Makay Beach Club card. Share it or save it — the QR code lets staff verify your membership.", "actionText": "Enjoy Makay" }
+          "step-1": {
+            "title": "Your Profile",
+            "description": "This is your Makay Beach Club profile. Your avatar is managed through your Clerk account settings.",
+            "actionText": ""
+          },
+          "step-2": {
+            "title": "Your Bio",
+            "description": "Click Edit to add a short bio that appears on your member card.",
+            "actionText": ""
+          },
+          "step-3": {
+            "title": "Makay Wallet",
+            "description": "Your wallet balance can be used for discounts and exclusive member benefits.",
+            "actionText": ""
+          },
+          "step-4": {
+            "title": "Your Member Card",
+            "description": "This is your digital Makay Beach Club card. Share it or save it — the QR code lets staff verify your membership.",
+            "actionText": "Enjoy Makay"
+          }
         }
       }
     }
@@ -927,38 +1352,44 @@
     }
   },
   "newsletter": {
-    "heading": "Stay Connected",
-    "subheading": "Get exclusive drops, community updates, and special offers delivered to your inbox",
-    "emailPlaceholder": "Enter your email...",
+    "heading": "Stay in the loop",
+    "subheading": "Events, member news and the occasional sunset worth seeing. No spam.",
+    "emailPlaceholder": "Your email...",
     "subscribe": "Subscribe",
-    "successMessage": "Thank you for subscribing! Check your email for a special welcome offer.",
-    "privacy": "We respect your privacy. Unsubscribe at any time."
+    "sending": "Sending...",
+    "successMessage": "You're on the list. See you at Makay.",
+    "invalid": "Please enter a valid email.",
+    "error": "We couldn't save your email. Please try again.",
+    "privacy": "We only use your email for Makay news. Write to us on WhatsApp to unsubscribe at any time."
   },
   "footer": {
-    "brand": {
-      "description": "Connecting people through beach-inspired fashion and community. Your refuge of connection."
-    },
-    "shop": {
-      "title": "Shop",
-      "allProducts": "All Products",
-      "women": "Women",
-      "men": "Men",
-      "accessories": "Accessories"
-    },
-    "community": {
-      "title": "Community",
-      "about": "About Us",
+    "tagline": "See you on the sand, from sunrise to the last song.",
+    "bookCta": "Book on WhatsApp",
+    "address": "Playa Guacuco, Isla de Margarita, Venezuela",
+    "navLabel": "Site sections",
+    "club": {
+      "title": "The club",
       "events": "Events",
-      "blog": "Journal",
-      "sustainability": "Sustainability"
+      "reservations": "Reservations",
+      "membership": "Membership",
+      "allies": "Allies"
     },
-    "connect": {
-      "title": "Connect"
+    "discover": {
+      "title": "Discover",
+      "experience": "The experience",
+      "community": "Community",
+      "shop": "Shop"
+    },
+    "account": {
+      "title": "Your account",
+      "profile": "Profile",
+      "orders": "Orders",
+      "cart": "Cart"
     },
     "legal": {
       "privacy": "Privacy Policy",
-      "terms": "Terms of Service",
-      "cookies": "Cookie Settings"
+      "terms": "Terms of Use",
+      "cookies": "Cookie Policy"
     },
     "copyright": "All rights reserved."
   },
@@ -1110,5 +1541,772 @@
       "stripeWebhook": "Stripe webhook",
       "binanceManualNote": "The manual Binance Pay ID only shows when the Binance Pay API is not configured."
     }
+  },
+  "eventsAdmin": {
+    "title": "Events",
+    "subtitle": "Create events, write the full story, add photos and track attendees.",
+    "customerView": "Customer view",
+    "newEvent": "New event",
+    "create": "Create event",
+    "save": "Save changes",
+    "saving": "Saving…",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "attendees": "Attendees",
+    "attendeesCount": "Attendees ({count})",
+    "noTickets": "No tickets yet.",
+    "loading": "Loading…",
+    "free": "Free",
+    "photos": "{count, plural, one {# photo} other {# photos}}",
+    "capacity": "{sold}/{capacity} tickets · {remaining} left",
+    "confirmDelete": "Delete \"{title}\"? This also removes its tickets.",
+    "tabs": {
+      "upcoming": "Upcoming",
+      "all": "All",
+      "past": "Past"
+    },
+    "empty": {
+      "upcoming": "No upcoming events. Create one above.",
+      "all": "No events yet.",
+      "past": "No past events."
+    },
+    "status": {
+      "active": "Active",
+      "draft": "Draft",
+      "cancelled": "Cancelled",
+      "past": "Past",
+      "activeLong": "Active (visible on the site)",
+      "draftLong": "Draft (hidden)"
+    },
+    "fields": {
+      "title": "Title",
+      "date": "Date and time",
+      "location": "Location",
+      "price": "Ticket price (USD)",
+      "capacity": "Capacity",
+      "tags": "Tags",
+      "status": "Status",
+      "cover": "Cover image",
+      "summary": "Short summary",
+      "content": "Full story",
+      "gallery": "Photo gallery"
+    },
+    "placeholders": {
+      "title": "Sunset Sessions",
+      "location": "Main deck",
+      "tags": "music, sunset, dj",
+      "summary": "One or two lines shown on cards and at the top of the page.",
+      "content": "Write the full post. Leave a blank line between paragraphs.",
+      "gallery": "One image link per line (https://… or a Google Drive share link)"
+    },
+    "hints": {
+      "price": "Use 0 for free events. Paid tickets are sold through checkout.",
+      "drive": "Google Drive links work if the file is shared as \"Anyone with the link\".",
+      "content": "Shown on the event page below the summary.",
+      "gallery": "{count, plural, =0 {No photos yet.} one {# photo. Drive links are converted when you save.} other {# photos. Drive links are converted when you save.}}"
+    },
+    "cols": {
+      "name": "Name",
+      "email": "Email",
+      "qty": "Qty",
+      "paid": "Paid",
+      "order": "Order",
+      "date": "Date"
+    },
+    "errors": {
+      "save": "Could not save the event.",
+      "delete": "Could not delete the event."
+    }
+  },
+  "eventPage": {
+    "loading": "Loading…",
+    "notFound": "Event not found.",
+    "back": "Back to events",
+    "soldOut": "Sold out",
+    "spotsLeft": "{count, plural, one {# spot left} other {# spots left}}",
+    "gallery": "Gallery",
+    "openPhoto": "Open photo {n}",
+    "getTickets": "Get tickets",
+    "reserve": "Reserve your spot",
+    "free": "Free",
+    "perPerson": "per person",
+    "ended": "This event has ended.",
+    "youreIn": "You're in!",
+    "confirmation": "We saved your spot for {email}.",
+    "soldOutLong": "This event is sold out.",
+    "quantity": "Tickets (max {max})",
+    "total": "Total",
+    "addToCart": "Add to cart",
+    "paidHint": "You'll pay at checkout. Your ticket is issued once the payment is confirmed.",
+    "name": "Full name",
+    "email": "Email",
+    "processing": "Processing…",
+    "confirm": "Confirm",
+    "close": "Close",
+    "prev": "Previous photo",
+    "next": "Next photo",
+    "errors": {
+      "generic": "Something went wrong.",
+      "network": "Network error. Please try again."
+    }
+  },
+  "homeOfferings": {
+    "eyebrow": "The experience",
+    "title": "Everything happens here",
+    "subtitle": "Food, drinks, people and nights to remember, right on the sand.",
+    "food": {
+      "title": "Food",
+      "text": "Fresh plates made for long beach afternoons.",
+      "cta": "Book a table"
+    },
+    "drinks": {
+      "title": "Drinks",
+      "text": "Cocktails, cold beers and sunset rounds.",
+      "cta": "Reserve now"
+    },
+    "people": {
+      "title": "People",
+      "text": "A community that comes back every season.",
+      "cta": "Become a member"
+    },
+    "events": {
+      "title": "Events",
+      "text": "Live music, DJs and gatherings by the sea.",
+      "cta": "See events"
+    }
+  },
+  "homeWhy": {
+    "eyebrow": "Why Makay",
+    "title": "More than a day at the beach",
+    "text": "A place to slow down, meet people and stay until the stars come out.",
+    "sea": {
+      "title": "Right on the sea",
+      "text": "Loungers, shade and the Caribbean a few steps away."
+    },
+    "sunset": {
+      "title": "The best sunset",
+      "text": "Golden hour is the main event, every single day."
+    },
+    "music": {
+      "title": "Music that fits the mood",
+      "text": "Chill by day, livelier as the night arrives."
+    },
+    "service": {
+      "title": "Service that remembers you",
+      "text": "A team that takes care of the details so you don't have to."
+    }
+  },
+  "homeDay": {
+    "eyebrow": "A day at Makay",
+    "title": "From sunrise to the last song",
+    "morning": {
+      "time": "Morning",
+      "title": "Arrive and unwind",
+      "text": "Pick your spot, order a coffee and let the sea set the pace."
+    },
+    "noon": {
+      "time": "Midday",
+      "title": "Sun and salt",
+      "text": "Swim, eat something fresh and stay in the shade as long as you like."
+    },
+    "sunset": {
+      "time": "Sunset",
+      "title": "Golden hour",
+      "text": "Drinks in hand while the sky changes colour over the water."
+    },
+    "night": {
+      "time": "Night",
+      "title": "The night begins",
+      "text": "Music, lights and the people you met during the day."
+    }
+  },
+  "homeCommunity": {
+    "eyebrow": "Community",
+    "title": "What our guests say",
+    "scoreLabel": "Average rating {average} out of 5 from {count} reviews",
+    "count": "{count, plural, one {# review} other {# reviews}}",
+    "empty": "No reviews yet. Be the first to share your day at Makay.",
+    "write": "Write a review",
+    "signInToWrite": "Sign in to write a review",
+    "thanks": "Thank you. Your review will appear once our team approves it.",
+    "yourRating": "Your rating",
+    "starsAria": "{n, plural, one {# star} other {# stars}}",
+    "yourComment": "Your review",
+    "placeholder": "Tell us about your day at Makay...",
+    "moderated": "Reviewed before publishing",
+    "cancel": "Cancel",
+    "sending": "Sending...",
+    "send": "Send review",
+    "errors": {
+      "recent": "You already sent a review in the last 30 days.",
+      "length": "Your review must be between 10 and 600 characters.",
+      "generic": "Something went wrong. Please try again."
+    }
+  },
+  "reviewsAdmin": {
+    "title": "Reviews",
+    "subtitle": "Approve or hide guest reviews before they appear on the homepage.",
+    "error": "The action could not be completed.",
+    "confirmDelete": "Delete this review permanently?",
+    "tabs": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "hidden": "Hidden"
+    },
+    "loading": "Loading...",
+    "empty": {
+      "pending": "No reviews waiting for approval.",
+      "approved": "No approved reviews yet.",
+      "hidden": "No hidden reviews."
+    },
+    "rating": "{n} out of 5 stars",
+    "approve": "Approve",
+    "hide": "Hide",
+    "toPending": "Move back to pending",
+    "delete": "Delete"
+  },
+  "legal": {
+    "updated": "Last updated: {date}",
+    "updatedDate": "November 22, 2026",
+    "tocLabel": "Contents",
+    "privacy": {
+      "title": "Privacy Policy",
+      "intro": "This policy explains what personal information Makay Beach Club collects through this website, why we collect it and what you can ask us to do with it.",
+      "sections": [
+        {
+          "h": "Who we are",
+          "p": [
+            "Makay Beach Club operates this website for reservations, events, memberships and our shop. You can reach us on WhatsApp at the number shown in the footer."
+          ]
+        },
+        {
+          "h": "What we collect",
+          "p": [
+            "Account details: your name, email and sign-in information when you create an account.",
+            "Orders and reservations: the contact, shipping and booking details you enter, the items or tickets you buy and the payment method you choose.",
+            "Reviews and newsletter: the rating and comment you write, and the email you give us to receive news.",
+            "Technical data: the language you choose and the session information needed to keep you signed in."
+          ]
+        },
+        {
+          "h": "How we use it",
+          "p": [
+            "To confirm and deliver your orders, tickets, reservations and memberships.",
+            "To verify payments and prevent fraud.",
+            "To publish reviews you write, after our team approves them, showing your first name and last initial.",
+            "To send newsletter emails, only if you subscribed."
+          ]
+        },
+        {
+          "h": "Payments",
+          "p": [
+            "Card payments are processed by Stripe and crypto payments by Binance Pay. We do not store your card numbers. For Pago Móvil, bank transfers and Zelle we keep the reference you provide so our team can verify the payment."
+          ]
+        },
+        {
+          "h": "Who we share it with",
+          "p": [
+            "We share data only with the services needed to run the site: our sign-in provider, our database host, our payment processors and our email provider. We do not sell your personal information."
+          ]
+        },
+        {
+          "h": "How long we keep it",
+          "p": [
+            "We keep order and payment records for as long as we need them for accounting and legal obligations. You can ask us to delete your account, reviews or newsletter subscription at any time."
+          ]
+        },
+        {
+          "h": "Your choices",
+          "p": [
+            "You can ask to see, correct or delete your personal information, or to stop receiving emails, by writing to us on WhatsApp. We may need to confirm your identity first."
+          ]
+        },
+        {
+          "h": "Changes",
+          "p": [
+            "If we change this policy we will update the date at the top of this page."
+          ]
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of Use",
+      "intro": "These terms apply when you use this website to make reservations, buy tickets, memberships or products, or write reviews.",
+      "sections": [
+        {
+          "h": "Using the site",
+          "p": [
+            "By using this website you agree to these terms. If you do not agree, please do not use it."
+          ]
+        },
+        {
+          "h": "Your account",
+          "p": [
+            "You are responsible for keeping your sign-in details safe and for the activity on your account. Tell us if you think someone else has used it."
+          ]
+        },
+        {
+          "h": "Prices and payments",
+          "p": [
+            "Prices are shown in US dollars and are confirmed by our system when you place the order. An order is confirmed once the payment has been received and, for manual methods, verified by our team."
+          ]
+        },
+        {
+          "h": "Reservations and events",
+          "p": [
+            "Reservations and event tickets are subject to availability and to the conditions shown for each date. Event capacity is limited and a ticket is valid only for the event it was issued for."
+          ]
+        },
+        {
+          "h": "Memberships",
+          "p": [
+            "Membership benefits, duration and price are those shown on the membership page at the time of purchase. Benefits at partner venues depend on each partner."
+          ]
+        },
+        {
+          "h": "Reviews",
+          "p": [
+            "Reviews must be about your own experience at Makay. We may decline or remove reviews that are offensive, misleading or unrelated."
+          ]
+        },
+        {
+          "h": "Changes and cancellations",
+          "p": [
+            "For changes, cancellations or refunds, contact us on WhatsApp with your order number. Each request is reviewed case by case according to the conditions of the product or event."
+          ]
+        },
+        {
+          "h": "Liability",
+          "p": [
+            "We work to keep the site accurate and available, but we cannot guarantee it will always be free of errors or interruptions."
+          ]
+        },
+        {
+          "h": "Changes to these terms",
+          "p": [
+            "We may update these terms. The date at the top shows the latest version."
+          ]
+        }
+      ]
+    },
+    "cookies": {
+      "title": "Cookie Policy",
+      "intro": "Cookies are small files your browser stores. This site uses only the cookies it needs to work. We do not use advertising or analytics cookies.",
+      "sections": [
+        {
+          "h": "Cookies we use",
+          "p": [
+            "Language (NEXT_LOCALE): remembers whether you browse in English or Spanish.",
+            "Sign-in (set by our authentication provider, Clerk): keeps you signed in and protects your account.",
+            "Payments: when you pay by card, Stripe may set its own cookies on its checkout page to process the payment and prevent fraud."
+          ]
+        },
+        {
+          "h": "Local storage",
+          "p": [
+            "Your cart is saved in your browser so it is still there when you come back."
+          ]
+        },
+        {
+          "h": "Managing cookies",
+          "p": [
+            "You can delete or block cookies in your browser settings. If you block the sign-in cookies you will not be able to sign in, and the site will return to its default language."
+          ]
+        },
+        {
+          "h": "Changes",
+          "p": [
+            "If we add new cookies we will update this page and the date at the top."
+          ]
+        }
+      ]
+    }
+  },
+  "clientsAdmin": {
+    "title": "Customers",
+    "subtitle": "{total} contacts in the shared customer base",
+    "searchPlaceholder": "Search by name, phone or email...",
+    "origin": {
+      "title": "Where do these contacts come from?",
+      "body": "This list reads the shared contacts table. The store does not create these rows: they are merged in by the contact pipeline from Yimi, Makay Roulette, store accounts and walk-in sales, the CRM and a historical CSV import. One person can come from several sources, so the counts by source add up to more than the total."
+    },
+    "sourceFilter": "Filter by source",
+    "allSources": "All",
+    "showing": "{from}-{to} of {matched}",
+    "loading": "Loading...",
+    "error": "Could not load customers.",
+    "empty": "No results.",
+    "noName": "No name",
+    "noContact": "No contact details",
+    "pagination": "Pagination",
+    "prev": "Previous page",
+    "next": "Next page",
+    "pageOf": "Page {page} of {pages}",
+    "sources": {
+      "yimi": "Yimi",
+      "makay_store_account": "Store (account)",
+      "makay_store_walkin": "Store (walk-in)",
+      "makay_store_crm": "Store (CRM)",
+      "roulette": "Makay Roulette",
+      "csv_import": "Historical base (CSV)"
+    }
+  },
+  "backoffice": {
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "expand": "Expand",
+    "collapse": "Collapse",
+    "backToSite": "Back to site",
+    "navLabel": "Back-office navigation",
+    "supervisorRole": "Supervisor",
+    "supNav": {
+      "overview": "Overview",
+      "staff": "Staff",
+      "orders": "Orders",
+      "payments": "Payments",
+      "shifts": "Shifts",
+      "reports": "Reports"
+    },
+    "adminNav": {
+      "dashboard": "Dashboard",
+      "orders": "Orders",
+      "payments": "Payments",
+      "users": "Users",
+      "clients": "Customers",
+      "reports": "Reports",
+      "goals": "Yimi goals",
+      "events": "Events",
+      "memberships": "Memberships",
+      "reviews": "Reviews",
+      "allies": "Allies",
+      "payroll": "Payroll"
+    }
+  },
+  "supervisorOrders": {
+    "methods": {
+      "stripe": "Card",
+      "cash": "Cash",
+      "transferencia": "Bank transfer",
+      "punto_venta": "POS"
+    },
+    "connectionError": "Connection error",
+    "orders": "Orders",
+    "allMethods": "All methods",
+    "card": "Card",
+    "pointOfSale": "Point of sale",
+    "cash": "Cash",
+    "bankTransfer": "Bank transfer",
+    "binancePayManual": "Binance Pay (manual)",
+    "from": "From",
+    "to": "To",
+    "loadingOrders": "Loading orders...",
+    "noOrdersFound": "No orders found.",
+    "inPerson": "In person",
+    "online": "Online",
+    "gift": "Gift",
+    "products": "Products",
+    "paymentMethods": "Payment methods",
+    "receipt": "Receipt",
+    "viewReceipt": "View receipt",
+    "shipping": "Shipping",
+    "total": "Total",
+    "paymentVerifiedBySupervisor": "Payment verified by supervisor",
+    "receiptAttachedPendingVerification": "Receipt attached, pending verification.",
+    "noReceiptConfirmThePayment": "No receipt, confirm the payment manually.",
+    "confirming": "Confirming...",
+    "confirmPayment": "Confirm payment"
+  },
+  "supervisorReports": {
+    "ranges": {
+      "7d": "7 days",
+      "30d": "30 days",
+      "3m": "3 months",
+      "all": "All time"
+    },
+    "goalLabels": {
+      "daily": "Daily target",
+      "weekly": "Weekly target",
+      "monthly": "Monthly target"
+    },
+    "soldIn": "Sold ({range})",
+    "percentDone": "{pct}% complete",
+    "stockFilter": {
+      "all": "All",
+      "out": "Out of stock",
+      "low": "Low stock",
+      "ok": "Well stocked"
+    },
+    "couldNotLoadData": "Could not load data",
+    "connectionError": "Connection error",
+    "sales": "Sales",
+    "costMargin": "Cost/Margin",
+    "targets": "Targets",
+    "inventory": "Inventory",
+    "reports": "Reports",
+    "loading": "Loading...",
+    "revenue": "Revenue",
+    "orders": "Orders",
+    "averageOrder": "Average / order",
+    "noSalesInThisPeriod": "No sales in this period.",
+    "date": "Date",
+    "seller": "Seller",
+    "customer": "Customer",
+    "products": "Products",
+    "method": "Method",
+    "total": "Total",
+    "globalCostDefault": "Global cost % (default):",
+    "totalCost": "Total cost",
+    "grossProfit": "Gross profit",
+    "effectiveMargin": "Effective margin",
+    "searchProductOrSku": "Search product or SKU...",
+    "noResults": "No results.",
+    "product": "Product",
+    "salePrice": "Sale price",
+    "unitsSold": "Units sold",
+    "cost": "Cost %",
+    "cost2": "Cost $",
+    "profit": "Profit",
+    "margin": "Margin",
+    "loadingTargets": "Loading targets...",
+    "save": "Save",
+    "edit": "Edit",
+    "daysElapsed": "Days elapsed",
+    "dailyRate": "Daily rate",
+    "monthProjection": "Month projection",
+    "remaining": "Remaining",
+    "noSalesThisMonth": "No sales this month.",
+    "ofTarget": "% of target",
+    "loadingInventory": "Loading inventory...",
+    "totalProducts": "Total products",
+    "outOfStock": "Out of stock",
+    "lowStock": "Low stock",
+    "wellStocked": "Well stocked",
+    "currentStock": "Current stock",
+    "status": "Status",
+    "couldNotLoadTheInventory": "Could not load the inventory."
+  },
+  "alliesAdmin": {
+    "active": "Active",
+    "hidden": "Hidden",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "allyCreated": "Ally created.",
+    "allyUpdated": "Ally updated.",
+    "deleteThisAlly": "Delete this ally?",
+    "allyRemoved": "Ally removed.",
+    "allies": "Allies",
+    "newAlly": "New ally",
+    "name": "Name *",
+    "partnerName": "Partner name",
+    "logoUrl": "Logo URL",
+    "description": "Description",
+    "discountCode": "Discount code *",
+    "discount": "Discount %",
+    "minimumTier": "Minimum tier",
+    "displayOrder": "Display order",
+    "saving": "Saving...",
+    "create": "Create",
+    "loading": "Loading...",
+    "noAlliesYetClickNew": "No allies yet. Click New ally to add one.",
+    "name2": "Name",
+    "discountCode2": "Discount code",
+    "order": "Order",
+    "save": "Save",
+    "edit": "Edit",
+    "delete": "Delete",
+    "shortDescriptionShownOnThe": "Short description shown on the card"
+  },
+  "membershipsAdmin": {
+    "creditHowTo": "To issue a credit line to a specific client, go to the <b>Members</b> tab, click <b>Credit</b> on the member's row and switch to <b>Credit line</b> mode. Enter the principal, interest rate and due date. The dollar balance is added to the client's wallet and shown on their profile, with interest accruing daily.",
+    "discountRatesSaved": "Discount rates saved.",
+    "walletSettingsSaved": "Wallet settings saved.",
+    "memberUpdated": "Member updated.",
+    "overview": "Overview",
+    "discounts": "Discounts",
+    "members": "Members",
+    "walletSettings": "Wallet settings",
+    "memberships": "Memberships",
+    "loading": "Loading...",
+    "distributionByTier": "Distribution by tier",
+    "noMemberProfilesYet": "No member profiles yet.",
+    "revenueByTier": "Revenue by tier",
+    "noMembershipSalesYet": "No membership sales yet.",
+    "recentMembershipSales": "Recent membership sales",
+    "client": "Client",
+    "tier": "Tier",
+    "payment": "Payment",
+    "amount": "Amount",
+    "date": "Date",
+    "globalDiscountsByTier": "Global discounts by tier",
+    "saving": "Saving...",
+    "saveChanges": "Save changes",
+    "perUserOverrideOnly": "Per-user override only",
+    "noMembersYet": "No members yet.",
+    "override": "Override %",
+    "save": "Save",
+    "edit": "Edit",
+    "credit": "Credit",
+    "points": "Points",
+    "creditLine": "Credit line",
+    "descriptionOptional": "Description (optional)",
+    "amount2": "Amount ($)",
+    "eG20000": "e.g. 200.00",
+    "interestRateYear": "Interest rate (% / year)",
+    "eG5": "e.g. 5",
+    "dueDate": "Due date",
+    "notesOptional": "Notes (optional)",
+    "internalNote": "Internal note",
+    "issuing": "Issuing...",
+    "issueCreditLine": "Issue credit line",
+    "pointsRate": "Points rate",
+    "pointsPer1Spent": "Points per $1 spent",
+    "clientsEarnThisManyPoints": "Clients earn this many points for every dollar spent. Applied automatically when an order is completed.",
+    "defaultApr": "Default APR",
+    "defaultCreditInterestPerYear": "Default credit interest (% per year)",
+    "preFilledWhenIssuingCredit": "Pre-filled when issuing credit lines from the Members tab. Each line can have its own rate.",
+    "howToIssueCreditLines": "How to issue credit lines"
+  },
+  "payrollAdmin": {
+    "employeeCreated": "Employee created.",
+    "employeeUpdated": "Employee updated.",
+    "deleteThisEmployeePayrollRuns": "Delete this employee? Payroll runs already generated are kept.",
+    "employeeDeleted": "Employee deleted.",
+    "payrollGenerated": "Payroll generated.",
+    "couldNotGeneratePayroll": "Could not generate payroll.",
+    "finalizeThisPayrollItCan": "Finalize this payroll? It can't be deleted afterwards.",
+    "payrollFinalized": "Payroll finalized.",
+    "deleteThisDraftPayroll": "Delete this draft payroll?",
+    "payrollDeleted": "Payroll deleted.",
+    "couldNotDelete": "Could not delete.",
+    "employees": "Employees",
+    "payroll": "Payroll",
+    "newEmployee": "New employee",
+    "activeEmployees": "Active employees",
+    "weeklyTotal": "Weekly total",
+    "monthlyTotalEst": "Monthly total (est.)",
+    "loading": "Loading...",
+    "active": "Active",
+    "inactive": "Inactive",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "edit": "Edit",
+    "delete": "Delete",
+    "generateNewPayroll": "Generate new payroll",
+    "from": "From",
+    "to": "To",
+    "generating": "Generating...",
+    "generatePayroll": "Generate payroll",
+    "noPayrollRunsYet": "No payroll runs yet.",
+    "finalized": "Finalized",
+    "draft": "Draft",
+    "employee": "Employee",
+    "department": "Department",
+    "base": "Base",
+    "commission": "Commission",
+    "deductions": "Deductions",
+    "total": "Total",
+    "finalize": "Finalize",
+    "fullName": "Full name *",
+    "employeeName": "Employee name",
+    "department2": "Department *",
+    "position": "Position",
+    "eGWaiterCook": "e.g. Waiter, Cook",
+    "startDate": "Start date",
+    "email": "Email",
+    "emailExampleCom": "email@example.com",
+    "phone": "Phone",
+    "weeklyWage": "Weekly wage ($) *",
+    "monthlyCalculated": "≈ Monthly (calculated)",
+    "commission2": "Commission (%)",
+    "fixedExtraCommission": "Fixed extra commission ($)",
+    "linkToASellerAccount": "Link to a seller account (optional, enables automatic commission on real sales)",
+    "notLinked": "Not linked",
+    "status": "Status",
+    "notes": "Notes",
+    "internalNotesOptional": "Internal notes (optional)",
+    "saving": "Saving...",
+    "save": "Save"
+  },
+  "staffProfile": {
+    "loading": "Loading...",
+    "changeProfilePicture": "Change profile picture",
+    "editName": "Edit name",
+    "administrator": "Administrator",
+    "systemHealth": "System health",
+    "productsInDb": "Products in DB",
+    "ordersThisMonth": "Orders this month",
+    "monthlyRevenue": "Monthly revenue",
+    "pendingOrders": "Pending orders",
+    "accessLevel": "Access level",
+    "fullAccessToEveryPanel": "Full access to every panel",
+    "canViewEditAndDelete": "Can view, edit and delete all data",
+    "canChangeUserRoles": "Can change user roles",
+    "canPublishSiteAndStudio": "Can publish site and Studio changes",
+    "canAccessFinancialReports": "Can access financial reports",
+    "configuration": "Configuration",
+    "storeName": "Store name",
+    "contactEmail": "Contact email",
+    "lowStockAlertUnits": "Low stock alert (units)",
+    "saving": "Saving...",
+    "saved": "✓ Saved",
+    "saveSettings": "Save settings",
+    "changePassword": "Change password →",
+    "quickLinks": "Quick links",
+    "adminDashboard": "Admin dashboard",
+    "reports": "Reports",
+    "orders": "Orders",
+    "studio": "Studio",
+    "teamOverview": "Team overview",
+    "activeToday": "Active today",
+    "totalSellers": "Total sellers",
+    "pendingApprovals": "Pending approvals",
+    "canViewAllSellerActivity": "Can view all seller activity",
+    "canApproveOrRejectClock": "Can approve or reject clock-ins",
+    "canAssignTasksToSellers": "Can assign tasks to sellers",
+    "cannotEditProductsOrPricing": "Cannot edit products or pricing",
+    "cannotAccessFinancialReports": "Cannot access financial reports",
+    "supervisorDashboard": "Supervisor dashboard",
+    "seller": "Seller",
+    "salesThisMonth": "Sales this month",
+    "revenue": "Revenue",
+    "avgOrder": "Avg order",
+    "todaySShift": "Today's shift",
+    "clockedIn": "Clocked in",
+    "notClockedIn": "Not clocked in",
+    "recentOrders": "Recent orders",
+    "noOrdersYet": "No orders yet.",
+    "client": "Client",
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "myActivity": "My activity"
+  },
+  "eventsUi": {
+    "free": "Free",
+    "soldOut": "Sold out",
+    "left": "{count} left",
+    "getTickets": "Get tickets",
+    "spotsLeft": "{count, plural, one {# spot left} other {# spots left}}",
+    "browseEvents": "Browse events",
+    "loadingEvents": "Loading events...",
+    "noEventsScheduledYet": "No events scheduled yet.",
+    "checkBackSoonForUpcoming": "Check back soon for upcoming beach club events.",
+    "upcomingEvents": "Upcoming events",
+    "shareTheseEventsWithYour": "Share these events with your clients.",
+    "customerView": "Customer view",
+    "loading": "Loading...",
+    "noEventsScheduledYetAdmins": "No events scheduled yet. Admins create events in the admin panel."
+  },
+  "uploads": {
+    "theFileIsOver8": "The file is over 8 MB. Paste a URL instead (Cloudinary, S3, CDN...).",
+    "uploadFailed": "Upload failed",
+    "changeUrl": "Change URL",
+    "upload": "Upload",
+    "pasteVideoUrl": "Paste video URL",
+    "uploading": "Uploading...",
+    "uploadFileMax8Mb": "Upload file (max 8 MB)",
+    "max10Mb": "Max 10 MB",
+    "change": "Change",
+    "uploadImage": "Upload image"
   }
 }

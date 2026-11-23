@@ -1,24 +1,31 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
+import { getPanelLocation } from '@/lib/location.server';
 
 async function ensureColumns() {
   await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS sizes TEXT[] DEFAULT '{}'`;
   await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS colors JSONB DEFAULT '[]'`;
   await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS provider TEXT DEFAULT ''`;
+  await sql`ALTER TABLE products ADD COLUMN IF NOT EXISTS location TEXT NOT NULL DEFAULT 'guacuco'`;
 }
 
 // GET — all products (all statuses) for seller panel
 export async function GET() {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await ensureColumns();
+  const location = await getPanelLocation();
 
   const rows = await sql`
     SELECT id, title, description, price, image, sku, stock, category, status,
            sizes, colors, variants, provider, markup_percent, markup_amount, created_at, updated_at
     FROM products
+    WHERE location = ${location}
     ORDER BY provider ASC, title ASC
   `;
   return NextResponse.json(rows);
@@ -26,10 +33,13 @@ export async function GET() {
 
 // POST — create a new product in the products table
 export async function POST(req: NextRequest) {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   await ensureColumns();
+  const location = await getPanelLocation();
 
   const body = await req.json();
   const { title, price, description, image, sku, stock, category, status, sizes, colors, provider, markup_percent, markup_amount } = body;
@@ -40,7 +50,7 @@ export async function POST(req: NextRequest) {
 
   const id = `custom-${Date.now()}`;
   const row = await sql`
-    INSERT INTO products (id, title, description, price, image, sku, stock, category, status, sizes, colors, variants, provider, markup_percent, markup_amount)
+    INSERT INTO products (id, title, description, price, image, sku, stock, category, status, sizes, colors, variants, provider, markup_percent, markup_amount, location)
     VALUES (
       ${id},
       ${title},
@@ -56,7 +66,8 @@ export async function POST(req: NextRequest) {
       '[]',
       ${provider ?? ''},
       ${markup_percent ?? false},
-      ${Number(markup_amount ?? 0)}
+      ${Number(markup_amount ?? 0)},
+      ${location}
     )
     RETURNING *
   `;
@@ -65,6 +76,8 @@ export async function POST(req: NextRequest) {
 
 // PATCH — bulk status update: { ids: string[], status: string }
 export async function PATCH(req: NextRequest) {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

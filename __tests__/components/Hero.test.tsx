@@ -95,10 +95,10 @@ describe('Hero (EN)', () => {
     expect(screen.getByText('Premium resort wear for the modern explorer')).toBeInTheDocument();
   });
 
-  it('renders the CTA link pointing to /products', () => {
+  it('renders the CTA link pointing to /reservations by default', () => {
     render(<Hero />);
     const link = screen.getByRole('link');
-    expect(link).toHaveAttribute('href', '/products');
+    expect(link).toHaveAttribute('href', '/reservations');
   });
 
   it('renders the shader gradient background', () => {

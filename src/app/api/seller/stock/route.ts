@@ -1,8 +1,11 @@
+import { requireAccess } from '@/lib/apiAuth';
 import { auth } from '@clerk/nextjs/server';
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
 
 export async function GET() {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -11,6 +14,8 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const gate = await requireAccess('staff');
+  if (gate instanceof NextResponse) return gate;
   const { userId } = await auth();
   if (!userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -28,5 +33,14 @@ export async function POST(req: NextRequest) {
         updated_at = NOW()
     RETURNING *
   `;
+
+  // Log activity so supervisor sees stock changes in real-time feed
+  const productRows = await sql`SELECT title FROM products WHERE id = ${product_id} LIMIT 1`.catch(() => []);
+  const productTitle = (productRows as { title: string }[])[0]?.title ?? `#${product_id}`;
+  await sql`
+    INSERT INTO activities (seller_id, type, note, status)
+    VALUES (${userId}, 'stock-update', ${`Stock actualizado: ${productTitle} → ${quantity} uds.`}, 'approved')
+  `.catch(() => {});
+
   return NextResponse.json(row[0]);
 }
