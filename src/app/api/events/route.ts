@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import sql from '@/lib/db';
 import { requireAccess } from '@/lib/apiAuth';
-import { ensureEventsSchema, normalizeGallery, normalizeImageUrl, UPCOMING_GRACE } from '@/lib/events';
+import { ensureEventsSchema, EVENT_CLUB, normalizeGallery, normalizeImageUrl, UPCOMING_GRACE } from '@/lib/events';
 
 // GET — public: active events that haven't passed yet, soonest first.
 //       ?scope=all (staff only): every event, any status, newest first.
@@ -15,6 +15,7 @@ export async function GET(req: NextRequest) {
       SELECT e.*,
         COALESCE((SELECT SUM(quantity) FROM event_tickets WHERE event_id = e.id), 0)::int AS tickets_sold
       FROM events e
+      WHERE e.club = ${EVENT_CLUB} OR e.club IS NULL
       ORDER BY e.event_date DESC NULLS FIRST
     `;
     return NextResponse.json(rows);
@@ -25,6 +26,7 @@ export async function GET(req: NextRequest) {
       COALESCE((SELECT SUM(quantity) FROM event_tickets WHERE event_id = e.id), 0)::int AS tickets_sold
     FROM events e
     WHERE e.status = 'active'
+      AND (e.club = ${EVENT_CLUB} OR e.club IS NULL)
       AND (e.event_date IS NULL OR e.event_date >= NOW() - ${UPCOMING_GRACE}::interval)
     ORDER BY e.event_date ASC NULLS LAST
   `;
@@ -42,11 +44,11 @@ export async function POST(req: NextRequest) {
   if (!title) return NextResponse.json({ error: 'title required' }, { status: 400 });
 
   const row = await sql`
-    INSERT INTO events (title, description, content, event_date, location, image_url, gallery, tags, price, capacity, status)
+    INSERT INTO events (title, description, content, event_date, location, image_url, gallery, tags, price, capacity, status, club)
     VALUES (
       ${title}, ${description ?? ''}, ${content ?? ''}, ${event_date || null}, ${location ?? ''},
       ${normalizeImageUrl(String(image_url ?? ''))}, ${JSON.stringify(normalizeGallery(gallery))}::jsonb,
-      ${tags ?? ''}, ${Number(price ?? 0)}, ${Number(capacity ?? 100)}, ${status ?? 'active'}
+      ${tags ?? ''}, ${Number(price ?? 0)}, ${Number(capacity ?? 100)}, ${status ?? 'active'}, ${EVENT_CLUB}
     )
     RETURNING *
   `;

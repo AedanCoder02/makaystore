@@ -1,4 +1,5 @@
 import sql from '@/lib/db';
+import { STORE_LOCATION } from '@/lib/location';
 
 let ready: Promise<void> | null = null;
 
@@ -27,6 +28,8 @@ export function ensureEventsSchema(): Promise<void> {
           ADD COLUMN IF NOT EXISTS gallery JSONB DEFAULT '[]',
           ADD COLUMN IF NOT EXISTS tags    TEXT DEFAULT ''
       `;
+      // Both clubs share this table; `club` says whose event it is (NULL = older rows, shown on both).
+      await sql`ALTER TABLE events ADD COLUMN IF NOT EXISTS club TEXT`;
       await sql`
         CREATE TABLE IF NOT EXISTS event_tickets (
           id             SERIAL PRIMARY KEY,
@@ -44,6 +47,9 @@ export function ensureEventsSchema(): Promise<void> {
   }
   return ready;
 }
+
+/** This deployment's club; events are written with it and listed only where it matches (or is NULL). */
+export const EVENT_CLUB = STORE_LOCATION;
 
 /**
  * Events stay listed until 12 hours after they start, so a night event

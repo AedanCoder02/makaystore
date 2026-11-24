@@ -1,1 +1,6 @@
-{"outputDirectory":".next"}
+{
+  "outputDirectory": ".next",
+  "crons": [
+    { "path": "/api/cron/sync-flyers", "schedule": "0 12 * * *" }
+  ]
+}
