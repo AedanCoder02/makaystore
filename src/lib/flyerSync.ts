@@ -165,10 +165,10 @@ export async function syncFlyers(): Promise<{ synced: number; skipped: number; e
       const f = await extractFlyerData(base64, mimeType);
       const image = normalizeImageUrl(`https://drive.google.com/file/d/${file.id}/view`);
       const rows = await sql`
-        INSERT INTO events (title, description, content, event_date, location, image_url, price, capacity, status, drive_file_id)
+        INSERT INTO events (title, description, content, event_date, location, image_url, price, capacity, status, drive_file_id, club)
         VALUES (
           ${f.title}, ${f.description}, ${flyerContent(f)}, ${flyerTimestamp(f.event_date, f.start_time)},
-          ${FLYER_LOCATION}, ${image}, ${f.price ?? 0}, ${f.capacity ?? DEFAULT_CAPACITY}, 'active', ${file.id}
+          ${FLYER_LOCATION}, ${image}, ${f.price ?? 0}, ${f.capacity ?? DEFAULT_CAPACITY}, 'active', ${file.id}, 'guacuco'
         )
         ON CONFLICT (drive_file_id) DO NOTHING
         RETURNING id
