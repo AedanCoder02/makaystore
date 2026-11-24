@@ -24,7 +24,7 @@ Live at guacuco.makaybeachclub.com. Last updated 2026-11-22.
 | Path | Who | Notes |
 |---|---|---|
 | `/` | Public | Hero, events, membership, experiences, why, a day at Makay, community reviews, newsletter, footer. All copy editable in Studio. |
-| `/events`, `/events/[id]` | Public | Only active events that are not past (12 h grace). Paid tickets go through checkout as `event-<id>` cart items. |
+| `/events`, `/events/[id]` | Public | Only active events that are not past (12 h grace). Paid tickets go through checkout as `event-<id>` cart items. Flyers dropped in the Guacuco Drive folder are imported daily as events (`src/lib/flyerSync.ts`, cron `/api/cron/sync-flyers` at 12:00 UTC); edit or hide them in the admin like any event. |
 | `/membership`, `/reservations`, `/products`, `/cart`, `/checkout` | Public | Prices are recomputed on the server (`src/lib/orderPricing.ts`); the client total is only a check. |
 | `/legal/{privacy,terms,cookies}` | Public | EN/ES text in `legal.*` keys. Draft text: have it reviewed by a lawyer. |
 | `/profile` | Signed in | Client profile, member card, wallet. |
@@ -62,7 +62,7 @@ Sales targets and cost % live in `report_settings` (`src/lib/reportSettings.ts`)
 
 Names only. Values live in Vercel.
 
-`DATABASE_URL`, `STORE_LOCATION`, `NEXT_PUBLIC_SITE_URL`, Clerk keys and `CLERK_WEBHOOK_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `BINANCE_PAY_API_KEY`, `BINANCE_PAY_SECRET_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `REPORT_EMAIL`, `CRON_SECRET`, `YIMI_REPORT_API_SECRET`, `AGENTIZAR_API_KEY`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, 3D generation (`GENERATION_PROVIDER`, `FAL_KEY`, `MESHY_API_KEY`, `TRIPO3D_API_KEY`, `TRIPO_LOCAL_URL`).
+`DATABASE_URL`, `STORE_LOCATION`, `NEXT_PUBLIC_SITE_URL`, Clerk keys and `CLERK_WEBHOOK_SECRET`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`, `BINANCE_PAY_API_KEY`, `BINANCE_PAY_SECRET_KEY`, `GMAIL_USER`, `GMAIL_APP_PASSWORD`, `REPORT_EMAIL`, `CRON_SECRET`, `GOOGLE_DRIVE_API_KEY`, `GEMINI_API_KEY` (flyer import), `YIMI_REPORT_API_SECRET`, `AGENTIZAR_API_KEY`, `NEON_AUTH_BASE_URL`, `NEON_AUTH_COOKIE_SECRET`, 3D generation (`GENERATION_PROVIDER`, `FAL_KEY`, `MESHY_API_KEY`, `TRIPO3D_API_KEY`, `TRIPO_LOCAL_URL`).
 
 ## Commands
 
