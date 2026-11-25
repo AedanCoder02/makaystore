@@ -1,0 +1,53 @@
+name: Deploy
+
+# master -> Vercel production, main -> Vercel staging (preview).
+# Vercel's own Git deploys are switched off for these two branches in
+# vercel.json, so this workflow is the only thing that deploys them and the
+# dashboard's "production branch" setting no longer matters.
+# After a production deploy it re-points the live domains at the new build,
+# so a domain left pinned to an old deployment is corrected automatically.
+# Needs the repository secret VERCEL_TOKEN (vercel.com/account/tokens).
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: team_WxGgPZP5SyEZq1pX9D5OHMN7
+      VERCEL_PROJECT_ID: prj_pE3tGczSw8QctIutua1qgCuS12OO
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_CLI: vercel@65.14.0
+      LIVE_DOMAINS: guacuco.makaybeachclub.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check the Vercel token is set
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::error::Add the VERCEL_TOKEN repository secret (Settings, Secrets and variables, Actions)."
+            exit 1
+          fi
+
+      - name: Deploy
+        id: deploy
+        run: |
+          if [ "$GITHUB_REF_NAME" = "master" ]; then target="--prod"; stage="production"; else target=""; stage="staging"; fi
+          url=$(npx -y "$VERCEL_CLI" deploy $target --yes --token "$VERCEL_TOKEN")
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          echo "Deployed $GITHUB_REF_NAME to $stage: $url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Point live domains at this build
+        if: github.ref_name == 'master'
+        run: |
+          for domain in $LIVE_DOMAINS; do
+            npx -y "$VERCEL_CLI" alias set "${{ steps.deploy.outputs.url }}" "$domain" --token "$VERCEL_TOKEN"
+            echo "$domain now serves this build" >> "$GITHUB_STEP_SUMMARY"
+          done
