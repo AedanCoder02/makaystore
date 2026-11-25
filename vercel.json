@@ -1,6 +1,15 @@
 {
   "outputDirectory": ".next",
   "crons": [
-    { "path": "/api/cron/sync-flyers", "schedule": "0 12 * * *" }
-  ]
+    {
+      "path": "/api/cron/sync-flyers",
+      "schedule": "0 12 * * *"
+    }
+  ],
+  "git": {
+    "deploymentEnabled": {
+      "master": false,
+      "main": false
+    }
+  }
 }
