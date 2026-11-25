@@ -11,7 +11,7 @@ import { ensureEventsSchema, normalizeImageUrl } from '@/lib/events';
  * The folder must be shared "Anyone with the link": the Drive API is called
  * with an API key, and the flyer is shown through its public lh3 URL.
  */
-export const GUACUCO_DRIVE_FOLDER_ID = '1blp5XREGYl5H0PyGA7fpziGEdyUSh2ni';
+export const GUACUCO_DRIVE_FOLDER_ID = '1F9BLYl_m5Z4tXk1FCo_OZg2zJmOEIcVO';
 export const DEFAULT_CAPACITY = 150;
 export const FLYER_LOCATION = 'Makay Beach Club, Playa Guacuco';
 // Margarita is UTC-4 all year (no daylight saving).
